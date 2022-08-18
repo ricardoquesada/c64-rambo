@@ -2,7 +2,6 @@
 ; **** ZP FIELDS **** 
 ;
 f02 = $02
-f05 = $05
 f20 = $20
 f2A = $2A
 f2D = $2D
@@ -393,8 +392,8 @@ b04AA   =*+$01
         LDA f058C,X
         JSR s8100
         JSR sC000
-a04BF   =*+$01
-a04BE   STX f05,Y
+a04BE   .BYTE $96
+a04BF   .BYTE $05
 b04C0   LDA $D012    ;Raster Position
         CMP #$C8     ;#%11001000
         BNE b04C0
@@ -4899,8 +4898,7 @@ b3057   LDX a3825
         RTS 
 
 a3063   .BYTE $00
-f3064   .BYTE $12
-        INY 
+f3064   .BYTE $12,$C8
 s3066   LDA a30C3
         BEQ b306E
         JMP j307D
