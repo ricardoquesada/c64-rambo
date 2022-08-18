@@ -321,7 +321,7 @@ b0426   LDX #$00     ;#%00000000
         STX a042C
 b042B   RTS 
 
-a042C   BRK 
+a042C   .BYTE $00
 j042D   STA f2576,X
         RTS 
 
@@ -610,7 +610,7 @@ j080E   DEX
         STA a0B2A
 b0826   RTS 
 
-a0827   BRK 
+a0827   .BYTE $00
 s0828   LDA a0966
         CMP #$01     ;#%00000001
         BEQ b0830
@@ -625,7 +625,7 @@ b0839   DEC a083F
         BEQ b0840
         RTS 
 
-a083F   BRK 
+a083F   .BYTE $00
 b0840   LDA #$32     ;#%00110010
         STA a083F
         LDA a0968
@@ -733,7 +733,7 @@ b090C   LDA a0912
         BEQ b0913
         RTS 
 
-a0912   BRK 
+a0912   .BYTE $00
 b0913   LDA a0B2A
         BNE b0919
         RTS 
@@ -1111,7 +1111,7 @@ p0C0A   =*+$01
 b0C0B   STX a0C0F
         RTS 
 
-a0C0F   BRK 
+a0C0F   .BYTE $00
 s0C10   LDA f45,X
         STA a25C4
         LDA a52
@@ -1178,7 +1178,7 @@ s0C5D   LDA f4A,X
 
 b0C9A   RTS 
 
-a0C9B   BRK 
+a0C9B   .BYTE $00
 s0C9C   LDX #$14     ;#%00010100
 b0C9E   LDA f4840,X
         STA f4400,X
@@ -4945,7 +4945,7 @@ b30BD   LDA #$00     ;#%00000000
         STA a3774
         RTS 
 
-a30C3   BRK 
+a30C3   .BYTE $00
 j30C4   LDA a32D7
         CMP #$01     ;#%00000001
         BEQ b30CC
@@ -5231,7 +5231,7 @@ j3308   LDA #$00     ;#%00000000
         STA f3C,X
         JMP j3304
 
-a3315   BRK 
+a3315   .BYTE $00
 s3316   LDA a3568
         SEC 
         SBC aF8
@@ -5356,7 +5356,7 @@ j33FB   LDA a3566
         STA a3567
         RTS 
 
-a340E   BRK 
+a340E   .BYTE $00
 j340F   LDA a3483
         BEQ b3433
         LDA #$03     ;#%00000011
@@ -5460,7 +5460,7 @@ b34D5   PLP
 
 b34DB   JMP j352E
 
-        BRK 
+        .BYTE $00
 j34DF   LDA a3564
         CLC 
         ADC #$01     ;#%00000001
@@ -11094,39 +11094,38 @@ bA60B   =*+$01
         .BYTE $01,$C0,$CC,$BA,$A9,$1F,$C8,$BA
         .BYTE $A9,$CC,$BA,$A9,$1A,$CE,$1A,$D9
         .BYTE $00,$02,$CE,$1A,$89,$00,$02,$CE
-        .BYTE $1A,$D9,$0C,$02,$CE,$1A,$89
-aA9CC   .BYTE $00,$01,$0A,$02,$00,$01,$07,$02
-        .BYTE $CE,$1A,$D9,$05,$02,$CE,$0D,$07
-        .BYTE $CE,$1A,$89,$02,$02,$CE,$0D,$05
-        .BYTE $C0,$CE,$1A,$D9,$00,$01,$CE,$1A
-        .BYTE $89,$00,$01,$0C,$01,$00,$01,$C0
-        .BYTE $CA,$1C,$D8,$0B,$C8,$E5,$A9,$DA
-        .BYTE $CA,$1D,$D8,$05,$C8,$E5,$A9,$DA
-        .BYTE $C0,$CA,$1C,$D8,$03,$C8,$E5,$A9
-        .BYTE $DA,$CC,$E5,$A9,$1F,$CA,$22,$D8
-        .BYTE $04,$C8,$E5,$A9,$DA,$CA,$21,$D8
-        .BYTE $08,$C8,$E5,$A9,$DA,$C0,$C8,$CD
-        .BYTE $A7,$5F,$0F,$C8,$CD,$A7,$5F,$0F
-        .BYTE $C8,$CD,$A7,$5F,$0F,$DC,$5C,$A7
-        .BYTE $C4,$7A,$A7,$C8,$08,$A8,$C8,$08
-        .BYTE $A8,$C8,$08,$A8,$C8,$08,$A8,$D4
-        .BYTE $0C,$0C,$D4,$0D,$07,$CE,$18,$49
-        .BYTE $5F,$02,$C4,$12,$A7,$C8,$3D,$A8
-        .BYTE $C8,$6A,$A8,$5F,$02,$C8,$3D,$A8
-        .BYTE $C8,$6A,$A8,$DC,$5C,$A7,$C4,$7A
-        .BYTE $A7,$C8,$08,$A8,$C8,$08,$A8,$C8
-        .BYTE $08,$A8,$C8,$08,$A8,$DC,$61,$A7
-        .BYTE $C8,$81,$A8,$3E,$02,$CE,$18,$41
-        .BYTE $9E,$0A,$D4,$06,$A6,$D4,$07,$FF
-        .BYTE $D4,$0C,$17,$D4,$0D,$07,$5F,$02
-        .BYTE $D4,$06,$5A,$D4,$07,$00,$BF,$4A
-        .BYTE $DC,$61,$A7,$5F,$04,$C8,$81,$A8
-        .BYTE $5F,$04,$45,$01,$46,$01,$45,$0C
-        .BYTE $D2,$C9,$AA,$5F,$04,$D2,$E8,$AA
-        .BYTE $BF,$00,$DC,$70,$A7,$BF,$00,$CE
-        .BYTE $0D,$00,$CE,$11,$00,$BF,$A0,$D8
-        .BYTE $04,$D2,$F9,$AA,$D8,$04,$1A,$01
-        .BYTE $DA
+        .BYTE $1A,$D9,$0C,$02,$CE,$1A,$89,$00
+        .BYTE $01,$0A,$02,$00,$01,$07,$02,$CE
+        .BYTE $1A,$D9,$05,$02,$CE,$0D,$07,$CE
+        .BYTE $1A,$89,$02,$02,$CE,$0D,$05,$C0
+        .BYTE $CE,$1A,$D9,$00,$01,$CE,$1A,$89
+        .BYTE $00,$01,$0C,$01,$00,$01,$C0,$CA
+        .BYTE $1C,$D8,$0B,$C8,$E5,$A9,$DA,$CA
+        .BYTE $1D,$D8,$05,$C8,$E5,$A9,$DA,$C0
+        .BYTE $CA,$1C,$D8,$03,$C8,$E5,$A9,$DA
+        .BYTE $CC,$E5,$A9,$1F,$CA,$22,$D8,$04
+        .BYTE $C8,$E5,$A9,$DA,$CA,$21,$D8,$08
+        .BYTE $C8,$E5,$A9,$DA,$C0,$C8,$CD,$A7
+        .BYTE $5F,$0F,$C8,$CD,$A7,$5F,$0F,$C8
+        .BYTE $CD,$A7,$5F,$0F,$DC,$5C,$A7,$C4
+        .BYTE $7A,$A7,$C8,$08,$A8,$C8,$08,$A8
+        .BYTE $C8,$08,$A8,$C8,$08,$A8,$D4,$0C
+        .BYTE $0C,$D4,$0D,$07,$CE,$18,$49,$5F
+        .BYTE $02,$C4,$12,$A7,$C8,$3D,$A8,$C8
+        .BYTE $6A,$A8,$5F,$02,$C8,$3D,$A8,$C8
+        .BYTE $6A,$A8,$DC,$5C,$A7,$C4,$7A,$A7
+        .BYTE $C8,$08,$A8,$C8,$08,$A8,$C8,$08
+        .BYTE $A8,$C8,$08,$A8,$DC,$61,$A7,$C8
+        .BYTE $81,$A8,$3E,$02,$CE,$18,$41,$9E
+        .BYTE $0A,$D4,$06,$A6,$D4,$07,$FF,$D4
+        .BYTE $0C,$17,$D4,$0D,$07,$5F,$02,$D4
+        .BYTE $06,$5A,$D4,$07,$00,$BF,$4A,$DC
+        .BYTE $61,$A7,$5F,$04,$C8,$81,$A8,$5F
+        .BYTE $04,$45,$01,$46,$01,$45,$0C,$D2
+        .BYTE $C9,$AA,$5F,$04,$D2,$E8,$AA,$BF
+        .BYTE $00,$DC,$70,$A7,$BF,$00,$CE,$0D
+        .BYTE $00,$CE,$11,$00,$BF,$A0,$D8,$04
+        .BYTE $D2,$F9,$AA,$D8,$04,$1A,$01,$DA
         .BYTE $DA
         DEC a27
         TAX 
@@ -12124,8 +12123,8 @@ jC1BA   LDX #$F0     ;#%11110000
         LDA #$08     ;#%00001000
         STA $D016    ;VIC Control Register 2
 jC1F3   JSR jC07A
-        LDX aA9CC
-        BRK 
+        .BYTE $AE,$CC
+        LDA #$00     ;#%00000000
         STA aCFFF
         JSR sCE30
         JSR sC3E6
