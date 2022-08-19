@@ -1,5 +1,5 @@
 ;
-; **** ZP FIELDS **** 
+; **** ZP FIELDS ****
 ;
 f02 = $02
 f20 = $20
@@ -36,7 +36,7 @@ fD6 = $D6
 fDA = $DA
 fDE = $DE
 ;
-; **** ZP ABSOLUTE ADRESSES **** 
+; **** ZP ABSOLUTE ADRESSES ****
 ;
 a01 = $01
 a02 = $02
@@ -142,7 +142,7 @@ aFD = $FD
 aFE = $FE
 aFF = $FF
 ;
-; **** ZP POINTERS **** 
+; **** ZP POINTERS ****
 ;
 p20 = $20
 p22 = $22
@@ -159,7 +159,7 @@ pFC = $FC
 pFD = $FD
 pFE = $FE
 ;
-; **** FIELDS **** 
+; **** FIELDS ****
 ;
 f0037 = $0037
 f0045 = $0045
@@ -172,22 +172,23 @@ f00B5 = $00B5
 f00C3 = $00C3
 f00E0 = $00E0
 ;
-; **** ABSOLUTE ADRESSES **** 
+; **** ABSOLUTE ADRESSES ****
 ;
 a028A = $028A
 a02A0 = $02A0
+aFFFA = $FFFA
 aFFFB = $FFFB
 aFFFE = $FFFE
 aFFFF = $FFFF
 ;
-; **** POINTERS **** 
+; **** POINTERS ****
 ;
 p0026 = $0026
 p35 = $0035
 p0135 = $0135
 p0232 = $0232
 ;
-; **** EXTERNAL JUMPS **** 
+; **** EXTERNAL JUMPS ****
 ;
 e00FF = $00FF
 
@@ -251,7 +252,7 @@ j0382   JSR s16DA
         JSR s8100
         LDA #$FF     ;#%11111111
         STA $D015    ;Sprite display Enable
-        CLI 
+        CLI
 j0393   JSR j07D5
         JSR j0D3D
         JSR j1D68
@@ -295,11 +296,11 @@ s03FC   LDY #$0D     ;#%00001101
 b03FE   LDX fB5,Y
 f0400   LDA f45,X
         BNE b0408
-        DEY 
+        DEY
         BPL b03FE
-        INY 
+        INY
 b0408   STY aFC
-        RTS 
+        RTS
 
 s040B   LDA aFF
         BNE b0426
@@ -321,23 +322,23 @@ a0425   =*+$02
 a0427   =*+$01
 b0426   LDX #$00     ;#%00000000
         STX a042C
-b042B   RTS 
+b042B   RTS
 
 a042C   .BYTE $00
 j042D   STA f2576,X
-        RTS 
+        RTS
 
 j0431   LDX #$05     ;#%00000101
         LDA #$00     ;#%00000000
 b0435   STA f2576,X
         STA f256A,X
-        DEX 
+        DEX
         BPL b0435
-        RTS 
+        RTS
 
 s043F   LDA a0F
         BNE j0451
-        RTS 
+        RTS
 
 j0444   JSR s044C
         DEC a0F
@@ -358,11 +359,11 @@ s0456   LDA a0B29
         LDA #$03     ;#%00000011
         STA a0F
         BNE s046E
-b046A   CLC 
+b046A   CLC
         ADC a0912
-s046E   PHA 
+s046E   PHA
         STA a0558
-        SEI 
+        SEI
         LDA #$00     ;#%00000000
         STA $D015    ;Sprite display Enable
         STA $D021    ;Background Color 0
@@ -375,7 +376,7 @@ s046E   PHA
         LDY #$1F     ;#%00011111
 b048C   LDA f00E0,Y
         STA f0566,Y
-        DEY 
+        DEY
         BPL b048C
         JSR sC000
         BCC b04AA
@@ -384,9 +385,9 @@ b048C   LDA f00E0,Y
         LDX #$07     ;#%00000111
         LDA #$1A     ;#%00011010
         JSR s8100
-        PLA 
-        ASL 
-        TAX 
+        PLA
+        ASL A
+        TAX
 b04AA   =*+$01
         LDA f0596,X
         STA a04BE
@@ -426,21 +427,21 @@ b04D3   JSR s180D
 f0500   =*+$02
 b04FE   LDA f0566,Y
         STA f00E0,Y
-        DEY 
+        DEY
         BPL b04FE
         LDA a0F
         BNE b0510
         JSR s0513
-        CLI 
-        RTS 
+        CLI
+        RTS
 
-b0510   PLA 
-        PLA 
-        RTS 
+b0510   PLA
+        PLA
+        RTS
 
 s0513   LDX a0558
         BEQ b054E
-        DEX 
+        DEX
         LDA f055F,X
         STA aFE
         LDA f0561,X
@@ -465,12 +466,12 @@ f0540   LDA #$10     ;#%00010000
 
 b054E   LDA #$01     ;#%00000001
         STA a0F
-        PLA 
-        PLA 
-        PLA 
-        PLA 
-        CLI 
-        RTS 
+        PLA
+        PLA
+        PLA
+        PLA
+        CLI
+        RTS
 
 a0558   .BYTE $00
 a0559   .BYTE $00
@@ -564,33 +565,33 @@ a07A0   .BYTE $54,$45,$5B,$53,$4F,$4C,$44,$49
         .BYTE $00
 j07C9   LDA #$01     ;#%00000001
         STA a1D3E
-        RTS 
+        RTS
 
 j07CF   LDA #$00     ;#%00000000
         STA a1D3E
-        RTS 
+        RTS
 
 j07D5   JSR j1DC2
         JSR j1D8F
         JMP j224E
 
-j07DE   TXA 
-        PHA 
-        ASL 
-        TAX 
+j07DE   TXA
+        PHA
+        ASL A
+        TAX
         LDA f256B,X
         STA a2493
         LDA f256A,X
-        ASL 
-        ASL 
-        ASL 
-        ASL 
+        ASL A
+        ASL A
+        ASL A
+        ASL A
         ORA a2493
         STA a2493
-        PLA 
-        TAX 
+        PLA
+        TAX
         LDA a2493
-        RTS 
+        RTS
 
 j07FB   LDX #$03     ;#%00000011
         STX a0827
@@ -600,7 +601,7 @@ b0800   LDA f086E,X
         JMP j080E
 
 b080B   JSR s0828
-j080E   DEX 
+j080E   DEX
         BPL b0800
         LDA a086D
         BNE b0826
@@ -610,22 +611,22 @@ j080E   DEX
         STA a0966
         STA a0967
         STA a0B2A
-b0826   RTS 
+b0826   RTS
 
 a0827   .BYTE $00
 s0828   LDA a0966
         CMP #$01     ;#%00000001
         BEQ b0830
-        RTS 
+        RTS
 
 b0830   DEC a0827
         LDA a086D
         BNE b0839
-        RTS 
+        RTS
 
 b0839   DEC a083F
         BEQ b0840
-        RTS 
+        RTS
 
 a083F   .BYTE $00
 b0840   LDA #$32     ;#%00110010
@@ -647,7 +648,7 @@ b0840   LDA #$32     ;#%00110010
         STA fC3,X
         LDA #$02     ;#%00000010
         STA a2578
-        RTS 
+        RTS
 
 a086D   .BYTE $0A
 f086E   .BYTE $00,$00,$00,$00
@@ -665,21 +666,21 @@ b0881   JSR s08BE
         CMP #$D6     ;#%11010110
         BNE b088E
         LDA #$D2     ;#%11010010
-b088E   CLC 
+b088E   CLC
         ADC #$01     ;#%00000001
         STA f8B,X
 b0893   LDA f61,X
-        LSR 
+        LSR A
         LDA f7D,X
-        ROR 
+        ROR A
         CMP #$AA     ;#%10101010
         BEQ b089E
-b089D   RTS 
+b089D   RTS
 
 b089E   LDA #$00     ;#%00000000
         STA f086E,X
         DEC fC3,X
-        RTS 
+        RTS
 
 j08A6   INC f45,X
         DEC f086E,X
@@ -689,26 +690,26 @@ j08A6   INC f45,X
         CMP #$D2     ;#%11010010
         BNE b08B8
         LDA #$CE     ;#%11001110
-b08B8   CLC 
+b08B8   CLC
         ADC #$01     ;#%00000001
         STA f8B,X
-        RTS 
+        RTS
 
 s08BE   LDA f08CF,X
         BNE b08CA
         LDA #$02     ;#%00000010
         STA f08CF,X
-        SEC 
-        RTS 
+        SEC
+        RTS
 
 b08CA   DEC f08CF,X
-        CLC 
-        RTS 
+        CLC
+        RTS
 
 f08CF   .BYTE $00,$00,$00,$00,$00
 j08D4   LDX #$00     ;#%00000000
         LDA a0968
-        CLC 
+        CLC
         ADC a0D
         STA a0968
         LDA a0966
@@ -729,16 +730,16 @@ s0900   LDA a0E
         LDA a161E
         CMP #$E0     ;#%11100000
         BEQ b090C
-b090B   RTS 
+b090B   RTS
 
 b090C   LDA a0912
         BEQ b0913
-        RTS 
+        RTS
 
 a0912   .BYTE $00
 b0913   LDA a0B2A
         BNE b0919
-        RTS 
+        RTS
 
 b0919   LDA a0966
         BNE b0965
@@ -758,24 +759,24 @@ b0919   LDA a0966
         STA a1933
         JSR s1366
         LDA a2747
-        ASL 
-        ASL 
-        ASL 
-        CLC 
+        ASL A
+        ASL A
+        ASL A
+        CLC
         ADC #$1A     ;#%00011010
         ADC aE3
         STA a0968
         LDA aF3
-        ASL 
-        ASL 
-        ASL 
+        ASL A
+        ASL A
+        ASL A
         ADC aE4
         STA a0969
         JSR s0AB7
         LDA #$1B     ;#%00011011
         JMP s8100
 
-b0965   RTS 
+b0965   RTS
 
 a0966   .BYTE $00
 a0967   .BYTE $00
@@ -785,14 +786,14 @@ s096A   LDX #$04     ;#%00000100
         LDA #$00     ;#%00000000
 b096E   STA f120B,X
         STA f45,X
-        DEX 
+        DEX
         BPL b096E
         LDX #$06     ;#%00000110
 b0978   STA f1961,X
         STA f4A,X
-        DEX 
+        DEX
         BPL b0978
-        RTS 
+        RTS
 
 a0981   .BYTE $00
 a0982   .BYTE $00
@@ -835,7 +836,7 @@ s09CA   JSR j1D2A
         STA a0981
         LDA a0982
         AND #$10     ;#%00010000
-b09E0   RTS 
+b09E0   RTS
 
 b09E1   JSR s180D
         LDA #$0D     ;#%00001101
@@ -855,18 +856,18 @@ a0A03   =*+$02
 b0A01   LDA fE770,Y
 a0A06   =*+$02
         STA fE000,Y
-        DEY 
+        DEY
         BNE b0A01
         INC a0A03
         INC a0A06
-        DEX 
+        DEX
         BPL b0A01
         LDY #$6F     ;#%01101111
 b0A15   LDA fEE70,Y
         STA fE700,Y
-        DEY 
+        DEY
         BPL b0A15
-        RTS 
+        RTS
 
 s0A1F   LDA #$3F     ;#%00111111
         JSR s26FA
@@ -878,18 +879,18 @@ s0A1F   LDA #$3F     ;#%00111111
         STA a0A40
         LDA #$01     ;#%00000001
         STA a0A3F
-b0A38   RTS 
+b0A38   RTS
 
 b0A39   LDA #$00     ;#%00000000
         STA a0A3F
-        RTS 
+        RTS
 
 a0A3F   .BYTE $00
 a0A40   .BYTE $00
 s0A41   LDA a51
         CMP #$0A     ;#%00001010
         BNE b0A48
-        RTS 
+        RTS
 
 b0A48   STA a25C4
         LDA a52
@@ -908,18 +909,18 @@ b0A48   STA a25C4
         STA a25C6
         JSR s257D
         BCS b0A74
-        RTS 
+        RTS
 
 b0A74   LDX a0BE0
         LDA f0BED,X
         BMI b0A9F
         ORA a1A47
         STA a1A47
-        TXA 
-        PHA 
+        TXA
+        PHA
         JSR s1985
-        PLA 
-        TAX 
+        PLA
+        TAX
         CPX #$03     ;#%00000011
         BEQ b0ADC
         LDA #$00     ;#%00000000
@@ -940,7 +941,7 @@ b0A9F   LDA a0E
         JSR j0D24
         JMP j0BC9
 
-b0AB6   RTS 
+b0AB6   RTS
 
 s0AB7   LDX #$04     ;#%00000100
 b0AB9   LDA #$00     ;#%00000000
@@ -956,9 +957,9 @@ b0AB9   LDA #$00     ;#%00000000
         STA f45,X
         STA f4A,X
         STA f4C,X
-        DEX 
+        DEX
         BPL b0AB9
-        RTS 
+        RTS
 
 b0ADC   JSR s0AB7
         LDA #$00     ;#%00000000
@@ -999,12 +1000,12 @@ j0B2D   LDA f0BED,X
 b0B32   JMP j0BC6
 
 b0B35   LDA f0BE1,X
-        SEC 
+        SEC
         SBC aF8
         BCC b0B32
         CMP #$2D     ;#%00101101
         BCS b0B32
-        TAY 
+        TAY
         LDA aFF
         CMP f0BE9,X
         BCC b0B32
@@ -1012,7 +1013,7 @@ b0B35   LDA f0BE1,X
         CMP f0BE5,X
         BCC b0B32
         LDA aFE
-        SEC 
+        SEC
         SBC f0BE5,X
         STA a2745
         LDA aFF
@@ -1023,24 +1024,24 @@ b0B35   LDA f0BE1,X
         LDA a2745
         CMP #$15     ;#%00010101
         BCS b0B32
-        ASL 
-        ASL 
-        ASL 
-        CLC 
+        ASL A
+        ASL A
+        ASL A
+        CLC
         ADC aE3
-        CLC 
+        CLC
         ADC #$1F     ;#%00011111
         STA a51
-        TYA 
-        ASL 
-        ASL 
-        ASL 
-        PHA 
+        TYA
+        ASL A
+        ASL A
+        ASL A
+        PHA
         LDA #$00     ;#%00000000
-        ROL 
+        ROL A
         STA a6D
-        PLA 
-        CLC 
+        PLA
+        CLC
         ADC aE4
         STA a89
         LDA f0BF5,X
@@ -1054,13 +1055,13 @@ b0B35   LDA f0BE1,X
         STA aA5
         STA a9D
         LDA a97
-a0BA0   CLC 
+a0BA0   CLC
         ADC #$01     ;#%00000001
         STA a8F
         LDA a51
         STA a49
 a0BA9   LDA a89
-        SEC 
+        SEC
         SBC #$18     ;#%00011000
         STA a81
         LDA a6D
@@ -1069,14 +1070,14 @@ a0BA9   LDA a89
 b0BB6   STA a65
         LDA #$01     ;#%00000001
         STA aC7
-        RTS 
+        RTS
 
 b0BBD   LDY a1B70
         LDA f1B71,Y
         STA aA5
-        RTS 
+        RTS
 
-j0BC6   DEX 
+j0BC6   DEX
         BPL b0BDD
 j0BC9   LDA #$00     ;#%00000000
         STA aCF
@@ -1087,7 +1088,7 @@ j0BC9   LDA #$00     ;#%00000000
         STA a49
         LDA #$00     ;#%00000000
         STA aC7
-b0BDC   RTS 
+b0BDC   RTS
 
 b0BDD   JMP j0B2D
 
@@ -1106,12 +1107,12 @@ s0BF9   LDX a0C0F
         CMP #$01     ;#%00000001
         BNE b0C06
         JSR s0C10
-b0C06   DEX 
+b0C06   DEX
         BPL b0C0B
 p0C0A   =*+$01
         LDX #$03     ;#%00000011
 b0C0B   STX a0C0F
-        RTS 
+        RTS
 
 a0C0F   .BYTE $00
 s0C10   LDA f45,X
@@ -1135,31 +1136,31 @@ s0C10   LDA f45,X
         LDA a0B
         ADC #$03     ;#%00000011
         STA a0B
-        TXA 
-        TAY 
+        TXA
+        TAY
         JMP j15C6
 
-b0C48   RTS 
+b0C48   RTS
 
 s0C49   LDX a0C9B
         LDA f1961,X
         BEQ b0C54
         JSR s0C5D
-b0C54   DEX 
+b0C54   DEX
         BPL b0C59
         LDX #$03     ;#%00000011
 b0C59   STX a0C9B
-        RTS 
+        RTS
 
 s0C5D   LDA f4A,X
         STA a25C4
         LDA a52
         STA a25C5
         LDA f82,X
-        ASL 
+        ASL A
         STA a25C0
         LDA #$00     ;#%00000000
-        ROL 
+        ROL A
         STA a25C1
         LDA a8A
         STA a25C2
@@ -1178,7 +1179,7 @@ s0C5D   LDA f4A,X
         JSR j0D24
         JMP j25E4
 
-b0C9A   RTS 
+b0C9A   RTS
 
 a0C9B   .BYTE $00
 s0C9C   LDX #$14     ;#%00010100
@@ -1186,11 +1187,11 @@ b0C9E   LDA f4840,X
         STA f4400,X
         LDA f4855,X
         STA f4440,X
-        DEX 
+        DEX
         BPL b0C9E
         LDA #$30     ;#%00110000
         STA a0CED
-        RTS 
+        RTS
 
 j0CB3   LDA a0B
         BEQ b0CEC
@@ -1199,32 +1200,32 @@ j0CB3   LDA a0B
         BPL b0CC3
         LDA #$01     ;#%00000001
         STA a0F
-        RTS 
+        RTS
 
 b0CC3   LDA a0CED
-        PHA 
-        LSR 
-        LSR 
-        LSR 
+        PHA
+        LSR A
+        LSR A
+        LSR A
         CMP #$03     ;#%00000011
         BCC b0CD1
-        CLC 
+        CLC
         ADC #$3D     ;#%00111101
-b0CD1   TAX 
-        PLA 
+b0CD1   TAX
+        PLA
         AND #$07     ;#%00000111
-        TAY 
+        TAY
         LDA #$06     ;#%00000110
         STA a2493
 b0CDB   LDA f4400,X
         EOR f0CEE,Y
         STA f4400,X
-        INX 
-        INX 
-        INX 
+        INX
+        INX
+        INX
         DEC a2493
         BPL b0CDB
-b0CEC   RTS 
+b0CEC   RTS
 
 a0CED   .BYTE $00
 f0CEE   .BYTE $80,$40,$20,$10,$08,$04,$02,$01
@@ -1240,50 +1241,50 @@ j0CF6   LDA #$0D     ;#%00001101
         LDA a0D23
         EOR #$07     ;#%00000111
         STA a0D23
-        TAX 
+        TAX
         LDA #$1A     ;#%00011010
         JMP s8100
 
-b0D1B   RTS 
+b0D1B   RTS
 
 b0D1C   LDA #$00     ;#%00000000
         STA a0D22
-        RTS 
+        RTS
 
 a0D22   .BYTE $00
 a0D23   .BYTE $00
 j0D24   STA a0D3C
-        TXA 
-        PHA 
-        TYA 
-        PHA 
+        TXA
+        PHA
+        TYA
+        PHA
         LDA a0D3B
         BNE b0D36
         LDA a0D3C
         JSR s8100
-b0D36   PLA 
-        TAY 
-        PLA 
-        TAX 
-        RTS 
+b0D36   PLA
+        TAY
+        PLA
+        TAX
+        RTS
 
 a0D3B   .BYTE $00
 a0D3C   .BYTE $00
 j0D3D   LDA a1D8C
         BNE b0D43
-        RTS 
+        RTS
 
 b0D43   LDX #$00     ;#%00000000
         STX a1D8C
-        LSR 
+        LSR A
         BCC b0D4E
         JMP j2867
 
-b0D4E   LSR 
+b0D4E   LSR A
         BCC b0D54
         JMP j2832
 
-b0D54   LSR 
+b0D54   LSR A
         BCC b0D5A
         JMP j277A
 
@@ -1295,7 +1296,7 @@ s0D5D   LDY f0D88,X
         STA f120B,X
         LDA #$07     ;#%00000111
         JSR s24D3
-        TAY 
+        TAY
         LDA f1231,Y
         STA f1210,X
         JMP j10BE
@@ -1304,18 +1305,18 @@ b0D76   CPY #$02     ;#%00000010
         BNE b0D7C
         INC f8B,X
 b0D7C   LDA f0D8A,Y
-        CLC 
+        CLC
         ADC f45,X
         STA f45,X
         DEC f0D88,X
-        RTS 
+        RTS
 
 f0D88   .BYTE $04,$00
 f0D8A   .BYTE $00,$00,$00,$04,$03,$02,$02,$02
         .BYTE $01,$01,$00,$00,$00,$FF,$FF
 s0D99   LDA a0967
         BEQ b0D9F
-        RTS 
+        RTS
 
 a0DA0   =*+$01
 b0D9F   LDX #$07     ;#%00000111
@@ -1324,7 +1325,7 @@ b0D9F   LDX #$07     ;#%00000111
         LDY #$1F     ;#%00011111
         STY a0E59
         LDA a32
-        CLC 
+        CLC
         ADC #$28     ;#%00101000
         STA a32
         LDA a33
@@ -1344,18 +1345,18 @@ b0DCA   LDA (p32),Y
         STY a2493
         JSR s0DE1
         LDY a2493
-b0DD9   DEY 
-        DEX 
+b0DD9   DEY
+        DEX
         BPL b0DCA
         STY a0E59
-        RTS 
+        RTS
 
 s0DE1   LDA #$04     ;#%00000100
         JSR s24D3
-        TAY 
+        TAY
         LDA f120B,Y
         BEQ b0DED
-        RTS 
+        RTS
 
 b0DED   LDA #$0E     ;#%00001110
         STA f0D88,Y
@@ -1368,9 +1369,9 @@ b0DED   LDA #$0E     ;#%00001110
         STA f106C,Y
         STY a2745
         LDA a2493
-        CLC 
+        CLC
         ADC #$28     ;#%00101000
-        TAY 
+        TAY
         LDA (p32),Y
         LDY a2745
         CMP #$67     ;#%01100111
@@ -1385,67 +1386,67 @@ b0E21   LDA #$0C     ;#%00001100
         LDA #$78     ;#%01111000
 j0E28   STA f008B,Y
         LDA #$0E     ;#%00001110
-        SEC 
+        SEC
         SBC a0E5A
-        ASL 
-        ASL 
-        ASL 
-        CLC 
+        ASL A
+        ASL A
+        ASL A
+        CLC
         ADC #$48     ;#%01001000
         ADC aE3
         STA f0045,Y
         LDA aE4
-        LSR 
-        CLC 
+        LSR A
+        CLC
         ADC #$18     ;#%00011000
         STA a2745
         LDA a2493
-        ASL 
-        ASL 
-        CLC 
+        ASL A
+        ASL A
+        CLC
         ADC a2745
-        ASL 
+        ASL A
         STA f007D,Y
         LDA #$00     ;#%00000000
-        ROL 
+        ROL A
         STA f0061,Y
-        RTS 
+        RTS
 
 a0E59   .BYTE $FF
 a0E5A   .BYTE $00
 s0E5B   LDA a0967
         BEQ b0E61
-        RTS 
+        RTS
 
 b0E61   LDX a0EB3
         BPL b0E67
-        RTS 
+        RTS
 
 b0E67   LDY #$07     ;#%00000111
 b0E69   LDA f42D0,X
         CMP #$FD     ;#%11111101
         BEQ b0E78
-        DEX 
-        DEY 
+        DEX
+        DEY
         BPL b0E69
         STX a0EB3
-        RTS 
+        RTS
 
 b0E78   LDA aE4
-        CLC 
+        CLC
         ADC #$11     ;#%00010001
-        LSR 
+        LSR A
         STA a2493
-        TXA 
-        ASL 
-        ASL 
-        CLC 
+        TXA
+        ASL A
+        ASL A
+        CLC
         ADC a2493
-        ASL 
+        ASL A
         ROL a65
         STA a81
         LDA #$BC     ;#%10111100
-        CLC 
+        CLC
         ADC aE3
         STA a49
         LDA #$FF     ;#%11111111
@@ -1467,29 +1468,29 @@ s0EB4   LDX a0EDB
         LDY a0EDA
         LDA #$00     ;#%00000000
         STA f7ED8,X
-        INX 
-        INY 
-        INY 
-        TXA 
+        INX
+        INY
+        INY
+        TXA
         AND #$07     ;#%00000111
-        TAX 
-        TYA 
+        TAX
+        TYA
         AND #$07     ;#%00000111
-        TAY 
+        TAY
         LDA f7ED8,X
         ORA f1A49,Y
         STA f7ED8,X
         STX a0EDB
         STY a0EDA
-        RTS 
+        RTS
 
 a0EDA   .BYTE $00
 a0EDB   .BYTE $00
-s0EDC   PHA 
+s0EDC   PHA
         LDA a0967
         BEQ b0EE4
-        PLA 
-        RTS 
+        PLA
+        RTS
 
 b0EE4   LDA a2493
         BEQ b0EF6
@@ -1507,21 +1508,21 @@ j0F00   LDA a2493
         STA a81
         LDA a2745
         STA a65
-        TXA 
-        ASL 
-        ASL 
-        ASL 
-        CLC 
+        TXA
+        ASL A
+        ASL A
+        ASL A
+        CLC
         ADC aE3
         ADC #$2C     ;#%00101100
         STA a49
         JMP j0F48
 
-s0F18   PHA 
+s0F18   PHA
         LDA a0967
         BEQ b0F20
-        PLA 
-        RTS 
+        PLA
+        RTS
 
 b0F20   LDA a28E6
         CMP #$C0     ;#%11000000
@@ -1529,21 +1530,21 @@ b0F20   LDA a28E6
         LDA #$2B     ;#%00101011
         STA a49
         LDA aE4
-        CLC 
+        CLC
         ADC #$01     ;#%00000001
-        LSR 
+        LSR A
         STA a2493
         LDA a2747
-        CLC 
+        CLC
         ADC #$02     ;#%00000010
-        ASL 
-        ASL 
-        CLC 
+        ASL A
+        ASL A
+        CLC
         ADC a2493
-        ASL 
+        ASL A
         STA a81
         LDA #$00     ;#%00000000
-        ROL 
+        ROL A
         STA a65
 j0F48   LDA #$01     ;#%00000001
         STA a1070
@@ -1554,22 +1555,22 @@ j0F48   LDA #$01     ;#%00000001
         STA a1214
         LDA #$0B     ;#%00001011
         STA a9D
-        TXA 
-        PHA 
-        TYA 
-        PHA 
+        TXA
+        PHA
+        TYA
+        PHA
         LDX #$04     ;#%00000100
         JSR j10BE
-        PLA 
-        TAY 
-        PLA 
-        TAX 
-b0F6A   PLA 
-        RTS 
+        PLA
+        TAY
+        PLA
+        TAX
+b0F6A   PLA
+        RTS
 
 s0F6C   LDA a0967
         BEQ b0F72
-        RTS 
+        RTS
 
 b0F72   LDX #$04     ;#%00000100
 b0F74   LDA f120B,X
@@ -1578,13 +1579,13 @@ b0F74   LDA f120B,X
         JMP j0F82
 
 b0F7F   JSR s11B1
-j0F82   DEX 
+j0F82   DEX
         BPL b0F74
         JSR s2961
         CMP #$00     ;#%00000000
         BNE b0F8F
         INC a11C1
-b0F8F   RTS 
+b0F8F   RTS
 
 s0F90   CMP #$05     ;#%00000101
         BNE b0F9A
@@ -1598,7 +1599,7 @@ a0FA0   =*+$02
         LDA f1100,X
         BEQ b0FAA
         DEC f1100,X
-        RTS 
+        RTS
 
 b0FAA   LDA #$04     ;#%00000100
         STA f1100,X
@@ -1606,7 +1607,7 @@ b0FAA   LDA #$04     ;#%00000100
         CMP #$82     ;#%10000010
         BEQ b0FB8
         INC f8B,X
-        RTS 
+        RTS
 
 b0FB8   JMP j1191
 
@@ -1621,7 +1622,7 @@ b0FBB   CMP #$02     ;#%00000010
         JSR j1184
         LDA #$7D     ;#%01111101
         STA a8F
-        RTS 
+        RTS
 
 b0FD7   JSR j1184
         JMP j109C
@@ -1630,24 +1631,24 @@ b0FDD   CMP #$03     ;#%00000011
         BNE b101F
         LDA a101D
         BNE b0FF0
-        TYA 
-        PHA 
+        TYA
+        PHA
         LDY #$04     ;#%00000100
         JSR j15C6
-        PLA 
-        TAY 
-        RTS 
+        PLA
+        TAY
+        RTS
 
 b0FF0   LDA a101D
-        LSR 
-        LSR 
-        TAY 
+        LSR A
+        LSR A
+        TAY
         LDA f1012,Y
-        CLC 
+        CLC
         ADC a49
         STA a49
         LDA a101D
-        SEC 
+        SEC
         SBC f1012,Y
         STA a101D
         BCS b100F
@@ -1670,7 +1671,7 @@ b102F   JMP j1096
 s1032   JSR j1659
         LDY f1210,X
         LDA f1071,Y
-        TAY 
+        TAY
         LDA (p30),Y
         CMP #$1B     ;#%00011011
         BCC b1054
@@ -1681,7 +1682,7 @@ s1032   JSR j1659
         JSR j10BE
         LDA #$00     ;#%00000000
         STA f106C,X
-b1053   RTS 
+b1053   RTS
 
 b1054   INC f106C,X
         LDA f106C,X
@@ -1690,10 +1691,10 @@ b1054   INC f106C,X
         JMP j1191
 
 s1061   JSR s2941
-        TAY 
+        TAY
         LDA f1231,Y
         STA f1210,X
-        RTS 
+        RTS
 
 f106C   .BYTE $00,$00,$00,$00
 a1070   .BYTE $00
@@ -1705,12 +1706,12 @@ f1071   .BYTE $00,$79,$29,$01,$52,$7A,$2A,$00
 a1093   .BYTE $01,$FF,$00
 j1096   LDA f106C,X
         BEQ j109C
-        RTS 
+        RTS
 
 j109C   LDA f1100,X
         BEQ b10A5
         DEC f1100,X
-        RTS 
+        RTS
 
 b10A5   LDA #$02     ;#%00000010
         STA f1100,X
@@ -1724,16 +1725,16 @@ b10B6   LDY f10FB,X
         BNE b10D1
 j10BE   LDY f1210,X
         LDA f10D7,Y
-        TAY 
+        TAY
         STA f10FB,X
         LDA f10E2,Y
         STA f8B,X
         INC f10FB,X
-        RTS 
+        RTS
 
 b10D1   INC f10FB,X
         STA f8B,X
-        RTS 
+        RTS
 
 f10D7   .BYTE $14,$00,$05,$00,$0F,$00,$05,$00
         .BYTE $0A,$00,$05
@@ -1751,7 +1752,7 @@ p1110   =*+$01
         JMP j1115
 
 b1112   LDA f1165,Y
-j1115   CLC 
+j1115   CLC
         ADC a0C
         STA a1163
         LDA f106C,X
@@ -1760,13 +1761,13 @@ j1115   CLC
         JMP j1128
 
 b1125   LDA f1172,Y
-j1128   CLC 
+j1128   CLC
         ADC a0D
         STA a1164
         LDA a1163
         BMI b1144
         LDA f7D,X
-        CLC 
+        CLC
         ADC a1163
         STA f7D,X
         BCC b1141
@@ -1775,21 +1776,21 @@ j1128   CLC
 b1141   JMP j115A
 
 b1144   EOR #$FF     ;#%11111111
-        CLC 
+        CLC
         ADC #$01     ;#%00000001
         STA a2493
         LDA f7D,X
-        SEC 
+        SEC
         SBC a2493
         STA f7D,X
         BCS j115A
         LDA #$00     ;#%00000000
         STA f61,X
 j115A   LDA f45,X
-        CLC 
+        CLC
         ADC a1164
         STA f45,X
-        RTS 
+        RTS
 
 a1163   .BYTE $00
 a1164   .BYTE $00
@@ -1813,12 +1814,12 @@ j1191   LDA #$00     ;#%00000000
         LDA #$00     ;#%00000000
         STA f45,X
         DEC fC3,X
-        RTS 
+        RTS
 
 j11A0   LDA f61,X
-        LSR 
+        LSR A
         LDA f7D,X
-        ROR 
+        ROR A
         CMP #$A9     ;#%10101001
         BCS j1191
         CMP #$02     ;#%00000010
@@ -1827,29 +1828,29 @@ j11A0   LDA f61,X
 
 s11B1   CPX #$04     ;#%00000100
         BNE b11B6
-        RTS 
+        RTS
 
 b11B6   LDA a0B29
         BNE b11C5
         LDA a11C1
         BNE b11C2
-        RTS 
+        RTS
 
 a11C1   .BYTE $00
 b11C2   DEC a11C1
 b11C5   LDA #$07     ;#%00000111
         JSR s24D3
-        TAY 
+        TAY
         LDA f121C,Y
         JSR s24D3
-        CLC 
+        CLC
         ADC f1215,Y
-        ASL 
+        ASL A
         STA f7D,X
         ROL f61,X
         LDA f122A,Y
         JSR s24D3
-        CLC 
+        CLC
         ADC f1223,Y
         STA f45,X
         LDA f1231,Y
@@ -1861,12 +1862,12 @@ b11C5   LDA #$07     ;#%00000111
         STA f106C,X
         LDA #$04     ;#%00000100
         JSR s24D3
-        TAY 
+        TAY
         LDA f1207,Y
         STA f99,X
         JMP j10BE
 
-        RTS 
+        RTS
 
 f1207   .BYTE $0B,$0F,$05,$09
 f120B   .BYTE $00,$00,$00,$00
@@ -1883,16 +1884,16 @@ j123A   LDX #$06     ;#%00000110
 b123C   LDA f1961,X
         BEQ b1254
         LDA f4A,X
-        CLC 
+        CLC
         ADC a0D
         STA f4A,X
         LDA a1266
         BNE b1254
         LDA f82,X
-        CLC 
+        CLC
         ADC a0C
         STA f82,X
-b1254   DEX 
+b1254   DEX
         BPL b123C
         LDA a0C
         BEQ b1265
@@ -1900,7 +1901,7 @@ b1254   DEX
         BPL b1265
         LDA #$01     ;#%00000001
         STA a1266
-b1265   RTS 
+b1265   RTS
 
 a1266   .BYTE $00
 f1267   .BYTE $09,$01,$02,$03,$0B,$0D,$0F,$11
@@ -1920,7 +1921,7 @@ s12A7   LDA a1D62
         LDA a12F2
         BEQ b12C7
         DEC a12F2
-b12BB   RTS 
+b12BB   RTS
 
 b12BC   STA a12F0
         LDA #$00     ;#%00000000
@@ -1933,20 +1934,20 @@ j12CC   LDX a12EF
         LDA f12FE,X
         BEQ j12DF
         STA aD1
-        CLC 
+        CLC
         ADC #$04     ;#%00000100
         STA a98
         INC a12EF
-        RTS 
+        RTS
 
 j12DF   LDA a1D62
         AND #$0F     ;#%00001111
-        TAY 
+        TAY
         LDA f12F3,Y
         STA a12EF
         JMP j12CC
 
-        RTS 
+        RTS
 
 a12EF   .BYTE $00
 a12F0   .BYTE $00
@@ -1973,22 +1974,22 @@ j1328   LDA aFF
         LDA aFE
         CMP #$B8     ;#%10111000
         BCS b133E
-b1336   RTS 
+b1336   RTS
 
 b1337   LDA aFE
         CMP #$19     ;#%00011001
         BCC b1347
-        RTS 
+        RTS
 
 b133E   LDA a1D63
         AND #$1E     ;#%00011110
         STA a1D63
-        RTS 
+        RTS
 
 b1347   LDA a1D63
         AND #$1D     ;#%00011101
         STA a1D63
-        RTS 
+        RTS
 
 b1350   LDA a1D63
         AND #$17     ;#%00010111
@@ -2001,35 +2002,35 @@ b135B   LDA a1D63
         JMP j1328
 
 s1366   LDA aE4
-        CLC 
+        CLC
         ADC #$16     ;#%00010110
         AND #$FE     ;#%11111110
         STA a2493
         LDA a1932
-        SEC 
+        SEC
         SBC a2493
-        PHA 
+        PHA
         BCS b137F
         LDA #$00     ;#%00000000
         JMP j1382
 
 b137F   LDA a1933
-j1382   LSR 
-        PLA 
-        ROR 
-        LSR 
-        LSR 
+j1382   LSR A
+        PLA
+        ROR A
+        LSR A
+        LSR A
         STA a1A50
         LDA a1931
-        SEC 
+        SEC
         SBC #$2D     ;#%00101101
         SBC aE3
-        LSR 
-        LSR 
-        LSR 
+        LSR A
+        LSR A
+        LSR A
         STA a1A46
         LDA aFE
-        SEC 
+        SEC
         SBC a1A46
         AND #$F8     ;#%11111000
         STA aF0
@@ -2037,7 +2038,7 @@ j1382   LSR
         SBC #$00     ;#%00000000
         STA aF1
         LDA aF8
-        CLC 
+        CLC
         ADC a1A50
         STA aF2
         LSR aF2
@@ -2046,7 +2047,7 @@ j1382   LSR
         ASL aF0
         ROL aF1
         LDA #$00     ;#%00000000
-        CLC 
+        CLC
         ADC aF0
         STA aF4
         LDA #$E0     ;#%11100000
@@ -2054,7 +2055,7 @@ j1382   LSR
         STA aF5
         LDY aF2
         LDA (pF4),Y
-        TAX 
+        TAX
         LDA f1267,X
         CPX #$30     ;#%00110000
         BNE b13D6
@@ -2067,16 +2068,16 @@ b13D6   STA a2493
 b13E1   STA (pF4),Y
         LDX #$00     ;#%00000000
         STX aF4
-        LSR 
+        LSR A
         ROR aF4
-        LSR 
+        LSR A
         ROR aF4
-        TAX 
+        TAX
         LDA aF4
-        CLC 
+        CLC
         ADC #$00     ;#%00000000
         STA aF4
-        TXA 
+        TXA
         ADC #$EF     ;#%11101111
         STA aF5
         LDA #>p4000  ;#%01000000
@@ -2104,21 +2105,21 @@ b13E1   STA (pF4),Y
         LDA #$07     ;#%00000111
         STA a14ED
         LDA a1A46
-        CLC 
+        CLC
         ADC a14EB
         AND #$F8     ;#%11111000
-        SEC 
+        SEC
         SBC a14EB
         STA a2747
-        ASL 
-        ASL 
-        ASL 
+        ASL A
+        ASL A
+        ASL A
         STA a30
-        ASL 
+        ASL A
         ROL a31
-        ASL 
+        ASL A
         ROL a31
-        CLC 
+        CLC
         ADC a30
         STA a14AE
         LDA a31
@@ -2132,10 +2133,10 @@ b1463   LDA aF0
         CMP a1A50
         BCS b1488
         LDA a1A50
-        CLC 
+        CLC
         ADC a14EA
         AND #$F8     ;#%11111000
-        SEC 
+        SEC
         SBC a14EA
         STA a14EF
         LDA #$00     ;#%00000000
@@ -2148,12 +2149,12 @@ b1488   LDA #$00     ;#%00000000
         STA a14EF
         STA a14EE
 j1490   LDA a14ED
-        ASL 
-        ASL 
-        ASL 
-        CLC 
+        ASL A
+        ASL A
+        ASL A
+        CLC
         ADC a14EA
-        TAY 
+        TAY
         LDA a14EA
         EOR #$07     ;#%00000111
         STA a14EC
@@ -2164,8 +2165,8 @@ b14AB   LDA (pF4),Y
 a14AE   =*+$01
 a14AF   =*+$02
         STA p4000,X
-        INY 
-        INX 
+        INY
+        INX
         DEC a14EC
         BMI b14C7
         INC aF3
@@ -2176,7 +2177,7 @@ a14AF   =*+$02
         LDA a14EE
         STA aF3
 b14C7   LDA a14AE
-        CLC 
+        CLC
         ADC #$28     ;#%00101000
         STA a14AE
         BCC b14D5
@@ -2190,7 +2191,7 @@ b14D5   DEC a14ED
         BCS j14E9
 b14E6   JMP j1490
 
-j14E9   RTS 
+j14E9   RTS
 
 a14EA   .BYTE $00
 a14EB   .BYTE $00
@@ -2200,7 +2201,7 @@ a14EE   .BYTE $00
 a14EF   .BYTE $00
 s14F0   LDA a1D8C
         BEQ b14F6
-        RTS 
+        RTS
 
 b14F6   LDX a152D
         LDA f1965,X
@@ -2210,14 +2211,14 @@ b14F6   LDX a152D
         BEQ b1507
         JMP j1524
 
-b1507   TXA 
-        PHA 
-        CLC 
+b1507   TXA
+        PHA
+        CLC
         ADC #$09     ;#%00001001
-        TAX 
+        TAX
         JSR s169C
-        PLA 
-        TAX 
+        PLA
+        TAX
         LDY #$29     ;#%00101001
         LDA (p30),Y
         CMP #$1B     ;#%00011011
@@ -2227,11 +2228,11 @@ b1507   TXA
         JMP j1524
 
 b1521   JSR s18E4
-j1524   DEX 
+j1524   DEX
         BPL b1529
         LDX #$02     ;#%00000010
 b1529   STX a152D
-        RTS 
+        RTS
 
 a152D   .BYTE $00
 s152E   LDX a154E
@@ -2242,13 +2243,13 @@ s152E   LDX a154E
         JSR s155F
         DEC a154E
         BMI b1548
-        RTS 
+        RTS
 
 b1543   DEC a154E
         BPL s152E
 b1548   LDA #$02     ;#%00000010
         STA a154E
-        RTS 
+        RTS
 
 a154E   .BYTE $00
 f154F   .BYTE $0D,$0C,$0C,$0C,$00,$0C,$00,$18
@@ -2257,9 +2258,9 @@ s155F   STA a2745
         LDY #$03     ;#%00000011
 j1564   STY a2493
         LDA a2745
-        SEC 
+        SEC
         SBC #$03     ;#%00000011
-        TAY 
+        TAY
         LDA f154F,Y
         STA a25C6
         LDA f1557,Y
@@ -2274,10 +2275,10 @@ j1564   STY a2493
         LDA f0045,Y
         STA a25C5
         LDA f86,X
-        ASL 
+        ASL A
         STA a25C0
         LDA #$00     ;#%00000000
-        ROL 
+        ROL A
         STA a25C1
         LDA f007D,Y
         STA a25C2
@@ -2311,9 +2312,9 @@ j15C6   LDA #$7E     ;#%01111110
         LDA #$12     ;#%00010010
         JMP j0D24
 
-b15EA   DEY 
+b15EA   DEY
         BPL b15EE
-        RTS 
+        RTS
 
 b15EE   JMP j1564
 
@@ -2334,9 +2335,9 @@ b15FE   LDY f161F,X
 b1611   LDA a1D62
         AND f1623,X
         STA a1D62
-j161A   DEX 
+j161A   DEX
         BPL b15FE
-        RTS 
+        RTS
 
 a161E   .BYTE $00
 f161F   .BYTE $29,$50,$52,$79
@@ -2350,85 +2351,85 @@ f1628   .BYTE $40,$28,$40,$50,$40,$78,$40,$A0
         .BYTE $43,$48,$43,$70,$43,$98,$43,$C0
         .BYTE $43
 j1659   LDA aE4
-        CLC 
+        CLC
         ADC #$16     ;#%00010110
-        LSR 
+        LSR A
         STA a2493
         LDA f61,X
-        LSR 
+        LSR A
         LDA f7D,X
-        ROR 
-        SEC 
+        ROR A
+        SEC
         SBC a2493
         BCS b1670
         LDA #$00     ;#%00000000
-b1670   LSR 
-        LSR 
+b1670   LSR A
+        LSR A
         STA a30
         LDA aE3
-        CLC 
+        CLC
         ADC #$2D     ;#%00101101
         STA a2493
         LDA f45,X
-        SEC 
+        SEC
         SBC a2493
         BCS b1686
         LDA #$00     ;#%00000000
 b1686   AND #$F8     ;#%11111000
-        LSR 
-        LSR 
-        TAY 
+        LSR A
+        LSR A
+        TAY
         LDA f1627,Y
-        CLC 
+        CLC
         ADC a30
         STA a30
         LDA f1628,Y
         ADC #$00     ;#%00000000
         STA a31
-        RTS 
+        RTS
 
-        RTS 
+        RTS
 
 s169C   LDA aE4
-        CLC 
+        CLC
         ADC #$16     ;#%00010110
-        LSR 
+        LSR A
         STA a2493
         LDA f7D,X
-        SEC 
+        SEC
         SBC a2493
         BCS b16AF
         LDA #$00     ;#%00000000
-b16AF   LSR 
-        LSR 
+b16AF   LSR A
+        LSR A
         STA a30
         LDA aE3
-        CLC 
+        CLC
         ADC #$2D     ;#%00101101
         STA a2493
         LDA f45,X
-        SEC 
+        SEC
         SBC a2493
         BCS b16C5
         LDA #$00     ;#%00000000
 b16C5   AND #$F8     ;#%11111000
-        LSR 
-        LSR 
-        TAY 
+        LSR A
+        LSR A
+        TAY
         LDA f1627,Y
-        CLC 
+        CLC
         ADC a30
         STA a30
         LDA f1628,Y
         ADC #$00     ;#%00000000
         STA a31
-        RTS 
+        RTS
 
 s16DA   JSR s180D
         LDX #$FD     ;#%11111101
         LDA #$00     ;#%00000000
 b16E1   STA f02,X
-        DEX 
+        DEX
         BNE b16E1
         JSR s2494
         LDA #$00     ;#%00000000
@@ -2446,7 +2447,7 @@ b16E1   STA f02,X
         LDX #$02     ;#%00000010
 b170A   LDA f0BF1,X
         STA f0BED,X
-        DEX 
+        DEX
         BPL b170A
         LDA #$04     ;#%00000100
         STA aE3
@@ -2522,21 +2523,21 @@ a17A0   LDA #$FF     ;#%11111111
         LDA #$00     ;#%00000000
         STX a0D23
 b17CB   STA f7FF8,X
-        DEX 
+        DEX
         BPL b17CB
         LDX #$07     ;#%00000111
         LDA #$1A     ;#%00011010
         JSR s8100
         LDX #$19     ;#%00011001
-b17DA   TXA 
-        PHA 
+b17DA   TXA
+        PHA
         JSR s1FCF
         LDA #$01     ;#%00000001
         STA a1D8C
         JSR j0D3D
-        PLA 
-        TAX 
-        DEX 
+        PLA
+        TAX
+        DEX
         BNE b17DA
         JSR b12C7
         JSR s0C9C
@@ -2552,19 +2553,19 @@ b17DA   TXA
 
 s180D   LDA #$00     ;#%00000000
         STA $D011    ;VIC Control Register 1
-        RTS 
+        RTS
 
 s1813   LDA #$10     ;#%00010000
         STA $D011    ;VIC Control Register 1
-        RTS 
+        RTS
 
 s1819   LDX #$02     ;#%00000010
 b181B   LDA f1965,X
         BEQ b1823
         JSR s1827
-b1823   DEX 
+b1823   DEX
         BPL b181B
-        RTS 
+        RTS
 
 s1827   CMP #$09     ;#%00001001
         BNE b182E
@@ -2579,7 +2580,7 @@ s1837   LDA #$00     ;#%00000000
         LDA #$00     ;#%00000000
         STA f4E,X
         DEC fCC,X
-        RTS 
+        RTS
 
 b1843   CMP #$C4     ;#%11000100
         BCC b184A
@@ -2598,36 +2599,36 @@ b1853   CMP #$AC     ;#%10101100
         JMP j1968
 
 b1861   LDA f4E,X
-        CLC 
+        CLC
         ADC f1B56,X
         STA f4E,X
         LDA f86,X
-        CLC 
+        CLC
         ADC f1B53,X
         STA f86,X
         LDA a2493
         CMP #$04     ;#%00000100
         BEQ b1879
-        RTS 
+        RTS
 
 b1879   LDA f94,X
         CMP #$40     ;#%01000000
         BEQ b1882
         INC f94,X
-        RTS 
+        RTS
 
 b1882   JMP j195C
 
 j1885   LDA f1955,X
         AND #$7F     ;#%01111111
-        LSR 
-        LSR 
-        LSR 
+        LSR A
+        LSR A
+        LSR A
         CMP #$03     ;#%00000011
         BCS b189C
         STA a2493
         LDA #$38     ;#%00111000
-        SEC 
+        SEC
         SBC a2493
         STA f94,X
 b189C   LDA f1955,X
@@ -2635,12 +2636,12 @@ b189C   LDA f1955,X
         DEC f1955,X
         BPL b18D2
 j18A6   AND #$7F     ;#%01111111
-        TAY 
+        TAY
         LDA f1958,X
-        CLC 
+        CLC
         ADC f194F,X
         STA f1958,X
-        CLC 
+        CLC
         ADC f8000,Y
         CMP #$C0     ;#%11000000
         BCS s18E4
@@ -2648,14 +2649,14 @@ j18A6   AND #$7F     ;#%01111111
         BCC s18E4
         STA f4E,X
         LDA f86,X
-        CLC 
+        CLC
         ADC f1952,X
         CMP #$A0     ;#%10100000
         BCS s18E4
         CMP #$0C     ;#%00001100
         BCC s18E4
         STA f86,X
-        RTS 
+        RTS
 
 b18D2   LDA #$00     ;#%00000000
         STA f1955,X
@@ -2669,40 +2670,40 @@ s18E4   LDY f1965,X
         LDA f1927,Y
         JSR j0D24
         JSR s1934
-        TXA 
-        PHA 
-        CLC 
+        TXA
+        PHA
+        CLC
         ADC #$09     ;#%00001001
-        TAX 
+        TAX
         JSR s169C
-        PLA 
-        TAX 
+        PLA
+        TAX
         LDY #$29     ;#%00101001
         LDA (p30),Y
         CMP #$1B     ;#%00011011
         BCC b1908
         CMP #$2A     ;#%00101010
         BCS b1908
-        RTS 
+        RTS
 
-b1908   TXA 
-        PHA 
+b1908   TXA
+        PHA
         LDA f4E,X
-        CLC 
+        CLC
         ADC #$08     ;#%00001000
         STA a1931
         LDA f86,X
-        CLC 
+        CLC
         ADC #$04     ;#%00000100
-        ASL 
+        ASL A
         STA a1932
         LDA #$00     ;#%00000000
-        ROL 
+        ROL A
         STA a1933
         JSR s1366
-        PLA 
-        TAX 
-        RTS 
+        PLA
+        TAX
+        RTS
 
 f1927   .BYTE $00,$00,$00,$00,$00,$0F,$00,$00
         .BYTE $0E,$0D
@@ -2720,7 +2721,7 @@ s1934   LDA #$41     ;#%01000001
         STA fA2,X
         LDA #$02     ;#%00000010
         STA f197F,X
-        RTS 
+        RTS
 
 f194F   .BYTE $00,$00,$00
 f1952   .BYTE $00,$00,$00
@@ -2729,7 +2730,7 @@ f1958   .BYTE $00,$00,$00
 a195B   .BYTE $00
 j195C   LDA #$39     ;#%00111001
         STA f94,X
-        RTS 
+        RTS
 
 f1961   .BYTE $00,$00
 f1963   .BYTE $00,$00
@@ -2737,7 +2738,7 @@ f1965   .BYTE $00,$00,$00
 j1968   LDA f197F,X
         BEQ b1971
         DEC f197F,X
-        RTS 
+        RTS
 
 b1971   LDA #$02     ;#%00000010
         STA f197F,X
@@ -2745,7 +2746,7 @@ b1971   LDA #$02     ;#%00000010
         CMP #$45     ;#%01000101
         BEQ b1982
         INC f94,X
-        RTS 
+        RTS
 
 f197F   .BYTE $00,$00,$00
 b1982   JMP s1837
@@ -2765,25 +2766,25 @@ b199B   LDA a1A47
         LDA #$22     ;#%00100010
         STA a2422
 b19A7   LDA a1A47
-        LSR 
-        LSR 
-        LSR 
+        LSR A
+        LSR A
+        LSR A
         AND #$06     ;#%00000110
-        TAX 
+        TAX
         LDA f19BD,X
         STA a2423
         LDA f19BE,X
         STA a2424
-        RTS 
+        RTS
 
 f19BD   .BYTE $22
 f19BE   .BYTE $22,$15,$16,$17,$18,$19,$1A
 s19C5   LDX #$07     ;#%00000111
 b19C7   LDA f242E,X
         STA f2426,X
-        DEX 
+        DEX
         BPL b19C7
-        RTS 
+        RTS
 
 s19D1   LDX a0E
         LDY a1B70
@@ -2801,15 +2802,15 @@ j19EB   CPX #$04     ;#%00000100
         CPX #$05     ;#%00000101
         BEQ b19FE
         STA f2426,X
-        RTS 
+        RTS
 
 b19F7   STA a242A
         STA a242B
-        RTS 
+        RTS
 
 b19FE   STA a242C
         STA a242D
-        RTS 
+        RTS
 
 j1A05   LDA #$00     ;#%00000000
         STA $DC00    ;CIA1: Data Port Register A
@@ -2818,7 +2819,7 @@ j1A05   LDA #$00     ;#%00000000
         BNE b1A17
         LDA #$FF     ;#%11111111
         STA $DC00    ;CIA1: Data Port Register A
-        RTS 
+        RTS
 
 b1A17   LDA #$3C     ;#%00111100
         JSR s26FA
@@ -2827,13 +2828,13 @@ b1A17   LDA #$3C     ;#%00111100
         LDA a1A45
         BEQ b1A29
         DEC a1A45
-        RTS 
+        RTS
 
 b1A29   JSR s19C5
 b1A2C   LDX a0E
         BNE b1A32
         LDX #$06     ;#%00000110
-b1A32   DEX 
+b1A32   DEX
         STX a0E
         LDA a1A47
         AND f1A48,X
@@ -2853,25 +2854,25 @@ s1A51   LDA a1D62
         BEQ b1A5E
         CMP a1B59
         BNE b1A64
-        RTS 
+        RTS
 
 b1A5E   LDA #$00     ;#%00000000
         STA a1B59
-        RTS 
+        RTS
 
 b1A64   STA a1B59
         LDX #$02     ;#%00000010
 b1A69   LDA f1965,X
         BEQ b1A72
-        DEX 
+        DEX
         BPL b1A69
-        RTS 
+        RTS
 
 b1A72   LDY a0E
         CPY #$04     ;#%00000100
         BNE b1A81
         LDA a11C1
-        CLC 
+        CLC
         ADC #$05     ;#%00000101
         STA a11C1
 b1A81   LDA f1AFA,Y
@@ -2881,10 +2882,10 @@ b1A81   LDA f1AFA,Y
         LDA f1B00,Y
         STA fA2,X
         LDA a8A
-        LSR 
+        LSR A
         STA f86,X
         LDA a52
-        SEC 
+        SEC
         SBC #$05     ;#%00000101
         STA f4E,X
         INC fCC,X
@@ -2909,7 +2910,7 @@ b1AC0   CMP #$03     ;#%00000011
         LDA #$9A     ;#%10011010
         STA f1955,X
         LDA f4E,X
-        SEC 
+        SEC
         SBC #$2A     ;#%00101010
         STA f1958,X
         LDA #$36     ;#%00110110
@@ -2925,7 +2926,7 @@ j1AD9   STA f94,X
         STA f194F,X
         LDA f1B3D,Y
         STA f1952,X
-        RTS 
+        RTS
 
 f1AF4   .BYTE $00,$11,$11,$13,$17,$10
 f1AFA   .BYTE $04,$05,$06,$09,$03,$08
@@ -2955,62 +2956,62 @@ s1B5A   DEC a1B6F
         BPL b1B6E
         LDA #$07     ;#%00000111
         STA a1B70
-b1B6E   RTS 
+b1B6E   RTS
 
 a1B6F   .BYTE $00
 a1B70   .BYTE $00
 f1B71   .BYTE $00,$0B,$0C,$0F,$01,$0F,$0C,$0B
 s1B79   LDA a1C28
-        SEC 
+        SEC
         BNE b1B87
         LDA a52
         CMP #$AF     ;#%10101111
         BCS b1B87
         INC a52
-b1B87   RTS 
+b1B87   RTS
 
 s1B88   LDA a1C28
-        SEC 
+        SEC
         BNE b1B96
         LDA #$7D     ;#%01111101
         CMP a52
         BCS b1B96
         DEC a52
-b1B96   RTS 
+b1B96   RTS
 
 s1B97   LDA a2493
-        SEC 
+        SEC
         BNE b1BA5
         LDA a8A
         CMP #$DE     ;#%11011110
         BCS b1BA5
         INC a8A
-b1BA5   RTS 
+b1BA5   RTS
 
 s1BA6   LDA a2493
-        SEC 
+        SEC
         BNE b1BB4
         LDA #$7A     ;#%01111010
         CMP a8A
         BCS b1BB4
         DEC a8A
-b1BB4   RTS 
+b1BB4   RTS
 
 s1BB5   LDA a1D62
         AND #$04     ;#%00000100
-        CLC 
+        CLC
         BEQ b1BC1
         LDA #$7A     ;#%01111010
         CMP a8A
 b1BC1   ROL a1C28
         LDA a1D62
         AND #$08     ;#%00001000
-        CLC 
+        CLC
         BEQ b1BD0
         LDA a8A
         CMP #$DE     ;#%11011110
 b1BD0   ROL a1C28
-        RTS 
+        RTS
 
 s1BD4   LDA a1D62
         STA a1C27
@@ -3041,24 +3042,24 @@ b1C0E   ROR a2493
         LDA a1D63
         AND a2493
         STA a1D63
-        RTS 
+        RTS
 
 a1C27   .BYTE $00
 a1C28   .BYTE $00
 s1C29   LDA aE4
         STA a1CC0
         LDA a1D62
-        TAX 
+        TAX
         AND #$03     ;#%00000011
         BEQ b1C6B
-        TXA 
+        TXA
         AND #$0C     ;#%00001100
         BEQ b1C6B
-        TXA 
+        TXA
         AND #$06     ;#%00000110
         CMP #$06     ;#%00000110
         BEQ b1C49
-        TXA 
+        TXA
         AND #$09     ;#%00001001
         CMP #$09     ;#%00001001
         BNE b1C51
@@ -3066,22 +3067,22 @@ b1C49   LDA a1CC0
         EOR #$07     ;#%00000111
         STA a1CC0
 b1C51   LDA aE3
-        SEC 
+        SEC
         SBC a1CC0
         BPL b1C5E
         EOR #$FF     ;#%11111111
-        CLC 
+        CLC
         ADC #$01     ;#%00000001
 b1C5E   CMP #$04     ;#%00000100
         BEQ b1C6B
         LDA a1D62
         AND #$13     ;#%00010011
         STA a1D63
-        RTS 
+        RTS
 
-b1C6B   TXA 
+b1C6B   TXA
         STA a1D63
-b1C6F   RTS 
+b1C6F   RTS
 
 s1C70   LDA a1D3E
         BNE b1C6F
@@ -3090,17 +3091,17 @@ s1C70   LDA a1D3E
         STA aE4
         STA a1CC0
         LDA a1D62
-        TAX 
+        TAX
         AND #$03     ;#%00000011
         BEQ b1C6B
-        TXA 
+        TXA
         AND #$0C     ;#%00001100
         BEQ b1C6B
-        TXA 
+        TXA
         AND #$06     ;#%00000110
         CMP #$06     ;#%00000110
         BEQ b1C99
-        TXA 
+        TXA
         AND #$09     ;#%00001001
         CMP #$09     ;#%00001001
         BNE b1CA1
@@ -3108,22 +3109,22 @@ b1C99   LDA a1CC0
         EOR #$06     ;#%00000110
         STA a1CC0
 b1CA1   LDA aE3
-        SEC 
+        SEC
         SBC a1CC0
         BPL b1CAE
         EOR #$FF     ;#%11111111
-        CLC 
+        CLC
         ADC #$01     ;#%00000001
 b1CAE   CMP #$04     ;#%00000100
         BEQ b1CBB
         LDA a1D62
         AND #$13     ;#%00010011
         STA a1D63
-        RTS 
+        RTS
 
-b1CBB   TXA 
+b1CBB   TXA
         STA a1D63
-        RTS 
+        RTS
 
 a1CC0   .BYTE $00
 s1CC1   LDA #$00     ;#%00000000
@@ -3147,7 +3148,7 @@ b1CE9   LDY a1D62
         BNE b1CF2
         LDY #$FF     ;#%11111111
 b1CF2   STY a12F1
-        RTS 
+        RTS
 
 s1CF6   LDA #$00     ;#%00000000
         STA a0C
@@ -3178,7 +3179,7 @@ j1D2A   LDA a1D3E
         STA a1D66
         STA a1D67
         STA a1D63
-        RTS 
+        RTS
 
 a1D3E   .BYTE $00
 b1D3F   LDA a0966
@@ -3195,7 +3196,7 @@ b1D47   LDA $DC01    ;CIA1: Data Port Register B
         BEQ b1D5E
         STA a1D67
 b1D5E   LDA a1D62
-        RTS 
+        RTS
 
 a1D62   .BYTE $00
 a1D63   .BYTE $00
@@ -3209,17 +3210,17 @@ j1D68   LDA a0A
         JSR s1D77
         LDA #$00     ;#%00000000
         STA a0A
-b1D76   RTS 
+b1D76   RTS
 
-s1D77   LSR 
+s1D77   LSR A
         BCC b1D7D
         JMP s1FCF
 
-b1D7D   LSR 
+b1D7D   LSR A
         BCC b1D83
         JMP j21A1
 
-b1D83   LSR 
+b1D83   LSR A
         BCC b1D89
         JMP j1E09
 
@@ -3234,12 +3235,12 @@ b1D91   LDA f45,X
         STA f53,X
         LDA fB5,X
         STA fA7,X
-        DEX 
+        DEX
         BPL b1D91
 a1DA0   LDX #$04     ;#%00000100
 b1DA2   LDA f7D,X
         STA f6F,X
-        DEX 
+        DEX
         BPL b1DA2
         LDA a8A
         STA a7C
@@ -3247,19 +3248,19 @@ b1DA2   LDA f7D,X
         STA a7B
         LDX #$06     ;#%00000110
 b1DB3   LDA f82,X
-        ASL 
+        ASL A
         STA f74,X
         ROL f58,X
-        DEX 
+        DEX
         BPL b1DB3
         LDA aD1
         STA aD2
-        RTS 
+        RTS
 
 j1DC2   LDA a2305
         BEQ j1DC2
         DEC a2305
-        RTS 
+        RTS
 
 s1DCB   INC a0C
         LDA aE4
@@ -3270,7 +3271,7 @@ j1DD5   LDA $D016    ;VIC Control Register 2
         AND #$10     ;#%00010000
         ORA aE4
         STA $D016    ;VIC Control Register 2
-        RTS 
+        RTS
 
 b1DE0   LDA #$00     ;#%00000000
         STA aE4
@@ -3314,7 +3315,7 @@ b1E0D   LDA p4000,X
         STA f4119,X
         LDA f4140,X
         STA f4141,X
-        DEX 
+        DEX
         BPL b1E0D
         LDX #$26     ;#%00100110
 b1E48   LDA f4168,X
@@ -3335,7 +3336,7 @@ b1E48   LDA f4168,X
         STA f4281,X
         LDA f42A8,X
         STA f42A9,X
-        DEX 
+        DEX
         BPL b1E48
         LDX #$26     ;#%00100110
 b1E83   LDA f42D0,X
@@ -3352,9 +3353,9 @@ b1E83   LDA f42D0,X
         STA f4399,X
         LDA f43C0,X
         STA f43C1,X
-        DEX 
+        DEX
         BPL b1E83
-        RTS 
+        RTS
 
 s1EB1   DEC a0C
         LDA aE4
@@ -3403,7 +3404,7 @@ b1EE7   LDA f4001,X
         STA f4118,X
         LDA f4141,X
         STA f4140,X
-        INX 
+        INX
         CPX #$27     ;#%00100111
         BNE b1EE7
         LDX #$00     ;#%00000000
@@ -3425,7 +3426,7 @@ b1F24   LDA f4169,X
         STA f4280,X
         LDA f42A9,X
         STA f42A8,X
-        INX 
+        INX
         CPX #$27     ;#%00100111
         BNE b1F24
         LDX #$00     ;#%00000000
@@ -3443,10 +3444,10 @@ b1F61   LDA f42D1,X
         STA f4398,X
         LDA f43C1,X
         STA f43C0,X
-        INX 
+        INX
         CPX #$27     ;#%00100111
         BNE b1F61
-        RTS 
+        RTS
 
 s1F91   INC a0D
         LDA aE3
@@ -3457,7 +3458,7 @@ s1F9B   LDA $D011    ;VIC Control Register 1
         AND #$70     ;#%01110000
         ORA aE3
         STA $D011    ;VIC Control Register 1
-        RTS 
+        RTS
 
 b1FA6   LDA #$00     ;#%00000000
         STA aE3
@@ -3525,7 +3526,7 @@ b1FD7   LDA f4168,X
         STA f4028,X
         LDA f4014,X
         STA f403C,X
-        DEX 
+        DEX
         BPL b1FD7
         LDX #$13     ;#%00010011
 b2054   LDA f42A8,X
@@ -3564,7 +3565,7 @@ b2054   LDA f42A8,X
         STA f4190,X
         LDA f2131,X
         STA f41A4,X
-        DEX 
+        DEX
         BPL b2054
         LDX #$13     ;#%00010011
 b20C5   LDA f4398,X
@@ -3595,9 +3596,9 @@ b20C5   LDA f4398,X
         STA f42D0,X
         LDA f2159,X
         STA f42E4,X
-        DEX 
+        DEX
         BPL b20C5
-        RTS 
+        RTS
 
 f211D   .BYTE $00,$00,$00,$00,$00,$00,$00,$00
         .BYTE $00,$00,$00,$00,$00,$00,$00,$00
@@ -3664,7 +3665,7 @@ b21B0   LDA f4028,X
         STA f4118,X
         LDA f4168,X
         STA f4140,X
-        DEX 
+        DEX
         BPL b21B0
         LDX #$27     ;#%00100111
 b21EB   LDA f4190,X
@@ -3683,7 +3684,7 @@ b21EB   LDA f4190,X
         STA f4258,X
         LDA f42A8,X
         STA f4280,X
-        DEX 
+        DEX
         BPL b21EB
         LDX #$27     ;#%00100111
 b2220   LDA f42D0,X
@@ -3700,18 +3701,18 @@ b2220   LDA f42D0,X
         STA f4370,X
         LDA f43C0,X
         STA f4398,X
-        DEX 
+        DEX
         BPL b2220
-        RTS 
+        RTS
 
 j224E   LDA #$00     ;#%00000000
         STA a055A
 b2253   LDA a2482
         BEQ b2253
         DEC a2482
-        RTS 
+        RTS
 
-s225C   SEI 
+s225C   SEI
         LDA #<p228B  ;#%10001011
         STA aFFFE    ;IRQ
         LDA #>p228B  ;#%00100010
@@ -3731,21 +3732,21 @@ s225C   SEI
         LDA #$32     ;#%00110010
         STA aFB
         STA $D012    ;Raster Position
-        RTS 
+        RTS
 
-p228B   PHA 
-        TYA 
-        PHA 
-        TXA 
-        PHA 
+p228B   PHA
+        TYA
+        PHA
+        TXA
+        PHA
         LDA #$FF     ;#%11111111
         STA $D019    ;VIC Interrupt Request Register (IRR)
-        CLD 
+        CLD
         LDA aFB
-        CLC 
+        CLC
         ADC #$0E     ;#%00001110
         STA aFB
-        CLI 
+        CLI
 b229E   LDY aFC
         LDX fA7,Y
         LDA f37,X
@@ -3764,9 +3765,9 @@ b229E   LDY aFC
         ORA f248B,Y
 b22C3   ROL f53,X
         STA $D010    ;Sprites 0-7 MSB of X coordinate
-        TYA 
-        ASL 
-        TAY 
+        TYA
+        ASL A
+        TAY
         LDA a06
         STA $D001,Y  ;Sprite 0 Y Pos
         LDA f6F,X
@@ -3790,14 +3791,14 @@ b22E4   LDA #$07     ;#%00000111
         INC a2305
         LDA #$DB     ;#%11011011
         STA $D012    ;Raster Position
-j22FE   PLA 
-        TAX 
-        PLA 
-        TAY 
-        PLA 
-        RTI 
+j22FE   PLA
+        TAX
+        PLA
+        TAY
+        PLA
+        RTI
 
-        RTS 
+        RTS
 
 a2305   .BYTE $00
 b2306   SBC #$0E     ;#%00001110
@@ -3808,22 +3809,22 @@ b2306   SBC #$0E     ;#%00001110
 b2312   ADC #$00     ;#%00000000
         STA $D012    ;Raster Position
         STA aFB
-        PLA 
-        TAX 
-        PLA 
-        TAY 
-        PLA 
-        RTI 
+        PLA
+        TAX
+        PLA
+        TAY
+        PLA
+        RTI
 
-p231F   PHA 
-        TYA 
-        PHA 
-        TXA 
-        PHA 
+p231F   PHA
+        TYA
+        PHA
+        TXA
+        PHA
         LDA #$01     ;#%00000001
         STA $D019    ;VIC Interrupt Request Register (IRR)
-        CLD 
-        SEI 
+        CLD
+        SEI
         LDA #<p228B  ;#%10001011
         STA aFFFE    ;IRQ
         LDA #>p228B  ;#%00100010
@@ -3858,18 +3859,18 @@ b236D   LDA #$E1     ;#%11100001
         STA f43FA,X
         LDA f2426,X
         STA $D029,X  ;Sprite 2 Color
-        DEY 
-        DEY 
-        DEX 
+        DEY
+        DEY
+        DEX
         BPL b236D
         LDA a1D66
         STA a1D62
         LDA a2493
-        PHA 
+        PHA
         LDA a30
-        PHA 
+        PHA
         LDA a31
-        PHA 
+        PHA
         LDA a2480
         BNE b23A4
 a23A0   =*+$02
@@ -3891,9 +3892,9 @@ j23C0   JSR s1312
         LDA a242C
         STA $D02D    ;Sprite 6 Color
         STA $D02E    ;Sprite 7 Color
-        PLA 
+        PLA
         STA a31
-        PLA 
+        PLA
         STA a30
         LDA a0A40
         BEQ b23F0
@@ -3920,7 +3921,7 @@ j2404   JSR s0EB4
         LDA a0A
         BNE b2411
         JSR s0A1F
-b2411   PLA 
+b2411   PLA
         STA a2493
         JMP j22FE
 
@@ -3966,7 +3967,7 @@ b246A   LDA a2480
         STA $D01C    ;Sprites Multi-Color Mode Select
         LDA aD2
         STA f43F8
-        RTS 
+        RTS
 
 a2480   .BYTE $00,$00
 a2482   .BYTE $00
@@ -3974,14 +3975,14 @@ f2483   .BYTE $FE,$FD,$FB,$F7,$EF,$DF,$BF,$7F
 f248B   .BYTE $01,$02,$04,$08,$10,$20,$40,$80
 a2493   .BYTE $00
 s2494   LDY #$0D     ;#%00001101
-b2496   TYA 
+b2496   TYA
         STA f00B5,Y
         LDA #$00     ;#%00000000
         STA fC3,X
         LDA #$14     ;#%00010100
         STA f0045,Y
         STA f0037,Y
-        DEY 
+        DEY
         BPL b2496
         LDA #$FF     ;#%11111111
         STA $D015    ;Sprite display Enable
@@ -3991,8 +3992,8 @@ b2496   TYA
 s24B4   LDA a24F4
         AND #$48     ;#%01001000
         ADC #$38     ;#%00111000
-        ASL 
-        ASL 
+        ASL A
+        ASL A
         ROL a24F7
         ROL a24F6
         ROL a24F5
@@ -4000,7 +4001,7 @@ s24B4   LDA a24F4
         LDA a24F4
         EOR $DC04    ;CIA1: Timer A: Low-Byte
         STA a24F4
-        RTS 
+        RTS
 
 s24D3   STA a2746
         JSR s24B4
@@ -4010,13 +4011,13 @@ s24D3   STA a2746
         LDA #$00     ;#%00000000
 b24E3   LSR a2745
         BCC b24EC
-        CLC 
+        CLC
         ADC a2746
-b24EC   ROR 
-        DEX 
+b24EC   ROR A
+        DEX
         BNE b24E3
         LDX a195B
-        RTS 
+        RTS
 
 a24F4   .BYTE $FF
 a24F5   .BYTE $80
@@ -4025,7 +4026,7 @@ a24F7   .BYTE $34,$00,$00,$00,$00,$00,$00,$00
         .BYTE $00,$00,$00,$00,$00,$00,$00
 j2506   LDA a1D8C
         BEQ b250C
-        RTS 
+        RTS
 
 b250C   LDX #$05     ;#%00000101
 b250E   LDA f256A,X
@@ -4034,38 +4035,38 @@ b250E   LDA f256A,X
         STX a2493
         JSR s2523
         LDX a2493
-b251F   DEX 
+b251F   DEX
         BPL b250E
-        RTS 
+        RTS
 
-s2523   ASL 
-        ASL 
-        ASL 
+s2523   ASL A
+        ASL A
+        ASL A
         CPX #$03     ;#%00000011
-        TAX 
+        TAX
         BCS b2531
         LDY a2493
         JMP j2537
 
 b2531   LDA a2493
         ADC #$3C     ;#%00111100
-        TAY 
+        TAY
 j2537   LDA f3980,X
         STA f442A,Y
-        INY 
-        INY 
-        INY 
-        INX 
-        TXA 
+        INY
+        INY
+        INY
+        INX
+        TXA
         AND #$07     ;#%00000111
         CMP #$07     ;#%00000111
         BNE j2537
-        RTS 
+        RTS
 
 j2549   LDX #$05     ;#%00000101
 b254B   LDA f256A,X
         STA f2570,X
-        CLC 
+        CLC
         ADC f2576,X
         CMP #$0A     ;#%00001010
         BCC b255E
@@ -4074,9 +4075,9 @@ b254B   LDA f256A,X
 b255E   STA f256A,X
         LDA #$00     ;#%00000000
         STA f2576,X
-        DEX 
+        DEX
         BPL b254B
-        RTS 
+        RTS
 
 f256A   .BYTE $00
 f256B   .BYTE $00,$00,$00,$00,$00
@@ -4086,12 +4087,12 @@ f2576   .BYTE $00,$00
 a2578   .BYTE $00
 a2579   .BYTE $00,$00,$00,$00
 s257D   LDA a25C4
-        SEC 
+        SEC
         SBC a25C7
         CMP a25C5
         BCS b25BE
         ASL a25C7
-        CLC 
+        CLC
         ADC a25C7
         CMP a25C5
         BCC b25BE
@@ -4101,20 +4102,20 @@ s257D   LDA a25C4
         ROR a25C2
         LSR a25C6
         LDA a25C0
-        SEC 
+        SEC
         SBC a25C6
         CMP a25C2
         BCS b25BE
         ASL a25C6
-        CLC 
+        CLC
         ADC a25C6
         CMP a25C2
         BCC b25BE
-        SEC 
-        RTS 
+        SEC
+        RTS
 
-b25BE   CLC 
-        RTS 
+b25BE   CLC
+        RTS
 
 a25C0   .BYTE $00
 a25C1   .BYTE $00
@@ -4131,13 +4132,13 @@ b25CB   LDA f1961,X
         JMP j25D9
 
 b25D6   JSR s2661
-j25D9   DEX 
+j25D9   DEX
         BPL b25CB
-        RTS 
+        RTS
 
 s25DE   =*+$01
 a25DD   .BYTE $03,$B5
-        LSR 
+        LSR A
         CMP #$0A     ;#%00001010
         BCS b25F0
 j25E4   LDA #$00     ;#%00000000
@@ -4145,7 +4146,7 @@ j25E4   LDA #$00     ;#%00000000
         LDA #$00     ;#%00000000
         STA f4A,X
         DEC fC8,X
-        RTS 
+        RTS
 
 b25F0   CMP #$C5     ;#%11000101
         BCC b25F7
@@ -4161,7 +4162,7 @@ b2600   CMP #$AC     ;#%10101100
         LDA f055B,X
         BPL b2635
         LDA fDA,X
-        SEC 
+        SEC
         SBC fD6,X
         STA fDA,X
         BCS b2628
@@ -4180,13 +4181,13 @@ b2628   LDA f055B,X
         AND #$02     ;#%00000010
         BEQ b2632
         INC f82,X
-        RTS 
+        RTS
 
 b2632   DEC f82,X
-        RTS 
+        RTS
 
 b2635   LDA fDA,X
-        SEC 
+        SEC
         SBC fD6,X
         STA fDA,X
         BCS b2650
@@ -4204,40 +4205,40 @@ b2650   LDA f055B,X
         BEQ b265C
         INC f4A,X
         INC f4A,X
-        RTS 
+        RTS
 
 b265C   DEC f4A,X
         DEC f4A,X
-        RTS 
+        RTS
 
 s2661   LDA #$05     ;#%00000101
         JSR s24D3
-        TAY 
+        TAY
         LDA f120B,Y
         CMP #$01     ;#%00000001
         BEQ b2673
         CMP #$04     ;#%00000100
         BEQ b2673
-        RTS 
+        RTS
 
 b2673   LDA aFE
         STA a2493
         LDA aFF
-        LSR 
+        LSR A
         ROR a2493
-        LSR 
+        LSR A
         ROR a2493
         LDA #$FF     ;#%11111111
-        SEC 
+        SEC
         SBC a2493
-        LSR 
-        LSR 
+        LSR A
+        LSR A
         STX aD5
         JSR s2961
         LDX aD5
         CMP #$01     ;#%00000001
         BEQ b2696
-        RTS 
+        RTS
 
 b2696   INC f1961,X
         INC a11C1
@@ -4249,18 +4250,18 @@ b2696   INC f1961,X
         LDA #$00     ;#%00000000
         STA f055B,X
         LDA f0061,Y
-        LSR 
+        LSR A
         LDA f007D,Y
-        ROR 
+        ROR A
         STA f82,X
         STA a2493
         LDA f0045,Y
         STA f4A,X
-        LSR 
+        LSR A
         STA a2745
         LDA a8A
-        LSR 
-        SEC 
+        LSR A
+        SEC
         SBC a2493
         BCS b26CE
         EOR #$FF     ;#%11111111
@@ -4268,8 +4269,8 @@ b2696   INC f1961,X
 b26CE   ROL f055B,X
         STA fD6,X
         LDA a52
-        LSR 
-        SEC 
+        LSR A
+        SEC
         SBC a2745
         BCS b26E0
         LDA #$FF     ;#%11111111
@@ -4282,23 +4283,23 @@ b26E0   ROL f055B,X
         LDA f055B,X
         ORA #$80     ;#%10000000
         STA f055B,X
-        TYA 
+        TYA
 b26F4   STA fDE,X
-        LSR 
+        LSR A
         STA fDA,X
-        RTS 
+        RTS
 
 s26FA   STY a2734
-        PHA 
-        LSR 
-        LSR 
-        LSR 
-        TAY 
+        PHA
+        LSR A
+        LSR A
+        LSR A
+        TAY
         LDA f2735,Y
         STA $DC00    ;CIA1: Data Port Register A
-        PLA 
+        PLA
         AND #$07     ;#%00000111
-        TAY 
+        TAY
         LDA $DC01    ;CIA1: Data Port Register B
         AND f273D,Y
         BNE b2725
@@ -4307,16 +4308,16 @@ s26FA   STY a2734
         LDA $DC01    ;CIA1: Data Port Register B
         AND f273D,Y
         BEQ b2725
-        SEC 
+        SEC
         JMP j2726
 
-b2725   CLC 
+b2725   CLC
 j2726   LDY a2734
         LDA #$FF     ;#%11111111
         STA $DC00    ;CIA1: Data Port Register A
         LDA #$7F     ;#%01111111
         STA $DC01    ;CIA1: Data Port Register B
-        RTS 
+        RTS
 
 a2734   .BYTE $00
 f2735   .BYTE $FE,$FD,$FB,$F7,$EF,$DF,$BF,$7F
@@ -4337,15 +4338,15 @@ j274A   LDA #$27     ;#%00100111
         AND #$07     ;#%00000111
         STA aF3
         LDA aF8
-        CLC 
+        CLC
         ADC #$27     ;#%00100111
-        TAY 
+        TAY
         AND #$07     ;#%00000111
         STA aF7
-        TYA 
-        LSR 
-        LSR 
-        LSR 
+        TYA
+        LSR A
+        LSR A
+        LSR A
         STA aF2
         LDA aF8
         JMP j27A6
@@ -4362,13 +4363,13 @@ j277A   LDX #$00     ;#%00000000
         AND #$07     ;#%00000111
         STA aF3
         LDA aF8
-        TAY 
+        TAY
         AND #$07     ;#%00000111
         STA aF7
-        TYA 
-        LSR 
-        LSR 
-        LSR 
+        TYA
+        LSR A
+        LSR A
+        LSR A
         STA aF2
         LDA aF8
         AND #$7F     ;#%01111111
@@ -4381,7 +4382,7 @@ j27A6   LDA aE0
         ASL aF0
         ROL aF1
         LDA #$00     ;#%00000000
-        CLC 
+        CLC
         ADC aF0
         STA aF4
         LDA #$E0     ;#%11100000
@@ -4391,25 +4392,25 @@ j27C1   LDY aF2
         LDA #$00     ;#%00000000
         STA aF0
         LDA (pF4),Y
-        LSR 
+        LSR A
         ROR aF0
-        LSR 
+        LSR A
         ROR aF0
-        TAY 
+        TAY
         LDA aF0
-        CLC 
+        CLC
         ADC #$00     ;#%00000000
         STA aF0
-        TYA 
+        TYA
         ADC #$EF     ;#%11101111
         STA aF1
 j27DC   LDA aF3
-        ASL 
-        ASL 
-        ASL 
-        CLC 
+        ASL A
+        ASL A
+        ASL A
+        CLC
         ADC aF7
-        TAY 
+        TAY
         LDA (pF0),Y
         CMP #$FD     ;#%11111101
         BNE b27EE
@@ -4418,7 +4419,7 @@ a27EF   =*+$01
 a27F0   =*+$02
 b27EE   STA p4000
         LDA a27EF
-        CLC 
+        CLC
         ADC #$28     ;#%00101000
         STA a27EF
         BCC b27FF
@@ -4433,20 +4434,20 @@ b2809   CPY #$08     ;#%00001000
         DEC aF3
         CPX #$18     ;#%00011000
         BCC b2814
-        RTS 
+        RTS
 
-b2814   INX 
+b2814   INX
         JMP j27DC
 
 b2818   LDA #$07     ;#%00000111
         STA aF3
         CPX #$18     ;#%00011000
         BCC b2821
-        RTS 
+        RTS
 
-b2821   INX 
+b2821   INX
         LDA aF4
-        SEC 
+        SEC
         SBC #$10     ;#%00010000
         STA aF4
         LDA aF5
@@ -4469,7 +4470,7 @@ j2832   LDA #$05     ;#%00000101
         STA aE1
         LDA aFE
         STA aE0
-        SEC 
+        SEC
         SBC #$18     ;#%00011000
         STA aFE
         BCS b285B
@@ -4479,7 +4480,7 @@ b285B   JSR s287D
         STA aFE
         LDA aE1
         STA aFF
-        RTS 
+        RTS
 
 j2867   LDA #$05     ;#%00000101
         STA aF6
@@ -4492,9 +4493,9 @@ j2867   LDA #$05     ;#%00000101
         LDA #$40     ;#%01000000
         STA a28E7
 s287D   LDA aF8
-        LSR 
-        LSR 
-        LSR 
+        LSR A
+        LSR A
+        LSR A
         STA aF2
         LDA aF8
         AND #$7F     ;#%01111111
@@ -4507,7 +4508,7 @@ s287D   LDA aF8
         ASL aF0
         ROL aF1
         LDA #$00     ;#%00000000
-        CLC 
+        CLC
         ADC aF0
         STA aF4
         LDA #$E0     ;#%11100000
@@ -4517,30 +4518,30 @@ j28A5   LDY aF2
         LDX #$00     ;#%00000000
         STX aF0
         LDA (pF4),Y
-        LSR 
+        LSR A
         ROR aF0
-        ROR 
+        ROR A
         ROR aF0
-        TAX 
+        TAX
         LDA aF0
-        CLC 
+        CLC
         ADC #$00     ;#%00000000
         STA aF0
-        TXA 
+        TXA
         ADC #$EF     ;#%11101111
         STA aF1
         LDX aF3
         LDA aFE
         AND #$07     ;#%00000111
-        ASL 
-        ASL 
-        ASL 
-        PHA 
-        CLC 
+        ASL A
+        ASL A
+        ASL A
+        PHA
+        CLC
         ADC aF7
-        TAY 
-        PLA 
-        CLC 
+        TAY
+        PLA
+        CLC
         ADC #$08     ;#%00001000
         STA a28EB
 b28D5   LDA (pF0),Y
@@ -4553,8 +4554,8 @@ b28E1   CPX #$28     ;#%00101000
 a28E6   =*+$01
 a28E7   =*+$02
         STA p4000,X
-        INY 
-        INX 
+        INY
+        INX
 a28EB   =*+$01
         CPY #$00     ;#%00000000
         BCC b28D5
@@ -4565,7 +4566,7 @@ a28EB   =*+$01
         STX aF7
         JMP j28A5
 
-b28FB   RTS 
+b28FB   RTS
 
         JMP jC006
 
@@ -4580,40 +4581,40 @@ b2905   LDY fB4,X
         LDA f0045,Y
         STY aD3
         STX aD4
-        DEX 
-b2919   DEX 
+        DEX
+b2919   DEX
         BMI b2925
         LDY fB5,X
         CMP f0045,Y
         BEQ b2925
         BCS b2919
-b2925   INX 
+b2925   INX
         INC a04
         STX a05
         LDX aD4
 b292C   LDA fB4,X
         STA fB5,X
-        DEX 
+        DEX
         CPX a05
         BNE b292C
         LDA aD3
         STA fB5,X
         LDX aD4
-b293B   INX 
+b293B   INX
         CPX #$0E     ;#%00001110
         BNE b2905
-        RTS 
+        RTS
 
 s2941   STX a295F
         STY a2960
         LDY a2994
 j294A   LDA f2997,Y
         BMI b295A
-        INY 
+        INY
         STY a2994
         LDY a2960
         LDX a295F
-        RTS 
+        RTS
 
 b295A   LDY #$00     ;#%00000000
         JMP j294A
@@ -4628,15 +4629,15 @@ j296D   LDA f2997,Y
         BMI b298A
         LDA f29A8,X
         BMI b298F
-        CLC 
+        CLC
         ADC f2997,Y
-        INY 
-        INX 
+        INY
+        INX
         STY a2995
         STX a2996
         LDY a2960
         LDX a295F
-        RTS 
+        RTS
 
 b298A   LDY #$00     ;#%00000000
         JMP j296D
@@ -4881,24 +4882,24 @@ j3009   JSR s0364
 s303F   JSR s0358
         LDA a0F
         BNE b3047
-        RTS 
+        RTS
 
-b3047   PLA 
-        PLA 
-        PLA 
-        PLA 
+b3047   PLA
+        PLA
+        PLA
+        PLA
         JMP j0376
 
 s304E   LDA a3063
         BEQ b3057
         DEC a3063
-        RTS 
+        RTS
 
 b3057   LDX a3825
         LDA f3064,X
         STA a3063
         INC a0B
-        RTS 
+        RTS
 
 a3063   .BYTE $00
 f3064   .BYTE $12,$C8
@@ -4919,10 +4920,10 @@ j307D   JSR s34F1
         JSR s3316
         LDA a3315
         BEQ b3092
-        RTS 
+        RTS
 
 b3092   LDA a3567
-        SEC 
+        SEC
         SBC #$03     ;#%00000011
         BCS b309C
         LDA #$00     ;#%00000000
@@ -4934,43 +4935,43 @@ b309C   STA a3567
         STA a3565
         LDA #$04     ;#%00000100
         STA a3127
-        RTS 
+        RTS
 
 s30B2   LDA a3774
         CMP #$0B     ;#%00001011
         BEQ b30BD
         INC a3774
-        RTS 
+        RTS
 
 b30BD   LDA #$00     ;#%00000000
         STA a3774
-        RTS 
+        RTS
 
 a30C3   .BYTE $00
 j30C4   LDA a32D7
         CMP #$01     ;#%00000001
         BEQ b30CC
-        RTS 
+        RTS
 
 b30CC   LDA a3315
         BNE b30D2
-        RTS 
+        RTS
 
 b30D2   LDA a4F
         STA a38DE
         LDA a362F
         STA a38DF
         LDA a87
-        ASL 
+        ASL A
         STA a38DA
         LDA #$00     ;#%00000000
-        ROL 
+        ROL A
         STA a38DB
         LDA a362E
-        ASL 
+        ASL A
         STA a38DC
         LDA #$00     ;#%00000000
-        ROL 
+        ROL A
         STA a38DD
         LDX a3774
         LDA f3128,X
@@ -4986,15 +4987,15 @@ b30D2   LDA a4F
         JSR s037C
         JMP j311A
 
-b3119   RTS 
+b3119   RTS
 
 j311A   LDA a3127
         BEQ b3123
         DEC a3127
-        RTS 
+        RTS
 
 b3123   INC a30C3
-        RTS 
+        RTS
 
 a3127   .BYTE $04
 f3128   .BYTE $1F,$1F,$1F,$09,$09,$09,$1F,$1F
@@ -5004,27 +5005,27 @@ f3134   .BYTE $0A,$0A,$0A,$22,$22,$22,$0A,$0A
 s3140   LDA a0E
         CMP #$05     ;#%00000101
         BEQ b3147
-        RTS 
+        RTS
 
 b3147   LDA a3770
         AND #$10     ;#%00010000
         BNE b314F
-        RTS 
+        RTS
 
 b314F   LDA a32D7
         BEQ b3155
-        RTS 
+        RTS
 
 b3155   INC a32D7
         LDA a89
-        LSR 
+        LSR A
         STA a87
         LDA a51
         STA a4F
         INC aCD
         LDA a3773
         STA a324D
-        RTS 
+        RTS
 
 s316A   LDA #$41     ;#%01000001
         STA f94,X
@@ -5040,7 +5041,7 @@ s316A   LDA #$41     ;#%01000001
 s3181   LDA f319B,X
         BEQ b318A
         DEC f319B,X
-        RTS 
+        RTS
 
 b318A   LDA #$02     ;#%00000010
         STA f319B,X
@@ -5050,23 +5051,23 @@ b318A   LDA #$02     ;#%00000010
         JMP j32C8
 
 b3198   INC f94,X
-        RTS 
+        RTS
 
 f319B   .BYTE $00,$00
 s319D   LDA f32D6
         CMP #$01     ;#%00000001
         BEQ b31A5
-        RTS 
+        RTS
 
 b31A5   LDA a4E
         STA a38DE
         LDA a51
         STA a38DF
         LDA a86
-        ASL 
+        ASL A
         STA a38DA
         LDA #$00     ;#%00000000
-        ROL 
+        ROL A
         STA a38DB
         LDA a89
         STA a38DC
@@ -5085,10 +5086,10 @@ b31D7   LDA a4E
         LDA a49
         STA a38DF
         LDA a86
-        ASL 
+        ASL A
         STA a38DA
         LDA #$00     ;#%00000000
-        ROL 
+        ROL A
         STA a38DB
         LDA a81
         STA a38DC
@@ -5104,20 +5105,20 @@ j3206   LDA #$05     ;#%00000101
         STA a0B
         LDX #$00     ;#%00000000
         JSR s316A
-b320F   RTS 
+b320F   RTS
 
 s3210   LDA a32D8
         BNE b3216
-        RTS 
+        RTS
 
 b3216   DEC a32D8
         LDA a3825
         BNE b321F
-        RTS 
+        RTS
 
 b321F   LDA f32D6
         BEQ b3225
-        RTS 
+        RTS
 
 b3225   LDA a362F
         CMP #$C0     ;#%11000000
@@ -5135,7 +5136,7 @@ b3225   LDA a362F
         LDA a362F
         STA a4E
         INC aCC
-b324B   RTS 
+b324B   RTS
 
 a324C   .BYTE $00
 a324D   .BYTE $00
@@ -5153,30 +5154,30 @@ b3274   LDA f32D6,X
         JMP j3284
 
 b3281   JSR s3181
-j3284   DEX 
+j3284   DEX
         BPL b3274
-        RTS 
+        RTS
 
 s3288   LDY a324C,X
         LDA f325A,Y
-        CLC 
+        CLC
         ADC a0C
         STA a32D5
         LDA a0D
-        ASL 
+        ASL A
         STA a336D
         LDA f324E,Y
-        CLC 
+        CLC
         ADC a336D
         STA a32D4
         LDA f3266,Y
         STA f94,X
         LDA f86,X
-        CLC 
+        CLC
         ADC a32D5
         STA f86,X
         LDA f4E,X
-        CLC 
+        CLC
         ADC a32D4
         CMP #$14     ;#%00010100
         BCC j32C8
@@ -5186,14 +5187,14 @@ s3288   LDY a324C,X
         LDA f86,X
         CMP #$AC     ;#%10101100
         BCS j32C8
-        RTS 
+        RTS
 
 j32C8   LDA #$00     ;#%00000000
         STA f32D6,X
         DEC fCC,X
         LDA #$0A     ;#%00001010
         STA f4E,X
-        RTS 
+        RTS
 
 a32D4   .BYTE $00
 a32D5   .BYTE $00
@@ -5221,9 +5222,9 @@ b32EE   LDA f4A,X
         LDA #$01     ;#%00000001
         STA fC8,X
         STA a3315
-j3304   DEX 
+j3304   DEX
         BPL b32E5
-        RTS 
+        RTS
 
 j3308   LDA #$00     ;#%00000000
         STA fC8,X
@@ -5234,17 +5235,17 @@ j3308   LDA #$00     ;#%00000000
 
 a3315   .BYTE $00
 s3316   LDA a3568
-        SEC 
+        SEC
         SBC aF8
         BCS b331F
-        RTS 
+        RTS
 
 b331F   CMP #$2E     ;#%00101110
         BCC b3324
-        RTS 
+        RTS
 
 b3324   LDA a347F
-        SEC 
+        SEC
         SBC aFE
         STA a336D
         LDA a3480
@@ -5253,48 +5254,48 @@ b3324   LDA a347F
         JMP j3341
 
 b3337   LDA #$1E     ;#%00011110
-        SEC 
+        SEC
         SBC a336D
         CMP #$1B     ;#%00011011
         BCC b3342
-j3341   RTS 
+j3341   RTS
 
 b3342   LDA aE4
-        LSR 
+        LSR A
         STA a336E
         LDA aF8
-        ASL 
-        ASL 
-        SEC 
+        ASL A
+        ASL A
+        SEC
         SBC a336E
         STA a336D
         LDA a3564
-        SEC 
+        SEC
         SBC a336D
         STA a362E
         LDA aFE
-        ASL 
-        ASL 
-        ASL 
-        CLC 
+        ASL A
+        ASL A
+        ASL A
+        CLC
         ADC aE3
-        SEC 
+        SEC
         SBC a3566
         STA a362F
-        RTS 
+        RTS
 
 a336D   .BYTE $00
 a336E   .BYTE $00,$00,$00,$00,$00
 s3373   JSR s3391
         LDA a3481
-        ASL 
-        ASL 
-        ASL 
-        CLC 
+        ASL A
+        ASL A
+        ASL A
+        CLC
         ADC a3482
         STA a3482
         BCS b3386
-        RTS 
+        RTS
 
 b3386   LDA a3483
         BEQ b338E
@@ -5303,7 +5304,7 @@ b3386   LDA a3483
 b338E   JMP j33FB
 
 s3391   LDA aFE
-        CLC 
+        CLC
         ADC #$0F     ;#%00001111
         STA a356A
         LDA aFF
@@ -5312,11 +5313,11 @@ s3391   LDA aFE
         LDA a3566
         STA a347F
         LDA a3567
-        LSR 
+        LSR A
         ROR a347F
-        LSR 
+        LSR A
         ROR a347F
-        LSR 
+        LSR A
         ROR a347F
         STA a3480
         LDA a347F
@@ -5330,7 +5331,7 @@ s3391   LDA aFE
         STA a3772
         INC a32D8
 b33D3   LDA a347F
-        SEC 
+        SEC
         SBC a356A
         LDA a3480
         SBC a356B
@@ -5340,22 +5341,22 @@ b33D3   LDA a347F
 b33E5   JMP j3444
 
 j33E8   LDA a3566
-        CLC 
+        CLC
         ADC a340E
         STA a3566
         LDA a3567
         ADC #$00     ;#%00000000
         STA a3567
-        RTS 
+        RTS
 
 j33FB   LDA a3566
-        SEC 
+        SEC
         SBC a340E
         STA a3566
         LDA a3567
         SBC #$00     ;#%00000000
         STA a3567
-        RTS 
+        RTS
 
 a340E   .BYTE $00
 j340F   LDA a3483
@@ -5372,12 +5373,12 @@ b3428   LDA a3772
         AND #$0C     ;#%00001100
         ORA #$01     ;#%00000001
         STA a3772
-        RTS 
+        RTS
 
 b3433   LDA a3481
         BEQ b343C
         DEC a3481
-        RTS 
+        RTS
 
 b343C   LDA #$01     ;#%00000001
         STA a3483
@@ -5397,12 +5398,12 @@ b345D   LDA a3772
         AND #$0C     ;#%00001100
         ORA #$02     ;#%00000010
         STA a3772
-        RTS 
+        RTS
 
 b3468   LDA a3481
         BEQ b3471
         DEC a3481
-        RTS 
+        RTS
 
 b3471   LDA #$00     ;#%00000000
         STA a3483
@@ -5410,7 +5411,7 @@ b3471   LDA #$00     ;#%00000000
 
 j3479   LDA #$05     ;#%00000101
         STA a3481
-        RTS 
+        RTS
 
 a347F   .BYTE $00
 a3480   .BYTE $00
@@ -5419,14 +5420,14 @@ a3482   .BYTE $00
 a3483   .BYTE $00
 s3484   JSR s34A2
         LDA a355F
-        ASL 
-        ASL 
-        ASL 
-        CLC 
+        ASL A
+        ASL A
+        ASL A
+        CLC
         ADC a3560
         STA a3560
         BCS b3497
-        RTS 
+        RTS
 
 b3497   LDA a3561
         BEQ b349F
@@ -5435,27 +5436,27 @@ b3497   LDA a3561
 b349F   JMP s34F1
 
 s34A2   LDA aF8
-        CLC 
+        CLC
         ADC #$16     ;#%00010110
         STA a3569
         LDA a3564
         STA a3568
         LDA a3565
-        LSR 
+        LSR A
         ROR a3568
-        LSR 
+        LSR A
         ROR a3568
         INC a3568
         INC a3568
         LDA a3568
         CMP a3569
-        PHP 
+        PHP
         BNE b34D5
         INC a32D8
         LDA a3772
         AND #$03     ;#%00000011
         STA a3772
-b34D5   PLP 
+b34D5   PLP
         BCS b34DB
         JMP j3503
 
@@ -5463,22 +5464,22 @@ b34DB   JMP j352E
 
         .BYTE $00
 j34DF   LDA a3564
-        CLC 
+        CLC
         ADC #$01     ;#%00000001
         STA a3564
         LDA a3565
         ADC #$00     ;#%00000000
         STA a3565
-        RTS 
+        RTS
 
 s34F1   LDA a3564
-        SEC 
+        SEC
         SBC #$01     ;#%00000001
         STA a3564
         LDA a3565
         SBC #$00     ;#%00000000
         STA a3565
-        RTS 
+        RTS
 
 j3503   LDA a3561
         BEQ b351D
@@ -5490,12 +5491,12 @@ b3512   LDA a3772
         AND #$03     ;#%00000011
         ORA #$08     ;#%00001000
         STA a3772
-        RTS 
+        RTS
 
 b351D   LDA a355F
         BEQ b3526
         DEC a355F
-        RTS 
+        RTS
 
 b3526   LDA #$01     ;#%00000001
         STA a3561
@@ -5511,12 +5512,12 @@ j352E   LDA a3561
         AND #$03     ;#%00000011
         ORA #$04     ;#%00000100
         STA a3772
-b3547   RTS 
+b3547   RTS
 
 b3548   LDA a355F
         BEQ b3551
         DEC a355F
-        RTS 
+        RTS
 
 b3551   LDA #$00     ;#%00000000
         STA a3561
@@ -5524,7 +5525,7 @@ b3551   LDA #$00     ;#%00000000
 
 j3559   LDA #$05     ;#%00000101
         STA a355F
-        RTS 
+        RTS
 
 a355F   .BYTE $01
 a3560   .BYTE $00
@@ -5544,7 +5545,7 @@ s356E   LDA aE6
         LDA aFF
         CMP #$03     ;#%00000011
         BCS b357E
-        RTS 
+        RTS
 
 b357E   LDX #$0C     ;#%00001100
         JSR s036A
@@ -5565,66 +5566,66 @@ b357E   LDX #$0C     ;#%00001100
         LDX #$00     ;#%00000000
         JSR s037C
         JSR s0352
-        SEI 
-        PLA 
-        PLA 
-        PLA 
-        PLA 
-        PLA 
-        PLA 
+        SEI
+        PLA
+        PLA
+        PLA
+        PLA
+        PLA
+        PLA
         LDA #$04     ;#%00000100
         JMP j037F
 
 b35B6   INC aE6
         LDA a51
-        CLC 
+        CLC
         ADC #$1E     ;#%00011110
-        TAY 
+        TAY
         LDX a89
-        PLA 
-        PLA 
-b35C2   RTS 
+        PLA
+        PLA
+b35C2   RTS
 
 j35C3   LDX a3774
         LDA a362E
-        CLC 
+        CLC
         ADC f3684,X
         STA a82
         LDA a362F
-        CLC 
+        CLC
         ADC f3690,X
         STA a4A
         LDA a82
-        CLC 
+        CLC
         ADC f363C,X
         STA a83
         LDA a4A
-        CLC 
+        CLC
         ADC f3648,X
         STA a4B
         LDA a82
-        CLC 
+        CLC
         ADC f3654,X
         STA a84
         LDA a4A
-        CLC 
+        CLC
         ADC f3660,X
         STA a4C
         LDA a82
-        CLC 
+        CLC
         ADC f366C,X
         STA a85
         LDA a4A
-        CLC 
+        CLC
         ADC f3678,X
         STA a4D
         LDY f3630,X
         STY a90
-        INY 
+        INY
         STY a91
-        INY 
+        INY
         STY a92
-        INY 
+        INY
         STY a93
         LDA #$0F     ;#%00001111
         STA a9E
@@ -5670,9 +5671,9 @@ b36A9   LDA f36C2,X
         LDA #$04     ;#%00000100
         STA f36C4,X
 b36B9   DEC f36C4,X
-j36BC   DEX 
+j36BC   DEX
         BPL b369E
-        RTS 
+        RTS
 
 f36C0   .BYTE $00,$00
 f36C2   .BYTE $01,$01
@@ -5717,8 +5718,8 @@ b370F   LDA f375A,Y
         STA f375E,Y
         LDA f3771,Y
         AND #$0C     ;#%00001100
-        LSR 
-        LSR 
+        LSR A
+        LSR A
         JMP j3737
 
 b3729   LDX f375A,Y
@@ -5726,10 +5727,10 @@ b3729   LDX f375A,Y
         STA f375E,Y
         LDA f3771,Y
         AND #$03     ;#%00000011
-j3737   CLC 
+j3737   CLC
         ADC f375E,Y
         STA a3773,Y
-        RTS 
+        RTS
 
 j373F   JSR s369C
         JSR s3827
@@ -5751,19 +5752,19 @@ a3773   .BYTE $00
 a3774   .BYTE $00
 j3775   LDX a3773
         LDA a89
-        CLC 
+        CLC
         ADC f3793,X
         STA a81
         LDA a51
-        CLC 
+        CLC
         ADC f379F,X
         STA a49
         LDA f37AB,X
         STA a8F
-        SEC 
+        SEC
         SBC #$01     ;#%00000001
         STA a97
-        RTS 
+        RTS
 
 f3793   .BYTE $00,$00,$00,$18,$18,$18,$00,$00
         .BYTE $00,$E8,$E8,$E8
@@ -5773,7 +5774,7 @@ f37AB   .BYTE $B4,$BE,$BC,$B8,$C4,$C6,$B6,$C2
         .BYTE $C0,$BA,$C8,$CA
 j37B7   STA a3825
         JSR s0364
-        SEI 
+        SEI
         LDA #$00     ;#%00000000
         STA a3773
         STA f3771
@@ -5802,14 +5803,14 @@ j37B7   STA a3825
         STA a362E
         STA a362F
 b37FF   STA $D000,X  ;Sprite 0 X Pos
-        DEX 
+        DEX
         BPL b37FF
         LDX #$03     ;#%00000011
 b3807   LDA #$C3     ;#%11000011
         STA f82,X
         LDA #$00     ;#%00000000
         STA fC8,X
-        DEX 
+        DEX
         BPL b3807
         JSR s32DE
         LDA #$19     ;#%00011001
@@ -5817,7 +5818,7 @@ b3807   LDA #$C3     ;#%11000011
         JSR s8100
         LDA #$14     ;#%00010100
         JSR s8100
-        CLI 
+        CLI
         JMP j3009
 
 a3825   .BYTE $00
@@ -5827,7 +5828,7 @@ s3827   LDA a3826
         LDA a51
         STA a3888
         LDA a89
-        LSR 
+        LSR A
         STA a3889
         LDX f36C4
         JMP j384C
@@ -5838,12 +5839,12 @@ b383D   LDA a362F
         STA a3889
         LDX a36C5
 j384C   LDA a3889
-        CLC 
+        CLC
         ADC f388E,X
-        ASL 
+        ASL A
         STA a8A
         STA a7C
-        ROL 
+        ROL A
         STA a6E
         STA a60
         LDA a3826
@@ -5851,7 +5852,7 @@ j384C   LDA a3889
         LDA a3825
         BEQ b3872
 b3867   LDA a3888
-        CLC 
+        CLC
         ADC f388A,X
         CMP #$C0     ;#%11000000
         BCC b3874
@@ -5864,7 +5865,7 @@ b3874   STA a52
         LDA a3826
         EOR #$01     ;#%00000001
         STA a3826
-        RTS 
+        RTS
 
 a3888   .BYTE $00
 a3889   .BYTE $00
@@ -5872,12 +5873,12 @@ f388A   .BYTE $F6,$00,$0A,$00
 f388E   .BYTE $00,$FB,$00,$05
 f3892   .BYTE $CD,$CC,$CB,$CE,$60
 s3897   LDA a38DE
-        SEC 
+        SEC
         SBC a38E1
         CMP a38DF
         BCS b38D8
         ASL a38E1
-        CLC 
+        CLC
         ADC a38E1
         CMP a38DF
         BCC b38D8
@@ -5887,20 +5888,20 @@ s3897   LDA a38DE
         ROR a38DC
         LSR a38E0
         LDA a38DA
-        SEC 
+        SEC
         SBC a38E0
         CMP a38DC
         BCS b38D8
         ASL a38E0
-        CLC 
+        CLC
         ADC a38E0
         CMP a38DC
         BCC b38D8
-        SEC 
-        RTS 
+        SEC
+        RTS
 
-b38D8   CLC 
-        RTS 
+b38D8   CLC
+        RTS
 
 a38DA   .BYTE $00
 a38DB   .BYTE $00
@@ -8274,7 +8275,7 @@ f8000   .BYTE $00,$00,$00,$01,$01,$02,$03,$04
         .BYTE $FF,$FF,$00,$00,$FF,$FF,$00,$00
         .BYTE $2E,$00,$BE,$00,$FF,$FF,$00,$00
         .BYTE $FF,$FF,$00,$00,$FF,$FF,$00,$00
-s8100   TAY 
+s8100   TAY
         LDA f836E,Y
         STA a810E
         LDA f838D,Y
@@ -8295,7 +8296,7 @@ s811C   LDA a8220
         STA a8235
         LDA a821D
         STA a8234
-f8134   RTS 
+f8134   RTS
 
 f8135   .BYTE $0A,$00,$F6,$FF,$0A,$00,$00,$00
         .BYTE $03,$06,$03,$00,$15
@@ -8513,7 +8514,7 @@ f838D   .BYTE $85,$84,$84,$84,$84,$84,$84,$84
         LDX a9291
         LDA f90B9,X
         STA a9299
-        TAX 
+        TAX
         LDA f90B9,X
         STA a929A
         LDY #$11     ;#%00010001
@@ -8528,7 +8529,7 @@ f838D   .BYTE $85,$84,$84,$84,$84,$84,$84,$84
 b83D6   STY a85EB
         LDY #$00     ;#%00000000
         STY a85EC
-        RTS 
+        RTS
 
         LDX a9291
         LDA f90B9,X
@@ -8548,19 +8549,19 @@ b8402   LDX #<p8423  ;#%00100011
         LDY #>p8423  ;#%10000100
         STX a859E
         STY a859F
-        RTS 
+        RTS
 
         LDA #$00     ;#%00000000
         STA a845B
         ORA a845C
         BEQ b845D
-        RTS 
+        RTS
 
         LDA #$00     ;#%00000000
         STA a845C
         ORA a845B
         BEQ b845D
-        RTS 
+        RTS
 
 p8423   LDA a828A
         AND #$07     ;#%00000111
@@ -8586,21 +8587,21 @@ b8442   LDA a845C
         LDA #$01     ;#%00000001
         JMP s861F
 
-b845A   RTS 
+b845A   RTS
 
 a845B   .BYTE $00
 a845C   .BYTE $00
 b845D   LDA #$00     ;#%00000000
         STA a859F
         STA a859E
-        RTS 
+        RTS
 
         LDA a29
         AND #$07     ;#%00000111
         ORA a8231
         ORA a8258
         ORA a827F
-        RTS 
+        RTS
 
         LDA #$38     ;#%00111000
         STA a29
@@ -8611,13 +8612,13 @@ b845D   LDA #$00     ;#%00000000
         STA a827F
         LDX #$14     ;#%00010100
 b8488   STA $D400,X  ;Voice 1: Frequency Control - Low-Byte
-        DEX 
+        DEX
         BPL b8488
         STX a85EB
         STA a859F
         STA a845B
         STA a845C
-        RTS 
+        RTS
 
         LDY #$35     ;#%00110101
         BIT j11A0
@@ -8636,15 +8637,15 @@ b8488   STA $D400,X  ;Voice 1: Frequency Control - Low-Byte
         LDX #$D4     ;#%11010100
 b84C2   LDA f8134,X
         STA a828A,X
-        DEX 
+        DEX
         BNE b84C2
         LDX #$0F     ;#%00001111
 b84CD   LDA f20,X
         STA f835E,X
-        DEX 
+        DEX
         BPL b84CD
         ASL a29
-        SEC 
+        SEC
         ROR a29
         LDA #$BF     ;#%10111111
 j84DD   =*+$01
@@ -8653,8 +8654,8 @@ j84DD   =*+$01
         LDX #$05     ;#%00000101
 b84E3   LDA f91E3,Y
         STA f20,X
-        DEY 
-        DEX 
+        DEY
+        DEX
         BPL b84E3
         LDX #$02     ;#%00000010
 b84EE   LDA #$01     ;#%00000001
@@ -8668,30 +8669,30 @@ b84EE   LDA #$01     ;#%00000001
         STA f8146,Y
         LDA #$08     ;#%00001000
         STA f814C,Y
-        DEX 
+        DEX
         BPL b84EE
-        RTS 
+        RTS
 
         STX a828A
-        RTS 
+        RTS
 
 s8511   LDA a820D
         BEQ b8537
         LDX a820E
-        CLC 
+        CLC
         ADC a820C
         STA a820C
         BIT a820D
         BPL b852D
         BCS b8537
-        TXA 
+        TXA
         BEQ b8537
-        DEX 
+        DEX
         BPL b8534
 b852D   BCC b8537
         CPX #$0F     ;#%00001111
         BEQ b8537
-        INX 
+        INX
 b8534   STX a820E
 b8537   LDA a820E
         ORA a820B
@@ -8702,7 +8703,7 @@ b8537   LDA a820E
         STA $D416    ;Filter Cutoff Frequency: High-Byte
         LDA a8208
         STA $D415    ;Filter Cutoff Frequency: Low-Nybble
-        RTS 
+        RTS
 
 j8553   JSR s8597
         JSR s8511
@@ -8712,11 +8713,11 @@ j8553   JSR s8597
         JSR s8D82
 s8565   LDA a29
         BMI b856A
-        RTS 
+        RTS
 
 b856A   AND #$07     ;#%00000111
         BEQ b856F
-        RTS 
+        RTS
 
 b856F   LDX #$34     ;#%00110100
 b8571   LDA f828B,X
@@ -8727,22 +8728,22 @@ b8571   LDA f828B,X
         STA f81A0,X
         LDA f832B,X
         STA f81D5,X
-        DEX 
+        DEX
         BPL b8571
         LDX #$0F     ;#%00001111
 b858E   LDA f835E,X
         STA f20,X
-        DEX 
+        DEX
         BPL b858E
-        RTS 
+        RTS
 
 s8597   LDA a859F
         BNE b859D
-        RTS 
+        RTS
 
 a859E   =*+$01
 a859F   =*+$02
-b859D   JMP ~e00FF
+b859D   JMP e00FF
 
 s85A0   LDX a822B
         LDY a822C
@@ -8752,7 +8753,7 @@ s85AC   LDA a8223
         STA a823A
         LDA a8224
         STA a823B
-        RTS 
+        RTS
 
 s85B9   LDX a8252
         LDY a8253
@@ -8762,7 +8763,7 @@ s85C5   LDA a824A
         STA a8261
         LDA a824B
         STA a8262
-        RTS 
+        RTS
 
 s85D2   LDX a8279
         LDY a827A
@@ -8772,7 +8773,7 @@ s85DE   LDA a8271
         STA a8288
         LDA a8272
         STA a8289
-        RTS 
+        RTS
 
 a85EB   .BYTE $FF
 a85EC   .BYTE $00
@@ -8780,7 +8781,7 @@ b85ED   LDX f9259,Y
         LDA f9289,Y
         STA a28
         LDA f9271,Y
-        TAY 
+        TAY
         LDA a28
         JSR s861F
         LDY a85EB
@@ -8795,12 +8796,12 @@ s8611   LDY a85EB
         LDA a85EC
         BEQ b85ED
         DEC a85EC
-b861E   RTS 
+b861E   RTS
 
 s861F   STX a26
         STY a27
         STA a28
-        TAX 
+        TAX
         LDA f90C8,X
         AND a29
         STA a29
@@ -8811,14 +8812,14 @@ s861F   STX a26
 b8637   LDA (p26),Y
 a863A   =*+$01
         STA $D409,X  ;Voice 2: Pulse Waveform Width - Low-Byte
-        DEY 
-        DEX 
+        DEY
+        DEX
         BPL b8637
         LDY #$1D     ;#%00011101
         LDX a863A
         LDA (p26),Y
         STA fD3FE,X
-        INY 
+        INY
         LDA (p26),Y
         STA fD3FF,X
         LDY a28
@@ -8826,7 +8827,7 @@ a863A   =*+$01
         LDY #$1B     ;#%00011011
         LDA (p26),Y
         STA f8219,X
-        INY 
+        INY
         LDA (p26),Y
         STA f821A,X
         LDY #$18     ;#%00011000
@@ -8835,7 +8836,7 @@ a863A   =*+$01
         LDY #$1E     ;#%00011110
         LDA (p26),Y
         STA f8217,X
-        DEY 
+        DEY
         LDA (p26),Y
         STA f8216,X
         LDY #$17     ;#%00010111
@@ -8845,7 +8846,7 @@ a863A   =*+$01
         BEQ b8698
 b8680   LDA (p26),Y
         STA f8215,Y
-        DEY 
+        DEY
         BPL b8680
         LDA a8226
         BEQ b8690
@@ -8856,7 +8857,7 @@ b8690   LDA a8222
 
 b8698   LDA (p26),Y
         STA f823C,Y
-        DEY 
+        DEY
         BPL b8698
         LDA a824D
         BEQ b86A8
@@ -8875,11 +8876,11 @@ s86B9   LDA a8247
         STA a825C
         LDA a8244
         STA a825B
-b86D1   RTS 
+b86D1   RTS
 
 b86D2   LDA (p26),Y
         STA f8263,Y
-        DEY 
+        DEY
         BPL b86D2
         LDA a8274
         BEQ b86E2
@@ -8898,17 +8899,17 @@ s86F3   LDA a826E
         STA a8283
         LDA a826B
         STA a8282
-b870B   RTS 
+b870B   RTS
 
 s870C   LDA a29
-        LSR 
+        LSR A
         BCC b8715
         DEC a2A
         BEQ b8723
 b8715   JMP j88DE
 
 j8718   LDA #$03     ;#%00000011
-j871A   CLC 
+j871A   CLC
         ADC a20
         STA a20
         BCC b8723
@@ -8918,16 +8919,16 @@ b8723   LDY #$00     ;#%00000000
         CMP #$C0     ;#%11000000
         BCC b8748
         AND #$3F     ;#%00111111
-        TAX 
+        TAX
         LDA f9189,X
         STA a8746
         LDA f918A,X
         STA a8747
-        INY 
+        INY
         LDA (p20),Y
-        TAX 
+        TAX
         STA a26
-        INY 
+        INY
         LDA (p20),Y
         STA a27
 a8746   =*+$01
@@ -8943,9 +8944,9 @@ b8750   CMP #$5F     ;#%01011111
         CMP #$5E     ;#%01011110
         BEQ b875B
         ADC f8204
-b875B   TAX 
+b875B   TAX
         LDA a828A
-        LSR 
+        LSR A
         BCS b8765
 b8762   JMP j87F3
 
@@ -8960,7 +8961,7 @@ b876D   LDA #$00     ;#%00000000
         BNE b877B
         AND #$F7     ;#%11110111
 b877B   STA $D402,Y  ;Voice 1: Pulse Waveform Width - Low-Byte
-        DEY 
+        DEY
         BPL b876D
         LDA a814D
         STA a822F
@@ -8976,7 +8977,7 @@ b877B   STA $D402,Y  ;Voice 1: Pulse Waveform Width - Low-Byte
         LDY #$09     ;#%00001001
 b87A3   LDA f8143,Y
         STA a8223,Y
-        DEY 
+        DEY
         BPL b87A3
         JSR s85A0
 b87AF   LDX f8142
@@ -8985,16 +8986,16 @@ b87AF   LDX f8142
         LDY #$0D     ;#%00001101
 b87B9   LDA f8135,Y
         STA f8215,Y
-        DEY 
+        DEY
         BPL b87B9
-        TXA 
+        TXA
         AND #$08     ;#%00001000
         BEQ b87DB
         LDA a28
         CMP #$60     ;#%01100000
         BCC b87D0
         SBC #$60     ;#%01100000
-        CLC 
+        CLC
 b87D0   ADC f8204
         STA a821F
         STY a8221
@@ -9012,11 +9013,11 @@ j87F3   LDY #$01     ;#%00000001
         LDX a28
         CPX #$60     ;#%01100000
         BCS b8801
-        TAX 
+        TAX
         LDA a8151,X
 b8801   STA a2A
         LDA #$02     ;#%00000010
-        CLC 
+        CLC
         ADC a20
         STA a20
         BCC b880E
@@ -9034,11 +9035,11 @@ b8819   LDX f8162,Y
 b8822   LDA a29
         AND #$FE     ;#%11111110
         STA a29
-        RTS 
+        RTS
 
         LDX a2D
-        CLC 
-        TYA 
+        CLC
+        TYA
         ADC a20
         STA f8162,X
         LDA #$00     ;#%00000000
@@ -9047,15 +9048,15 @@ b8822   LDA a29
         LDA a26
         STA f8172,X
         DEC a2D
-        TYA 
+        TYA
         JMP j871A
 
         LDX a2D
         DEC f8173,X
         BEQ b8850
-        INX 
-        TXA 
-        TAY 
+        INX
+        TXA
+        TAY
         BPL b8819
 b8850   INC a2D
         LDA #$01     ;#%00000001
@@ -9065,8 +9066,8 @@ b8850   INC a2D
         LDX #$1C     ;#%00011100
 b885B   LDA (p26),Y
         STA f8135,X
-        DEX 
-        DEY 
+        DEX
+        DEY
         BPL b885B
         JMP j8718
 
@@ -9074,28 +9075,28 @@ b885B   LDA (p26),Y
         BIT a09A0
 b886C   LDA (p26),Y
         STA f8135,Y
-        DEY 
+        DEY
         BPL b886C
         JMP j8718
 
-        INY 
-        PHA 
+        INY
+        PHA
         LDA (p20),Y
         STA a26
-        INY 
+        INY
         LDA (p20),Y
         STA a27
-        PLA 
-        TAY 
+        PLA
+        TAY
 b8884   LDA (p26),Y
         STA f8135,X
-        DEX 
-        DEY 
+        DEX
+        DEY
         BPL b8884
         LDA #$05     ;#%00000101
         JMP j871A
 
-        INY 
+        INY
         LDA (p20),Y
         STA f8204
 j8898   LDA a27
@@ -9104,14 +9105,14 @@ j889A   STX a20
         JMP b8723
 
         LDA #$87     ;#%10000111
-        PHA 
+        PHA
         LDA #$17     ;#%00010111
-        PHA 
+        PHA
         JMP (p0026)
 
         LDA #$03     ;#%00000011
 b88AC   LDY a2D
-        CLC 
+        CLC
         ADC a20
         STA f8162,Y
         LDA #$00     ;#%00000000
@@ -9120,13 +9121,13 @@ b88AC   LDY a2D
         DEC a2D
         JMP j8898
 
-        INY 
+        INY
         LDA (p20),Y
         STA f8204
         LDA #$04     ;#%00000100
         BNE b88AC
         STX f8204
-        TYA 
+        TYA
         JMP j871A
 
 j88D1   STA f8135,X
@@ -9135,7 +9136,7 @@ j88D1   STA f8135,X
         STA f8215,X
         JMP j8718
 
-b88DD   RTS 
+b88DD   RTS
 
 j88DE   LDX a8231
         BEQ b88DD
@@ -9157,12 +9158,12 @@ b8900   LDA a8230
         BNE b8926
         LDX #$06     ;#%00000110
 b890C   STA $D400,X  ;Voice 1: Frequency Control - Low-Byte
-        DEX 
+        DEX
         BPL b890C
         LDA #$08     ;#%00001000
         ORA a29
         STA a29
-        RTS 
+        RTS
 
 b8919   DEC a8230
         BNE b8926
@@ -9176,28 +9177,28 @@ b8926   LDA a8226
         DEC a8225
         JMP b8988
 
-b8936   CLC 
+b8936   CLC
         LDX a8238
         LDY a8239
         LDA a823A
         BEQ b8952
-        TXA 
+        TXA
         ADC a8227
-        TAX 
-        TYA 
+        TAX
+        TYA
         ADC a8228
-        TAY 
+        TAY
         DEC a823A
         JMP j897C
 
 b8952   LDA a823B
         BEQ b8967
-        TXA 
+        TXA
         ADC a8229
-        TAX 
-        TYA 
+        TAX
+        TYA
         ADC a822A
-        TAY 
+        TAY
         DEC a823B
         JMP j897C
 
@@ -9221,11 +9222,11 @@ b8988   LDA a8222
         BNE b89B4
         LDX a8232
         LDY a8233
-        TYA 
+        TYA
         STX a28
         ORA a28
         BEQ b89B3
-        CLC 
+        CLC
         LDA a8221
         BEQ b89D6
         DEC a8221
@@ -9234,68 +9235,68 @@ b8988   LDA a8222
 b89AC   LDA a8222
         AND #$02     ;#%00000010
         BNE b8A1A
-b89B3   RTS 
+b89B3   RTS
 
 b89B4   LDX a8221
         BPL b89BC
         LDX a8220
 b89BC   LDA a821F
-        CLC 
+        CLC
         ADC f8215,X
-        DEX 
+        DEX
         STX a8221
-        TAY 
+        TAY
         LDX f912A,Y
         LDA f90CB,Y
         STX $D400    ;Voice 1: Frequency Control - Low-Byte
         STA $D401    ;Voice 1: Frequency Control - High-Byte
-        RTS 
+        RTS
 
-j89D5   CLC 
+j89D5   CLC
 b89D6   LDA a8234
         BEQ b89EA
         DEC a8234
-        TXA 
+        TXA
         ADC f8215
-        TAX 
-        TYA 
+        TAX
+        TYA
         ADC f8216
         JMP j8A23
 
 b89EA   LDA a8235
         BEQ b89FE
         DEC a8235
-        TXA 
+        TXA
         ADC f8217
-        TAX 
-        TYA 
+        TAX
+        TYA
         ADC f8218
         JMP j8A23
 
 b89FE   LDA a8236
         BEQ b8A12
         DEC a8236
-        TXA 
+        TXA
         ADC f8219
-        TAX 
-        TYA 
+        TAX
+        TYA
         ADC f821A
         JMP j8A23
 
 b8A12   LDA a8237
         BEQ b8A31
         DEC a8237
-b8A1A   TXA 
+b8A1A   TXA
         ADC a821B
-        TAX 
-        TYA 
+        TAX
+        TYA
         ADC a821C
-j8A23   TAY 
+j8A23   TAY
 b8A24   STX a8232
         STY a8233
         STX $D400    ;Voice 1: Frequency Control - Low-Byte
         STY $D401    ;Voice 1: Frequency Control - High-Byte
-        RTS 
+        RTS
 
 b8A31   LDA a8222
         AND #$81     ;#%10000001
@@ -9315,7 +9316,7 @@ s8A46   LDA a29
 b8A50   JMP j8C1A
 
 j8A53   LDA #$03     ;#%00000011
-j8A55   CLC 
+j8A55   CLC
         ADC a22
         STA a22
         BCC b8A5E
@@ -9325,16 +9326,16 @@ b8A5E   LDY #$00     ;#%00000000
         CMP #$C0     ;#%11000000
         BCC b8A83
         AND #$3F     ;#%00111111
-        TAX 
+        TAX
         LDA f91A7,X
         STA a8A81
         LDA f91A8,X
         STA a8A82
-        INY 
+        INY
         LDA (p22),Y
-        TAX 
+        TAX
         STA a26
-        INY 
+        INY
         LDA (p22),Y
         STA a27
 a8A81   =*+$01
@@ -9350,7 +9351,7 @@ b8A8B   CMP #$5F     ;#%01011111
         CMP #$5E     ;#%01011110
         BEQ b8A96
         ADC a8205
-b8A96   TAX 
+b8A96   TAX
         LDA a828A
         AND #$02     ;#%00000010
         BNE b8AA1
@@ -9367,7 +9368,7 @@ b8AA9   LDA #$00     ;#%00000000
         BNE b8AB7
         AND #$F7     ;#%11110111
 b8AB7   STA $D409,Y  ;Voice 2: Pulse Waveform Width - Low-Byte
-        DEY 
+        DEY
         BPL b8AA9
         LDA a8192
         STA a8256
@@ -9383,7 +9384,7 @@ b8AB7   STA $D409,Y  ;Voice 2: Pulse Waveform Width - Low-Byte
         LDY #$09     ;#%00001001
 b8ADF   LDA f8188,Y
         STA a824A,Y
-        DEY 
+        DEY
         BPL b8ADF
         JSR s85B9
 b8AEB   LDX a8187
@@ -9392,16 +9393,16 @@ b8AEB   LDX a8187
         LDY #$0D     ;#%00001101
 b8AF5   LDA f817A,Y
         STA f823C,Y
-        DEY 
+        DEY
         BPL b8AF5
-        TXA 
+        TXA
         AND #$08     ;#%00001000
         BEQ b8B17
         LDA a28
         CMP #$60     ;#%01100000
         BCC b8B0C
         SBC #$60     ;#%01100000
-        CLC 
+        CLC
 b8B0C   ADC a8205
         STA a8246
         STY a8248
@@ -9419,11 +9420,11 @@ j8B2F   LDY #$01     ;#%00000001
         LDX a28
         CPX #$60     ;#%01100000
         BCS b8B3D
-        TAX 
+        TAX
         LDA a8196,X
 b8B3D   STA a2B
         LDA #$02     ;#%00000010
-        CLC 
+        CLC
         ADC a22
         STA a22
         BCC b8B4A
@@ -9441,11 +9442,11 @@ b8B55   LDX f81A7,Y
 b8B5E   LDA a29
         AND #$FD     ;#%11111101
         STA a29
-        RTS 
+        RTS
 
         LDX a2E
-        CLC 
-        TYA 
+        CLC
+        TYA
         ADC a22
         STA f81A7,X
         LDA a23
@@ -9454,15 +9455,15 @@ b8B5E   LDA a29
         LDA a26
         STA f81B7,X
         DEC a2E
-        TYA 
+        TYA
         JMP j8A55
 
         LDX a2E
         DEC f81B8,X
         BEQ b8B8C
-        INX 
-        TXA 
-        TAY 
+        INX
+        TXA
+        TAY
         BPL b8B55
 b8B8C   INC a2E
         LDA #$01     ;#%00000001
@@ -9472,8 +9473,8 @@ b8B8C   INC a2E
         LDX #$1C     ;#%00011100
 b8B97   LDA (p26),Y
         STA f817A,X
-        DEX 
-        DEY 
+        DEX
+        DEY
         BPL b8B97
         JMP j8A53
 
@@ -9481,28 +9482,28 @@ b8B97   LDA (p26),Y
         BIT a09A0
 b8BA8   LDA (p26),Y
         STA f817A,Y
-        DEY 
+        DEY
         BPL b8BA8
         JMP j8A53
 
-        INY 
-        PHA 
+        INY
+        PHA
         LDA (p22),Y
         STA a26
-        INY 
+        INY
         LDA (p22),Y
         STA a27
-        PLA 
-        TAY 
+        PLA
+        TAY
 b8BC0   LDA (p26),Y
         STA f817A,X
-        DEX 
-        DEY 
+        DEX
+        DEY
         BPL b8BC0
         LDA #$05     ;#%00000101
         JMP j8A55
 
-        INY 
+        INY
         LDA (p22),Y
         STA a8205
 j8BD4   LDA a27
@@ -9511,14 +9512,14 @@ j8BD6   STX a22
         JMP b8A5E
 
         LDA #$8A     ;#%10001010
-        PHA 
+        PHA
         LDA #$52     ;#%01010010
-        PHA 
+        PHA
         JMP (p0026)
 
         LDA #$03     ;#%00000011
 b8BE8   LDY a2E
-        CLC 
+        CLC
         ADC a22
         STA f81A7,Y
         LDA a23
@@ -9527,13 +9528,13 @@ b8BE8   LDY a2E
         DEC a2E
         JMP j8BD4
 
-        INY 
+        INY
         LDA (p22),Y
         STA a8205
         LDA #$04     ;#%00000100
         BNE b8BE8
         STX a8205
-        TYA 
+        TYA
         JMP j8A55
 
 j8C0D   STA f817A,X
@@ -9542,7 +9543,7 @@ j8C0D   STA f817A,X
         STA f823C,X
         JMP j8A53
 
-b8C19   RTS 
+b8C19   RTS
 
 j8C1A   LDX a8258
         BEQ b8C19
@@ -9564,12 +9565,12 @@ b8C3C   LDA a8257
         BNE b8C62
         LDX #$06     ;#%00000110
 b8C48   STA $D407,X  ;Voice 2: Frequency Control - Low-Byte
-        DEX 
+        DEX
         BPL b8C48
         LDA #$10     ;#%00010000
         ORA a29
         STA a29
-        RTS 
+        RTS
 
 b8C55   DEC a8257
         BNE b8C62
@@ -9583,28 +9584,28 @@ b8C62   LDA a824D
         DEC a824C
         JMP b8CC4
 
-b8C72   CLC 
+b8C72   CLC
         LDX a825F
         LDY a8260
         LDA a8261
         BEQ b8C8E
-        TXA 
+        TXA
         ADC a824E
-        TAX 
-        TYA 
+        TAX
+        TYA
         ADC a824F
-        TAY 
+        TAY
         DEC a8261
         JMP j8CB8
 
 b8C8E   LDA a8262
         BEQ b8CA3
-        TXA 
+        TXA
         ADC a8250
-        TAX 
-        TYA 
+        TAX
+        TYA
         ADC a8251
-        TAY 
+        TAY
         DEC a8262
         JMP j8CB8
 
@@ -9628,11 +9629,11 @@ b8CC4   LDA a8249
         BNE b8CF0
         LDX a8259
         LDY a825A
-        TYA 
+        TYA
         STX a28
         ORA a28
         BEQ b8CEF
-        CLC 
+        CLC
         LDA a8248
         BEQ b8D12
         DEC a8248
@@ -9641,68 +9642,68 @@ b8CC4   LDA a8249
 b8CE8   LDA a8249
         AND #$02     ;#%00000010
         BNE b8D56
-b8CEF   RTS 
+b8CEF   RTS
 
 b8CF0   LDX a8248
         BPL b8CF8
         LDX a8247
 b8CF8   LDA a8246
-        CLC 
+        CLC
         ADC f823C,X
-        DEX 
+        DEX
         STX a8248
-        TAY 
+        TAY
         LDX f912A,Y
         LDA f90CB,Y
         STX $D407    ;Voice 2: Frequency Control - Low-Byte
         STA $D408    ;Voice 2: Frequency Control - High-Byte
-        RTS 
+        RTS
 
-j8D11   CLC 
+j8D11   CLC
 b8D12   LDA a825B
         BEQ b8D26
         DEC a825B
-        TXA 
+        TXA
         ADC f823C
-        TAX 
-        TYA 
+        TAX
+        TYA
         ADC a823D
         JMP j8D5F
 
 b8D26   LDA a825C
         BEQ b8D3A
         DEC a825C
-        TXA 
+        TXA
         ADC a823E
-        TAX 
-        TYA 
+        TAX
+        TYA
         ADC a823F
         JMP j8D5F
 
 b8D3A   LDA a825D
         BEQ b8D4E
         DEC a825D
-        TXA 
+        TXA
         ADC a8240
-        TAX 
-        TYA 
+        TAX
+        TYA
         ADC a8241
         JMP j8D5F
 
 b8D4E   LDA a825E
         BEQ b8D6D
         DEC a825E
-b8D56   TXA 
+b8D56   TXA
         ADC a8242
-        TAX 
-        TYA 
+        TAX
+        TYA
         ADC a8243
-j8D5F   TAY 
+j8D5F   TAY
 b8D60   STX a8259
         STY a825A
         STX $D407    ;Voice 2: Frequency Control - Low-Byte
         STY $D408    ;Voice 2: Frequency Control - High-Byte
-        RTS 
+        RTS
 
 b8D6D   LDA a8249
         AND #$81     ;#%10000001
@@ -9722,7 +9723,7 @@ s8D82   LDA a29
 b8D8C   JMP j8F51
 
 j8D8F   LDA #$03     ;#%00000011
-j8D91   CLC 
+j8D91   CLC
         ADC a24
         STA a24
         BCC b8D9A
@@ -9732,16 +9733,16 @@ b8D9A   LDY #$00     ;#%00000000
         CMP #$C0     ;#%11000000
         BCC b8DBF
         AND #$3F     ;#%00111111
-        TAX 
+        TAX
         LDA f91C5,X
         STA a8DBD
         LDA f91C6,X
         STA a8DBE
-        INY 
+        INY
         LDA (p24),Y
-        TAX 
+        TAX
         STA a26
-        INY 
+        INY
         LDA (p24),Y
         STA a27
 a8DBD   =*+$01
@@ -9757,7 +9758,7 @@ b8DC7   CMP #$5F     ;#%01011111
         CMP #$5E     ;#%01011110
         BEQ b8DD2
         ADC a8206
-b8DD2   TAX 
+b8DD2   TAX
         LDA a828A
         AND #$04     ;#%00000100
         BNE b8DDD
@@ -9772,7 +9773,7 @@ b8DE5   LDA f81D5,Y
         BNE b8DEE
         AND #$F7     ;#%11110111
 b8DEE   STA $D410,Y  ;Voice 3: Pulse Waveform Width - Low-Byte
-        DEY 
+        DEY
         BPL b8DE5
         LDA a81D7
         STA a827D
@@ -9788,7 +9789,7 @@ b8DEE   STA $D410,Y  ;Voice 3: Pulse Waveform Width - Low-Byte
         LDY #$09     ;#%00001001
 b8E16   LDA f81CD,Y
         STA a8271,Y
-        DEY 
+        DEY
         BPL b8E16
         JSR s85D2
 b8E22   LDX a81CC
@@ -9797,16 +9798,16 @@ b8E22   LDX a81CC
         LDY #$0D     ;#%00001101
 b8E2C   LDA f81BF,Y
         STA f8263,Y
-        DEY 
+        DEY
         BPL b8E2C
-        TXA 
+        TXA
         AND #$08     ;#%00001000
         BEQ b8E4E
         LDA a28
         CMP #$60     ;#%01100000
         BCC b8E43
         SBC #$60     ;#%01100000
-        CLC 
+        CLC
 b8E43   ADC a8206
         STA a826D
         STY a826F
@@ -9824,11 +9825,11 @@ j8E66   LDY #$01     ;#%00000001
         LDX a28
         CPX #$60     ;#%01100000
         BCS b8E74
-        TAX 
+        TAX
         LDA a81DB,X
 b8E74   STA a2C
         LDA #$02     ;#%00000010
-        CLC 
+        CLC
         ADC a24
         STA a24
         BCC b8E81
@@ -9846,11 +9847,11 @@ b8E8C   LDX f81EC,Y
 b8E95   LDA a29
         AND #$FB     ;#%11111011
         STA a29
-        RTS 
+        RTS
 
         LDX a2F
-        CLC 
-        TYA 
+        CLC
+        TYA
         ADC a24
         STA f81EC,X
         LDA #$00     ;#%00000000
@@ -9859,15 +9860,15 @@ b8E95   LDA a29
         LDA a26
         STA f81FC,X
         DEC a2F
-        TYA 
+        TYA
         JMP j8D91
 
         LDX a2F
         DEC f81FD,X
         BEQ b8EC3
-        INX 
-        TXA 
-        TAY 
+        INX
+        TXA
+        TAY
         BPL b8E8C
 b8EC3   INC a2F
         LDA #$01     ;#%00000001
@@ -9877,8 +9878,8 @@ b8EC3   INC a2F
         LDX #$1C     ;#%00011100
 b8ECE   LDA (p26),Y
         STA f81BF,X
-        DEX 
-        DEY 
+        DEX
+        DEY
         BPL b8ECE
         JMP j8D8F
 
@@ -9886,28 +9887,28 @@ b8ECE   LDA (p26),Y
         BIT a09A0
 b8EDF   LDA (p26),Y
         STA f81BF,Y
-        DEY 
+        DEY
         BPL b8EDF
         JMP j8D8F
 
-        INY 
-        PHA 
+        INY
+        PHA
         LDA (p24),Y
         STA a26
-        INY 
+        INY
         LDA (p24),Y
         STA a27
-        PLA 
-        TAY 
+        PLA
+        TAY
 b8EF7   LDA (p26),Y
         STA f81BF,X
-        DEX 
-        DEY 
+        DEX
+        DEY
         BPL b8EF7
         LDA #$05     ;#%00000101
         JMP j8D91
 
-        INY 
+        INY
         LDA (p24),Y
         STA a8206
 j8F0B   LDA a27
@@ -9916,14 +9917,14 @@ j8F0D   STX a24
         JMP b8D9A
 
         LDA #$8D     ;#%10001101
-        PHA 
+        PHA
         LDA #$8E     ;#%10001110
-        PHA 
+        PHA
         JMP (p0026)
 
         LDA #$03     ;#%00000011
 b8F1F   LDY a2F
-        CLC 
+        CLC
         ADC a24
         STA f81EC,Y
         LDA a25
@@ -9932,13 +9933,13 @@ b8F1F   LDY a2F
         DEC a2F
         JMP j8F0B
 
-        INY 
+        INY
         LDA (p24),Y
         STA a8206
         LDA #$04     ;#%00000100
         BNE b8F1F
         STX a8206
-        TYA 
+        TYA
         JMP j8D91
 
 j8F44   STA f81BF,X
@@ -9947,7 +9948,7 @@ j8F44   STA f81BF,X
         STA f8263,X
         JMP j8D8F
 
-b8F50   RTS 
+b8F50   RTS
 
 j8F51   LDX a827F
         BEQ b8F50
@@ -9969,12 +9970,12 @@ b8F73   LDA a827E
         BNE b8F99
         LDX #$06     ;#%00000110
 b8F7F   STA $D40E,X  ;Voice 3: Frequency Control - Low-Byte
-        DEX 
+        DEX
         BPL b8F7F
         LDA #$20     ;#%00100000
         ORA a29
         STA a29
-        RTS 
+        RTS
 
 b8F8C   DEC a827E
         BNE b8F99
@@ -9988,28 +9989,28 @@ b8F99   LDA a8274
         DEC a8273
         JMP b8FFB
 
-b8FA9   CLC 
+b8FA9   CLC
         LDX a8286
         LDY a8287
         LDA a8288
         BEQ b8FC5
-        TXA 
+        TXA
         ADC a8275
-        TAX 
-        TYA 
+        TAX
+        TYA
         ADC a8276
-        TAY 
+        TAY
         DEC a8288
         JMP j8FEF
 
 b8FC5   LDA a8289
         BEQ b8FDA
-        TXA 
+        TXA
         ADC a8277
-        TAX 
-        TYA 
+        TAX
+        TYA
         ADC a8278
-        TAY 
+        TAY
         DEC a8289
         JMP j8FEF
 
@@ -10033,11 +10034,11 @@ b8FFB   LDA a8270
         BNE b9027
         LDX a8280
         LDY a8281
-        TYA 
+        TYA
         STX a28
         ORA a28
         BEQ b9026
-        CLC 
+        CLC
         LDA a826F
         BEQ b9049
         DEC a826F
@@ -10046,68 +10047,68 @@ b8FFB   LDA a8270
 b901F   LDA a8270
         AND #$02     ;#%00000010
         BNE b908D
-b9026   RTS 
+b9026   RTS
 
 b9027   LDX a826F
         BPL b902F
         LDX a826E
 b902F   LDA a826D
-        CLC 
+        CLC
         ADC f8263,X
-        DEX 
+        DEX
         STX a826F
-        TAY 
+        TAY
         LDX f912A,Y
         LDA f90CB,Y
         STX $D40E    ;Voice 3: Frequency Control - Low-Byte
         STA $D40F    ;Voice 3: Frequency Control - High-Byte
-        RTS 
+        RTS
 
-j9048   CLC 
+j9048   CLC
 b9049   LDA a8282
         BEQ b905D
         DEC a8282
-        TXA 
+        TXA
         ADC f8263
-        TAX 
-        TYA 
+        TAX
+        TYA
         ADC a8264
         JMP j9096
 
 b905D   LDA a8283
         BEQ b9071
         DEC a8283
-        TXA 
+        TXA
         ADC a8265
-        TAX 
-        TYA 
+        TAX
+        TYA
         ADC a8266
         JMP j9096
 
 b9071   LDA a8284
         BEQ b9085
         DEC a8284
-        TXA 
+        TXA
         ADC a8267
-        TAX 
-        TYA 
+        TAX
+        TYA
         ADC a8268
         JMP j9096
 
 b9085   LDA a8285
         BEQ b90A4
         DEC a8285
-b908D   TXA 
+b908D   TXA
         ADC a8269
-        TAX 
-        TYA 
+        TAX
+        TYA
         ADC a826A
-j9096   TAY 
+j9096   TAY
 b9097   STX a8280
         STY a8281
         STX $D40E    ;Voice 3: Frequency Control - Low-Byte
         STY $D40F    ;Voice 3: Frequency Control - High-Byte
-        RTS 
+        RTS
 
 b90A4   LDA a8270
         AND #$81     ;#%10000001
@@ -10789,13 +10790,13 @@ bA451   JSR sA4F8
         JSR s8100
         JSR sA4DE
         JSR sA4DE
-jA46D   SEI 
+jA46D   SEI
         LDA #$64     ;#%01100100
 bA470   CMP $D012    ;Raster Position
         BNE bA470
         JSR sA548
-        JSR ROM_SCNKEYj ;$EA87 (jmp) - scan keyboard                    
-        JSR ROM_GETINj ;$F13E (jmp) - get a byte from channel          
+        JSR ROM_SCNKEYj ;$EA87 (jmp) - scan keyboard
+        JSR ROM_GETINj ;$F13E (jmp) - get a byte from channel
         CMP #$0D     ;#%00001101
         BNE bA488
         JSR sA5FC
@@ -10825,7 +10826,7 @@ bA4AA   CMP #$20     ;#%00100000
         CMP #$41     ;#%01000001
         BCC jA46D
         SBC #$41     ;#%01000001
-        CLC 
+        CLC
         ADC aA4C8
         DEC $D020    ;Border Color
         JSR s8100
@@ -10840,9 +10841,9 @@ bA4CE   STA f0400,X
         STA f0500,X
         STA f0600,X
         STA f0700,X
-        DEX 
+        DEX
         BNE bA4CE
-        RTS 
+        RTS
 
 sA4DE   JSR sA4E1
 sA4E1   JSR sA4E4
@@ -10858,7 +10859,7 @@ sA4F8   JSR sA4CA
         LDX #$15     ;#%00010101
         LDA #$DA     ;#%11011010
 bA4FF   STA f20,X
-        DEX 
+        DEX
         BPL bA4FF
         LDX #$44     ;#%01000100
 bA506   LDA #$0C     ;#%00001100
@@ -10871,7 +10872,7 @@ bA506   LDA #$0C     ;#%00001100
         STA f8135,X
         STA f817A,X
         STA f81BF,X
-        DEX 
+        DEX
         BPL bA506
         LDX #$26     ;#%00100110
 bA525   LDA #$0C     ;#%00001100
@@ -10884,11 +10885,11 @@ bA525   LDA #$0C     ;#%00001100
         STA f8263,X
         LDA #$01     ;#%00000001
         STA fDA58,X
-        DEX 
+        DEX
         BPL bA525
         LDA #$FF     ;#%11111111
         STA a028A
-        RTS 
+        RTS
 
 sA548   LDA #$05     ;#%00000101
         STA $D020    ;Border Color
@@ -10924,7 +10925,7 @@ sA548   LDA #$05     ;#%00000101
         LDX #$0F     ;#%00001111
 bA5A3   LDA f20,X
         STA f0400,X
-        DEX 
+        DEX
         BPL bA5A3
         LDX #$44     ;#%01000100
 bA5AD   LDA f8135,X
@@ -10933,7 +10934,7 @@ bA5AD   LDA f8135,X
         STA f04C8,X
         LDA f81BF,X
         STA f0540,X
-        DEX 
+        DEX
         BPL bA5AD
         LDX #$26     ;#%00100110
 bA5C4   LDA f8215,X
@@ -10942,40 +10943,40 @@ bA5C4   LDA f8215,X
         STA f0608,X
         LDA f8263,X
         STA f0658,X
-        DEX 
+        DEX
         BPL bA5C4
         LDX #$E3     ;#%11100011
 bA5DB   LDA a828A,X
         STA f06A7,X
-        DEX 
+        DEX
         BNE bA5DB
         LDA #$00     ;#%00000000
         STA $D020    ;Border Color
         LDA a29
         LDX #$07     ;#%00000111
-bA5ED   LSR 
-        PHA 
+bA5ED   LSR A
+        PHA
         LDA #$00     ;#%00000000
         ADC #$30     ;#%00110000
         STA f0418,X
-        PLA 
-        DEX 
+        PLA
+        DEX
         BPL bA5ED
         BMI bA5FF
 sA5FC   INC a828A
 bA5FF   LDA a828A
         LDX #$02     ;#%00000010
-bA604   LSR 
-        PHA 
+bA604   LSR A
+        PHA
         BCC bA60B
         LDA #$59     ;#%01011001
 bA60B   =*+$01
         BIT a4EA9
         STA f0421,X
-        PLA 
-        DEX 
+        PLA
+        DEX
         BPL bA604
-        RTS 
+        RTS
 
         .BYTE $C5,$CE,$C4,$00,$FF,$00,$FF,$00
         .BYTE $FF,$00,$FF,$F7,$00,$FF,$00,$FF
@@ -11129,7 +11130,7 @@ bA60B   =*+$01
         .BYTE $D2,$F9,$AA,$D8,$04,$1A,$01,$DA
         .BYTE $DA
         DEC a27
-        TAX 
+        TAX
         LDX #<p39AC  ;#%10101100
         LDY #>p39AC  ;#%00111001
         STX a8232
@@ -11142,7 +11143,7 @@ bA60B   =*+$01
         LDY #>pFFBC  ;#%11111111
         STX a821B
         STY a821C
-        RTS 
+        RTS
 
         LDA #$64     ;#%01100100
         STA a8231
@@ -11153,10 +11154,10 @@ bA60B   =*+$01
         JMP j8116
 
         LDA a814F
-        CLC 
+        CLC
         ADC #$20     ;#%00100000
         STA a814F
-        RTS 
+        RTS
 
         .BYTE $BF,$0C,$C8,$CD,$A7,$5F,$0F,$C8
         .BYTE $CD,$A7,$5F,$0D,$CC,$CD,$A7,$18
@@ -11668,7 +11669,7 @@ aB469   .BYTE $4F,$00,$FF,$00,$FF,$00,$FF,$FF
         .BYTE $04,$1A,$01,$DA
         .BYTE $DA
         DEC a27
-        TSX 
+        TSX
         LDX #<p39AC  ;#%10101100
         LDY #>p39AC  ;#%00111001
         STX a8232
@@ -11681,7 +11682,7 @@ aB469   .BYTE $4F,$00,$FF,$00,$FF,$00,$FF,$FF
         LDY #>pFFBC  ;#%11111111
         STX a821B
         STY a821C
-        RTS 
+        RTS
 
         LDA #$64     ;#%01100100
         STA a8231
@@ -11692,10 +11693,10 @@ aB469   .BYTE $4F,$00,$FF,$00,$FF,$00,$FF,$FF
         JMP j8116
 
         LDA a814F
-        CLC 
+        CLC
         ADC #$20     ;#%00100000
         STA a814F
-        RTS 
+        RTS
 
         .BYTE $BF,$0C,$C8,$CD,$B7,$5F,$0F,$C8
         .BYTE $CD,$B7,$5F,$0D,$CC,$CD,$B7,$18
@@ -11865,8 +11866,8 @@ jC006   JMP jC1BA
 
         JMP jCF17
 
-jC00C   ASL 
-        TAX 
+jC00C   ASL A
+        TAX
         LDA fC06D,X
         STA aFB
         LDA fC06E,X
@@ -11878,7 +11879,7 @@ jC00C   ASL
         LDA fC071,X
         STA aC065
         LDA fC072,X
-        TAX 
+        TAX
         LDA #$30     ;#%00110000
         STA a01
         LDY #$00     ;#%00000000
@@ -11888,9 +11889,9 @@ bC032   LDA (pFD),Y
         STA (pFD),Y
         LDA aC073
         STA (pFB),Y
-        INY 
+        INY
         BNE bC032
-        DEX 
+        DEX
         BEQ bC04C
         INC aFC
         INC aFE
@@ -11905,13 +11906,13 @@ bC055   LDA (pFD),Y
         STA (pFD),Y
         LDA aC073
         STA (pFB),Y
-        INY 
+        INY
 aC065   =*+$01
         CPY #$FF     ;#%11111111
         BNE bC055
 bC068   LDA #$35     ;#%00110101
         STA a01
-        RTS 
+        RTS
 
 fC06D   .BYTE $00
 fC06E   .BYTE $D0
@@ -11924,25 +11925,25 @@ aC073   .BYTE $00
 
         JMP jC00C
 
-jC07A   PLA 
+jC07A   PLA
         STA aFA
-        PLA 
+        PLA
         STA aFB
         LDA aFA
-        CLC 
+        CLC
         ADC #$02     ;#%00000010
         STA aC19C
         LDA aFB
         ADC #$00     ;#%00000000
-        PHA 
+        PHA
         LDA aC19C
-        PHA 
+        PHA
         JSR sC1A9
         JSR sC19F
-        PHA 
+        PHA
         JSR sC19F
         STA aFB
-        PLA 
+        PLA
         STA aFA
 jC0A0   JSR sC19F
         CMP #$FF     ;#%11111111
@@ -11957,11 +11958,11 @@ bC0AD   LDY aC135
 
 bC0B7   CMP #$3B     ;#%00111011
         BCS bC0BE
-        SEC 
+        SEC
         SBC #$12     ;#%00010010
-bC0BE   ASL 
-        ASL 
-        CLC 
+bC0BE   ASL A
+        ASL A
+        CLC
         ADC #$3C     ;#%00111100
         STA aC19C
         LDX #$03     ;#%00000011
@@ -11969,23 +11970,23 @@ bC0C8   LDA aC19C
         LDY fC119,X
         JSR sC0DD
         INC aC19C
-        DEX 
+        DEX
         BPL bC0C8
 jC0D7   JSR sC0FC
         JMP jC0A0
 
 sC0DD   STA (pFC),Y
         LDA aFD
-        PHA 
+        PHA
         AND #$03     ;#%00000011
-        CLC 
+        CLC
         ADC #$D8     ;#%11011000
         STA aFD
         LDA aC19E
         STA (pFC),Y
-        PLA 
+        PLA
         STA aFD
-        RTS 
+        RTS
 
 jC0F2   AND #$3F     ;#%00111111
         LDY #$00     ;#%00000000
@@ -11993,22 +11994,22 @@ jC0F2   AND #$3F     ;#%00111111
         JMP jC0D7
 
 sC0FC   LDA aFC
-        CLC 
+        CLC
         ADC aC135
         STA aFC
         LDA aFD
         ADC #$00     ;#%00000000
         STA aFD
-        RTS 
+        RTS
 
 sC10B   JSR sC19F
-        ASL 
-        TAX 
+        ASL A
+        TAX
         LDA fC11E,X
-        PHA 
+        PHA
         LDA fC11D,X
-        PHA 
-        RTS 
+        PHA
+        RTS
 
 fC119   .BYTE $29,$28,$01,$00
 fC11E   =*+$01
@@ -12017,90 +12018,90 @@ aC128   =*+$01
         .WORD aC12E
         LDA #$02     ;#%00000010
         STA aC135
-aC12E   RTS 
+aC12E   RTS
 
         LDA #$01     ;#%00000001
         STA aC135
-        RTS 
+        RTS
 
 aC135   .BYTE $02
         JSR sC19F
-        PHA 
+        PHA
         JSR sC19F
-        TAX 
+        TAX
         LDY #$C8     ;#%11001000
-bC140   PLA 
+bC140   PLA
         STA p4000,Y
         STA f40C8,Y
         STA f4190,Y
         STA f4258,Y
         STA f4320,Y
-        PHA 
-        TXA 
+        PHA
+        TXA
         STA fD800,Y
         STA fD8C8,Y
         STA fD990,Y
         STA fDA58,Y
         STA fDB20,Y
-        DEY 
+        DEY
         CPY #$FF     ;#%11111111
         BNE bC140
-        PLA 
-aC167   RTS 
+        PLA
+aC167   RTS
 
         LDA #$00     ;#%00000000
         STA aFD
         JSR sC19F
         STA aC19C
         JSR sC19F
-        ASL 
-        ASL 
-        ASL 
+        ASL A
+        ASL A
+        ASL A
         STA aC19D
-        ASL 
+        ASL A
         ROL aFD
-        ASL 
+        ASL A
         ROL aFD
-        CLC 
+        CLC
         ADC aC19D
         STA aFC
         LDA aFD
         ADC #$40     ;#%01000000
         STA aFD
         LDA aFC
-        CLC 
+        CLC
         ADC aC19C
         STA aFC
         LDA aFD
         ADC #$00     ;#%00000000
         STA aFD
-        RTS 
+        RTS
 
 aC19C   .BYTE $B8
 aC19D   .BYTE $B8
 aC19E   .BYTE $06
 sC19F   LDY #$00     ;#%00000000
         LDA (pFA),Y
-        PHA 
+        PHA
         JSR sC1A9
-        PLA 
-        RTS 
+        PLA
+        RTS
 
 sC1A9   INC aFA
         BNE bC1AF
         INC aFB
-bC1AF   RTS 
+bC1AF   RTS
 
         JSR sC19F
         STA aC19E
-aC1B6   RTS 
+aC1B6   RTS
 
-        PLA 
-        PLA 
-        RTS 
+        PLA
+        PLA
+        RTS
 
 jC1BA   LDX #$F0     ;#%11110000
-        TXS 
+        TXS
         JSR sC43C
         LDA #$19     ;#%00011001
         LDX #$0F     ;#%00001111
@@ -12112,7 +12113,7 @@ jC1BA   LDX #$F0     ;#%11110000
         STA $D015    ;Sprite display Enable
         LDA #$8D     ;#%10001101
         STA aCF01
-        SEI 
+        SEI
         LDA #$35     ;#%00110101
         STA a01
         LDA #$00     ;#%00000000
@@ -12133,15 +12134,15 @@ jC1F3   JSR jC07A
         JSR sC82E
         LDA aB469
         STA aC19C
-        ASL 
-        CLC 
+        ASL A
+        CLC
         ADC aC19C
-        TAY 
+        TAY
         LDX #$02     ;#%00000010
         LDA #$00     ;#%00000000
 bC219   STA fB000,Y
-        INY 
-        DEX 
+        INY
+        DEX
         BPL bC219
         LDA #$1B     ;#%00011011
         STA $D011    ;VIC Control Register 1
@@ -12152,7 +12153,7 @@ bC219   STA fB000,Y
         LDA #$00     ;#%00000000
         JSR jC00C
         JSR s0367
-        SEI 
+        SEI
         LDA #$00     ;#%00000000
         STA $D015    ;Sprite display Enable
         STA $D020    ;Border Color
@@ -12180,7 +12181,7 @@ bC219   STA fB000,Y
 sC276   LDA aC2D1
         CMP aB469
         BNE bC27F
-        RTS 
+        RTS
 
 bC27F   JSR jC07A
         .BYTE $AE,$CC,$20,$7A,$C0,$AE,$C7
@@ -12188,7 +12189,7 @@ bC27F   JSR jC07A
         LDA aC2D1
 bC28E   CMP fB41A,X
         BEQ bC296
-        DEX 
+        DEX
         BPL bC28E
 bC296   STX aCD72
         LDA #$08     ;#%00001000
@@ -12212,7 +12213,7 @@ bC2AE   JSR sC3DE
         JSR sC589
         LDA aC5CC
         BEQ bC2AE
-        RTS 
+        RTS
 
 aC2D1   .BYTE $00
 aC2D2   .BYTE $00
@@ -12221,50 +12222,50 @@ bC2D3   LDA aCF0C
         DEC aCF0C
         LDA #$00     ;#%00000000
         JSR s8100
-        RTS 
+        RTS
 
 sC2E1   LDA aB469
         STA aC19C
-        ASL 
-        CLC 
+        ASL A
+        CLC
         ADC aC19C
-        TAY 
+        TAY
         LDX #$00     ;#%00000000
 bC2EF   JSR s035B
         STA fB000,Y
-        INY 
-        INX 
+        INY
+        INX
         CPX #$03     ;#%00000011
         BNE bC2EF
-        RTS 
+        RTS
 
 sC2FC   LDA #>p4E00  ;#%01001110
         STA aC36D
         LDA #<p4E00  ;#%00000000
         STA aC36C
 bC306   LDY aC36D
-        INY 
+        INY
         LDA fB41A,Y
-        ASL 
-        CLC 
+        ASL A
+        CLC
         ADC fB41A,Y
         STA aC6E9
         LDY aC36D
         LDA fB41A,Y
-        ASL 
-        CLC 
+        ASL A
+        CLC
         ADC fB41A,Y
-        TAY 
+        TAY
         JSR sC34B
         BCC bC329
         JMP jC33F
 
 bC329   LDY aC36D
         LDA fB41A,Y
-        PHA 
+        PHA
         LDA fB41B,Y
         STA fB41A,Y
-        PLA 
+        PLA
         STA fB41B,Y
         LDA #$01     ;#%00000001
         STA aC36C
@@ -12272,31 +12273,31 @@ jC33F   DEC aC36D
         BPL bC306
         LDA aC36C
         BNE sC2FC
-        RTS 
+        RTS
 
 sC34B   =*+$01
-        CMP ~f00A2,X
+        CMP f00A2,b,X
 bC34D   LDA fB000,Y
         STY aC6EA
         LDY aC6E9
         CMP fB000,Y
         BEQ bC35F
         LDY aC6EA
-        RTS 
+        RTS
 
 bC35F   LDY aC6EA
-        INY 
+        INY
         INC aC6E9
-        INX 
+        INX
         CPX #$03     ;#%00000011
         BNE bC34D
-        RTS 
+        RTS
 
 aC36C   .BYTE $00
 aC36D   .BYTE $FF
 sC36E   LDA #$00     ;#%00000000
         STA $D011    ;VIC Control Register 1
-        SEI 
+        SEI
         LDA #$01     ;#%00000001
         STA $D015    ;Sprite display Enable
         JSR s8100
@@ -12314,17 +12315,17 @@ sC36E   LDA #$00     ;#%00000000
         STA aFF
         LDY #$09     ;#%00001001
         LDA aB469
-        ASL 
+        ASL A
         STA aC19C
-        ASL 
+        ASL A
         ROL aFF
-        ASL 
+        ASL A
         ROL aFF
-        CLC 
+        CLC
         ADC aC19C
         BCC bC3B3
         INC aFF
-bC3B3   CLC 
+bC3B3   CLC
         ADC #$F0     ;#%11110000
         STA aFE
         LDA aFF
@@ -12332,7 +12333,7 @@ bC3B3   CLC
         STA aFF
         LDA #$5B     ;#%01011011
 bC3C0   STA (pFE),Y
-        DEY 
+        DEY
         BPL bC3C0
         JSR sC559
         JSR sC589
@@ -12347,15 +12348,15 @@ bC3C0   STA (pFE),Y
 sC3DE   LDA #$F8     ;#%11111000
 bC3E0   CMP $D012    ;Raster Position
         BNE bC3E0
-        RTS 
+        RTS
 
 sC3E6   LDY #$00     ;#%00000000
-bC3E8   TYA 
+bC3E8   TYA
         STA fB41A,Y
-        INY 
+        INY
         CPY #$50     ;#%01010000
         BNE bC3E8
-        RTS 
+        RTS
 
 sC3F2   JSR sC3DE
         LDA #$00     ;#%00000000
@@ -12372,8 +12373,8 @@ sC3F2   JSR sC3DE
         JMP sC3F2
 
 sC418   LDA aC528
-        ASL 
-        CLC 
+        ASL A
+        CLC
         ADC #$0A     ;#%00001010
         STA aC433
         LDX aC547
@@ -12381,37 +12382,37 @@ sC418   LDA aC528
         STA aC437
         JSR jC07A
         AND (pC4),Y
-        RTS 
+        RTS
 
         .BYTE $FF,$01
 aC433   .BYTE $00,$16,$FF,$02
 aC437   .BYTE $00,$3A,$5B,$FF,$00
 sC43C   LDX #$4F     ;#%01001111
         LDY #$00     ;#%00000000
-        SED 
+        SED
         LDA #$81     ;#%10000001
-bC443   SEC 
+bC443   SEC
         SBC #$01     ;#%00000001
         STA aC19C
-        ASL 
-        ASL 
-        ASL 
-        ASL 
+        ASL A
+        ASL A
+        ASL A
+        ASL A
         STA fB001,Y
         LDA aC19C
-        LSR 
-        LSR 
-        LSR 
-        LSR 
+        LSR A
+        LSR A
+        LSR A
+        LSR A
         STA fB000,Y
         LDA aC19C
-        INY 
-        INY 
-        INY 
-        DEX 
+        INY
+        INY
+        INY
+        DEX
         BPL bC443
-        CLD 
-        RTS 
+        CLD
+        RTS
 
 sC465   LDA aC5CC
         BNE sC494
@@ -12426,21 +12427,21 @@ sC465   LDA aC5CC
         CMP #$02     ;#%00000010
         BNE bC49C
         JSR sC489
-        PLA 
-        PLA 
-        RTS 
+        PLA
+        PLA
+        RTS
 
 sC489   LDY #$09     ;#%00001001
 bC48B   LDA fC49F,Y
         STA (pFE),Y
-        DEY 
+        DEY
         BPL bC48B
-        RTS 
+        RTS
 
 sC494   LDA #$00     ;#%00000000
         STA aC49D
         STA aC49E
-bC49C   RTS 
+bC49C   RTS
 
 aC49D   .BYTE $00
 aC49E   .BYTE $00
@@ -12449,7 +12450,7 @@ fC49F   .BYTE $5D,$55,$4E,$4B,$4E,$4F,$57,$4E
 sC4A9   LDY #$09     ;#%00001001
 bC4AB   LDA (pFE),Y
         STA fC4C2,Y
-        DEY 
+        DEY
         BPL bC4AB
         JSR jC07A
         LDA f60C4,Y
@@ -12459,7 +12460,7 @@ fC4C2   .BYTE $5B,$5B,$5B,$5B,$5B,$5B,$5B,$5B
         .BYTE $55,$44,$FF,$00
 sC4CE   LDA aC5CC
         BNE bC4D4
-        RTS 
+        RTS
 
 bC4D4   LDX aC651
         LDA fC72C,X
@@ -12469,29 +12470,29 @@ bC4D4   LDX aC651
         BEQ bC4E9
         STA (pFE),Y
         INC aC528
-bC4E9   RTS 
+bC4E9   RTS
 
 sC4EA   CPX #$1B     ;#%00011011
         BNE bC4FE
         LDY aC528
         BEQ bC4FB
         DEC aC528
-        DEY 
+        DEY
         LDA #$5B     ;#%01011011
         STA (pFE),Y
-bC4FB   PLA 
-        PLA 
-        RTS 
+bC4FB   PLA
+        PLA
+        RTS
 
 bC4FE   CPX #$1C     ;#%00011100
         BNE bC505
         LDA #$5D     ;#%01011101
-        RTS 
+        RTS
 
 bC505   CPX #$1A     ;#%00011010
         BNE bC50C
         LDA #$5B     ;#%01011011
-        RTS 
+        RTS
 
 bC50C   CPX #$1D     ;#%00011101
         BNE bC527
@@ -12499,31 +12500,31 @@ bC50C   CPX #$1D     ;#%00011101
         STA $D011    ;VIC Control Register 1
         LDA #$01     ;#%00000001
         JSR s8100
-        SEI 
+        SEI
         LDA aC528
         BNE bC523
         JSR sC489
-bC523   PLA 
-        PLA 
-        PLA 
-        PLA 
-bC527   RTS 
+bC523   PLA
+        PLA
+        PLA
+        PLA
+bC527   RTS
 
 aC528   .BYTE $00
 sC529   LDA aC546
         BEQ bC532
         DEC aC546
-        RTS 
+        RTS
 
 bC532   LDA #$02     ;#%00000010
         STA aC546
         LDX aC547
         LDA fC551,X
-        DEX 
+        DEX
         BPL bC542
         LDX #$07     ;#%00000111
 bC542   STX aC547
-        RTS 
+        RTS
 
 aC546   .BYTE $00
 aC547   .BYTE $00,$00
@@ -12540,34 +12541,34 @@ sC559   LDA #$01     ;#%00000001
 sC589   LDA #$00     ;#%00000000
         LDX #$05     ;#%00000101
 bC58D   STA aC5C8,X
-        DEX 
+        DEX
         BPL bC58D
         LDA $DC00    ;CIA1: Data Port Register A
         AND $DC01    ;CIA1: Data Port Register B
         EOR #$FF     ;#%11111111
         AND #$1F     ;#%00011111
         STA aC5CD
-        LSR 
+        LSR A
         ROL aC5CB
-        LSR 
+        LSR A
         ROL aC5CA
-        LSR 
+        LSR A
         ROL aC5C9
-        LSR 
+        LSR A
         ROL aC5C8
-        LSR 
+        LSR A
         ROL aC5CC
         LDA aC5CC
         CMP aC5C7
         BEQ bC5C0
         STA aC5C7
-        RTS 
+        RTS
 
 bC5C0   LDA #$00     ;#%00000000
         STA aC5CC
-        RTS 
+        RTS
 
-        RTS 
+        RTS
 
 aC5C7   .BYTE $00
 aC5C8   .BYTE $00
@@ -12590,61 +12591,61 @@ sC5CE   LDA aC652
         STA $D027    ;Sprite 0 Color
 bC5F0   STA fD82D,Y
         STA fD805,Y
-        DEY 
+        DEY
         BPL bC5F0
-        RTS 
+        RTS
 
 sC5FA   LDA aC5C9
         BNE bC616
         LDA aC5C8
         BNE bC605
-        RTS 
+        RTS
 
 bC605   LDA aC651
         CMP #$1D     ;#%00011101
         BEQ bC610
         INC aC651
-        RTS 
+        RTS
 
 bC610   LDA #$00     ;#%00000000
         STA aC651
-        RTS 
+        RTS
 
 bC616   LDA aC651
         BEQ bC61F
         DEC aC651
-        RTS 
+        RTS
 
 bC61F   LDA #$1D     ;#%00011101
         STA aC651
-        RTS 
+        RTS
 
 sC625   LDX aC651
         LDA fC6EC,X
-        CLC 
+        CLC
         ADC #$09     ;#%00001001
         ADC #$02     ;#%00000010
-        ASL 
-        ASL 
-        ASL 
-        PHP 
-        CLC 
+        ASL A
+        ASL A
+        ASL A
+        PHP
+        CLC
         ADC #$06     ;#%00000110
         STA aC652
-        PLP 
+        PLP
         LDA #$00     ;#%00000000
-        ROL 
+        ROL A
         STA aC653
         LDA fC70C,X
-        CLC 
+        CLC
         ADC #$03     ;#%00000011
-        ASL 
-        ASL 
-        ASL 
-        CLC 
+        ASL A
+        ASL A
+        ASL A
+        CLC
         ADC #$31     ;#%00110001
         STA aC654
-        RTS 
+        RTS
 
 aC651   .BYTE $00
 aC652   .BYTE $00
@@ -12653,7 +12654,7 @@ aC654   .BYTE $00
 sC655   LDA aC65E
         BEQ bC65F
         DEC aC65E
-        RTS 
+        RTS
 
 aC65E   .BYTE $00
 bC65F   LDA #$03     ;#%00000011
@@ -12662,67 +12663,67 @@ bC65F   LDA #$03     ;#%00000011
         JSR sC5FA
         LDX #$1F     ;#%00011111
 bC66C   LDA fC70C,X
-        CLC 
+        CLC
         ADC #$03     ;#%00000011
         JSR sC6C7
         LDA fC6EC,X
-        CLC 
+        CLC
         ADC #$09     ;#%00001001
-        TAY 
+        TAY
         LDA fC72C,X
         AND #$3F     ;#%00111111
         STA (pFB),Y
         LDA aFC
-        CLC 
+        CLC
         ADC #$98     ;#%10011000
         STA aFC
         STX aC6B1
-        TXA 
+        TXA
         AND #$07     ;#%00000111
-        TAX 
+        TAX
         LDA fC6B2,X
         LDX aC6B1
         STA (pFB),Y
-        DEX 
+        DEX
         BPL bC66C
-        RTS 
+        RTS
 
 sC69D   LDX #$07     ;#%00000111
         LDA aC6B9
-        PHA 
+        PHA
 bC6A3   LDA aC6B1,X
         STA fC6B2,X
-        DEX 
+        DEX
         BNE bC6A3
-        PLA 
+        PLA
         STA fC6B2
-        RTS 
+        RTS
 
 aC6B1   .BYTE $00
 fC6B2   .BYTE $00,$06,$02,$04,$05,$03,$07
 aC6B9   .BYTE $01
 fC6BA   .BYTE $00,$06,$02,$04,$05,$03,$07,$01
         .BYTE $07,$03,$05,$04,$02
-sC6C7   PHA 
+sC6C7   PHA
         LDA #$00     ;#%00000000
         STA aFB
         STA aFC
-        PLA 
-        ASL 
-        ASL 
-        ASL 
+        PLA
+        ASL A
+        ASL A
+        ASL A
         STA aC6E8
-        ASL 
+        ASL A
         ROL aFC
-        ASL 
+        ASL A
         ROL aFC
-        CLC 
+        CLC
         ADC aC6E8
         STA aFB
         LDA #$40     ;#%01000000
         ADC aFC
         STA aFC
-        RTS 
+        RTS
 
 aC6E8   .BYTE $00
 aC6E9   .BYTE $03
@@ -12785,10 +12786,10 @@ jC83F   LDA #$08     ;#%00001000
         LDX #$27     ;#%00100111
 bC853   STA f4348,X
         STA f4370,X
-        DEX 
+        DEX
         BPL bC853
         JSR jC07A
-        CLI 
+        CLI
         .BYTE $C7
         LDA #$00     ;#%00000000
 bC863   STA aCD72
@@ -12804,7 +12805,7 @@ jC86E   JSR bC2D3
         BNE bC885
         JMP jC86E
 
-bC884   RTS 
+bC884   RTS
 
 bC885   DEC aCF0E
 bC888   JSR bC2D3
@@ -12819,7 +12820,7 @@ bC888   JSR bC2D3
         LDA #$20     ;#%00100000
 bC8A2   STA f4398,Y
         STA f43C0,Y
-        DEY 
+        DEY
         BPL bC8A2
 bC8AB   JSR bC2D3
         JSR sCD73
@@ -12830,7 +12831,7 @@ bC8AB   JSR bC2D3
         BEQ bC8AB
         DEC aCF0E
         LDA aCD72
-        CLC 
+        CLC
         ADC #$01     ;#%00000001
         CMP #$50     ;#%01010000
         BCC bC863
@@ -12850,24 +12851,24 @@ jC8E4   LDY #$00     ;#%00000000
 jC8E6   LDA (pFE),Y
         BMI bC8F1
         STA fCC7E,Y
-        INY 
+        INY
         JMP jC8E6
 
-bC8F1   TAX 
-        INY 
+bC8F1   TAX
+        INY
         LDA (pFE),Y
-        PHA 
-        INY 
-        TYA 
+        PHA
+        INY
+        TYA
         STY aCCD4
-        CLC 
+        CLC
         ADC aFE
         STA aFE
         BCC bC904
         INC aFF
-bC904   PLA 
+bC904   PLA
         STA aCC7D
-        TAY 
+        TAY
         CPX #$FF     ;#%11111111
         BNE bC912
         LDA #$2C     ;#%00101100
@@ -12876,18 +12877,18 @@ bC912   CPX #$FE     ;#%11111110
         BNE bC919
         JMP jC83F
 
-bC919   TYA 
+bC919   TYA
         AND #$10     ;#%00010000
-        LSR 
-        LSR 
-        LSR 
-        LSR 
-        CLC 
+        LSR A
+        LSR A
+        LSR A
+        LSR A
+        CLC
         ADC #$04     ;#%00000100
         STA aCC7A
         LDY aCCD4
-        DEY 
-        DEY 
+        DEY
+        DEY
         LDA #$FF     ;#%11111111
         STA fCC7E,Y
         LDA #$00     ;#%00000000
@@ -12914,7 +12915,7 @@ bC95B   LDA aCF0E
 
 bC966   LDX #$8D     ;#%10001101
         STX aCF01
-        RTS 
+        RTS
 
 pC96C   .BYTE $5B,$5B,$5B,$5B,$5B,$5B,$59,$4F
         .BYTE $55,$5B,$48,$41,$56,$45,$5B,$43
@@ -13039,21 +13040,21 @@ sCCD5   LDY aCD72
         CPX #$01     ;#%00000001
         BNE bCCE1
         LDX #$0D     ;#%00001101
-bCCE1   DEX 
+bCCE1   DEX
         STX aCCD3
         LDA fC6BA,X
         STA aCCBC
         LDX #$00     ;#%00000000
-        TYA 
-        CLC 
+        TYA
+        CLC
         ADC #$01     ;#%00000001
-bCCF1   SEC 
+bCCF1   SEC
         SBC #$0A     ;#%00001010
         BCC bCCF9
-        INX 
+        INX
         BNE bCCF1
 bCCF9   ADC #$0A     ;#%00001010
-        CLC 
+        CLC
         ADC #$30     ;#%00110000
         STA aCCBE
         CPX #$00     ;#%00000000
@@ -13062,25 +13063,25 @@ bCCF9   ADC #$0A     ;#%00001010
         STA aCCBD
         JMP jCD14
 
-bCD0D   TXA 
-        CLC 
+bCD0D   TXA
+        CLC
         ADC #$30     ;#%00110000
         STA aCCBD
 jCD14   LDA #$00     ;#%00000000
         STA aFE
         STA aFF
         LDA fB41A,Y
-        TAX 
-        ASL 
+        TAX
+        ASL A
         STA aC19C
-        ASL 
+        ASL A
         ROL aFF
-        ASL 
+        ASL A
         ROL aFF
         ADC aC19C
         BCC bCD2F
         INC aFF
-bCD2F   CLC 
+bCD2F   CLC
         ADC #$F0     ;#%11110000
         STA aFE
         LDA aFF
@@ -13089,40 +13090,40 @@ bCD2F   CLC
         LDY #$09     ;#%00001001
 bCD3C   LDA (pFE),Y
         STA fCCC0,Y
-        DEY 
+        DEY
         BPL bCD3C
-        TXA 
+        TXA
         STA aC19C
-        ASL 
-        CLC 
+        ASL A
+        CLC
         ADC aC19C
-        TAY 
+        TAY
         LDX #$00     ;#%00000000
 bCD50   LDA fB000,Y
         AND #$0F     ;#%00001111
-        CLC 
+        CLC
         ADC #$30     ;#%00110000
         STA fCCCC,X
         LDA fB000,Y
         AND #$F0     ;#%11110000
-        LSR 
-        LSR 
-        LSR 
-        LSR 
-        CLC 
+        LSR A
+        LSR A
+        LSR A
+        LSR A
+        CLC
         ADC #$30     ;#%00110000
         STA fCCCB,X
-        INY 
-        INX 
-        INX 
+        INY
+        INX
+        INX
         CPX #$06     ;#%00000110
         BNE bCD50
-        RTS 
+        RTS
 
 aCD72   .BYTE $06
 sCD73   LDA aCF0E
         BNE bCD79
-        RTS 
+        RTS
 
 bCD79   LDY #$00     ;#%00000000
 bCD7B   LDA f41B8,Y
@@ -13159,7 +13160,7 @@ bCD7B   LDA f41B8,Y
         STA fDAA8,Y
         LDA f42F8,Y
         STA f42D0,Y
-        INY 
+        INY
         CPY #$28     ;#%00101000
         BNE bCD7B
         LDY #$00     ;#%00000000
@@ -13185,12 +13186,12 @@ bCDE8   LDA fDAF8,Y
         STA f4398,Y
         LDA fDBC0,Y
         STA fDB98,Y
-        INY 
+        INY
         CPY #$28     ;#%00101000
         BNE bCDE8
-        RTS 
+        RTS
 
-sCE30   SEI 
+sCE30   SEI
         LDA #<pCE71  ;#%01110001
         STA aFFFE    ;IRQ
         LDA #>pCE71  ;#%11001110
@@ -13209,8 +13210,8 @@ sCE30   SEI
         STA a02
         LDA #<p35    ;#%00110101
         STA a01
-        CLI 
-        RTS 
+        CLI
+        RTS
 
 pCE5F   LDA #$36     ;#%00110110
         STA a01
@@ -13220,26 +13221,26 @@ pCE5F   LDA #$36     ;#%00110110
         STA aFFFA    ;NMI
         LDA #>pCE5F  ;#%11001110
         STA aFFFB    ;NMI
-        RTS 
+        RTS
 
-pCE71   PHA 
-        TYA 
-        PHA 
-        TXA 
-        PHA 
+pCE71   PHA
+        TYA
+        PHA
+        TXA
+        PHA
         LDA #$01     ;#%00000001
         STA $D019    ;VIC Interrupt Request Register (IRR)
-        NOP 
-        NOP 
-        NOP 
-        NOP 
-        NOP 
-        NOP 
-        NOP 
-        NOP 
-        NOP 
-        NOP 
-        NOP 
+        NOP
+        NOP
+        NOP
+        NOP
+        NOP
+        NOP
+        NOP
+        NOP
+        NOP
+        NOP
+        NOP
 aCE87   =*+$01
 aCE88   =*+$02
         JSR sCEC1
@@ -13249,18 +13250,18 @@ aCE88   =*+$02
         BNE bCE95
         LDA #$00     ;#%00000000
         STA a02
-bCE95   ASL 
-        TAX 
+bCE95   ASL A
+        TAX
         LDA fCEA9,X
         STA aCE87
         LDA fCEAA,X
         STA aCE88
-        PLA 
-        TAX 
-        PLA 
-        TAY 
-        PLA 
-        RTI 
+        PLA
+        TAX
+        PLA
+        TAY
+        PLA
+        RTI
 
 fCEA9   .BYTE $B1
 fCEAA   .BYTE $CE,$C1,$CE,$D4,$CE,$E7,$CE
@@ -13270,7 +13271,7 @@ fCEAA   .BYTE $CE,$C1,$CE,$D4,$CE,$E7,$CE
         STA $D016    ;VIC Control Register 2
         LDA #$81     ;#%10000001
         STA $D012    ;Raster Position
-        RTS 
+        RTS
 
 sCEC1   LDA #$18     ;#%00011000
         STA $D016    ;VIC Control Register 2
@@ -13279,7 +13280,7 @@ sCEC1   LDA #$18     ;#%00011000
         STA $D011    ;VIC Control Register 1
         LDA #$89     ;#%10001001
         STA $D012    ;Raster Position
-        RTS 
+        RTS
 
         LDA $D011    ;VIC Control Register 1
         AND #$3F     ;#%00111111
@@ -13288,7 +13289,7 @@ sCEC1   LDA #$18     ;#%00011000
         STA $D016    ;VIC Control Register 2
         LDA #$E9     ;#%11101001
         STA $D012    ;Raster Position
-        RTS 
+        RTS
 
         LDA #$18     ;#%00011000
         STA $D016    ;VIC Control Register 2
@@ -13298,14 +13299,14 @@ sCEC1   LDA #$18     ;#%00011000
         LDA #$00     ;#%00000000
         STA $D012    ;Raster Position
         LDA aCF0D
-        SEC 
+        SEC
         SBC #$01     ;#%00000001
         AND #$07     ;#%00000111
 aCF01   STA aCF0D
         CMP #$02     ;#%00000010
         BNE bCF0B
         INC aCF0E
-bCF0B   RTS 
+bCF0B   RTS
 
 aCF0C   .BYTE $00
 aCF0D   .BYTE $07
@@ -13319,17 +13320,17 @@ jCF17   LDX #$03     ;#%00000011
         STA $DD0F    ;CIA2: CIA Control Register B
 bCF23   LDA fCF0F,X
         STA $DD08,X  ;CIA2: Time-of-Day Clock: 1/10 Seconds
-        DEX 
+        DEX
         BPL bCF23
         LDX #$03     ;#%00000011
         LDA #$80     ;#%10000000
         STA $DD0F    ;CIA2: CIA Control Register B
 bCF33   LDA fCF13,X
         STA $DD08,X  ;CIA2: Time-of-Day Clock: 1/10 Seconds
-        DEY 
-        DEX 
+        DEY
+        DEX
         BPL bCF33
-        RTS 
+        RTS
 
         .BYTE $DF,$60,$DF,$20,$DF,$20,$DF,$20
         .BYTE $DF,$00,$DF,$20,$DF,$20,$DF,$20
@@ -14033,13 +14034,13 @@ fE000   .BYTE $02,$01,$02,$02,$15,$02,$01,$15
         .BYTE $02,$02,$02,$02,$02,$02,$02,$02
         .BYTE $02,$02,$02,$02,$02,$02,$02,$02
 
-; $E500 (jmp) - returns the addr of I/O devices  
+; $E500 (jmp) - returns the addr of I/O devices
 ROM_IOBASEj .BYTE $05,$05,$04,$01,$19
 
-; $E505 (jmp) - return screen size               
+; $E505 (jmp) - return screen size
 ROM_SCREENj .BYTE $04,$05,$04,$18,$19
 
-; $E50A (jmp) - read/set cursor position         
+; $E50A (jmp) - read/set cursor position
 ROM_PLOTj .BYTE $15,$04,$05,$04,$05,$15,$04,$04
         .BYTE $00,$05,$05,$04,$01,$00,$15,$18
         .BYTE $15,$19,$05,$04,$04,$05,$05,$05
@@ -14217,7 +14218,7 @@ fE770   .BYTE $02,$01,$02,$02,$15,$02,$01,$15
         .BYTE $02,$39,$3A,$3B,$36,$37,$38,$02
         .BYTE $02,$02,$02,$02,$02,$02,$02
 
-; $EA87 (jmp) - scan keyboard                    
+; $EA87 (jmp) - scan keyboard
 ROM_SCNKEYj .BYTE $02,$02,$02,$04,$04,$39,$3A,$3B
         .BYTE $36,$02,$02,$02,$02,$02,$02,$02
         .BYTE $02,$02,$02,$02,$02,$02,$02,$02
@@ -14300,10 +14301,10 @@ ROM_SCNKEYj .BYTE $02,$02,$02,$04,$04,$39,$3A,$3B
         .BYTE $02,$02,$02,$02,$02,$02,$02,$02
         .BYTE $02,$02
 
-; $ED09 (jmp) - make SERIAL device talk          
+; $ED09 (jmp) - make SERIAL device talk
 ROM_TALKj .BYTE $02,$02,$02
 
-; $ED0C (jmp) - make SERIAL device listen        
+; $ED0C (jmp) - make SERIAL device listen
 ROM_LISTENj .BYTE $02,$02,$02,$02,$02,$02,$02,$02
         .BYTE $02,$02,$02,$02,$02,$02,$02,$02
         .BYTE $02,$02,$02,$02,$02,$02,$02,$02
@@ -14327,30 +14328,30 @@ ROM_LISTENj .BYTE $02,$02,$02,$02,$02,$02,$02,$02
         .BYTE $3F,$3F,$3F,$36,$3F,$3F,$3F,$3F
         .BYTE $3F,$3F,$3F,$3F,$3F
 
-; $EDB9 (jmp) - send secondary addr after listen 
+; $EDB9 (jmp) - send secondary addr after listen
 ROM_SECONDj .BYTE $3F,$3F,$3F,$3F,$3F,$3F,$3F,$3F
         .BYTE $3F,$3F,$3F,$3F,$3F,$3F
 
-; $EDC7 (jmp) - send secondary addr after talk   
+; $EDC7 (jmp) - send secondary addr after talk
 ROM_TKSAj .BYTE $3F,$3F,$3F,$3F,$3F,$3F,$3F,$3F
         .BYTE $3F,$3F,$3F,$3F,$3F,$3F,$3F,$3F
         .BYTE $3F,$3F,$3F,$3F,$3F,$3F
 
-; $EDDD (jmp) - output byte to SERIAL            
+; $EDDD (jmp) - output byte to SERIAL
 ROM_CIOUTj .BYTE $3F,$3F,$3F,$39,$3A,$3B,$3F,$3F
         .BYTE $3F,$3F,$3F,$3F,$3F,$3F,$3F,$3F
         .BYTE $3F,$3F
 
-; $EDEF (jmp) - untalk all SERIAL devices        
+; $EDEF (jmp) - untalk all SERIAL devices
 ROM_UNTLKj .BYTE $3F,$02,$01,$02,$39,$3A,$3B,$3F
         .BYTE $3F,$3F,$3F,$3F,$3F,$3F,$3F
 
-; $EDFE (jmp) - unlisten all SERIAL devices      
+; $EDFE (jmp) - unlisten all SERIAL devices
 ROM_UNLSNj .BYTE $3F,$3F,$02,$15,$02,$01,$02,$18
         .BYTE $39,$3A,$3B,$3F,$3F,$3F,$3F,$3F
         .BYTE $3F,$3F,$01,$02,$02
 
-; $EE13 (jmp) - input byte from SERIAL           
+; $EE13 (jmp) - input byte from SERIAL
 ROM_ACPTRj .BYTE $15,$02,$02,$18,$02,$02,$39,$3A
         .BYTE $3B,$3F,$3F,$3F,$3F,$15,$02,$18
         .BYTE $01,$02,$02,$15,$02,$18,$01,$02
@@ -14454,13 +14455,13 @@ fEE70   .BYTE $01,$15,$02,$02,$18,$02,$01,$02
         .BYTE $7D,$7E,$76,$76,$7B,$7C,$1E,$1F
         .BYTE $1E,$1F,$7D,$7C,$1F,$1E
 
-; $F13E (jmp) - get a byte from channel          
+; $F13E (jmp) - get a byte from channel
 ROM_GETINj .BYTE $1F,$1E,$1E,$1F,$1F,$1E,$1F,$1E
         .BYTE $1F,$1F,$1E,$1F,$1E,$1E,$1F,$1E
         .BYTE $1F,$1E,$1E,$1F,$21,$12,$13,$14
         .BYTE $24
 
-; $F157 (jmp) - input character                  
+; $F157 (jmp) - input character
 ROM_CHRINj .BYTE $1F,$1F,$1E,$1E,$00,$10,$11,$1E
         .BYTE $1F,$1E,$1E,$1F,$1E,$0E,$1F,$1F
         .BYTE $1E,$1E,$1F,$1F,$1E,$1F,$1F,$1E
@@ -14477,7 +14478,7 @@ ROM_CHRINj .BYTE $1F,$1F,$1E,$1E,$00,$10,$11,$1E
         .BYTE $1E,$1F,$1F,$1E,$1F,$12,$13,$14
         .BYTE $1F,$1F,$15
 
-; $F1CA (jmp) - output character                 
+; $F1CA (jmp) - output character
 ROM_CHROUTj .BYTE $16,$17,$1F,$10,$11,$1F,$1F,$12
         .BYTE $13,$14,$1F,$0E,$0F,$1E,$1F,$1F
         .BYTE $10,$11,$1E,$1F,$1F,$1F,$1E,$1F
@@ -14488,7 +14489,7 @@ ROM_CHROUTj .BYTE $16,$17,$1F,$10,$11,$1F,$1F,$12
         .BYTE $1E,$1F,$12,$13,$14,$1F,$1F,$1F
         .BYTE $16,$1F,$1F,$1F
 
-; $F20E (jmp) - open channel for input           
+; $F20E (jmp) - open channel for input
 ROM_CHKINj .BYTE $1E,$1F,$1F,$12,$13,$14,$1F,$1F
         .BYTE $1F,$1E,$1F,$1F,$1E,$1F,$1E,$1F
         .BYTE $1F,$1F,$1E,$1F,$1E,$1F,$1F,$1E
@@ -14499,7 +14500,7 @@ ROM_CHKINj .BYTE $1E,$1F,$1F,$12,$13,$14,$1F,$1F
         .BYTE $1F,$1F,$1E,$15,$12,$13,$14,$16
         .BYTE $17,$1E
 
-; $F250 (jmp) - open channel for output          
+; $F250 (jmp) - open channel for output
 ROM_CHKOUTj .BYTE $1F,$12,$13,$10,$12,$13,$14,$1F
         .BYTE $1E,$1F,$10,$0E,$11,$10,$11,$1F
         .BYTE $1F,$1E,$0E,$1F,$1F,$0E,$0F,$1E
@@ -14510,7 +14511,7 @@ ROM_CHKOUTj .BYTE $1F,$12,$13,$10,$12,$13,$14,$1F
         .BYTE $1E,$15,$12,$13,$14,$16,$17,$1E
         .BYTE $1F
 
-; $F291 (jmp) - close a logical file             
+; $F291 (jmp) - close a logical file
 ROM_CLOSEj .BYTE $12,$13,$1F,$12,$13,$14,$1F,$1E
         .BYTE $1F,$1F,$1E,$1F,$1F,$1E,$1F,$1F
         .BYTE $1E,$1F,$1F,$1F,$1E,$1F,$1E,$1F
@@ -14532,10 +14533,10 @@ ROM_CLOSEj .BYTE $12,$13,$1F,$12,$13,$14,$1F,$1E
         .BYTE $1F,$1F,$1E,$5E,$5B,$1E,$1F,$1F
         .BYTE $1E,$1F,$1F,$1F,$1E,$1F
 
-; $F32F (jmp) - close or abort all files         
+; $F32F (jmp) - close or abort all files
 ROM_CLALLj .BYTE $1F,$1F,$1E,$1F
 
-; $F333 (jmp) - restore default devices          
+; $F333 (jmp) - restore default devices
 ROM_CLRCHNj .BYTE $1E,$1F,$1F,$1E,$1F,$1F,$1F,$1E
         .BYTE $1F,$1E,$1F,$1F,$1E,$1F,$1F,$24
         .BYTE $25,$26,$1E,$1F,$1F,$1F,$97
@@ -14585,7 +14586,7 @@ ROM_OPENj .BYTE $98,$23,$1F,$1F,$1E,$1F,$5C,$5A
         .BYTE $B4,$B7,$B8,$1F,$1F,$1E,$1E,$B4
         .BYTE $B4,$B0,$B1,$B6
 
-; $F49E (jmp) - load after call SETLFS,SETNAM    
+; $F49E (jmp) - load after call SETLFS,SETNAM
 ROM_LOADj .BYTE $1E,$1F,$1F,$A6,$A6,$A6,$1F,$A6
         .BYTE $1F,$1E,$1F,$1F,$1E,$1F,$1E,$1F
         .BYTE $1F,$1F,$1E,$1F,$1E,$1F,$1F,$1F
@@ -14627,7 +14628,7 @@ ROM_LOADj .BYTE $1E,$1F,$1F,$A6,$A6,$A6,$1F,$A6
         .BYTE $1F,$1E,$21,$22,$23,$21,$22,$23
         .BYTE $1F,$1F,$8A,$8A,$8A,$8A,$8A
 
-; $F5DD (jmp) - save after call SETLFS,SETNAM    
+; $F5DD (jmp) - save after call SETLFS,SETNAM
 ROM_SAVEj .BYTE $92,$8A,$92,$82,$82,$82,$82,$92
         .BYTE $92,$92,$92,$4B,$4B,$4B,$4B,$1F
         .BYTE $82,$82,$92,$4A,$4A,$4A,$4A,$4B
@@ -14653,7 +14654,7 @@ ROM_SAVEj .BYTE $92,$8A,$92,$82,$82,$82,$82,$92
         .BYTE $E8,$92,$E9,$E8,$EF,$EF,$EF,$EF
         .BYTE $EF,$EF,$E9,$E8,$EF,$EF
 
-; $F69B (jmp) - update jiffy clock               
+; $F69B (jmp) - update jiffy clock
 ROM_UDTIMj .BYTE $EF,$EF,$EF,$EF,$E9,$E8,$EF,$EF
         .BYTE $EF,$EF,$EF,$EF,$E9,$E8,$EF,$EF
         .BYTE $EF,$EF,$EF,$EF,$E9,$E6,$E4,$EB
@@ -14664,14 +14665,14 @@ ROM_UDTIMj .BYTE $EF,$EF,$EF,$EF,$E9,$E8,$EF,$EF
         .BYTE $1E,$1F,$1E,$A2,$A3,$92,$92,$8B
         .BYTE $1F,$1F
 
-; $F6DD (jmp) - read jiffy clock                 
+; $F6DD (jmp) - read jiffy clock
 ROM_RDTIMj .BYTE $1F,$1E,$1E,$92,$92,$92,$8A
 
-; $F6E4 (jmp) - set jiffy clock                  
+; $F6E4 (jmp) - set jiffy clock
 ROM_SETTIMj .BYTE $8B,$1F,$1F,$1F,$82,$82,$82,$92
         .BYTE $92
 
-; $F6ED (jmp) - check stop key                   
+; $F6ED (jmp) - check stop key
 ROM_STOPj .BYTE $1F,$1E,$1F,$4B,$4B,$49,$92,$92
         .BYTE $1F,$1E,$1F,$4A,$4A,$49,$92,$92
         .BYTE $1F,$1E,$1F,$1F,$1F,$1E,$68,$69
@@ -14871,10 +14872,10 @@ RESET_VECTOR .BYTE $DB,$F8,$F9,$1F,$1E,$1F,$DB,$DB
         .BYTE $1E,$1F,$1E,$1F,$1F,$1E,$1F,$1F
         .BYTE $1F,$1E,$1F
 
-; $FD15 (jmp) - restore default I/O vectors      
+; $FD15 (jmp) - restore default I/O vectors
 ROM_RESTORj .BYTE $1E,$1F,$1E,$1E,$1F
 
-; $FD1A (jmp) - read/set I/O vectors             
+; $FD1A (jmp) - read/set I/O vectors
 ROM_VECTORj .BYTE $1F,$1E,$1F,$1F,$1E,$1F,$1F,$1E
         .BYTE $1F,$1F,$1E,$1F,$1F,$1E,$1F,$1F
         .BYTE $1E,$1F,$1F,$1F,$1E,$1F,$F8,$F9
@@ -14883,7 +14884,7 @@ ROM_VECTORj .BYTE $1F,$1E,$1F,$1F,$1E,$1F,$1F,$1E
         .BYTE $DB,$DB,$DB,$DB,$DB,$DB,$1F,$15
         .BYTE $16,$FA,$FB,$DB,$DB,$DB
 
-; $FD50 (jmp) - RAM test & search RAM end        
+; $FD50 (jmp) - RAM test & search RAM end
 ROM_RAMTASj .BYTE $C2,$C3,$C4,$C5,$1F,$1F,$FA,$FB
         .BYTE $C2,$C3,$C1,$C5,$1F,$1F,$1E,$1F
         .BYTE $BC,$BD,$BE,$BF,$1E,$1F,$1F,$1E
@@ -14896,7 +14897,7 @@ ROM_RAMTASj .BYTE $C2,$C3,$C4,$C5,$1F,$1F,$FA,$FB
         .BYTE $FA,$FB,$DB,$DB,$DB,$DB,$DB,$DB
         .BYTE $1F,$1E,$1F
 
-; $FDA3 (jmp) - initialize CIA & IRQ             
+; $FDA3 (jmp) - initialize CIA & IRQ
 ROM_IOINITj .BYTE $FA,$FB,$DB,$DB,$DB,$68,$69,$6D
         .BYTE $1F,$1F,$1E,$FA,$FB,$18,$19,$1A
         .BYTE $1E,$1F,$1E,$1F,$1E,$1E,$1F,$1F
@@ -14909,29 +14910,29 @@ ROM_IOINITj .BYTE $FA,$FB,$DB,$DB,$DB,$68,$69,$6D
         .BYTE $DB,$DB,$DB,$DB,$DB,$FA,$FB,$DB
         .BYTE $DB,$DB,$DB,$DB,$DB,$1F
 
-; $FDF9 (jmp) - set file name                    
+; $FDF9 (jmp) - set file name
 ROM_SETNAMj .BYTE $1E,$1F,$FA,$FB,$DB,$DB,$DB
 
-; $FE00 (jmp) - set file parameters              
+; $FE00 (jmp) - set file parameters
 ROM_SETLFSj .BYTE $1F,$1F,$5B,$5E,$1F,$1F,$24
 
-; $FE07 (jmp) - read I/O status byte             
+; $FE07 (jmp) - read I/O status byte
 ROM_READSTj .BYTE $25,$5B,$1F,$27,$28,$29,$1F,$21
         .BYTE $22,$1F,$1F,$24,$25,$26,$1F,$1F
         .BYTE $5E
 
-; $FE18 (jmp) - enable/disable KERNAL messages   
+; $FE18 (jmp) - enable/disable KERNAL messages
 ROM_SETMSGj .BYTE $1E,$1F,$21,$22,$23,$1E,$1F,$1F
         .BYTE $1E
 
-; $FE21 (jmp) - set IEEE timeout                 
+; $FE21 (jmp) - set IEEE timeout
 ROM_SETTMOj .BYTE $1F,$1F,$1F,$1F
 
-; $FE25 (jmp) - read/set top of memory           
+; $FE25 (jmp) - read/set top of memory
 ROM_MEMTOPj .BYTE $5E,$5B,$1F,$1F,$1E,$1F,$1F,$1F
         .BYTE $1F,$1F,$1E,$1F,$1F,$1F,$1E
 
-; $FE34 (jmp) - read/set bottom of memory        
+; $FE34 (jmp) - read/set bottom of memory
 ROM_MEMBOTj .BYTE $1F,$1F,$1F,$1E,$1F,$1F,$1F,$1E
         .BYTE $1F,$1F,$1F,$1E,$1F,$1F,$1E
 NMI_VECTOR .BYTE $1F,$1F,$1F,$1F,$1E,$68,$69,$6D
@@ -14972,127 +14973,127 @@ IRQ_BRK_VECTOR .BYTE $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
         .BYTE $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
         .BYTE $FF,$FF,$FF
 
-; $FF5B (jmp) - init VIC & screen editor         
+; $FF5B (jmp) - init VIC & screen editor
 ROM_CINTj .BYTE $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
         .BYTE $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
         .BYTE $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
         .BYTE $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
         .BYTE $FF,$FF,$FF,$FF,$FF,$00
 
-; $FF81 - init VIC & screen editor         
+; $FF81 - init VIC & screen editor
 ROM_CINT .BYTE $00,$00,$00
 
-; $FF84 - initialize CIA & IRQ             
+; $FF84 - initialize CIA & IRQ
 ROM_IOINIT .BYTE $00,$00,$00
 
-; $FF87 - RAM test & search RAM end        
+; $FF87 - RAM test & search RAM end
 ROM_RAMTAS .BYTE $00,$00,$00
 
-; $FF8A - restore default I/O vectors      
+; $FF8A - restore default I/O vectors
 ROM_RESTOR .BYTE $00,$00,$00
 
-; $FF8D - read/set I/O vectors             
+; $FF8D - read/set I/O vectors
 ROM_VECTOR .BYTE $00,$00,$00
 
-; $FF90 - enable/disable KERNAL messages   
+; $FF90 - enable/disable KERNAL messages
 ROM_SETMSG .BYTE $00,$00,$00
 
-; $FF93 - send secondary addr after listen 
+; $FF93 - send secondary addr after listen
 ROM_SECOND .BYTE $00,$00,$00
 
-; $FF96 - send secondary addr after talk   
+; $FF96 - send secondary addr after talk
 ROM_TKSA .BYTE $00,$00,$00
 
-; $FF99 - read/set top of memory           
+; $FF99 - read/set top of memory
 ROM_MEMTOP .BYTE $00,$00,$00
 
-; $FF9C - read/set bottom of memory        
+; $FF9C - read/set bottom of memory
 ROM_MEMBOT .BYTE $00,$00,$00
 
-; $FF9F - scan keyboard                    
+; $FF9F - scan keyboard
 ROM_SCNKEY .BYTE $00,$00,$00
 
-; $FFA2 - set IEEE timeout                 
+; $FFA2 - set IEEE timeout
 ROM_SETTMO .BYTE $00,$00,$00
 
-; $FFA5 - input byte from SERIAL           
+; $FFA5 - input byte from SERIAL
 ROM_ACPTR .BYTE $00,$00,$00
 
-; $FFA8 - output byte to SERIAL            
+; $FFA8 - output byte to SERIAL
 ROM_CIOUT .BYTE $00,$00,$00
 
-; $FFAB - untalk all SERIAL devices        
+; $FFAB - untalk all SERIAL devices
 ROM_UNTLK .BYTE $00,$00,$00
 
-; $FFAE - unlisten all SERIAL devices      
+; $FFAE - unlisten all SERIAL devices
 ROM_UNLSN .BYTE $00,$00,$00
 
-; $FFB1 - make SERIAL device listen        
+; $FFB1 - make SERIAL device listen
 ROM_LISTEN .BYTE $00,$00,$00
 
-; $FFB4 - make SERIAL device talk          
+; $FFB4 - make SERIAL device talk
 ROM_TALK .BYTE $00,$00,$00
 
-; $FFB7 - read I/O status byte             
+; $FFB7 - read I/O status byte
 ROM_READST .BYTE $00,$00,$00
 
-; $FFBA - set file parameters              
+; $FFBA - set file parameters
 ROM_SETLFS .BYTE $00,$00
 pFFBC   .BYTE $00
 
-; $FFBD - set file name                    
+; $FFBD - set file name
 ROM_SETNAM .BYTE $00,$00,$00
 
 ; $FFC0 - open log.file after SETLFS,SETNAM
 ROM_OPEN .BYTE $FF,$FF,$FF
 
-; $FFC3 - close a logical file             
+; $FFC3 - close a logical file
 ROM_CLOSE .BYTE $FF,$FF,$FF
 
-; $FFC6 - open channel for input           
+; $FFC6 - open channel for input
 ROM_CHKIN .BYTE $FF,$FF,$FF
 
-; $FFC9 - open channel for output          
+; $FFC9 - open channel for output
 ROM_CHKOUT .BYTE $FF,$FF,$FF
 
-; $FFCC - restore default devices          
+; $FFCC - restore default devices
 ROM_CLRCHN .BYTE $FF,$FF,$FF
 
-; $FFCF - input character                  
+; $FFCF - input character
 ROM_CHRIN .BYTE $FF,$FF,$FF
 
-; $FFD2 - output character                 
+; $FFD2 - output character
 ROM_CHROUT .BYTE $FF,$FF,$FF
 
-; $FFD5 - load after call SETLFS,SETNAM    
+; $FFD5 - load after call SETLFS,SETNAM
 ROM_LOAD .BYTE $FF,$FF,$FF
 
-; $FFD8 - save after call SETLFS,SETNAM    
+; $FFD8 - save after call SETLFS,SETNAM
 ROM_SAVE .BYTE $FF,$FF,$FF
 
-; $FFDB - set jiffy clock                  
+; $FFDB - set jiffy clock
 ROM_SETTIM .BYTE $FF,$FF,$FF
 
-; $FFDE - read jiffy clock                 
+; $FFDE - read jiffy clock
 ROM_RDTIM .BYTE $FF,$FF,$FF
 
-; $FFE1 - check stop key                   
+; $FFE1 - check stop key
 ROM_STOP .BYTE $FF,$FF,$FF
 
-; $FFE4 - get a byte from channel          
+; $FFE4 - get a byte from channel
 ROM_GETIN .BYTE $FF,$FF,$FF
 
-; $FFE7 - close or abort all files         
+; $FFE7 - close or abort all files
 ROM_CLALL .BYTE $FF,$FF,$FF
 
-; $FFEA - update jiffy clock               
+; $FFEA - update jiffy clock
 ROM_UDTIM .BYTE $FF,$FF,$FF
 
-; $FFED - return screen size               
+; $FFED - return screen size
 ROM_SCREEN .BYTE $FF,$FF,$FF
 
-; $FFF0 - read/set cursor position         
+; $FFF0 - read/set cursor position
 ROM_PLOT .BYTE $FF,$FF,$FF
 
-; $FFF3 - returns the addr of I/O devices  
+; $FFF3 - returns the addr of I/O devices
 ROM_IOBASE .BYTE $FF,$FF,$FF,$FF,$FF,$FF,$FF
