@@ -10040,13 +10040,13 @@ sC10B   JSR sC19F
 fC119   .BYTE $29,$28,$01,$00
 fC11E   =*+$01
 fC11D   .WORD aC1B7-1,aC168-1,bC1B0-1,aC136-1,aC129-1
-        .WORD aC12E
+        .WORD aC12F-1
 
 aC129   LDA #$02     ;#%00000010
         STA aC135
-aC12E   RTS
+        RTS
 
-        LDA #$01     ;#%00000001
+aC12F   LDA #$01     ;#%00000001
         STA aC135
         RTS
 
