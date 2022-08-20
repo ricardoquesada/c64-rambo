@@ -12697,6 +12697,8 @@ sC74C   .BYTE $20,$7A,$C0,$52,$C7,$60,$FF,$03
         .TEXT "HIGH[SCORE[RANKS"
         .BYTE $FF,$00
 
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+; $C82E
 sC82E   LDA #$01     ;#%00000001
         JSR s8100
         LDA #$1A     ;#%00011010
@@ -12704,6 +12706,7 @@ sC82E   LDA #$01     ;#%00000001
         JSR s8100
         LDA #$03     ;#%00000011
         JSR s8100
+
 jC83F   LDA #$08     ;#%00001000
         STA aCCD3
         LDA #$00     ;#%00000000
@@ -12769,43 +12772,51 @@ bC8AB   JSR bC2D3
         JSR jC07A
         .BYTE $5A
         .BYTE $CC
-        LDA #$00     ;#%00000000
-        STA aCFFF
-        LDA #<pC96C  ;#%01101100
-        STA aFE
-        LDA #>pC96C  ;#%11001001
-        STA aFF
-jC8E4   LDY #$00     ;#%00000000
-jC8E6   LDA (pFE),Y
-        BMI bC8F1
-        STA fCC7E,Y
-        INY
-        JMP jC8E6
 
-bC8F1   TAX
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+; $C8D7
+        LDA #$00
+        STA aCFFF
+        LDA #<pC96C
+        STA aFE
+        LDA #>pC96C
+        STA aFF
+
+_L00    LDY #$00
+_L01    LDA (pFE),Y                     ;Read char to print
+        BMI _L02                        ;Is it special char? Yes
+        STA fCC7E,Y                     ; No?,just place it in buffer
+        INY                             ;Next char
+        JMP _L01
+
+_L02    TAX                             ;Save special char in X
         INY
-        LDA (pFE),Y
-        PHA
+        LDA (pFE),Y                     ;Load next char (special modifier)
+        PHA                             ;Push special-modifier char
         INY
         TYA
-        STY aCCD4
+        STY aCCD4                       ;Save next char in tmp variable
         CLC
-        ADC aFE
+        ADC aFE                         ;Update index of buffer to print
         STA aFE
-        BCC bC904
+        BCC _L03
         INC aFF
-bC904   PLA
-        STA aCC7D
+
+_L03    PLA                             ;Pop special-modifier
+        STA aCC7D                       ;Save it
         TAY
-        CPX #$FF     ;#%11111111
-        BNE bC912
-        LDA #$2C     ;#%00101100
+        CPX #$FF                        ;Special is #ff ?
+        BNE _L04                        ; No
+
+        LDA #$2C
         STA aCF01
-bC912   CPX #$FE     ;#%11111110
-        BNE bC919
+
+_L04    CPX #$FE                        ;Special is #fe ?
+        BNE _L05                        ; No
+
         JMP jC83F
 
-bC919   TYA
+_L05    TYA
         AND #$10     ;#%00010000
         LSR A
         LSR A
@@ -12823,25 +12834,25 @@ bC919   TYA
         STA fCC7F,Y
         JSR jC07A
         ADC fCC,X
-bC93A   JSR bC2D3
+_L06    JSR bC2D3
         JSR sCD73
         JSR sC589
         LDA aCFFF
-        BNE bC951
+        BNE _L07
         LDA aC5CD
-        BEQ bC95B
+        BEQ _L08
         AND #$10     ;#%00010000
-        BNE bC966
-bC951   LDA #$00     ;#%00000000
+        BNE _L09
+_L07    LDA #$00     ;#%00000000
         STA aCFFF
         LDA #$8D     ;#%10001101
         STA aCF01
-bC95B   LDA aCF0E
-        BEQ bC93A
+_L08    LDA aCF0E
+        BEQ _L06
         DEC aCF0E
-        JMP jC8E4
+        JMP _L00
 
-bC966   LDX #$8D     ;#%10001101
+_L09    LDX #$8D     ;#%10001101
         STX aCF01
         RTS
 
