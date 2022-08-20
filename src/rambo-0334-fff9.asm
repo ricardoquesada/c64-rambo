@@ -10039,10 +10039,10 @@ sC10B   JSR sC19F
 
 fC119   .BYTE $29,$28,$01,$00
 fC11E   =*+$01
-fC11D   .WORD aC1B6,aC167,bC1AF,aC135,aC128
-aC128   =*+$01
+fC11D   .WORD aC1B7-1,aC168-1,bC1B0-1,aC136-1,aC129-1
         .WORD aC12E
-        LDA #$02     ;#%00000010
+
+aC129   LDA #$02     ;#%00000010
         STA aC135
 aC12E   RTS
 
@@ -10051,7 +10051,8 @@ aC12E   RTS
         RTS
 
 aC135   .BYTE $02
-        JSR sC19F
+
+aC136   JSR sC19F
         PHA
         JSR sC19F
         TAX
@@ -10073,9 +10074,9 @@ bC140   PLA
         CPY #$FF     ;#%11111111
         BNE bC140
         PLA
-aC167   RTS
+        RTS
 
-        LDA #$00     ;#%00000000
+aC168   LDA #$00     ;#%00000000
         STA aFD
         JSR sC19F
         STA aC19C
@@ -10118,11 +10119,11 @@ sC1A9   INC aFA
         INC aFB
 bC1AF   RTS
 
-        JSR sC19F
+bC1B0   JSR sC19F
         STA aC19E
-aC1B6   RTS
+        RTS
 
-        PLA
+aC1B7   PLA
         PLA
         RTS
 
@@ -11016,6 +11017,7 @@ fCCCC   .TEXT "74000"
         .BYTE $FF,$00
 aCCD3   .BYTE $01
 aCCD4   .BYTE $00
+
 sCCD5   LDY aCD72
         LDX aCCD3
         CPX #$01     ;#%00000001
@@ -11246,6 +11248,7 @@ bCE95   ASL A
 
 fCEA9   .BYTE $B1
 fCEAA   .BYTE $CE,$C1,$CE,$D4,$CE,$E7,$CE
+
         LDA #$1B     ;#%00011011
         STA $D011    ;VIC Control Register 1
         LDA #$08     ;#%00001000
@@ -11294,6 +11297,7 @@ aCF0D   .BYTE $07
 aCF0E   .BYTE $00
 fCF0F   .BYTE $00,$00,$00,$00
 fCF13   .BYTE $00,$20,$05,$00
+
 jCF17   LDX #$03     ;#%00000011
         LDA #$81     ;#%10000001
         STA $DD0E    ;CIA2: CIA Control Register A
