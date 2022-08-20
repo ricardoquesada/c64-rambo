@@ -9946,6 +9946,7 @@ fC070   .BYTE $78
 fC071   .BYTE $FF
 fC072   .BYTE $07
 aC073   .BYTE $00
+
         JMP jC07A
 
         JMP jC00C
@@ -10150,7 +10151,9 @@ jC1BA   LDX #$F0     ;#%11110000
         LDA #$08     ;#%00001000
         STA $D016    ;VIC Control Register 2
 jC1F3   JSR jC07A
+
         .BYTE $AE,$CC
+
         LDA #$00     ;#%00000000
         STA aCFFF
         JSR sCE30
@@ -10209,7 +10212,9 @@ sC276   LDA aC2D1
         RTS
 
 bC27F   JSR jC07A
+
         .BYTE $AE,$CC,$20,$7A,$C0,$AE,$C7
+
         LDX #$4F     ;#%01001111
         LDA aC2D1
 bC28E   CMP fB41A,X
@@ -10242,6 +10247,7 @@ bC2AE   JSR sC3DE
 
 aC2D1   .BYTE $00
 aC2D2   .BYTE $00
+
 bC2D3   LDA aCF0C
         BEQ bC2D3
         DEC aCF0C
@@ -10406,12 +10412,12 @@ sC418   LDA aC528
         LDA fC549,X
         STA aC437
         JSR jC07A
-        AND (pC4),Y
-        RTS
 
+        .BYTE $31,$C4,$60
         .BYTE $FF,$01
 aC433   .BYTE $00,$16,$FF,$02
 aC437   .BYTE $00,$3A,$5B,$FF,$00
+
 sC43C   LDX #$4F     ;#%01001111
         LDY #$00     ;#%00000000
         SED
@@ -10477,11 +10483,13 @@ bC4AB   LDA (pFE),Y
         DEY
         BPL bC4AB
         JSR jC07A
+
         .BYTE $B9,$C4,$60
         .BYTE $FF,$01,$0A,$16,$FF,$02,$01,$FF
         .BYTE $04
 fC4C2   .BYTE $5B,$5B,$5B,$5B,$5B,$5B,$5B,$5B
         .BYTE $55,$44,$FF,$00
+
 sC4CE   LDA aC5CC
         BNE bC4D4
         RTS
@@ -10554,13 +10562,16 @@ aC546   .BYTE $00
 aC547   .BYTE $00,$00
 fC549   .BYTE $00,$0B,$0C,$0F,$01,$0F,$0C,$0B
 fC551   .BYTE $00,$06,$0E,$03,$01,$03,$0E,$06
+
 sC559   LDA #$01     ;#%00000001
         STA a43F9
         JSR jC07A
+
         .BYTE $64,$C5,$60,$FF,$04,$FF,$01,$0D
         .BYTE $13,$FF,$02,$05
         .TEXT "TROOPER", $FF, $01, $05, $00, "ENTER[YOUR[NAME", $FF
         .BYTE $00
+
 sC589   LDA #$00     ;#%00000000
         LDX #$05     ;#%00000101
 bC58D   STA aC5C8,X
@@ -10815,9 +10826,9 @@ bC853   STA f4348,X
         DEX
         BPL bC853
         JSR jC07A
-        CLI
-        .BYTE $C7
-        LDA #$00     ;#%00000000
+
+        .BYTE $58,$C7,$A9,$00
+
 bC863   STA aCD72
         JSR sCCD5
         JSR jC07A
@@ -10865,8 +10876,8 @@ bC8AB   JSR bC2D3
         STA aCD72
         BCC jC86E
         JSR jC07A
-        .BYTE $5A
-        .BYTE $CC
+
+        .BYTE $5A,$CC
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 ; $C8D7
