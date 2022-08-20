@@ -1,3 +1,5 @@
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+
 ;
 ; **** ZP FIELDS ****
 ;
@@ -11296,6 +11298,8 @@ fB001   .BYTE $00,$00,$07,$90,$00,$07,$80,$00
         .BYTE $80,$00,$00,$70,$00,$00,$60,$00
         .BYTE $00,$50,$00,$00,$40,$00,$00,$30
         .BYTE $00,$00,$20,$00,$00,$10,$00
+
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
         .TEXT "[[CODING[["
         .TEXT "[[[[BY[[[["
         .TEXT "]]]TONY]]]"
@@ -11377,6 +11381,7 @@ fB001   .BYTE $00,$00,$07,$90,$00,$07,$80,$00
         .TEXT "]UNKNOWN]["
         .TEXT "]UNKNOWN]["
         .TEXT "[[[[[[[[[["
+
 fB41A   .BYTE $00
 fB41B   .BYTE $01,$02,$03,$04,$05,$06,$07,$08
         .BYTE $09,$0A,$0B,$0C,$0D,$0E,$0F,$10
@@ -12500,6 +12505,7 @@ aC5CA   .BYTE $00
 aC5CB   .BYTE $00
 aC5CC   .BYTE $00
 aC5CD   .BYTE $00
+
 sC5CE   LDA aC652
         STA $D000    ;Sprite 0 X Pos
         LDA aC654
@@ -12662,14 +12668,35 @@ fC70C   .BYTE $00,$01,$02,$03,$04,$06,$08,$0A
 fC72C   .TEXT "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
         .BYTE $5F,$61,$5C,$5D,$5E,$62
 sC74C   .BYTE $20,$7A,$C0,$52,$C7,$60,$FF,$03
-        .BYTE $00,$20,$FF,$00,$FF,$02,$07,$FF
-        .BYTE $04,$FF,$01,$0F,$00
-        .TEXT "RAMBO", $FF, $05, "TM", $FF, $04, $FF, $01, $09, $03, $FF, $02, $02, "FIRST[BLOOD", $FF, $05, "TM", $FF, $04, $FF, $01, $0D, $06, $FF
-        .TEXT $02, $03, "PART[II", $FF, $05, $FF, $01, $0C, $09, $FF, $02, $05, "ALL[TIME[HEROES", $FF, $04, $FF, $00, $FF, $02, $0F
-        .TEXT $FF, $01, $05, $00, "CONGRATULATIONS", $FF, $01, $09, $03, $FF, $02, $05, "YOU[ARE[NOW", $FF, $01, $03
-        .TEXT $06, $FF, $02, $07, "AMONG[OTHER[GREAT", $FF, $01, $07, $09, $FF, $02, $0A, "BATTLE[HEROE"
-        .TEXT "S", $FF, $01, $08, $0C, $FF, $02, $03, "IN[THE[RAMBO", $FF, $01, $04, $0F, $FF, $02, $0E, "HIGH[SCORE[RA"
-        .TEXT "NKS", $FF, $00
+        .BYTE $00,$20,$FF,$00
+        .BYTE $FF,$02,$07,$FF,$04
+        .BYTE $FF,$01,$0F,$00
+        .TEXT "RAMBO"
+        .BYTE $FF,$05
+        .TEXT "TM"
+        .BYTE $FF,$04,$FF,$01,$09,$03,$FF,$02,$02
+        .TEXT "FIRST[BLOOD"
+        .BYTE $FF,$05
+        .TEXT "TM"
+        .BYTE $FF,$04,$FF,$01,$0D,$06,$FF,$02,$03
+        .TEXT "PART[II"
+        .BYTE $FF,$05,$FF,$01,$0C,$09,$FF,$02,$05
+        .TEXT "ALL[TIME[HEROES"
+        .BYTE $FF,$04,$FF,$00
+        .BYTE $FF,$02,$0F,$FF,$01,$05,$00
+        .TEXT "CONGRATULATIONS"
+        .BYTE $FF,$01,$09,$03,$FF,$02,$05
+        .TEXT "YOU[ARE[NOW"
+        .BYTE $FF,$01,$03,$06,$FF,$02,$07
+        .TEXT "AMONG[OTHER[GREAT"
+        .BYTE $FF,$01,$07,$09,$FF,$02,$0A
+        .TEXT "BATTLE[HEROES"
+        .BYTE $FF,$01,$08,$0C,$FF,$02,$03
+        .TEXT "IN[THE[RAMBO"
+        .BYTE $FF,$01,$04,$0F,$FF,$02,$0E
+        .TEXT "HIGH[SCORE[RANKS"
+        .BYTE $FF,$00
+
 sC82E   LDA #$01     ;#%00000001
         JSR s8100
         LDA #$1A     ;#%00011010
@@ -12819,25 +12846,42 @@ bC966   LDX #$8D     ;#%10001101
         RTS
 
 pC96C   .TEXT "[[[[[[YOU[HAVE[CHOSEN[TO[BECOME[AN[[[[[["
-        .TEXT $80, $91, "[[[[[[[[[[AMERICAN[PEACETIME[HERO[[[[["
-        .TEXT "[[", $80, $91, "[[[[PLACE[YOUR[WEAPON[INTO[PORT[TWO["
-        .TEXT "[[[[", $80, $93, "[[YOUR[MISSION[IS[TO[RETURN[TO[VIE"
-        .TEXT "TNAM[[", $80, $91, "[[[[ON[A[RECONNAISANCE[EXERCISE["
-        .TEXT "TO[[[[[[", $80, $91, "[[[ESTABLISH[WHETHER[P<O<W;S[A"
-        .TEXT "RE[STILL[[", $80, $91, "[[[[[[[[BEING[HELD[CAPTIVE<<"
-        .TEXT "<[[[[[[[[[[[", $80, $91, "[YOU[MUST[UNDER[NO[CIRCUMS"
-        .TEXT "TANCES[ENGAGE[", $80, $95, "[[[[[[[[[[[[[[[THE[ENEMY"
-        .TEXT "[[[[[[[[[[[[[[[[", $80, $95, "[[[[[[[[MOVE[JOYSTICK["
-        .TEXT "TO[CONTINUE[[[[[[[", $80, $93, $80, $93, "[[[[[[[[SPACE[BAR["
-        .TEXT "SELECTS[WEAPON[[[[[[[[", $FF, $93, "[[[[[=S=[TOGGLES"
-        .TEXT "[MUSIC[AND[SOUND[FX[[[[[", $80, $93, "[=RUN[STOP=[TO"
-        .TEXT "GGLES[SUSPENDED[ANIMATION[", $80, $93, $80, $95, "[[[WATCH[O"
-        .TEXT "UT[FOR[EXTRA[WEAPONS[IN[THE[[[", $80, $95, "[[[[[[[T"
-        .TEXT "ERRAIN[AND[ENEMY[CAMPSITE[[[[[[[", $80, $95, $80, $91, "[[[["
-        .TEXT "[[[WHETHER[YOU[SUCCEED[OR[NOT[[[[[[[", $80, $91, $80, $91
-        .TEXT "[[[[IS[UP[TO[YOU[[[[", $80, $81, $80, $91, "[[[[[[[[[[[[[[[["
-        .TEXT "[[[[[[[[[[[[[[[[[[[[[[[[", $80, $91, $FF, $91, $FE, $91, $FF, $01, $0B, $09, $FF, $02, $01, $FF, $05, " "
-        .TEXT "  INSTRUCTIONS "
+        .BYTE $80,$91
+        .TEXT "[[[[[[[[[[AMERICAN[PEACETIME[HERO[[[[[[["
+        .BYTE $80, $91
+        .TEXT "[[[[PLACE[YOUR[WEAPON[INTO[PORT[TWO[[[[["
+        .BYTE $80,$93
+        .TEXT "[[YOUR[MISSION[IS[TO[RETURN[TO[VIETNAM[["
+        .BYTE $80,$91
+        .TEXT "[[[[ON[A[RECONNAISANCE[EXERCISE[TO[[[[[["
+        .BYTE $80,$91
+        .TEXT "[[[ESTABLISH[WHETHER[P<O<W;S[ARE[STILL[["
+        .BYTE $80,$91
+        .TEXT "[[[[[[[[BEING[HELD[CAPTIVE<<<[[[[[[[[[[["
+        .BYTE $80,$91
+        .TEXT "[YOU[MUST[UNDER[NO[CIRCUMSTANCES[ENGAGE["
+        .BYTE $80,$95
+        .TEXT "[[[[[[[[[[[[[[[THE[ENEMY[[[[[[[[[[[[[[[["
+        .BYTE $80,$95
+        .TEXT "[[[[[[[[MOVE[JOYSTICK[TO[CONTINUE[[[[[[["
+        .BYTE $80,$93,$80,$93
+        .TEXT "[[[[[[[[SPACE[BAR[SELECTS[WEAPON[[[[[[[["
+        .BYTE $FF,$93
+        .TEXT "[[[[[=S=[TOGGLES[MUSIC[AND[SOUND[FX[[[[["
+        .BYTE $80,$93
+        .TEXT "[=RUN[STOP=[TOGGLES[SUSPENDED[ANIMATION["
+        .BYTE $80,$93,$80,$95
+        .TEXT "[[[WATCH[OUT[FOR[EXTRA[WEAPONS[IN[THE[[["
+        .BYTE $80,$95
+        .TEXT "[[[[[[[TERRAIN[AND[ENEMY[CAMPSITE[[[[[[["
+        .BYTE $80,$95,$80,$91
+        .TEXT "[[[[[[[WHETHER[YOU[SUCCEED[OR[NOT[[[[[[["
+        .BYTE $80,$91,$80,$91
+        .TEXT "[[[[IS[UP[TO[YOU[[[["
+        .BYTE $80,$81,$80,$91
+        .TEXT "[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[["
+        .BYTE $80,$91,$FF,$91,$FE,$91,$FF,$01,$0B,$09,$FF,$02,$01,$FF,$05
+        .TEXT "   INSTRUCTIONS "
         .BYTE $FF,$00,$FF,$01,$00,$17,$FF
 aCC7A   .BYTE $05,$FF,$02
 aCC7D   .BYTE $00
