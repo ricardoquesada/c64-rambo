@@ -10031,14 +10031,13 @@ sC0FC   LDA aFC
 sC10B   JSR sC19F
         ASL A
         TAX
-        LDA fC11E,X
+        LDA fC11D+1,X
         PHA
         LDA fC11D,X
         PHA
         RTS
 
 fC119   .BYTE $29,$28,$01,$00
-fC11E   =*+$01
 fC11D   .WORD aC1B7-1,aC168-1,bC1B0-1,aC136-1,aC129-1
         .WORD aC12F-1
 
