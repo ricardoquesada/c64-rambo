@@ -388,7 +388,9 @@ b048C   LDA f00E0,Y
         DEY
         BPL b048C
         JSR sC000
-        BCC b04AA
+
+        .BYTE $90,$10
+
         LDA #$00     ;#%00000000
         JSR sC003
         LDX #$07     ;#%00000111
@@ -397,7 +399,6 @@ b048C   LDA f00E0,Y
         PLA
         ASL A
         TAX
-b04AA   =*+$01
         LDA f0596,X
         STA a04BE
         LDA f0597,X
@@ -405,8 +406,10 @@ b04AA   =*+$01
         LDA f058C,X
         JSR s8100
         JSR sC000
+
 a04BE   .BYTE $96
 a04BF   .BYTE $05
+
 b04C0   LDA $D012    ;Raster Position
         CMP #$C8     ;#%11001000
         BNE b04C0
@@ -431,7 +434,9 @@ b04D3   JSR s180D
         LDA #$0B     ;#%00001011
         STA $D021    ;Background Color 0
         JSR sC000
-        STX a05
+
+        .BYTE $86,$05
+
         LDY #$1F     ;#%00011111
 f0500   =*+$02
 b04FE   LDA f0566,Y
@@ -772,7 +777,9 @@ a09A0   =*+$02
         STA a0981
 a09A9   =*+$02
         JSR sC000
+
         .BYTE $7C,$10
+
         JSR s1813
 b09AF   LDA $D012    ;Raster Position
         CMP #$64     ;#%01100100
@@ -800,14 +807,15 @@ b09E1   JSR s180D
         LDA #$0D     ;#%00001101
         STA a1093
         JSR sC000
-        BCC b09FE
+
+        .BYTE $90,$10
+
         LDA #$00     ;#%00000000
         JSR sC003
 s09F3   LDA #$E0     ;#%11100000
         STA a0A06
         LDA #$E7     ;#%11100111
         STA a0A03
-b09FE   =*+$01
         LDX #$06     ;#%00000110
         LDY #$00     ;#%00000000
 a0A03   =*+$02
@@ -9883,6 +9891,7 @@ aB469   .BYTE $4F,$00,$FF,$00,$FF,$00,$FF,$FF
         .BYTE $03,$17,$03,$18,$02,$1A,$02,$1C
         .BYTE $02,$1E,$02,$C6,$59,$BF,$C5,$CE
         .BYTE $C4,$00,$CE,$C4,$FF
+
 sC000   JMP jC07A
 
 sC003   JMP jC00C
@@ -9951,6 +9960,9 @@ aC073   .BYTE $00
 
         JMP jC00C
 
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+; Returns to the ret_addr + 3
+; Treats ret_addr+1 / ret_addr+2 as variables
 jC07A   PLA
         STA aFA
         PLA
@@ -10038,6 +10050,7 @@ sC10B   JSR sC19F
         RTS
 
 fC119   .BYTE $29,$28,$01,$00
+
 fC11D   .WORD aC1B7-1,aC168-1,bC1B0-1,aC136-1,aC129-1
         .WORD aC12F-1
 
@@ -10106,6 +10119,7 @@ aC168   LDA #$00     ;#%00000000
 aC19C   .BYTE $B8
 aC19D   .BYTE $B8
 aC19E   .BYTE $06
+
 sC19F   LDY #$00     ;#%00000000
         LDA (pFA),Y
         PHA
@@ -10126,6 +10140,7 @@ aC1B7   PLA
         PLA
         RTS
 
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 jC1BA   LDX #$F0     ;#%11110000
         TXS
         JSR sC43C
@@ -10150,11 +10165,13 @@ jC1BA   LDX #$F0     ;#%11110000
         STA $D018    ;VIC Memory Control Register
         LDA #$08     ;#%00001000
         STA $D016    ;VIC Control Register 2
+
 jC1F3   JSR jC07A
 
         .BYTE $AE,$CC
 
-        LDA #$00     ;#%00000000
+; $C1F8
+        LDA #$00
         STA aCFFF
         JSR sCE30
         JSR sC3E6
@@ -10203,6 +10220,8 @@ bC219   STA fB000,Y
         LDX #$07     ;#%00000111
         JSR s8100
         JSR sC2FC
+
+        ; $C270 (Triggered when user has high-score)
         JSR sC276
         JMP jC1F3
 
@@ -10213,7 +10232,11 @@ sC276   LDA aC2D1
 
 bC27F   JSR jC07A
 
-        .BYTE $AE,$CC,$20,$7A,$C0,$AE,$C7
+        .BYTE $AE,$CC
+
+        JSR jC07A
+
+        .BYTE $AE,$C7
 
         LDX #$4F     ;#%01001111
         LDA aC2D1
@@ -10226,7 +10249,9 @@ bC296   STX aCD72
         STA aCCD3
         JSR sCCD5
         JSR jC07A
-        LDX fCC,Y
+
+        .BYTE $B6,$CC
+
         LDA #$05     ;#%00000101
         STA aC2D2
         JSR s8100
@@ -10239,7 +10264,9 @@ bC2AE   JSR sC3DE
         STA aC2D2
         JSR sCCD5
         JSR jC07A
-        LDX fCC,Y
+
+        .BYTE $B6,$CC
+
         JSR sC589
         LDA aC5CC
         BEQ bC2AE
@@ -10413,7 +10440,10 @@ sC418   LDA aC528
         STA aC437
         JSR jC07A
 
-        .BYTE $31,$C4,$60
+        .BYTE $31,$C4
+
+        RTS
+
         .BYTE $FF,$01
 aC433   .BYTE $00,$16,$FF,$02
 aC437   .BYTE $00,$3A,$5B,$FF,$00
@@ -10484,7 +10514,10 @@ bC4AB   LDA (pFE),Y
         BPL bC4AB
         JSR jC07A
 
-        .BYTE $B9,$C4,$60
+        .BYTE $B9,$C4
+
+        RTS
+
         .BYTE $FF,$01,$0A,$16,$FF,$02,$01,$FF
         .BYTE $04
 fC4C2   .BYTE $5B,$5B,$5B,$5B,$5B,$5B,$5B,$5B
@@ -10567,7 +10600,11 @@ sC559   LDA #$01     ;#%00000001
         STA a43F9
         JSR jC07A
 
-        .BYTE $64,$C5,$60,$FF,$04,$FF,$01,$0D
+        .BYTE $64,$C5
+
+        RTS
+
+        .BYTE $FF,$04,$FF,$01,$0D
         .BYTE $13,$FF,$02,$05
         .TEXT "TROOPER", $FF, $01, $05, $00, "ENTER[YOUR[NAME", $FF
         .BYTE $00
@@ -10827,12 +10864,15 @@ bC853   STA f4348,X
         BPL bC853
         JSR jC07A
 
-        .BYTE $58,$C7,$A9,$00
+        .BYTE $58,$C7
 
+        LDA #$00
 bC863   STA aCD72
         JSR sCCD5
         JSR jC07A
-        LDX fCC,Y
+
+        .BYTE $B6,$CC
+
 jC86E   JSR bC2D3
         JSR sCD73
         JSR sC589
@@ -10879,7 +10919,6 @@ bC8AB   JSR bC2D3
 
         .BYTE $5A,$CC
 
-;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 ; $C8D7
         LDA #$00
         STA aCFFF
@@ -10939,7 +10978,9 @@ _L05    TYA
         LDA #$00     ;#%00000000
         STA fCC7F,Y
         JSR jC07A
-        ADC fCC,X
+
+        .BYTE $75,$CC
+
 _L06    JSR bC2D3
         JSR sCD73
         JSR sC589
