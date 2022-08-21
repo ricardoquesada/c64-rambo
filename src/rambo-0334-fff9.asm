@@ -10010,6 +10010,14 @@ aC073   .BYTE $00
 ; Print extended string
 ; The string to print is in the ret-addr (in the stack)
 ; And the function returns to the ret-addr + 2
+;
+; Args:
+;       Stack:          String to print
+;
+; Vars:
+;       $FA/$FB:        Points to the string to print
+;       $FC/$FD:        Points to the screen
+;
 ; Codes:
 ;       $FF,$00:        End of string
 ;       $FF,$01, y, x:  Coordinates to start printing
@@ -10021,11 +10029,11 @@ PRINT_EXT_STR
         PLA
         STA aFA
         PLA
-        STA aFB                         ;Ret address is stored in FA/FB
+        STA aFB                         ;String to use (stack) is stored in FA/FB
         LDA aFA
         CLC
-        ADC #$02                        ;Ret address + 2 and is pushed in the stack
-        STA aC19C                       ;So ret address no points to the original + 2
+        ADC #$02                        ;Re-write stack so that the ret address points to
+        STA aC19C                       ; to where it should return: callee + 2
         LDA aFB
         ADC #$00
         PHA
@@ -10033,71 +10041,86 @@ PRINT_EXT_STR
         PHA
 
         JSR sC1A9
-        JSR sC19F
+        JSR GET_NEXT_CHAR
         PHA
-        JSR sC19F
+        JSR GET_NEXT_CHAR
         STA aFB
         PLA
         STA aFA
 jC0A0
-_L00    JSR sC19F
+_L00    JSR GET_NEXT_CHAR
         CMP #$FF     ;#%11111111
         BNE _L01
         JSR sC10B
         JMP _L00
 
-_L01    LDY aC135
-        CPY #$02     ;#%00000010
+        ; Print chars
+_L01    LDY FONT_SIZE
+        CPY #$02
         BEQ _L02
         JMP jC0F2
 
-_L02    CMP #$3B     ;#%00111011
+        ; Big font
+        ; The chars are layed-out as:
+        ; char[n]   = top-left
+        ; char[n+1] = top-right
+        ; char[n+2] = bottom-left
+        ; char[n+3] = bottom-right
+        ; And Letter 'A' (the first one) starts at 64
+_L02    CMP #59
         BCS _L03
         SEC
-        SBC #$12     ;#%00010010
-_L03    ASL A
-        ASL A
+        SBC #18
+
+_L03    ASL A                           ;Multiply by 4
+        ASL A                           ; Since each letter has 4 chars
         CLC
-        ADC #$3C     ;#%00111100
-        STA aC19C
-        LDX #$03     ;#%00000011
+        ADC #60                         ;And add 60, since letter A starts there.
+        STA aC19C                       ; Technically it starts at 64, but char 0 is A
+                                        ; instead of char 1, so offset is 60 and not 64.
+
+        LDX #$03                        ;Chars to print: 4
 _L04    LDA aC19C
-        LDY fC119,X
-        JSR sC0DD
+        LDY BIG_LETTER_OFFSET,X
+        JSR PRINT_CHAR_WITH_ATTRIBUTE
         INC aC19C
         DEX
         BPL _L04
+
 jC0D7   JSR sC0FC
         JMP jC0A0
 
-sC0DD   STA (pFC),Y
-        LDA aFD
+PRINT_CHAR_WITH_ATTRIBUTE
+        STA (pFC),Y                     ;Print the char
+        LDA aFD                         ;And the color
         PHA
-        AND #$03     ;#%00000011
+        AND #$03
         CLC
-        ADC #$D8     ;#%11011000
+        ADC #$D8                        ;Switch to Color Screen
         STA aFD
-        LDA aC19E
+
+        LDA CHAR_COLOR
         STA (pFC),Y
         PLA
-        STA aFD
+        STA aFD                         ;Restore Screen pointer
         RTS
 
-jC0F2   AND #$3F     ;#%00111111
-        LDY #$00     ;#%00000000
-        JSR sC0DD
+        ; Small font
+jC0F2   AND #$3F                        ;The small-font charset only contains 64 chars
+        LDY #$00
+        JSR PRINT_CHAR_WITH_ATTRIBUTE
         JMP jC0D7
 
 sC0FC   LDA aFC
         CLC
-        ADC aC135
+        ADC FONT_SIZE
         STA aFC
         LDA aFD
         ADC #$00     ;#%00000000
         STA aFD
         RTS
 
-sC10B   JSR sC19F
+sC10B   JSR GET_NEXT_CHAR
         ASL A
         TAX
         LDA fC11D+1,X
@@ -10106,27 +10129,29 @@ sC10B   JSR sC19F
         PHA
         RTS
 
-fC119   .BYTE $29,$28,$01,$00
+BIG_LETTER_OFFSET                       ;Reverse order: from bottom-right to top-left
+        .BYTE 41,40,1,0
 
 fC11D   .WORD CODE_00-1,CODE_01-1,CODE_02-1,CODE_03-1,CODE_04-1
         .WORD CODE_05-1
 
 CODE_04                                 ;Use Big font
         LDA #$02
-        STA aC135
+        STA FONT_SIZE
         RTS
 
 CODE_05                                 ;Use Small font
         LDA #$01
-        STA aC135
+        STA FONT_SIZE
         RTS
 
-aC135   .BYTE $02
+FONT_SIZE
+        .BYTE $02                       ;Default: Big size
 
 CODE_03                                 ;???
-        JSR sC19F
+        JSR GET_NEXT_CHAR
         PHA
-        JSR sC19F
+        JSR GET_NEXT_CHAR
         TAX
         LDY #$C8     ;#%11001000
 bC140   PLA
@@ -10148,12 +10173,13 @@ bC140   PLA
         PLA
         RTS
 
+        ; Sets $FC/$FD to point to the correct screen coordinate
 CODE_01                                 ;Set string start coordinates
         LDA #$00
         STA aFD
-        JSR sC19F
+        JSR GET_NEXT_CHAR
         STA aC19C
-        JSR sC19F
+        JSR GET_NEXT_CHAR
         ASL A
         ASL A
         ASL A
@@ -10179,23 +10205,25 @@ CODE_01                                 ;Set string start coordinates
 
 aC19C   .BYTE $B8
 aC19D   .BYTE $B8
-aC19E   .BYTE $06
+CHAR_COLOR
+        .BYTE $06
 
-sC19F   LDY #$00     ;#%00000000
+GET_NEXT_CHAR
+        LDY #$00                        ;Get next char
         LDA (pFA),Y
         PHA
         JSR sC1A9
         PLA
         RTS
 
-sC1A9   INC aFA
+sC1A9   INC aFA                         ;Point to next char
         BNE bC1AF
         INC aFB
 bC1AF   RTS
 
 CODE_02                                 ;Set color
-        JSR sC19F
-        STA aC19E
+        JSR GET_NEXT_CHAR
+        STA CHAR_COLOR
         RTS
 
 CODE_00                                 ;End of string
