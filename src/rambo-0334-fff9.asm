@@ -10047,12 +10047,13 @@ PRINT_EXT_STR
         STA aFB
         PLA
         STA aFA
-jC0A0
-_L00    JSR GET_NEXT_CHAR
-        CMP #$FF     ;#%11111111
-        BNE _L01
-        JSR sC10B
-        JMP _L00
+
+PROCESS_NEXT_CHAR
+        JSR GET_NEXT_CHAR
+        CMP #$FF                        ;Is it a special char?
+        BNE _L01                        ; No, a regular char to print
+        JSR PROCESS_STRING_CODE
+        JMP PROCESS_NEXT_CHAR
 
         ; Print chars
 _L01    LDY FONT_SIZE
@@ -10087,8 +10088,8 @@ _L04    LDA aC19C
         DEX
         BPL _L04
 
-jC0D7   JSR sC0FC
-        JMP jC0A0
+jC0D7   JSR NEXT_SCREEN_COORDINATE
+        JMP PROCESS_NEXT_CHAR
 
 PRINT_CHAR_WITH_ATTRIBUTE
         STA (pFC),Y                     ;Print the char
@@ -10111,28 +10112,37 @@ jC0F2   AND #$3F                        ;The small-font charset only contains 64
         JSR PRINT_CHAR_WITH_ATTRIBUTE
         JMP jC0D7
 
-sC0FC   LDA aFC
+        ; Update screen coordinate to point to next char
+NEXT_SCREEN_COORDINATE
+        LDA aFC
         CLC
         ADC FONT_SIZE
         STA aFC
         LDA aFD
-        ADC #$00     ;#%00000000
+        ADC #$00
         STA aFD
         RTS
 
-sC10B   JSR GET_NEXT_CHAR
+        ; This is a special string code, process it.
+PROCESS_STRING_CODE
+        JSR GET_NEXT_CHAR
         ASL A
         TAX
-        LDA fC11D+1,X
+        LDA CODE_OFFSET_TBL+1,X
         PHA
-        LDA fC11D,X
+        LDA CODE_OFFSET_TBL,X
         PHA
         RTS
 
 BIG_LETTER_OFFSET                       ;Reverse order: from bottom-right to top-left
         .BYTE 41,40,1,0
 
-fC11D   .WORD CODE_00-1,CODE_01-1,CODE_02-1,CODE_03-1,CODE_04-1
+CODE_OFFSET_TBL
+        .WORD CODE_00-1
+        .WORD CODE_01-1
+        .WORD CODE_02-1
+        .WORD CODE_03-1
+        .WORD CODE_04-1
         .WORD CODE_05-1
 
 CODE_04                                 ;Use Big font
