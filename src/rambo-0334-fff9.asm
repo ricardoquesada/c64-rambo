@@ -9941,7 +9941,7 @@ sC000   JMP PRINT_EXT_STR
 
 sC003   JMP jC00C
 
-jC006   JMP jC1BA
+jC006   JMP START
 
         JMP jCF17
 
@@ -10250,7 +10250,10 @@ CODE_00                                 ;End of string
         RTS
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
-jC1BA   LDX #$F0     ;#%11110000
+; $C1BA
+; Main init
+START
+        LDX #$F0     ;#%11110000
         TXS
         JSR sC43C
         LDA #$19     ;#%00011001
