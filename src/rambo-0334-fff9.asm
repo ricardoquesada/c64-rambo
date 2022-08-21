@@ -505,27 +505,70 @@ f058C   .BYTE $0B,$0B,$06,$06,$07,$07,$0B,$0B
 f0596   .BYTE $A0
 f0597   .BYTE $05,$FC,$05,$78,$06,$EC,$06,$00
         .BYTE $07
+
 a05A0   .BYTE $FF,$01,$01,$03,$FF,$02,$01,$FF
         .BYTE $04
         .TEXT "TASK[ONE[COMPLE"
-f05B8   .TEXT "TED.", $FF, $01, $02, $06, $FF, $02, $05, "YOUR[DATA[REVEALS", $FF, $01, $03, $09, "AMERICAN"
-        .TEXT "[P.O.W.S", $FF, $01, $06, $0C, "TO[BE[RESCUED.", $FF, $00, $FF, $01, $01, $03
+f05B8   .TEXT "TED."
+        .BYTE $FF,$01,$02,$06,$FF,$02,$05
+        .TEXT "YOUR[DATA[REVEALS"
+        .BYTE $FF,$01,$03,$09
+        .TEXT "AMERICAN[P.O.W.S"
+        .BYTE $FF,$01,$06,$0C
+        .TEXT "TO[BE[RESCUED."
+        .BYTE $FF,$00
+
+        .BYTE $FF,$01,$01,$03
 f0600   .TEXT $FF, $02, $01, $FF, $04, "TAS"
-f0608   .TEXT "K[ONE[COMPLETED.", $FF, $01, $05, $06, $FF, $02, $03, "NOW[RESCUE[THE", $FF, $01, $0C
-        .TEXT $09, "P.O.W.S", $FF, $01, $06, $0C, "FROM[THE[CAMP.", $FF, $01, $06, $0F, $FF, $02, $0A, "USE[ANY"
-f0658   .TEXT "[ENEMY", $FF, $01, $00, $12, "EQUIPMENT[NECESSARY.", $FF, $00, $FF, $01, $07, $03, $FF, $02, $01, $FF
-        .TEXT $04, "YOUR[PRESENCE", $FF, $01, $04, $06, "HAS[BEEN[RELAY"
-a06A0   .TEXT "ED", $FF, $01, $08, $09, "T"
-f06A7   .TEXT "O[ENEMY[H.Q.", $FF, $01, $08, $0C, $FF, $02, $05, "A[GUNSHIP[IS", $FF, $01, $07, $0F, "NOW[O"
-        .TEXT "N[COURSE", $FF, $01, $06, $12, "AND[IN[PURSUIT.", $FF, $00, $FF, $01, $0B, $0B, $FF, $02, $01, $FF, $04, "GA"
-        .TEXT "ME[OVER", $FF, $00
-f0700   .TEXT $FF, $02, $01, $FF, $01, $05, $00, "CONGRATULAT"
-p0712   .TEXT "IONS.", $FF, $02, $03, $FF, $01, $07, $03, "THANKS[TO[YOU", $FF, $01, $04, $06, "TEN[P.O.W.S"
-        .TEXT "[HAVE", $FF, $01, $07, $09, "BEEN[RETURNED", $FF, $01, $05, $0C, "TO[THE[HOMEL", $E8, "."
-        .TEXT $FF, $02, $07, $FF, $01, $02, $0F, $FF, $05, "YOU[KNOW[YOU[MUST[NOW[RETURN[TO"
-        .TEXT "[GET", $FF, $01, $03, $11, "MORE[UNFORTUNA"
-a07A0   .TEXT "TE[SOLDIERS[TRAPPED", $FF, $01, $0C, $13, "BY[ENEMY[FORCES<", $FF
-        .TEXT $00
+f0608   .TEXT "K[ONE[COMPLETED."
+        .BYTE $FF, $01, $05, $06, $FF, $02, $03
+        .TEXT "NOW[RESCUE[THE"
+        .BYTE $FF, $01, $0C,$09
+        .TEXT "P.O.W.S"
+        .BYTE $FF, $01, $06, $0C
+        .TEXT "FROM[THE[CAMP."
+        .BYTE $FF, $01, $06, $0F, $FF, $02, $0A
+        .TEXT "USE[ANY"
+f0658   .TEXT "[ENEMY"
+        .BYTE $FF, $01, $00, $12
+        .TEXT "EQUIPMENT[NECESSARY."
+        .BYTE $FF, $00, $FF, $01, $07, $03, $FF, $02, $01, $FF,$04
+        .TEXT "YOUR[PRESENCE"
+        .BYTE $FF, $01, $04, $06
+        .TEXT "HAS[BEEN[RELAY"
+a06A0   .TEXT "ED"
+        .BYTE $FF, $01, $08, $09
+        .TEXT "T"
+f06A7   .TEXT "O[ENEMY[H.Q."
+        .BYTE $FF, $01, $08, $0C, $FF, $02, $05
+        .TEXT "A[GUNSHIP[IS", $FF, $01, $07, $0F
+        .TEXT "NOW[ON[COURSE"
+        .BYTE $FF, $01, $06, $12
+        .TEXT "AND[IN[PURSUIT."
+        .BYTE $FF,$00,$FF,$01,$0B,$0B,$FF,$02,$01,$FF,$04
+        .TEXT "GAME[OVER"
+        .BYTE $FF,$00
+
+f0700   .BYTE $FF, $02, $01, $FF, $01, $05, $00
+        .TEXT "CONGRATULAT"
+p0712   .TEXT "IONS."
+        .BYTE $FF, $02, $03, $FF, $01, $07, $03
+        .TEXT "THANKS[TO[YOU"
+        .BYTE $FF, $01, $04, $06
+        .TEXT "TEN[P.O.W.S[HAVE"
+        .BYTE $FF, $01, $07, $09
+        .TEXT "BEEN[RETURNED"
+        .BYTE $FF, $01, $05, $0C
+        .TEXT "TO[THE[HOMEL", $E8, "."
+        .BYTE $FF, $02, $07, $FF, $01, $02, $0F, $FF, $05
+        .TEXT "YOU[KNOW[YOU[MUST[NOW[RETURN[TO[GET"
+        .BYTE $FF, $01, $03, $11
+        .TEXT "MORE[UNFORTUNA"
+a07A0   .TEXT "TE[SOLDIERS[TRAPPED"
+        .BYTE $FF, $01, $0C, $13
+        .TEXT "BY[ENEMY[FORCES<"
+        .BYTE $FF,$00
+
 j07C9   LDA #$01     ;#%00000001
         STA a1D3E
         RTS
@@ -9894,7 +9937,7 @@ aB469   .BYTE $4F,$00,$FF,$00,$FF,$00,$FF,$FF
         .BYTE $02,$1E,$02,$C6,$59,$BF,$C5,$CE
         .BYTE $C4,$00,$CE,$C4,$FF
 
-sC000   JMP jC07A
+sC000   JMP PRINT_EXT_STR
 
 sC003   JMP jC00C
 
@@ -9958,14 +10001,24 @@ fC071   .BYTE $FF
 fC072   .BYTE $07
 aC073   .BYTE $00
 
-        JMP jC07A
+        JMP PRINT_EXT_STR
 
         JMP jC00C
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
-; Returns to the ret_addr + 3
-; Treats ret_addr+1 / ret_addr+2 as variables
-jC07A   PLA
+; $C07A
+; Print extended string
+; The string to print is in the ret-addr (in the stack)
+; And the function returns to the ret-addr + 2
+; Codes:
+;       $FF,$00:        End of string
+;       $FF,$01, y, x:  Coordinates to start printing
+;       $FF,$02, color: Use color to print
+;       $FF,$03: ?, ?:  ?
+;       $FF,$04:        Use big font
+;       $FF,$05:        Use small font
+PRINT_EXT_STR
+        PLA
         STA aFA
         PLA
         STA aFB                         ;Ret address is stored in FA/FB
@@ -10055,20 +10108,23 @@ sC10B   JSR sC19F
 
 fC119   .BYTE $29,$28,$01,$00
 
-fC11D   .WORD aC1B7-1,aC168-1,bC1B0-1,aC136-1,aC129-1
-        .WORD aC12F-1
+fC11D   .WORD CODE_00-1,CODE_01-1,CODE_02-1,CODE_03-1,CODE_04-1
+        .WORD CODE_05-1
 
-aC129   LDA #$02     ;#%00000010
+CODE_04                                 ;Use Big font
+        LDA #$02
         STA aC135
         RTS
 
-aC12F   LDA #$01     ;#%00000001
+CODE_05                                 ;Use Small font
+        LDA #$01
         STA aC135
         RTS
 
 aC135   .BYTE $02
 
-aC136   JSR sC19F
+CODE_03                                 ;???
+        JSR sC19F
         PHA
         JSR sC19F
         TAX
@@ -10092,7 +10148,8 @@ bC140   PLA
         PLA
         RTS
 
-aC168   LDA #$00     ;#%00000000
+CODE_01                                 ;Set string start coordinates
+        LDA #$00
         STA aFD
         JSR sC19F
         STA aC19C
@@ -10136,11 +10193,13 @@ sC1A9   INC aFA
         INC aFB
 bC1AF   RTS
 
-bC1B0   JSR sC19F
+CODE_02                                 ;Set color
+        JSR sC19F
         STA aC19E
         RTS
 
-aC1B7   PLA
+CODE_00                                 ;End of string
+        PLA
         PLA
         RTS
 
@@ -10170,7 +10229,7 @@ jC1BA   LDX #$F0     ;#%11110000
         LDA #$08     ;#%00001000
         STA $D016    ;VIC Control Register 2
 
-jC1F3   JSR jC07A
+jC1F3   JSR PRINT_EXT_STR
         .ADDR aCCAE
 
 ; $C1F8
@@ -10233,10 +10292,10 @@ sC276   LDA aC2D1
         BNE bC27F
         RTS
 
-bC27F   JSR jC07A
+bC27F   JSR PRINT_EXT_STR
         .ADDR aCCAE
 
-        JSR jC07A
+        JSR PRINT_EXT_STR
         .ADDR aC7AE
 
         LDX #$4F     ;#%01001111
@@ -10250,7 +10309,7 @@ bC296   STX aCD72
         STA aCCD3
         JSR sCCD5
 
-        JSR jC07A
+        JSR PRINT_EXT_STR
         .ADDR aCCB6
 
         LDA #$05     ;#%00000101
@@ -10265,7 +10324,7 @@ bC2AE   JSR sC3DE
         STA aC2D2
         JSR sCCD5
 
-        JSR jC07A
+        JSR PRINT_EXT_STR
         .ADDR aCCB6
 
         JSR sC589
@@ -10440,7 +10499,7 @@ sC418   LDA aC528
         LDA fC549,X
         STA aC437
 
-        JSR jC07A
+        JSR PRINT_EXT_STR
         .ADDR aC431
 
         RTS
@@ -10509,13 +10568,14 @@ bC49C   RTS
 aC49D   .BYTE $00
 aC49E   .BYTE $00
 fC49F   .TEXT "]UNKNOWN]["
+
 sC4A9   LDY #$09     ;#%00001001
 bC4AB   LDA (pFE),Y
         STA fC4C2,Y
         DEY
         BPL bC4AB
 
-        JSR jC07A
+        JSR PRINT_EXT_STR
         .ADDR aC4B9
 
         RTS
@@ -10601,7 +10661,7 @@ fC551   .BYTE $00,$06,$0E,$03,$01,$03,$0E,$06
 sC559   LDA #$01     ;#%00000001
         STA a43F9
 
-        JSR jC07A
+        JSR PRINT_EXT_STR
         .ADDR aC564
 
         RTS
@@ -10813,7 +10873,7 @@ fC70C   .BYTE $00,$01,$02,$03,$04,$06,$08,$0A
 fC72C   .TEXT "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
         .BYTE $5F,$61,$5C,$5D,$5E,$62
 
-sC74C   JSR jC07A
+sC74C   JSR PRINT_EXT_STR
         .ADDR aC752
 
         RTS
@@ -10875,14 +10935,14 @@ bC853   STA f4348,X
         DEX
         BPL bC853
 
-        JSR jC07A
+        JSR PRINT_EXT_STR
         .ADDR aC758
 
         LDA #$00
 bC863   STA aCD72
         JSR sCCD5
 
-        JSR jC07A
+        JSR PRINT_EXT_STR
         .ADDR aCCB6
 
 jC86E   JSR bC2D3
@@ -10928,7 +10988,7 @@ bC8AB   JSR bC2D3
         STA aCD72
         BCC jC86E
 
-        JSR jC07A
+        JSR PRINT_EXT_STR
         .ADDR aCC5A
 
 ; $C8D7
@@ -10990,7 +11050,7 @@ _L05    TYA
         LDA #$00     ;#%00000000
         STA fCC7F,Y
 
-        JSR jC07A
+        JSR PRINT_EXT_STR
         .ADDR aCC75
 
 _L06    JSR bC2D3
@@ -11060,9 +11120,10 @@ aCC7A   .BYTE $05,$FF,$02
 aCC7D   .BYTE $00
 fCC7E   .TEXT "["
 fCC7F   .TEXT "[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[["
-        .BYTE $FF,$00,$FF,$00,$00,$00,$00,$00
-aCCAE   .BYTE $FF,$03,$20,$01,$FF,$04,$FF,$00
-
+        .BYTE $FF,$00
+        .BYTE $FF,$00,$00,$00,$00,$00
+aCCAE   .BYTE $FF,$03,$20,$01,$FF,$04
+        .BYTE $FF,$00
 aCCB6   .BYTE $FF,$01,$00,$17,$FF,$02
 aCCBC   .BYTE $06
 aCCBD   .TEXT "["
