@@ -10019,12 +10019,12 @@ aC073   .BYTE $00
 ;       $FC/$FD:        Points to the screen
 ;
 ; Codes:
-;       $FF,$00:        End of string
-;       $FF,$01, y, x:  Coordinates to start printing
-;       $FF,$02, color: Use color to print
-;       $FF,$03: ?, ?:  ?
-;       $FF,$04:        Use big font
-;       $FF,$05:        Use small font
+;       $FF,$00:                End of string
+;       $FF,$01, y, x:          Coordinates to start printing
+;       $FF,$02, color:         Use color to print
+;       $FF,$03: char, color:   Paint full screen
+;       $FF,$04:                Use big font
+;       $FF,$05:                Use small font
 PRINT_EXT_STR
         PLA
         STA aFA
@@ -10040,26 +10040,26 @@ PRINT_EXT_STR
         LDA aC19C
         PHA
 
-        JSR sC1A9
-        JSR GET_NEXT_CHAR
+        JSR POINT_TO_NEXT_CHAR
+        JSR GET_CHAR
         PHA
-        JSR GET_NEXT_CHAR
+        JSR GET_CHAR
         STA aFB
         PLA
         STA aFA
 
-PROCESS_NEXT_CHAR
-        JSR GET_NEXT_CHAR
+PROCESS_CHAR
+        JSR GET_CHAR
         CMP #$FF                        ;Is it a special char?
         BNE _L01                        ; No, a regular char to print
         JSR PROCESS_STRING_CODE
-        JMP PROCESS_NEXT_CHAR
+        JMP PROCESS_CHAR
 
         ; Print chars
 _L01    LDY FONT_SIZE
         CPY #$02
         BEQ _L02
-        JMP jC0F2
+        JMP PROCESS_SMALL_FONT_CHAR
 
         ; Big font
         ; The chars are layed-out as:
@@ -10088,8 +10088,9 @@ _L04    LDA aC19C
         DEX
         BPL _L04
 
-jC0D7   JSR NEXT_SCREEN_COORDINATE
-        JMP PROCESS_NEXT_CHAR
+NEXT_CHAR
+        JSR NEXT_SCREEN_COORDINATE
+        JMP PROCESS_CHAR
 
 PRINT_CHAR_WITH_ATTRIBUTE
         STA (pFC),Y                     ;Print the char
@@ -10107,10 +10108,11 @@ PRINT_CHAR_WITH_ATTRIBUTE
         RTS
 
         ; Small font
-jC0F2   AND #$3F                        ;The small-font charset only contains 64 chars
+PROCESS_SMALL_FONT_CHAR
+        AND #$3F                        ;The small-font charset only contains 64 chars
         LDY #$00
         JSR PRINT_CHAR_WITH_ATTRIBUTE
-        JMP jC0D7
+        JMP NEXT_CHAR
 
         ; Update screen coordinate to point to next char
 NEXT_SCREEN_COORDINATE
@@ -10125,7 +10127,7 @@ NEXT_SCREEN_COORDINATE
 
         ; This is a special string code, process it.
 PROCESS_STRING_CODE
-        JSR GET_NEXT_CHAR
+        JSR GET_CHAR
         ASL A
         TAX
         LDA CODE_OFFSET_TBL+1,X
@@ -10158,28 +10160,32 @@ CODE_05                                 ;Use Small font
 FONT_SIZE
         .BYTE $02                       ;Default: Big size
 
-CODE_03                                 ;???
-        JSR GET_NEXT_CHAR
+        ; Paint screen with arg 1. Paint color screen with arg 2
+CODE_03                                 ;Clear screen with char and color
+        JSR GET_CHAR
         PHA
-        JSR GET_NEXT_CHAR
+        JSR GET_CHAR
         TAX
         LDY #$C8     ;#%11001000
-bC140   PLA
-        STA p4000,Y
-        STA f40C8,Y
-        STA f4190,Y
-        STA f4258,Y
-        STA f4320,Y
+_L00    PLA
+        ; Update screen
+        STA $4000,Y                     ;Paint screen with first arg
+        STA $40C8,Y
+        STA $4190,Y
+        STA $4258,Y
+        STA $4320,Y
         PHA
         TXA
-        STA fD800,Y
-        STA fD8C8,Y
-        STA fD990,Y
-        STA fDA58,Y
-        STA fDB20,Y
+        ; Update color
+        STA $D800,Y                     ;Paint color screen with 2nd arg
+        STA $D8C8,Y
+        STA $D990,Y
+        STA $DA58,Y
+        STA $DB20,Y
         DEY
-        CPY #$FF     ;#%11111111
-        BNE bC140
+        CPY #$FF
+        BNE _L00
+
         PLA
         RTS
 
@@ -10187,9 +10193,9 @@ bC140   PLA
 CODE_01                                 ;Set string start coordinates
         LDA #$00
         STA aFD
-        JSR GET_NEXT_CHAR
+        JSR GET_CHAR
         STA aC19C
-        JSR GET_NEXT_CHAR
+        JSR GET_CHAR
         ASL A
         ASL A
         ASL A
@@ -10218,21 +10224,23 @@ aC19D   .BYTE $B8
 CHAR_COLOR
         .BYTE $06
 
-GET_NEXT_CHAR
-        LDY #$00                        ;Get next char
+        ; Get current char and update pointer to next char
+GET_CHAR
+        LDY #$00                        ;Get char
         LDA (pFA),Y
         PHA
-        JSR sC1A9
+        JSR POINT_TO_NEXT_CHAR                       ;Update pointer to next char
         PLA
         RTS
 
-sC1A9   INC aFA                         ;Point to next char
-        BNE bC1AF
+POINT_TO_NEXT_CHAR
+        INC aFA                         ;Point to next char
+        BNE _L00
         INC aFB
-bC1AF   RTS
+_L00    RTS
 
 CODE_02                                 ;Set color
-        JSR GET_NEXT_CHAR
+        JSR GET_CHAR
         STA CHAR_COLOR
         RTS
 
@@ -11506,7 +11514,8 @@ aCFFF   .BYTE $00
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 
-fD800   .BYTE $FD,$2D,$FD,$FD,$FD
+; $D800
+        .BYTE $FD,$2D,$FD,$FD,$FD
 fD805   .BYTE $FD,$FD,$FD,$0D,$CD,$FD,$FD,$0D
         .BYTE $FD,$0D,$0D,$FD,$FD,$FD,$FD,$FD
         .BYTE $0D,$FD,$FD,$FD,$2D,$FD,$2D,$FD
