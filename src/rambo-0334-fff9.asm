@@ -387,9 +387,9 @@ b048C   LDA f00E0,Y
         STA f0566,Y
         DEY
         BPL b048C
-        JSR sC000
 
-        .BYTE $90,$10
+        JSR sC000
+        .ADDR a1090
 
         LDA #$00     ;#%00000000
         JSR sC003
@@ -405,10 +405,10 @@ b048C   LDA f00E0,Y
         STA a04BF
         LDA f058C,X
         JSR s8100
-        JSR sC000
 
-a04BE   .BYTE $96
-a04BF   .BYTE $05
+        JSR sC000
+a04BF   =*+$01
+a04BE   .ADDR f0596
 
 b04C0   LDA $D012    ;Raster Position
         CMP #$C8     ;#%11001000
@@ -433,9 +433,9 @@ b04D3   JSR s180D
         JSR s8100
         LDA #$0B     ;#%00001011
         STA $D021    ;Background Color 0
-        JSR sC000
 
-        .BYTE $86,$05
+        JSR sC000
+        .ADDR a0586
 
         LDY #$1F     ;#%00011111
 f0500   =*+$02
@@ -499,7 +499,7 @@ f0566   .BYTE $00,$00,$00,$00,$00,$00,$00,$00
         .BYTE $00,$00,$00,$00,$00,$00,$00,$00
         .BYTE $00,$00,$00,$00,$00,$00,$00,$00
         .BYTE $00,$00,$00,$00,$00,$00,$00,$00
-        .BYTE $FF,$03,$20,$0D,$FF,$00
+a0586   .BYTE $FF,$03,$20,$0D,$FF,$00
 f058C   .BYTE $0B,$0B,$06,$06,$07,$07,$0B,$0B
         .BYTE $0A,$0A
 f0596   .BYTE $A0
@@ -776,9 +776,9 @@ a09A0   =*+$02
         LDA a1D62
         STA a0981
 a09A9   =*+$02
-        JSR sC000
 
-        .BYTE $7C,$10
+        JSR sC000
+        .ADDR a107C
 
         JSR s1813
 b09AF   LDA $D012    ;Raster Position
@@ -806,9 +806,9 @@ b09E0   RTS
 b09E1   JSR s180D
         LDA #$0D     ;#%00001101
         STA a1093
-        JSR sC000
 
-        .BYTE $90,$10
+        JSR sC000
+        .ADDR a1090
 
         LDA #$00     ;#%00000000
         JSR sC003
@@ -1665,10 +1665,12 @@ s1061   JSR s2941
 f106C   .BYTE $00,$00,$00,$00
 a1070   .BYTE $00
 f1071   .BYTE $00,$79,$29,$01,$52,$7A,$2A,$00
-        .BYTE $50,$79,$29,$FF,$03,$20,$01,$FF
+        .BYTE $50,$79,$29
+a107C   .BYTE $FF,$03,$20,$01,$FF
         .BYTE $04,$FF,$01,$0F,$0B,$FF,$02,$01
-        .BYTE $52,$45,$41,$44,$59,$FF,$00,$FF
-        .BYTE $03,$20
+        .TEXT "READY"
+        .BYTE $FF,$00
+a1090   .BYTE $FF,$03,$20
 a1093   .BYTE $01,$FF,$00
 j1096   LDA f106C,X
         BEQ j109C
@@ -10169,7 +10171,6 @@ jC1BA   LDX #$F0     ;#%11110000
         STA $D016    ;VIC Control Register 2
 
 jC1F3   JSR jC07A
-
         .ADDR aCCAE
 
 ; $C1F8
@@ -10233,11 +10234,9 @@ sC276   LDA aC2D1
         RTS
 
 bC27F   JSR jC07A
-
         .ADDR aCCAE
 
         JSR jC07A
-
         .ADDR aC7AE
 
         LDX #$4F     ;#%01001111
@@ -10250,8 +10249,8 @@ bC296   STX aCD72
         LDA #$08     ;#%00001000
         STA aCCD3
         JSR sCCD5
-        JSR jC07A
 
+        JSR jC07A
         .ADDR aCCB6
 
         LDA #$05     ;#%00000101
@@ -10265,8 +10264,8 @@ bC2AE   JSR sC3DE
         LDA #$02     ;#%00000010
         STA aC2D2
         JSR sCCD5
-        JSR jC07A
 
+        JSR jC07A
         .ADDR aCCB6
 
         JSR sC589
@@ -10440,15 +10439,16 @@ sC418   LDA aC528
         LDX aC547
         LDA fC549,X
         STA aC437
-        JSR jC07A
 
+        JSR jC07A
         .ADDR aC431
 
         RTS
 
 aC431   .BYTE $FF,$01
 aC433   .BYTE $00,$16,$FF,$02
-aC437   .BYTE $00,$3A,$5B,$FF,$00
+aC437   .BYTE $00,$3A,$5B
+        .BYTE $FF,$00
 
 sC43C   LDX #$4F     ;#%01001111
         LDY #$00     ;#%00000000
@@ -10514,16 +10514,16 @@ bC4AB   LDA (pFE),Y
         STA fC4C2,Y
         DEY
         BPL bC4AB
-        JSR jC07A
 
+        JSR jC07A
         .ADDR aC4B9
 
         RTS
 
 aC4B9   .BYTE $FF,$01,$0A,$16,$FF,$02,$01,$FF
         .BYTE $04
-fC4C2   .BYTE $5B,$5B,$5B,$5B,$5B,$5B,$5B,$5B
-        .BYTE $55,$44,$FF,$00
+fC4C2   .TEXT "[[[[[[[[UD"
+        .BYTE $FF,$00
 
 sC4CE   LDA aC5CC
         BNE bC4D4
@@ -10600,16 +10600,16 @@ fC551   .BYTE $00,$06,$0E,$03,$01,$03,$0E,$06
 
 sC559   LDA #$01     ;#%00000001
         STA a43F9
-        JSR jC07A
 
-        .BYTE $64,$C5
+        JSR jC07A
+        .ADDR aC564
 
         RTS
 
-        .BYTE $FF,$04,$FF,$01,$0D
+aC564   .BYTE $FF,$04,$FF,$01,$0D
         .BYTE $13,$FF,$02,$05
-        .TEXT "TROOPER", $FF, $01, $05, $00, "ENTER[YOUR[NAME", $FF
-        .BYTE $00
+        .TEXT "TROOPER", $FF, $01, $05, $00, "ENTER[YOUR[NAME"
+        .BYTE $FF,$00
 
 sC589   LDA #$00     ;#%00000000
         LDX #$05     ;#%00000101
@@ -10812,9 +10812,17 @@ fC70C   .BYTE $00,$01,$02,$03,$04,$06,$08,$0A
         .BYTE $04,$03,$02,$01,$00,$00,$00,$01
 fC72C   .TEXT "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
         .BYTE $5F,$61,$5C,$5D,$5E,$62
-sC74C   .BYTE $20,$7A,$C0,$52,$C7,$60,$FF,$03
-        .BYTE $00,$20,$FF,$00
-        .BYTE $FF,$02,$07,$FF,$04
+
+sC74C   JSR jC07A
+        .ADDR aC752
+
+        RTS
+
+aC752   .BYTE $FF,$03
+        .BYTE $00,$20
+        .BYTE $FF,$00
+
+aC758   .BYTE $FF,$02,$07,$FF,$04
         .BYTE $FF,$01,$0F,$00
         .TEXT "RAMBO"
         .BYTE $FF,$05
@@ -10827,7 +10835,9 @@ sC74C   .BYTE $20,$7A,$C0,$52,$C7,$60,$FF,$03
         .TEXT "PART[II"
         .BYTE $FF,$05,$FF,$01,$0C,$09,$FF,$02,$05
         .TEXT "ALL[TIME[HEROES"
-        .BYTE $FF,$04,$FF,$00
+        .BYTE $FF,$04
+        .BYTE $FF,$00
+
 aC7AE   .BYTE $FF,$02,$0F,$FF,$01,$05,$00
         .TEXT "CONGRATULATIONS"
         .BYTE $FF,$01,$09,$03,$FF,$02,$05
@@ -10864,16 +10874,16 @@ bC853   STA f4348,X
         STA f4370,X
         DEX
         BPL bC853
-        JSR jC07A
 
-        .BYTE $58,$C7
+        JSR jC07A
+        .ADDR aC758
 
         LDA #$00
 bC863   STA aCD72
         JSR sCCD5
-        JSR jC07A
 
-        .BYTE $B6,$CC
+        JSR jC07A
+        .ADDR aCCB6
 
 jC86E   JSR bC2D3
         JSR sCD73
@@ -10917,9 +10927,9 @@ bC8AB   JSR bC2D3
         CMP #$54     ;#%01010100
         STA aCD72
         BCC jC86E
-        JSR jC07A
 
-        .BYTE $5A,$CC
+        JSR jC07A
+        .ADDR aCC5A
 
 ; $C8D7
         LDA #$00
@@ -10979,9 +10989,9 @@ _L05    TYA
         STA fCC7E,Y
         LDA #$00     ;#%00000000
         STA fCC7F,Y
-        JSR jC07A
 
-        .BYTE $75,$CC
+        JSR jC07A
+        .ADDR aCC75
 
 _L06    JSR bC2D3
         JSR sCD73
@@ -11040,15 +11050,19 @@ pC96C   .TEXT "[[[[[[YOU[HAVE[CHOSEN[TO[BECOME[AN[[[[[["
         .TEXT "[[[[IS[UP[TO[YOU[[[["
         .BYTE $80,$81,$80,$91
         .TEXT "[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[["
-        .BYTE $80,$91,$FF,$91,$FE,$91,$FF,$01,$0B,$09,$FF,$02,$01,$FF,$05
+        .BYTE $80,$91,$FF,$91,$FE,$91
+
+aCC5A   .BYTE $FF,$01,$0B,$09,$FF,$02,$01,$FF,$05
         .TEXT "   INSTRUCTIONS "
-        .BYTE $FF,$00,$FF,$01,$00,$17,$FF
+        .BYTE $FF,$00
+aCC75   .BYTE $FF,$01,$00,$17,$FF
 aCC7A   .BYTE $05,$FF,$02
 aCC7D   .BYTE $00
 fCC7E   .TEXT "["
 fCC7F   .TEXT "[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[["
         .BYTE $FF,$00,$FF,$00,$00,$00,$00,$00
 aCCAE   .BYTE $FF,$03,$20,$01,$FF,$04,$FF,$00
+
 aCCB6   .BYTE $FF,$01,$00,$17,$FF,$02
 aCCBC   .BYTE $06
 aCCBD   .TEXT "["
@@ -11057,6 +11071,7 @@ fCCC0   .TEXT "\\\\\\\\\\["
 fCCCB   .TEXT "0"
 fCCCC   .TEXT "74000"
         .BYTE $FF,$00
+
 aCCD3   .BYTE $01
 aCCD4   .BYTE $00
 
