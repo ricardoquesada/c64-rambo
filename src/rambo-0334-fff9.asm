@@ -9966,16 +9966,17 @@ aC073   .BYTE $00
 jC07A   PLA
         STA aFA
         PLA
-        STA aFB
+        STA aFB                         ;Ret address is stored in FA/FB
         LDA aFA
         CLC
-        ADC #$02     ;#%00000010
-        STA aC19C
+        ADC #$02                        ;Ret address + 2 and is pushed in the stack
+        STA aC19C                       ;So ret address no points to the original + 2
         LDA aFB
-        ADC #$00     ;#%00000000
+        ADC #$00
         PHA
         LDA aC19C
         PHA
+
         JSR sC1A9
         JSR sC19F
         PHA
@@ -9983,33 +9984,34 @@ jC07A   PLA
         STA aFB
         PLA
         STA aFA
-jC0A0   JSR sC19F
+jC0A0
+_L00    JSR sC19F
         CMP #$FF     ;#%11111111
-        BNE bC0AD
+        BNE _L01
         JSR sC10B
-        JMP jC0A0
+        JMP _L00
 
-bC0AD   LDY aC135
+_L01    LDY aC135
         CPY #$02     ;#%00000010
-        BEQ bC0B7
+        BEQ _L02
         JMP jC0F2
 
-bC0B7   CMP #$3B     ;#%00111011
-        BCS bC0BE
+_L02    CMP #$3B     ;#%00111011
+        BCS _L03
         SEC
         SBC #$12     ;#%00010010
-bC0BE   ASL A
+_L03    ASL A
         ASL A
         CLC
         ADC #$3C     ;#%00111100
         STA aC19C
         LDX #$03     ;#%00000011
-bC0C8   LDA aC19C
+_L04    LDA aC19C
         LDY fC119,X
         JSR sC0DD
         INC aC19C
         DEX
-        BPL bC0C8
+        BPL _L04
 jC0D7   JSR sC0FC
         JMP jC0A0
 
@@ -10168,7 +10170,7 @@ jC1BA   LDX #$F0     ;#%11110000
 
 jC1F3   JSR jC07A
 
-        .BYTE $AE,$CC
+        .ADDR aCCAE
 
 ; $C1F8
         LDA #$00
@@ -10232,11 +10234,11 @@ sC276   LDA aC2D1
 
 bC27F   JSR jC07A
 
-        .BYTE $AE,$CC
+        .ADDR aCCAE
 
         JSR jC07A
 
-        .BYTE $AE,$C7
+        .ADDR aC7AE
 
         LDX #$4F     ;#%01001111
         LDA aC2D1
@@ -10250,7 +10252,7 @@ bC296   STX aCD72
         JSR sCCD5
         JSR jC07A
 
-        .BYTE $B6,$CC
+        .ADDR aCCB6
 
         LDA #$05     ;#%00000101
         STA aC2D2
@@ -10265,7 +10267,7 @@ bC2AE   JSR sC3DE
         JSR sCCD5
         JSR jC07A
 
-        .BYTE $B6,$CC
+        .ADDR aCCB6
 
         JSR sC589
         LDA aC5CC
@@ -10440,11 +10442,11 @@ sC418   LDA aC528
         STA aC437
         JSR jC07A
 
-        .BYTE $31,$C4
+        .ADDR aC431
 
         RTS
 
-        .BYTE $FF,$01
+aC431   .BYTE $FF,$01
 aC433   .BYTE $00,$16,$FF,$02
 aC437   .BYTE $00,$3A,$5B,$FF,$00
 
@@ -10514,11 +10516,11 @@ bC4AB   LDA (pFE),Y
         BPL bC4AB
         JSR jC07A
 
-        .BYTE $B9,$C4
+        .ADDR aC4B9
 
         RTS
 
-        .BYTE $FF,$01,$0A,$16,$FF,$02,$01,$FF
+aC4B9   .BYTE $FF,$01,$0A,$16,$FF,$02,$01,$FF
         .BYTE $04
 fC4C2   .BYTE $5B,$5B,$5B,$5B,$5B,$5B,$5B,$5B
         .BYTE $55,$44,$FF,$00
@@ -10826,7 +10828,7 @@ sC74C   .BYTE $20,$7A,$C0,$52,$C7,$60,$FF,$03
         .BYTE $FF,$05,$FF,$01,$0C,$09,$FF,$02,$05
         .TEXT "ALL[TIME[HEROES"
         .BYTE $FF,$04,$FF,$00
-        .BYTE $FF,$02,$0F,$FF,$01,$05,$00
+aC7AE   .BYTE $FF,$02,$0F,$FF,$01,$05,$00
         .TEXT "CONGRATULATIONS"
         .BYTE $FF,$01,$09,$03,$FF,$02,$05
         .TEXT "YOU[ARE[NOW"
@@ -11046,8 +11048,8 @@ aCC7D   .BYTE $00
 fCC7E   .TEXT "["
 fCC7F   .TEXT "[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[["
         .BYTE $FF,$00,$FF,$00,$00,$00,$00,$00
-        .BYTE $FF,$03,$20,$01,$FF,$04,$FF,$00
-        .BYTE $FF,$01,$00,$17,$FF,$02
+aCCAE   .BYTE $FF,$03,$20,$01,$FF,$04,$FF,$00
+aCCB6   .BYTE $FF,$01,$00,$17,$FF,$02
 aCCBC   .BYTE $06
 aCCBD   .TEXT "["
 aCCBE   .TEXT "7\"
