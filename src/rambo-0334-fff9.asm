@@ -6444,6 +6444,8 @@ f8000   .BYTE $00,$00,$00,$01,$01,$02,$03,$04
         .BYTE $FF,$FF,$00,$00,$FF,$FF,$00,$00
         .BYTE $2E,$00,$BE,$00,$FF,$FF,$00,$00
         .BYTE $FF,$FF,$00,$00,$FF,$FF,$00,$00
+
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 s8100   TAY
         LDA f836E,Y
         STA a810E
@@ -6453,6 +6455,7 @@ a810E   =*+$01
 a810F   =*+$02
         JMP j8553
 
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 j8110   LDX a822D
         LDY a822E
 j8116   STX a8232
@@ -6672,14 +6675,78 @@ f832B   .BYTE $00,$08,$41,$01,$89,$04,$1A,$06
         .BYTE $18,$1A,$00
 f835E   .BYTE $C8,$A7,$C8,$A7,$9E,$A9,$1A,$89
         .BYTE $B3,$3F,$01,$01,$01,$05,$05,$04
-f836E   .BYTE $53,$74,$66,$B3,$B8,$B0,$AA,$AD
-        .BYTE $18,$A1,$A4,$A7,$9B,$BF,$C2,$C5
-        .BYTE $C8,$CB,$D1,$DF,$EC,$0D,$F8,$D4
-        .BYTE $AC,$34,$0D,$BE,$BB,$9E,$CE
-f838D   .BYTE $85,$84,$84,$84,$84,$84,$84,$84
-        .BYTE $84,$84,$84,$84,$84,$83,$83,$83
-        .BYTE $83,$83,$83,$83,$83,$84,$83,$83
-        .BYTE $83,$85,$85,$84,$84,$84,$83
+
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+f836E   .BYTE <$8553
+	.BYTE <$8474
+	.BYTE <$8466
+	.BYTE <$84B3
+	.BYTE <$84B8
+	.BYTE <$84B0
+	.BYTE <$84AA
+	.BYTE <$84AD
+
+        .BYTE <$8418
+	.BYTE <$84A1
+	.BYTE <$84A4
+	.BYTE <$84A7
+	.BYTE <$849B
+	.BYTE <$83BF
+	.BYTE <$83C2
+	.BYTE <$83C5
+
+        .BYTE <$83C8
+	.BYTE <$83CB
+	.BYTE <$83D1
+	.BYTE <$83DF
+	.BYTE <$83EC
+	.BYTE <$840D
+	.BYTE <$83F8
+	.BYTE <$83D4
+
+        .BYTE <$83AC
+	.BYTE <$8534
+	.BYTE <$850D
+	.BYTE <$84BE
+	.BYTE <$84BB
+	.BYTE <$849E
+	.BYTE <$83CE
+
+f838D   .BYTE >$8553
+	.BYTE >$8474
+	.BYTE >$8466
+	.BYTE >$84B3
+	.BYTE >$84B8
+	.BYTE >$84B0
+	.BYTE >$84AA
+	.BYTE >$84AD
+
+        .BYTE >$8418
+	.BYTE >$84A1
+	.BYTE >$84A4
+	.BYTE >$84A7
+	.BYTE >$849B
+	.BYTE >$83BF
+	.BYTE >$83C2
+	.BYTE >$83C5
+
+        .BYTE >$83C8
+	.BYTE >$83CB
+	.BYTE >$83D1
+	.BYTE >$83DF
+	.BYTE >$83EC
+	.BYTE >$840D
+	.BYTE >$83F8
+	.BYTE >$83D4
+
+        .BYTE >$83AC
+	.BYTE >$8534
+	.BYTE >$850D
+	.BYTE >$84BE
+	.BYTE >$84BB
+	.BYTE >$849E
+	.BYTE >$83CE
+
         LDX a9291
         LDA f90B9,X
         STA a9299
@@ -6874,6 +6941,7 @@ b8537   LDA a820E
         STA $D415    ;Filter Cutoff Frequency: Low-Nybble
         RTS
 
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 j8553   JSR s8597
         JSR s8511
         JSR s8611
@@ -10382,22 +10450,22 @@ bC219   STA fB000,Y
         JSR jC00C
         JSR s0367
         SEI
-        LDA #$00     ;#%00000000
-        STA $D015    ;Sprite display Enable
-        STA $D020    ;Border Color
-        STA $D021    ;Background Color 0
-        LDA #$08     ;#%00001000
-        STA $D016    ;VIC Control Register 2
-        LDA #$00     ;#%00000000
+        LDA #$00
+        STA $D015			;Sprite display Enable
+        STA $D020    			;Border Color
+        STA $D021    			;Background Color 0
+        LDA #$08     			;#%00001000
+        STA $D016    			;VIC Control Register 2
+        LDA #$00
         JSR jC00C
         LDA #$8D     ;#%10001101
         STA aCF01
-        LDA #$1B     ;#%00011011
-        STA $D011    ;VIC Control Register 1
+        LDA #$1B     			;#%00011011
+        STA $D011    			;VIC Control Register 1
         LDA aB469
         STA aC2D1
         JSR sC2E1
-        LDA #$01     ;#%00000001
+        LDA #$01
         JSR s8100
         LDA #$1A     ;#%00011010
         LDX #$07     ;#%00000111
