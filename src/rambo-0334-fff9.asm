@@ -192,7 +192,6 @@ a7FF8 = $7FF8                           ; or using unused space as variables?
 ; **** POINTERS ****
 ;
 p0026 = $0026
-p35 = $0035
 p0135 = $0135
 p0232 = $0232
 
@@ -3783,6 +3782,7 @@ b2253   LDA a2482
         DEC a2482
         RTS
 
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 s225C   SEI
         LDA #<a228b
         STA $FFFE    ;IRQ
@@ -3805,6 +3805,8 @@ s225C   SEI
         STA $D012    ;Raster Position
         RTS
 
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+; IRQ Handler
 a228b   PHA
         TYA
         PHA
@@ -3887,6 +3889,8 @@ b2312   ADC #$00     ;#%00000000
         PLA
         RTI
 
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+; IRQ Handler
 a231F   PHA
         TYA
         PHA
@@ -4009,6 +4013,7 @@ a242B   .BYTE $00
 a242C   .BYTE $00
 a242D   .BYTE $00
 f242E   .BYTE $0B,$04,$05,$05,$09,$0C,$09,$06
+
 s2436   LDA #$00     ;#%00000000
         STA $D012    ;Raster Position
         JSR s19D1
@@ -4045,6 +4050,7 @@ a2482   .BYTE $00
 f2483   .BYTE $FE,$FD,$FB,$F7,$EF,$DF,$BF,$7F
 f248B   .BYTE $01,$02,$04,$08,$10,$20,$40,$80
 a2493   .BYTE $00
+
 s2494   LDY #$0D     ;#%00001101
 b2496   TYA
         STA f00B5,Y
@@ -4095,6 +4101,7 @@ a24F5   .BYTE $80
 a24F6   .BYTE $1B
 a24F7   .BYTE $34,$00,$00,$00,$00,$00,$00,$00
         .BYTE $00,$00,$00,$00,$00,$00,$00
+
 j2506   LDA a1D8C
         BEQ b250C
         RTS
@@ -4157,6 +4164,7 @@ f2575   .BYTE $09
 f2576   .BYTE $00,$00
 a2578   .BYTE $00
 a2579   .BYTE $00,$00,$00,$00
+
 s257D   LDA a25C4
         SEC
         SBC a25C7
@@ -4196,6 +4204,7 @@ a25C4   .BYTE $00
 a25C5   .BYTE $00
 a25C6   .BYTE $00
 a25C7   .BYTE $00
+
 s25C8   LDX a25DD
 b25CB   LDA f1961,X
         BEQ b25D6
@@ -4207,9 +4216,9 @@ j25D9   DEX
         BPL b25CB
         RTS
 
-s25DE   =*+$01
-a25DD   .BYTE $03,$B5
-        LSR A
+a25DD   .BYTE $03
+
+s25DE   LDA f4A,X
         CMP #$0A     ;#%00001010
         BCS b25F0
 j25E4   LDA #$00     ;#%00000000
@@ -10317,7 +10326,7 @@ CODE_00                                 ;End of string
 ; $C1BA
 ; Main init
 START
-        LDX #$F0     ;#%11110000
+        LDX #$F0                        ;Set stack
         TXS
         JSR sC43C
         LDA #$19     ;#%00011001
@@ -10623,11 +10632,12 @@ aC437   = *+2
         .TEXT ":["                      ; ': '
         #STR_CODE_END
 
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 sC43C   LDX #$4F     ;#%01001111
         LDY #$00     ;#%00000000
         SED
         LDA #$81     ;#%10000001
-bC443   SEC
+_L00    SEC
         SBC #$01     ;#%00000001
         STA aC19C
         ASL A
@@ -10646,10 +10656,11 @@ bC443   SEC
         INY
         INY
         DEX
-        BPL bC443
+        BPL _L00
         CLD
         RTS
 
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 sC465   LDA aC5CC
         BNE sC494
         LDA aC5C9
@@ -11180,7 +11191,7 @@ _L05    TYA
         LDA #$FF     ;#%11111111
         STA fCC7E,Y
         LDA #$00     ;#%00000000
-        STA fCC7F,Y
+        STA fCC7E+1,Y
 
         JSR PRINT_EXT_STR
         .ADDR aCC75
@@ -11207,6 +11218,7 @@ _L09    LDX #$8D     ;#%10001101
         STX aCF01
         RTS
 
+        ; WTF: Two different way to encode special chars?
 pC96C   .TEXT "[[[[[[YOU[HAVE[CHOSEN[TO[BECOME[AN[[[[[["
         .BYTE $80,$91
         .TEXT "[[[[[[[[[[AMERICAN[PEACETIME[HERO[[[[[[["
@@ -11227,6 +11239,7 @@ pC96C   .TEXT "[[[[[[YOU[HAVE[CHOSEN[TO[BECOME[AN[[[[[["
         .BYTE $80,$95
         .TEXT "[[[[[[[[MOVE[JOYSTICK[TO[CONTINUE[[[[[[["
         .BYTE $80,$93,$80,$93
+
         .TEXT "[[[[[[[[SPACE[BAR[SELECTS[WEAPON[[[[[[[["
         .BYTE $FF,$93
         .TEXT "[[[[[=S=[TOGGLES[MUSIC[AND[SOUND[FX[[[[["
@@ -11252,12 +11265,12 @@ STR_TITLE_INSTRUCTIONS
         #STR_CODE_END
 
 aCC75   #STR_CODE_SET_COORDS $00,$17
-        .BYTE $FF
-aCC7A   .BYTE $05
+aCC7A   = *+1
+        #STR_CODE_FONT_SMALL
 aCC7D   = *+2
         #STR_CODE_SET_COLOR $00
-fCC7E   .TEXT "["
-fCC7F   .TEXT "[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[["
+        ; 40 spaces
+fCC7E   .TEXT "[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[["
         #STR_CODE_END
         .BYTE $FF,$00,$00,$00,$00,$00
 
@@ -11451,28 +11464,30 @@ _L01    LDA $D800+40 * 19 + 0,Y
         BNE _L01
         RTS
 
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 sCE30   SEI
         LDA #<aCE71
-        STA $FFFE    ;IRQ
+        STA $FFFE                       ;IRQ
         LDA #>aCE71
-        STA $FFFF    ;IRQ
-        LDA #$C8     ;#%11001000
-        STA $D012    ;Raster Position
-        LDA #$1B     ;#%00011011
-        STA $D011    ;VIC Control Register 1
-        LDA #$01     ;#%00000001
-        STA $D01A    ;VIC Interrupt Mask Register (IMR)
-        STA $DC0D    ;CIA1: CIA Interrupt Control Register
-        LDA $DC0D    ;CIA1: CIA Interrupt Control Register
-        LDA #$7F     ;#%01111111
-        STA $D019    ;VIC Interrupt Request Register (IRR)
-        LDA #>p35    ;#%00000000
+        STA $FFFF                       ;IRQ
+        LDA #$C8
+        STA $D012                       ;Raster Position
+        LDA #$1B                        ;#%00011011
+        STA $D011                       ;VIC Control Register 1
+        LDA #$01
+        STA $D01A                       ;VIC Interrupt Mask Register (IMR)
+        STA $DC0D                       ;CIA1: CIA Interrupt Control Register
+        LDA $DC0D                       ;CIA1: CIA Interrupt Control Register
+        LDA #$7F                        ;#%01111111
+        STA $D019                       ;VIC Interrupt Request Register (IRR)
+        LDA #$00
         STA a02
-        LDA #<p35    ;#%00110101
+        LDA #$35
         STA a01
         CLI
         RTS
 
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
         LDA #$36     ;#%00110110
         STA a01
         JMP $FE66
@@ -11483,6 +11498,8 @@ sCE30   SEI
         STA $FFFB    ;NMI
         RTS
 
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+; IRQ Handler
 aCE71   PHA
         TYA
         PHA

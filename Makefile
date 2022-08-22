@@ -13,6 +13,20 @@ rambo.prg: src/rambo-0334-fff9.asm
 	64tass -Wall -Werror --cbm-prg -o bin/rambo.prg -L bin/list.txt -l bin/labels.txt --vice-labels src/rambo-0334-fff9.asm
 	md5sum bin/rambo.prg orig/rambo-0334-fff9.prg
 
+d64: rambo.prg
+	split -b48334 bin/rambo.prg
+	mv xaa bin/ram2.prg
+	printf "\x00\x40" | cat - xab > bin/ram1.prg
+	rm xab
+	$(C1541) -format "rambo,rq" d64 $(D64_IMAGE)
+	$(C1541) $(D64_IMAGE) -write orig/sys16384.prg "sys16384"
+	$(C1541) $(D64_IMAGE) -write bin/ram1.prg "ram1"
+	$(C1541) $(D64_IMAGE) -write bin/ram2.prg "ram2"
+	$(C1541) $(D64_IMAGE) -list
+
+run: d64
+	$(X64) -verbose -moncommands bin/labels.txt $(D64_IMAGE)
+
 clean:
 	-rm $(D64_IMAGE)
-	-rm bin/*.prg bin/*.txt bin/*.d64 bin/*.bin  bin/*.crt
+	-rm bin/*.prg bin/*.txt bin/*.d64 bin/*.bin bin/*.crt
