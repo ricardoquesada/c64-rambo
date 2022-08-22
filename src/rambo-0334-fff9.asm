@@ -187,7 +187,6 @@ a4840 = $4840                           ;Sprite
 a4855 = $4855                           ;Sprite
 a7ED8 = $7ED8                           ;Updatign charset?
 a7FF8 = $7FF8                           ; or using unused space as variables?
-aFFFF = $FFFF
 
 ;
 ; **** POINTERS ****
@@ -3748,10 +3747,10 @@ b2253   LDA a2482
         RTS
 
 s225C   SEI
-        LDA #$8B     ;#%10001011
+        LDA #<a228b
         STA $FFFE    ;IRQ
-        LDA #$22     ;#%00100010
-        STA aFFFF    ;IRQ
+        LDA #>a228b
+        STA $FFFF    ;IRQ
         LDA #$00     ;#%00000000
         STA $D011    ;VIC Control Register 1
         LDA #$01     ;#%00000001
@@ -3769,7 +3768,7 @@ s225C   SEI
         STA $D012    ;Raster Position
         RTS
 
-        PHA
+a228b   PHA
         TYA
         PHA
         TXA
@@ -3819,10 +3818,10 @@ b22E4   LDA #$07     ;#%00000111
         STA a09
         LDA #$32     ;#%00110010
         STA aFB
-        LDA #$1F     ;#%00011111
+        LDA #<a231F
         STA $FFFE    ;IRQ
-        LDA #$23     ;#%00100011
-        STA aFFFF    ;IRQ
+        LDA #>a231F
+        STA $FFFF    ;IRQ
         INC a2305
         LDA #$DB     ;#%11011011
         STA $D012    ;Raster Position
@@ -3851,7 +3850,7 @@ b2312   ADC #$00     ;#%00000000
         PLA
         RTI
 
-        PHA
+a231F   PHA
         TYA
         PHA
         TXA
@@ -3860,10 +3859,10 @@ b2312   ADC #$00     ;#%00000000
         STA $D019    ;VIC Interrupt Request Register (IRR)
         CLD
         SEI
-        LDA #$8B     ;#%10001011
+        LDA #<a228b
         STA $FFFE    ;IRQ
-        LDA #$22     ;#%00100010
-        STA aFFFF    ;IRQ
+        LDA #>a228b
+        STA $FFFF    ;IRQ
         LDA #$C0     ;#%11000000
         STA $D010    ;Sprites 0-7 MSB of X coordinate
         LDA #$03     ;#%00000011
@@ -11324,8 +11323,9 @@ sCD73   LDA aCF0E
         BNE bCD79
         RTS
 
-bCD79   LDY #$00     ;#%00000000
-bCD7B   LDA $4000+40 * 11 + 0,Y
+        ; Scroll up one row from row 24 to row 10
+bCD79   LDY #$00
+_L00    LDA $4000+40 * 11 + 0,Y
         STA $4000+40 * 10 + 0,Y
         LDA $D800+40 * 11 + 0,Y
         STA $D800+40 * 10 + 0,Y
@@ -11365,14 +11365,14 @@ bCD7B   LDA $4000+40 * 11 + 0,Y
         LDA $D800+40 * 18 + 0,Y
         STA $D800+40 * 17 + 0,Y
 
-        LDA $4000+40 * 19 + 0,Y
-        STA $4000+40 * 18 + 0,Y         ;Color updated in next loop
+        LDA $4000+40 * 19 + 0,Y         ;Color updated in next loop
+        STA $4000+40 * 18 + 0,Y         ; Bug? Why was the loop split in two?
         INY
         CPY #40
-        BNE bCD7B
+        BNE _L00
 
         LDY #$00
-bCDE8   LDA $D800+40 * 19 + 0,Y
+_L01    LDA $D800+40 * 19 + 0,Y
         STA $D800+40 * 18 + 0,Y
 
         LDA $4000+40 * 20 + 0,Y
@@ -11402,14 +11402,14 @@ bCDE8   LDA $D800+40 * 19 + 0,Y
 
         INY
         CPY #40
-        BNE bCDE8
+        BNE _L01
         RTS
 
 sCE30   SEI
-        LDA #$71     ;#%01110001
+        LDA #<aCE71
         STA $FFFE    ;IRQ
-        LDA #$CE     ;#%11001110
-        STA aFFFF    ;IRQ
+        LDA #>aCE71
+        STA $FFFF    ;IRQ
         LDA #$C8     ;#%11001000
         STA $D012    ;Raster Position
         LDA #$1B     ;#%00011011
@@ -11437,7 +11437,7 @@ sCE30   SEI
         STA $FFFB    ;NMI
         RTS
 
-        PHA
+aCE71   PHA
         TYA
         PHA
         TXA
