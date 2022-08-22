@@ -6446,6 +6446,7 @@ f8000   .BYTE $00,$00,$00,$01,$01,$02,$03,$04
         .BYTE $FF,$FF,$00,$00,$FF,$FF,$00,$00
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+; Args: A
 s8100   TAY
         LDA f836E,Y
         STA a810E
@@ -6677,40 +6678,40 @@ f835E   .BYTE $C8,$A7,$C8,$A7,$9E,$A9,$1A,$89
         .BYTE $B3,$3F,$01,$01,$01,$05,$05,$04
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
-f836E   .BYTE <$8553
+f836E   .BYTE <$8553  			;0
 	.BYTE <$8474
 	.BYTE <$8466
 	.BYTE <$84B3
 	.BYTE <$84B8
 	.BYTE <$84B0
 	.BYTE <$84AA
-	.BYTE <$84AD
+	.BYTE <$84AD 			;7
 
-        .BYTE <$8418
+        .BYTE <$8418 			;8
 	.BYTE <$84A1
 	.BYTE <$84A4
 	.BYTE <$84A7
 	.BYTE <$849B
 	.BYTE <$83BF
 	.BYTE <$83C2
-	.BYTE <$83C5
+	.BYTE <$83C5			;15
 
-        .BYTE <$83C8
+        .BYTE <$83C8 			;16
 	.BYTE <$83CB
 	.BYTE <$83D1
 	.BYTE <$83DF
 	.BYTE <$83EC
 	.BYTE <$840D
 	.BYTE <$83F8
-	.BYTE <$83D4
+	.BYTE <$83D4 			;23
 
-        .BYTE <$83AC
+        .BYTE <$83AC 			;24
 	.BYTE <$8534
 	.BYTE <$850D
 	.BYTE <$84BE
 	.BYTE <$84BB
 	.BYTE <$849E
-	.BYTE <$83CE
+	.BYTE <$83CE 			;30
 
 f838D   .BYTE >$8553
 	.BYTE >$8474
@@ -6929,7 +6930,9 @@ b852D   BCC b8537
         CPX #$0F     ;#%00001111
         BEQ b8537
         INX
+
 b8534   STX a820E
+
 b8537   LDA a820E
         ORA a820B
         STA $D418    ;Select Filter Mode and Volume
@@ -9014,6 +9017,7 @@ a9E4D   .BYTE $0B,$D2,$FE,$9B,$5F,$04,$D2,$19
         .BYTE $00,$00,$00,$00,$00,$00,$00,$00
         .BYTE $00,$00,$00,$00,$00,$15,$00,$C7
         .BYTE $03,$07,$DA,$61
+
 bA451   JSR sA4F8
         LDA #$01     ;#%00000001
         JSR s8100
@@ -10397,7 +10401,7 @@ START
         LDX #$F0                        ;Set stack
         TXS
         JSR sC43C
-        LDA #$19     ;#%00011001
+        LDA #$19 			;Jump to index $19
         LDX #$0F     ;#%00001111
         JSR s8100
         LDA #$00     ;#%00000000
