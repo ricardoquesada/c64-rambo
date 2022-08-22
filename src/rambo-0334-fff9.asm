@@ -10355,7 +10355,7 @@ bC27F   JSR PRINT_EXT_STR
         .ADDR STR_CLEAR_SCREEN
 
         JSR PRINT_EXT_STR
-        .ADDR aC7AE
+        .ADDR STR_CONGRATULATIONS
 
         LDX #$4F     ;#%01001111
         LDA aC2D1
@@ -10941,23 +10941,36 @@ aC752   .BYTE $FF,$03
         .BYTE $00,$20
         .BYTE $FF,$00
 
-aC758   .BYTE $FF,$02,$07,$FF,$04
-        .BYTE $FF,$01,$0F,$00
+STR_TITLE_RAMBO
+        .WORD STR_CODE_SET_COLOR
+        .BYTE $07
+        .WORD STR_CODE_USE_BIG_FONT
+        .WORD STR_CODE_SET_COORDS
+        .BYTE $0F,$00
         .TEXT "RAMBO"
-        .BYTE $FF,$05
+        .WORD STR_CODE_USE_SMALL_FONT
         .TEXT "TM"
-        .BYTE $FF,$04,$FF,$01,$09,$03,$FF,$02,$02
+        .WORD STR_CODE_USE_BIG_FONT
+        .WORD STR_CODE_SET_COORDS
+        .BYTE $09,$03
+        .WORD STR_CODE_SET_COLOR
+        .BYTE $02
         .TEXT "FIRST[BLOOD"
-        .BYTE $FF,$05
+        .WORD STR_CODE_USE_SMALL_FONT
         .TEXT "TM"
-        .BYTE $FF,$04,$FF,$01,$0D,$06,$FF,$02,$03
+        .WORD STR_CODE_USE_BIG_FONT
+        .WORD STR_CODE_SET_COORDS
+        .BYTE $0D,$06
+        .WORD STR_CODE_SET_COLOR
+        .BYTE $03
         .TEXT "PART[II"
         .BYTE $FF,$05,$FF,$01,$0C,$09,$FF,$02,$05
         .TEXT "ALL[TIME[HEROES"
-        .BYTE $FF,$04
-        .BYTE $FF,$00
+        .WORD STR_CODE_USE_BIG_FONT
+        .WORD STR_CODE_END
 
-aC7AE   .WORD STR_CODE_SET_COLOR
+STR_CONGRATULATIONS
+        .WORD STR_CODE_SET_COLOR
         .BYTE $0F
         .WORD STR_CODE_SET_COORDS
         .BYTE $05,$00
@@ -11013,7 +11026,7 @@ bC853   STA f4348,X
         BPL bC853
 
         JSR PRINT_EXT_STR
-        .ADDR aC758
+        .ADDR STR_TITLE_RAMBO
 
         LDA #$00
 bC863   STA aCD72
