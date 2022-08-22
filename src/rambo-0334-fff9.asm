@@ -11142,6 +11142,11 @@ bC8AB   JSR bC2D3
         LDA #>pC96C
         STA aFF
 
+	; Reads from the lines to scroll.
+	; A copies each line, one-by-one, in a temporal
+	; buffer.
+	; And this temporal buffer is printed using the
+	; PRINT_EXT_STR function
 _L00    LDY #$00
 _L01    LDA (pFE),Y                     ;Read char to print
         BMI _L02                        ;Is it special char? Yes
