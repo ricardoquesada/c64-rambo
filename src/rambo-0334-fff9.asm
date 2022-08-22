@@ -196,6 +196,16 @@ p0026 = $0026
 p35 = $0035
 p0135 = $0135
 p0232 = $0232
+
+; String codes
+; Defined in reverse order so that can be used with .word
+STR_CODE_END            = $00ff
+STR_CODE_SET_COORDS     = $01ff
+STR_CODE_SET_COLOR      = $02ff
+STR_CODE_CLEAR_SCR      = $03ff
+STR_CODE_USE_BIG_FONT   = $04ff
+STR_CODE_USE_SMALL_FONT = $05ff
+
 ;
 ; **** EXTERNAL JUMPS ****
 ;
@@ -10279,7 +10289,7 @@ START
         STA $D016    ;VIC Control Register 2
 
 jC1F3   JSR PRINT_EXT_STR
-        .ADDR aCCAE
+        .ADDR STR_CLEAR_SCREEN
 
 ; $C1F8
         LDA #$00
@@ -10342,7 +10352,7 @@ sC276   LDA aC2D1
         RTS
 
 bC27F   JSR PRINT_EXT_STR
-        .ADDR aCCAE
+        .ADDR STR_CLEAR_SCREEN
 
         JSR PRINT_EXT_STR
         .ADDR aC7AE
@@ -10947,19 +10957,37 @@ aC758   .BYTE $FF,$02,$07,$FF,$04
         .BYTE $FF,$04
         .BYTE $FF,$00
 
-aC7AE   .BYTE $FF,$02,$0F,$FF,$01,$05,$00
+aC7AE   .WORD STR_CODE_SET_COLOR
+        .BYTE $0F
+        .WORD STR_CODE_SET_COORDS
+        .BYTE $05,$00
         .TEXT "CONGRATULATIONS"
-        .BYTE $FF,$01,$09,$03,$FF,$02,$05
+        .WORD STR_CODE_SET_COORDS
+        .BYTE $09,$03
+        .WORD STR_CODE_SET_COLOR
+        .BYTE $05
         .TEXT "YOU[ARE[NOW"
-        .BYTE $FF,$01,$03,$06,$FF,$02,$07
+        .WORD STR_CODE_SET_COORDS
+        .BYTE $03,$06
+        .WORD STR_CODE_SET_COLOR
+        .BYTE $07
         .TEXT "AMONG[OTHER[GREAT"
-        .BYTE $FF,$01,$07,$09,$FF,$02,$0A
+        .WORD STR_CODE_SET_COORDS
+        .BYTE $07,$09
+        .WORD STR_CODE_SET_COLOR
+        .BYTE $0A
         .TEXT "BATTLE[HEROES"
-        .BYTE $FF,$01,$08,$0C,$FF,$02,$03
+        .WORD STR_CODE_SET_COORDS
+        .BYTE $08,$0C
+        .WORD STR_CODE_SET_COLOR
+        .BYTE $03
         .TEXT "IN[THE[RAMBO"
-        .BYTE $FF,$01,$04,$0F,$FF,$02,$0E
+        .WORD STR_CODE_SET_COORDS
+        .BYTE $04,$0F
+        .WORD STR_CODE_SET_COLOR
+        .BYTE $0E
         .TEXT "HIGH[SCORE[RANKS"
-        .BYTE $FF,$00
+        .WORD STR_CODE_END
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 ; $C82E
@@ -11161,26 +11189,41 @@ pC96C   .TEXT "[[[[[[YOU[HAVE[CHOSEN[TO[BECOME[AN[[[[[["
         .TEXT "[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[["
         .BYTE $80,$91,$FF,$91,$FE,$91
 
-aCC5A   .BYTE $FF,$01,$0B,$09,$FF,$02,$01,$FF,$05
+aCC5A   .WORD STR_CODE_SET_COORDS
+        .BYTE $0B,$09
+        .WORD STR_CODE_SET_COLOR
+        .BYTE $01
+        .WORD STR_CODE_USE_SMALL_FONT
         .TEXT "   INSTRUCTIONS "
-        .BYTE $FF,$00
-aCC75   .BYTE $FF,$01,$00,$17,$FF
-aCC7A   .BYTE $05,$FF,$02
+        .WORD STR_CODE_END
+
+aCC75   .WORD STR_CODE_SET_COORDS
+        .BYTE $00,$17
+        .BYTE $FF
+aCC7A   .BYTE $05
+        .WORD STR_CODE_SET_COLOR
 aCC7D   .BYTE $00
 fCC7E   .TEXT "["
 fCC7F   .TEXT "[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[["
-        .BYTE $FF,$00
+        .WORD STR_CODE_END
         .BYTE $FF,$00,$00,$00,$00,$00
-aCCAE   .BYTE $FF,$03,$20,$01,$FF,$04
-        .BYTE $FF,$00
-aCCB6   .BYTE $FF,$01,$00,$17,$FF,$02
+
+STR_CLEAR_SCREEN
+        .WORD STR_CODE_CLEAR_SCR
+        .BYTE $20,$01
+        .WORD STR_CODE_USE_BIG_FONT
+        .WORD STR_CODE_END
+
+aCCB6   .WORD STR_CODE_SET_COORDS
+        .BYTE $00,$17
+        .WORD STR_CODE_SET_COLOR
 aCCBC   .BYTE $06
 aCCBD   .TEXT "["
 aCCBE   .TEXT "7\"
 fCCC0   .TEXT "\\\\\\\\\\["
 fCCCB   .TEXT "0"
 fCCCC   .TEXT "74000"
-        .BYTE $FF,$00
+        .WORD STR_CODE_END
 
 aCCD3   .BYTE $01
 aCCD4   .BYTE $00
