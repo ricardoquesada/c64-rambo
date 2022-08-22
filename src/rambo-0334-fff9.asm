@@ -520,7 +520,10 @@ f0566   .BYTE $00,$00,$00,$00,$00,$00,$00,$00
         .BYTE $00,$00,$00,$00,$00,$00,$00,$00
         .BYTE $00,$00,$00,$00,$00,$00,$00,$00
         .BYTE $00,$00,$00,$00,$00,$00,$00,$00
-a0586   .BYTE $FF,$03,$20,$0D,$FF,$00
+
+a0586   #STR_CODE_CLR_SCREEN $20,$0D
+        #STR_CODE_END
+
 f058C   .BYTE $0B,$0B,$06,$06,$07,$07,$0B,$0B
         .BYTE $0A,$0A
 
@@ -536,12 +539,12 @@ a05A0
         #STR_CODE_FONT_BIG
         .TEXT "TASK[ONE[COMPLE"
 f05B8   .TEXT "TED."
-        .BYTE $FF,$01,$02,$06
+        #STR_CODE_SET_COORDS $02,$06
         #STR_CODE_SET_COLOR $05
         .TEXT "YOUR[DATA[REVEALS"
-        .BYTE $FF,$01,$03,$09
+        #STR_CODE_SET_COORDS $03,$09
         .TEXT "AMERICAN[P.O.W.S"
-        .BYTE $FF,$01,$06,$0C
+        #STR_CODE_SET_COORDS $06,$0C
         .TEXT "TO[BE[RESCUED."
         #STR_CODE_END
 
@@ -554,15 +557,15 @@ f0608   .TEXT "K[ONE[COMPLETED."
         #STR_CODE_SET_COORDS $05,$06
         #STR_CODE_SET_COLOR $03
         .TEXT "NOW[RESCUE[THE"
-        .BYTE $FF,$01,$0C,$09
+        #STR_CODE_SET_COORDS $0C,$09
         .TEXT "P.O.W.S"
-        .BYTE $FF,$01,$06,$0C
+        #STR_CODE_SET_COORDS $06,$0C
         .TEXT "FROM[THE[CAMP."
         #STR_CODE_SET_COORDS $06,$0F
         #STR_CODE_SET_COLOR $0A
         .TEXT "USE[ANY"
 f0658   .TEXT "[ENEMY"
-        .BYTE $FF,$01,$00,$12
+        #STR_CODE_SET_COORDS $00,$12
         .TEXT "EQUIPMENT[NECESSARY."
         #STR_CODE_END
 
@@ -571,13 +574,13 @@ a0678
         #STR_CODE_SET_COLOR $01
         #STR_CODE_FONT_BIG
         .TEXT "YOUR[PRESENCE"
-        .BYTE $FF,$01,$04,$06
+        #STR_CODE_SET_COORDS $04,$06
         .TEXT "HAS[BEEN[RELAY"
 a06A0   .TEXT "ED"
         #STR_CODE_SET_COORDS $08,$09
         .TEXT "T"
 f06A7   .TEXT "O[ENEMY[H.Q."
-        .BYTE $FF,$01,$08,$0C
+        #STR_CODE_SET_COORDS $08,$0C
         #STR_CODE_SET_COLOR $05
         .TEXT "A[GUNSHIP[IS"
         #STR_CODE_SET_COORDS $07,$0F
@@ -595,27 +598,27 @@ a06EC
 
 a0700
         #STR_CODE_SET_COLOR $01
-        .BYTE $FF,$01,$05,$00
+        #STR_CODE_SET_COORDS $05,$00
         .TEXT "CONGRATULAT"
 p0712   .TEXT "IONS."
         #STR_CODE_SET_COLOR $03
-        .BYTE $FF,$01,$07,$03
+        #STR_CODE_SET_COORDS $07,$03
         .TEXT "THANKS[TO[YOU"
-        .BYTE $FF,$01,$04,$06
+        #STR_CODE_SET_COORDS $04,$06
         .TEXT "TEN[P.O.W.S[HAVE"
-        .BYTE $FF,$01,$07,$09
+        #STR_CODE_SET_COORDS $07,$09
         .TEXT "BEEN[RETURNED"
-        .BYTE $FF,$01,$05,$0C
-        .TEXT "TO[THE[HOMEL", $E8, "."
+        #STR_CODE_SET_COORDS $05,$0C
+        .TEXT "TO[THE[HOMEL", $E8, "."          ;XXX ???
         #STR_CODE_SET_COLOR $07
-        .BYTE $FF,$01,$02,$0F
-        .BYTE $FF,$05
+        #STR_CODE_SET_COORDS $02,$0F
+        #STR_CODE_FONT_SMALL
         .TEXT "YOU[KNOW[YOU[MUST[NOW[RETURN[TO[GET"
-        .BYTE $FF,$01,$03,$11
+        #STR_CODE_SET_COORDS $03,$11
         .TEXT "MORE[UNFORTUNA"
 a07A0   .TEXT "TE[SOLDIERS[TRAPPED"
-        .BYTE $FF,$01,$0C,$13
-        .TEXT "BY[ENEMY[FORCES<"
+        #STR_CODE_SET_COORDS $0C,$13
+        .TEXT "BY[ENEMY[FORCES<"                ; '<' is a period in small font
         #STR_CODE_END
 
 j07C9   LDA #$01     ;#%00000001
