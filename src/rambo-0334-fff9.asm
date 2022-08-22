@@ -197,14 +197,28 @@ p35 = $0035
 p0135 = $0135
 p0232 = $0232
 
+;
+; **** MACROS ****
+;
 ; String codes
-; Defined in reverse order so that can be used with .word
-STR_CODE_END            = $00ff
-STR_CODE_SET_COORDS     = $01ff
-STR_CODE_SET_COLOR      = $02ff
-STR_CODE_CLEAR_SCR      = $03ff
-STR_CODE_USE_BIG_FONT   = $04ff
-STR_CODE_USE_SMALL_FONT = $05ff
+STR_CODE_END            .MACRO
+        .BYTE $ff,$00
+                        .ENDMACRO
+STR_CODE_SET_COORDS    .MACRO y, x
+        .BYTE $ff,$01,\y,\x
+                        .ENDMACRO
+STR_CODE_SET_COLOR      .MACRO c
+        .BYTE $ff,$02,\c
+                        .ENDMACRO
+STR_CODE_CLR_SCREEN     .MACRO chr,color
+        .BYTE $ff,$03,\chr,\color
+                        .ENDMACRO
+STR_CODE_FONT_BIG       .MACRO
+        .BYTE $ff,$04
+                        .ENDMACRO
+STR_CODE_FONT_SMALL     .MACRO
+        .BYTE $ff,$05
+                        .ENDMACRO
 
 ;
 ; **** EXTERNAL JUMPS ****
@@ -10937,70 +10951,53 @@ sC74C   JSR PRINT_EXT_STR
 
         RTS
 
-aC752   .BYTE $FF,$03
-        .BYTE $00,$20
-        .BYTE $FF,$00
+aC752   #STR_CODE_CLR_SCREEN $00,$20            ;Bug? Reverse order. Should be $20,$00
+        #STR_CODE_END
 
 STR_TITLE_RAMBO
-        .WORD STR_CODE_SET_COLOR
-        .BYTE $07
-        .WORD STR_CODE_USE_BIG_FONT
-        .WORD STR_CODE_SET_COORDS
-        .BYTE $0F,$00
+        #STR_CODE_SET_COLOR $07
+        #STR_CODE_FONT_BIG
+        #STR_CODE_SET_COORDS $0F,$00
         .TEXT "RAMBO"
-        .WORD STR_CODE_USE_SMALL_FONT
+        #STR_CODE_FONT_SMALL
         .TEXT "TM"
-        .WORD STR_CODE_USE_BIG_FONT
-        .WORD STR_CODE_SET_COORDS
-        .BYTE $09,$03
-        .WORD STR_CODE_SET_COLOR
-        .BYTE $02
+        #STR_CODE_FONT_BIG
+        #STR_CODE_SET_COORDS $09,$03
+        #STR_CODE_SET_COLOR $02
         .TEXT "FIRST[BLOOD"
-        .WORD STR_CODE_USE_SMALL_FONT
+        #STR_CODE_FONT_SMALL
         .TEXT "TM"
-        .WORD STR_CODE_USE_BIG_FONT
-        .WORD STR_CODE_SET_COORDS
-        .BYTE $0D,$06
-        .WORD STR_CODE_SET_COLOR
-        .BYTE $03
+        #STR_CODE_FONT_BIG
+        #STR_CODE_SET_COORDS $0D,$06
+        #STR_CODE_SET_COLOR $03
         .TEXT "PART[II"
-        .BYTE $FF,$05,$FF,$01,$0C,$09,$FF,$02,$05
+        #STR_CODE_FONT_SMALL
+        #STR_CODE_SET_COORDS $0C,$09
+        #STR_CODE_SET_COLOR $05
         .TEXT "ALL[TIME[HEROES"
-        .WORD STR_CODE_USE_BIG_FONT
-        .WORD STR_CODE_END
+        #STR_CODE_FONT_BIG
+        #STR_CODE_END
 
 STR_CONGRATULATIONS
-        .WORD STR_CODE_SET_COLOR
-        .BYTE $0F
-        .WORD STR_CODE_SET_COORDS
-        .BYTE $05,$00
+        #STR_CODE_SET_COLOR $0F
+        #STR_CODE_SET_COORDS $05,$00
         .TEXT "CONGRATULATIONS"
-        .WORD STR_CODE_SET_COORDS
-        .BYTE $09,$03
-        .WORD STR_CODE_SET_COLOR
-        .BYTE $05
+        #STR_CODE_SET_COORDS $09,$03
+        #STR_CODE_SET_COLOR $05
         .TEXT "YOU[ARE[NOW"
-        .WORD STR_CODE_SET_COORDS
-        .BYTE $03,$06
-        .WORD STR_CODE_SET_COLOR
-        .BYTE $07
+        #STR_CODE_SET_COORDS $03,$06
+        #STR_CODE_SET_COLOR $07
         .TEXT "AMONG[OTHER[GREAT"
-        .WORD STR_CODE_SET_COORDS
-        .BYTE $07,$09
-        .WORD STR_CODE_SET_COLOR
-        .BYTE $0A
+        #STR_CODE_SET_COORDS $07,$09
+        #STR_CODE_SET_COLOR $0A
         .TEXT "BATTLE[HEROES"
-        .WORD STR_CODE_SET_COORDS
-        .BYTE $08,$0C
-        .WORD STR_CODE_SET_COLOR
-        .BYTE $03
+        #STR_CODE_SET_COORDS $08,$0C
+        #STR_CODE_SET_COLOR $03
         .TEXT "IN[THE[RAMBO"
-        .WORD STR_CODE_SET_COORDS
-        .BYTE $04,$0F
-        .WORD STR_CODE_SET_COLOR
-        .BYTE $0E
+        #STR_CODE_SET_COORDS $04,$0F
+        #STR_CODE_SET_COLOR $0E
         .TEXT "HIGH[SCORE[RANKS"
-        .WORD STR_CODE_END
+        #STR_CODE_END
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 ; $C82E
@@ -11079,7 +11076,7 @@ bC8AB   JSR bC2D3
         BCC jC86E
 
         JSR PRINT_EXT_STR
-        .ADDR aCC5A
+        .ADDR STR_TITLE_INSTRUCTIONS
 
 ; $C8D7
         LDA #$00
@@ -11202,41 +11199,37 @@ pC96C   .TEXT "[[[[[[YOU[HAVE[CHOSEN[TO[BECOME[AN[[[[[["
         .TEXT "[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[["
         .BYTE $80,$91,$FF,$91,$FE,$91
 
-aCC5A   .WORD STR_CODE_SET_COORDS
-        .BYTE $0B,$09
-        .WORD STR_CODE_SET_COLOR
-        .BYTE $01
-        .WORD STR_CODE_USE_SMALL_FONT
+STR_TITLE_INSTRUCTIONS
+        #STR_CODE_SET_COORDS $0B,$09
+        #STR_CODE_SET_COLOR $01
+        #STR_CODE_FONT_SMALL
         .TEXT "   INSTRUCTIONS "
-        .WORD STR_CODE_END
+        #STR_CODE_END
 
-aCC75   .WORD STR_CODE_SET_COORDS
-        .BYTE $00,$17
+aCC75   #STR_CODE_SET_COORDS $00,$17
         .BYTE $FF
 aCC7A   .BYTE $05
-        .WORD STR_CODE_SET_COLOR
-aCC7D   .BYTE $00
+aCC7D   = *+2
+        #STR_CODE_SET_COLOR $00
 fCC7E   .TEXT "["
 fCC7F   .TEXT "[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[["
-        .WORD STR_CODE_END
+        #STR_CODE_END
         .BYTE $FF,$00,$00,$00,$00,$00
 
 STR_CLEAR_SCREEN
-        .WORD STR_CODE_CLEAR_SCR
-        .BYTE $20,$01
-        .WORD STR_CODE_USE_BIG_FONT
-        .WORD STR_CODE_END
+        #STR_CODE_CLR_SCREEN $20,$01
+        #STR_CODE_FONT_BIG
+        #STR_CODE_END
 
-aCCB6   .WORD STR_CODE_SET_COORDS
-        .BYTE $00,$17
-        .WORD STR_CODE_SET_COLOR
-aCCBC   .BYTE $06
+aCCB6   #STR_CODE_SET_COORDS $00,$17
+aCCBC   = *+2
+        #STR_CODE_SET_COLOR $06
 aCCBD   .TEXT "["
 aCCBE   .TEXT "7\"
 fCCC0   .TEXT "\\\\\\\\\\["
 fCCCB   .TEXT "0"
 fCCCC   .TEXT "74000"
-        .WORD STR_CODE_END
+        #STR_CODE_END
 
 aCCD3   .BYTE $01
 aCCD4   .BYTE $00
@@ -11332,68 +11325,83 @@ sCD73   LDA aCF0E
         RTS
 
 bCD79   LDY #$00     ;#%00000000
-bCD7B   LDA f41B8,Y
-        STA f4190,Y
-        LDA fD9B8,Y
-        STA fD990,Y
-        LDA f41E0,Y
-        STA f41B8,Y
-        LDA fD9E0,Y
-        STA fD9B8,Y
-        LDA f4208,Y
-        STA f41E0,Y
-        LDA fDA08,Y
-        STA fD9E0,Y
-        LDA f4230,Y
-        STA f4208,Y
-        LDA fDA30,Y
-        STA fDA08,Y
-        LDA f4258,Y
-        STA f4230,Y
-        LDA fDA58,Y
-        STA fDA30,Y
-        LDA f4280,Y
-        STA f4258,Y
-        LDA fDA80,Y
-        STA fDA58,Y
-        LDA f42A8,Y
-        STA f4280,Y
-        LDA fDAA8,Y
-        STA fDA80,Y
-        LDA f42D0,Y
-        STA f42A8,Y
-        LDA fDAD0,Y
-        STA fDAA8,Y
-        LDA f42F8,Y
-        STA f42D0,Y
+bCD7B   LDA $4000+40 * 11 + 0,Y
+        STA $4000+40 * 10 + 0,Y
+        LDA $D800+40 * 11 + 0,Y
+        STA $D800+40 * 10 + 0,Y
+
+        LDA $4000+40 * 12 + 0,Y
+        STA $4000+40 * 11 + 0,Y
+        LDA $D800+40 * 12 + 0,Y
+        STA $D800+40 * 11 + 0,Y
+
+        LDA $4000+40 * 13 + 0,Y
+        STA $4000+40 * 12 + 0,Y
+        LDA $D800+40 * 13 + 0,Y
+        STA $D800+40 * 12 + 0,Y
+
+        LDA $4000+40 * 14 + 0,Y
+        STA $4000+40 * 13 + 0,Y
+        LDA $D800+40 * 14 + 0,Y
+        STA $D800+40 * 13 + 0,Y
+
+        LDA $4000+40 * 15 + 0,Y
+        STA $4000+40 * 14 + 0,Y
+        LDA $D800+40 * 15 + 0,Y
+        STA $D800+40 * 14 + 0,Y
+
+        LDA $4000+40 * 16 + 0,Y
+        STA $4000+40 * 15 + 0,Y
+        LDA $D800+40 * 16 + 0,Y
+        STA $D800+40 * 15 + 0,Y
+
+        LDA $4000+40 * 17 + 0,Y
+        STA $4000+40 * 16 + 0,Y
+        LDA $D800+40 * 17 + 0,Y
+        STA $D800+40 * 16 + 0,Y
+
+        LDA $4000+40 * 18 + 0,Y
+        STA $4000+40 * 17 + 0,Y
+        LDA $D800+40 * 18 + 0,Y
+        STA $D800+40 * 17 + 0,Y
+
+        LDA $4000+40 * 19 + 0,Y
+        STA $4000+40 * 18 + 0,Y         ;Color updated in next loop
         INY
-        CPY #$28     ;#%00101000
+        CPY #40
         BNE bCD7B
-        LDY #$00     ;#%00000000
-bCDE8   LDA fDAF8,Y
-        STA fDAD0,Y
-        LDA f4320,Y
-        STA f42F8,Y
-        LDA fDB20,Y
-        STA fDAF8,Y
-        LDA f4348,Y
-        STA f4320,Y
-        LDA fDB48,Y
-        STA fDB20,Y
-        LDA f4370,Y
-        STA f4348,Y
-        LDA fDB70,Y
-        STA fDB48,Y
-        LDA f4398,Y
-        STA f4370,Y
-        LDA fDB98,Y
-        STA fDB70,Y
-        LDA f43C0,Y
-        STA f4398,Y
-        LDA fDBC0,Y
-        STA fDB98,Y
+
+        LDY #$00
+bCDE8   LDA $D800+40 * 19 + 0,Y
+        STA $D800+40 * 18 + 0,Y
+
+        LDA $4000+40 * 20 + 0,Y
+        STA $4000+40 * 19 + 0,Y
+        LDA $D800+40 * 20 + 0,Y
+        STA $D800+40 * 19 + 0,Y
+
+        LDA $4000+40 * 21 + 0,Y
+        STA $4000+40 * 20 + 0,Y
+        LDA $D800+40 * 21 + 0,Y
+        STA $D800+40 * 20 + 0,Y
+
+        LDA $4000+40 * 22 + 0,Y
+        STA $4000+40 * 21 + 0,Y
+        LDA $D800+40 * 22 + 0,Y
+        STA $D800+40 * 21 + 0,Y
+
+        LDA $4000+40 * 23 + 0,Y
+        STA $4000+40 * 22 + 0,Y
+        LDA $D800+40 * 23 + 0,Y
+        STA $D800+40 * 22 + 0,Y
+
+        LDA $4000+40 * 24 + 0,Y
+        STA $4000+40 * 23 + 0,Y
+        LDA $D800+40 * 24 + 0,Y
+        STA $D800+40 * 23 + 0,Y
+
         INY
-        CPY #$28     ;#%00101000
+        CPY #40
         BNE bCDE8
         RTS
 
@@ -11625,7 +11633,7 @@ fD940   .BYTE $FD,$1D,$FD,$FD,$FD,$FD,$0D,$FD
         .BYTE $FD,$FD,$9D,$2D,$FD,$FD,$FD,$FD
         .BYTE $FD,$2D,$FD,$FD,$1D,$FD,$FD,$FD
         .BYTE $FD,$0D,$2D,$FD,$0D,$FD,$FD,$FD
-fD990   .BYTE $FD,$FD,$FD,$FD,$FD,$FD,$FD,$FD
+        .BYTE $FD,$FD,$FD,$FD,$FD,$FD,$FD,$FD
         .BYTE $FD,$FD,$FD,$FD,$FD,$FD,$FD,$FD
         .BYTE $FD,$FD,$0D,$FD,$FD,$FD,$FD,$FD
         .BYTE $FD,$FD,$FD,$FD,$FD,$FD,$FD,$FD
@@ -11635,7 +11643,7 @@ fD9B8   .BYTE $FD,$2D,$FD,$FD,$2D,$FD,$FD,$FD
         .BYTE $FD,$CD,$FD,$2D,$FD,$FD,$FD,$FD
         .BYTE $1D,$FD,$FD,$FD,$9D,$2D,$FD,$FD
         .BYTE $FD,$FD,$FD,$FD,$FD,$FD,$FD,$FD
-fD9E0   .BYTE $FD,$FD,$FD,$FD,$FD,$FD,$FD,$0D
+        .BYTE $FD,$FD,$FD,$FD,$FD,$FD,$FD,$0D
         .BYTE $FD,$FD,$FD,$2D,$FD,$FD,$0D,$FD
         .BYTE $9D,$FD,$FD,$0D,$FD,$2D,$FD,$2D
         .BYTE $FD,$FD,$FD,$FD,$0D,$FD,$0D,$FD
@@ -11645,7 +11653,7 @@ fDA08   .BYTE $FD,$FD,$FD,$FD,$FD,$FD,$0D,$FD
         .BYTE $FD,$FD,$FD,$FD,$0D,$2D,$0D,$FD
         .BYTE $FD,$FD,$FD,$FD,$FD,$FD,$1D,$FD
         .BYTE $FD,$FD,$FD,$FD,$FD,$FD,$FD,$FD
-fDA30   .BYTE $FD,$0D,$FD,$0D,$FD,$FD,$FD,$FD
+        .BYTE $FD,$0D,$FD,$0D,$FD,$FD,$FD,$FD
         .BYTE $2D,$FD,$FD,$FD,$FD,$FD,$FD,$FD
         .BYTE $9D,$9D,$2D,$1D,$FD,$FD,$FD,$FD
         .BYTE $FD,$FD,$FD,$FD,$FD,$2D,$FD,$FD
@@ -11655,47 +11663,47 @@ fDA58   .BYTE $FD,$FD,$FD,$FD,$FD,$FD,$FD,$FD
         .BYTE $FD,$FD,$FD,$FD,$FD,$FD,$FD,$1D
         .BYTE $FD,$1D,$FD,$FD,$FD,$0D,$FD,$FD
         .BYTE $FD,$0D,$FD,$FD,$FD,$0D,$FD,$0D
-fDA80   .BYTE $FD,$FD,$2D,$FD,$FD,$FD,$FD,$1D
+        .BYTE $FD,$FD,$2D,$FD,$FD,$FD,$FD,$1D
         .BYTE $FD,$FD,$FD,$2D,$FD,$CD,$FD,$2D
         .BYTE $FD,$2D,$FD,$2D,$FD,$FD,$FD,$FD
         .BYTE $FD,$FD,$FD,$FD,$2D,$FD,$2D,$6D
         .BYTE $FD,$FD,$FD,$9D,$0D,$FD,$FD,$FD
-fDAA8   .BYTE $FD,$6D,$FD,$FD,$FD,$FD,$FD,$FD
+        .BYTE $FD,$6D,$FD,$FD,$FD,$FD,$FD,$FD
         .BYTE $2D,$FD,$1D,$FD,$FD,$FD,$6D,$FD
         .BYTE $1D,$FD,$FD,$FD,$FD,$FD,$FD,$FD
         .BYTE $0D,$FD,$FD,$FD,$FD,$FD,$FD,$FD
         .BYTE $FD,$FD,$FD,$2D,$FD,$FD,$FD,$FD
-fDAD0   .BYTE $FD,$0D,$FD,$FD,$FD,$FD,$FD,$FD
+        .BYTE $FD,$0D,$FD,$FD,$FD,$FD,$FD,$FD
         .BYTE $FD,$FD,$FD,$0D,$1D,$FD,$FD,$FD
         .BYTE $FD,$FD,$FD,$FD,$FD,$2D,$FD,$FD
         .BYTE $FD,$FD,$FD,$FD,$FD,$FD,$FD,$FD
         .BYTE $FD,$2D,$FD,$FD,$FD,$FD,$FD,$FD
-fDAF8   .BYTE $FD,$FD,$FD,$FD,$FD,$FD,$FD,$FD
+        .BYTE $FD,$FD,$FD,$FD,$FD,$FD,$FD,$FD
         .BYTE $FD,$FD,$1D,$FD,$FD,$0D,$FD,$FD
         .BYTE $FD,$FD,$FD,$0D,$FD,$FD,$FD,$0D
         .BYTE $FD,$9D,$2D,$FD,$FD,$2D,$FD,$FD
         .BYTE $FD,$FD,$FD,$FD,$FD,$FD,$FD,$CD
-fDB20   .BYTE $FD,$FD,$FD,$FD,$FD,$FD,$FD,$FD
+        .BYTE $FD,$FD,$FD,$FD,$FD,$FD,$FD,$FD
         .BYTE $FD,$CD,$FD,$FD,$FD,$FD,$FD,$FD
         .BYTE $2D,$FD,$FD,$2D,$FD,$FD,$FD,$FD
         .BYTE $FD,$FD,$FD,$FD,$FD,$FD,$FD,$2D
         .BYTE $9D,$1D,$FD,$FD,$FD,$FD,$FD,$FD
-fDB48   .BYTE $FD,$FD,$FD,$FD,$FD,$FD,$FD,$FD
+        .BYTE $FD,$FD,$FD,$FD,$FD,$FD,$FD,$FD
         .BYTE $FD,$FD,$FD,$FD,$CD,$FD,$FD,$2D
         .BYTE $FD,$FD,$FD,$FD,$FD,$FD,$0D,$FD
         .BYTE $0D,$FD,$CD,$FD,$FD,$FD,$FD,$FD
         .BYTE $FD,$FD,$FD,$FD,$FD,$FD,$FD,$2D
-fDB70   .BYTE $FD,$FD,$FD,$FD,$FD,$FD,$9D,$FD
+        .BYTE $FD,$FD,$FD,$FD,$FD,$FD,$9D,$FD
         .BYTE $FD,$2D,$FD,$0D,$FD,$FD,$FD,$FD
         .BYTE $FD,$FD,$FD,$FD,$FD,$FD,$2D,$2D
         .BYTE $FD,$FD,$FD,$FD,$0D,$FD,$FD,$2D
         .BYTE $FD,$2D,$FD,$FD,$FD,$FD,$FD,$FD
-fDB98   .BYTE $FD,$2D,$FD,$FD,$FD,$FD,$FD,$FD
+        .BYTE $FD,$2D,$FD,$FD,$FD,$FD,$FD,$FD
         .BYTE $FD,$FD,$FD,$9D,$FD,$FD,$0D,$FD
         .BYTE $FD,$FD,$FD,$FD,$FD,$FD,$FD,$FD
         .BYTE $FD,$0D,$FD,$2D,$9D,$FD,$2D,$FD
         .BYTE $FD,$FD,$FD,$FD,$FD,$FD,$FD,$6D
-fDBC0   .BYTE $0D,$FD,$FD,$FD,$FD,$9D,$FD,$FD
+        .BYTE $0D,$FD,$FD,$FD,$FD,$9D,$FD,$FD
         .BYTE $FD,$FD,$FD,$FD,$FD,$FD,$FD,$FD
         .BYTE $FD,$FD,$0D,$FD,$FD,$2D,$FD,$FD
         .BYTE $FD,$FD,$FD,$0D,$FD,$FD,$FD,$FD
