@@ -201,22 +201,22 @@ p0232 = $0232
 ; String codes
 STR_CODE_END            .MACRO
         .BYTE $ff,$00
-                        .ENDMACRO
+                        .ENDM
 STR_CODE_SET_COORDS    .MACRO y, x
         .BYTE $ff,$01,\y,\x
-                        .ENDMACRO
+                        .ENDM
 STR_CODE_SET_COLOR      .MACRO c
         .BYTE $ff,$02,\c
-                        .ENDMACRO
+                        .ENDM
 STR_CODE_CLR_SCREEN     .MACRO chr,color
         .BYTE $ff,$03,\chr,\color
-                        .ENDMACRO
+                        .ENDM
 STR_CODE_FONT_BIG       .MACRO
         .BYTE $ff,$04
-                        .ENDMACRO
+                        .ENDM
 STR_CODE_FONT_SMALL     .MACRO
         .BYTE $ff,$05
-                        .ENDMACRO
+                        .ENDM
 
 ;
 ; **** EXTERNAL JUMPS ****
