@@ -412,7 +412,7 @@ b048C   LDA f00E0,Y
         BPL b048C
 
         JSR sC000
-        .ADDR a1090
+        .ADDR STR_CLEAR_SCREEN_BIS
 
         LDA #$00     ;#%00000000
         JSR sC003
@@ -424,14 +424,13 @@ b048C   LDA f00E0,Y
         TAX
         LDA f0596,X
         STA a04BE
-        LDA f0597,X
-        STA a04BF
+        LDA f0596+1,X
+        STA a04BE+1
         LDA f058C,X
         JSR s8100
 
         JSR sC000
-a04BF   =*+$01
-a04BE   .ADDR f0596
+a04BE   .ADDR f0596                     ;This address is changed in runtime
 
 b04C0   LDA $D012    ;Raster Position
         CMP #$C8     ;#%11001000
@@ -524,9 +523,12 @@ f0566   .BYTE $00,$00,$00,$00,$00,$00,$00,$00
 a0586   .BYTE $FF,$03,$20,$0D,$FF,$00
 f058C   .BYTE $0B,$0B,$06,$06,$07,$07,$0B,$0B
         .BYTE $0A,$0A
-f0596   .BYTE $A0
-f0597   .BYTE $05,$FC,$05,$78,$06,$EC,$06,$00
-        .BYTE $07
+
+f0596   .ADDR a05A0
+        .ADDR a05FC
+        .ADDR a0678
+        .ADDR a06EC
+        .ADDR a0700
 
 a05A0
         #STR_CODE_SET_COORDS $01,$03
@@ -543,6 +545,7 @@ f05B8   .TEXT "TED."
         .TEXT "TO[BE[RESCUED."
         #STR_CODE_END
 
+a05FC
         #STR_CODE_SET_COORDS $01,$03
         #STR_CODE_SET_COLOR $01
         #STR_CODE_FONT_BIG
@@ -563,6 +566,7 @@ f0658   .TEXT "[ENEMY"
         .TEXT "EQUIPMENT[NECESSARY."
         #STR_CODE_END
 
+a0678
         #STR_CODE_SET_COORDS $07,$03
         #STR_CODE_SET_COLOR $01
         #STR_CODE_FONT_BIG
@@ -582,12 +586,14 @@ f06A7   .TEXT "O[ENEMY[H.Q."
         .TEXT "AND[IN[PURSUIT."
         #STR_CODE_END
 
+a06EC
         #STR_CODE_SET_COORDS $0B,$0B
         #STR_CODE_SET_COLOR $01
         #STR_CODE_FONT_BIG
         .TEXT "GAME[OVER"
         #STR_CODE_END
 
+a0700
         #STR_CODE_SET_COLOR $01
         .BYTE $FF,$01,$05,$00
         .TEXT "CONGRATULAT"
@@ -864,7 +870,7 @@ a09A0   =*+$02
 a09A9   =*+$02
 
         JSR sC000
-        .ADDR a107C
+        .ADDR STR_READY
 
         JSR s1813
 b09AF   LDA $D012    ;Raster Position
@@ -890,11 +896,11 @@ s09CA   JSR j1D2A
 b09E0   RTS
 
 b09E1   JSR s180D
-        LDA #$0D     ;#%00001101
+        LDA #$0D                        ;Color
         STA a1093
 
         JSR sC000
-        .ADDR a1090
+        .ADDR STR_CLEAR_SCREEN_BIS
 
         LDA #$00     ;#%00000000
         JSR sC003
@@ -1752,12 +1758,20 @@ f106C   .BYTE $00,$00,$00,$00
 a1070   .BYTE $00
 f1071   .BYTE $00,$79,$29,$01,$52,$7A,$2A,$00
         .BYTE $50,$79,$29
-a107C   .BYTE $FF,$03,$20,$01,$FF
-        .BYTE $04,$FF,$01,$0F,$0B,$FF,$02,$01
+
+STR_READY
+        .BYTE $FF,$03,$20,$01
+        .BYTE $FF,$04
+        .BYTE $FF,$01,$0F,$0B
+        .BYTE $FF,$02,$01
         .TEXT "READY"
-        .BYTE $FF,$00
-a1090   .BYTE $FF,$03,$20
-a1093   .BYTE $01,$FF,$00
+        #STR_CODE_END
+
+a1093   = *+3                           ;Points to the color of screen
+STR_CLEAR_SCREEN_BIS
+        #STR_CODE_CLR_SCREEN $20,$01
+        #STR_CODE_END
+
 j1096   LDA f106C,X
         BEQ j109C
         RTS
