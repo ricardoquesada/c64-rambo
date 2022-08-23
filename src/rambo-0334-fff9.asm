@@ -672,6 +672,7 @@ b0839   DEC a083F
         RTS
 
 a083F   .BYTE $00
+
 b0840   LDA #$32     ;#%00110010
         STA a083F
         LDA a0968
@@ -695,6 +696,7 @@ b0840   LDA #$32     ;#%00110010
 
 a086D   .BYTE $0A
 f086E   .BYTE $00,$00,$00,$00
+
 s0872   CMP #$01     ;#%00000001
         BEQ b0879
         JMP j08A6
@@ -750,6 +752,7 @@ b08CA   DEC f08CF,X
         RTS
 
 f08CF   .BYTE $00,$00,$00,$00,$00
+
 j08D4   LDX #$00     ;#%00000000
         LDA a0968
         CLC
@@ -825,6 +828,7 @@ a0966   .BYTE $00
 a0967   .BYTE $00
 a0968   .BYTE $00
 a0969   .BYTE $00
+
 s096A   LDX #$04     ;#%00000100
         LDA #$00     ;#%00000000
 b096E   STA f120B,X
@@ -840,32 +844,33 @@ b0978   STA f1961,X
 
 a0981   .BYTE $00
 a0982   .BYTE $00
-s0983   LDA #$00     ;#%00000000
+
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+s0983   LDA #$00
         JSR sC003
-        LDA #$01     ;#%00000001
+        LDA #$01
         STA a1093
-        LDA #$1A     ;#%00011010
-        LDX #$07     ;#%00000111
+        LDA #$1A
+        LDX #$07
         JSR s8100
-        LDA #$01     ;#%00000001
+        LDA #$01
         JSR s8100
-        LDA #$09     ;#%00001001
+        LDA #$09
         JSR s8100
         JSR j1D2A
         LDA a1D62
         STA a0981
-a09A9   =*+$02
 
         JSR sC000
         .ADDR STR_READY
 
         JSR s1813
-b09AF   LDA $D012    ;Raster Position
-        CMP #$64     ;#%01100100
+b09AF   LDA $D012                       ;Raster Position
+        CMP #$64
         BNE b09AF
-        LDA #$00     ;#%00000000
+        LDA #$00
         JSR s8100
-        LDA #$02     ;#%00000010
+        LDA #$02
         JSR s8100
         BEQ b09E1
         JSR s09CA
@@ -889,24 +894,26 @@ b09E1   JSR s180D
         JSR sC000
         .ADDR STR_CLEAR_SCREEN_BIS
 
-        LDA #$00     ;#%00000000
+        LDA #$00
         JSR sC003
-s09F3   LDA #$E0     ;#%11100000
+
+s09F3   LDA #$E0
         STA a0A06
-        LDA #$E7     ;#%11100111
+        LDA #$E7
         STA a0A03
-        LDX #$06     ;#%00000110
-        LDY #$00     ;#%00000000
+        LDX #$06
+        LDY #$00
 a0A03   =*+$02
-b0A01   LDA $E770,Y
+b0A01   LDA $E770,Y                     ;Modified in runtime
 a0A06   =*+$02
-        STA $E000,Y
+        STA $E000,Y                     ;Modified in runtime
         DEY
         BNE b0A01
         INC a0A03
         INC a0A06
         DEX
         BPL b0A01
+
         LDY #$6F     ;#%01101111
 b0A15   LDA $EE70,Y
         STA $E700,Y
@@ -2479,34 +2486,41 @@ b16C5   AND #$F8     ;#%11111000
         RTS
 
 s16DA   JSR s180D
-        LDX #$FD     ;#%11111101
-        LDA #$00     ;#%00000000
+
+        LDX #$FD
+        LDA #$00
 b16E1   STA f02,X
         DEX
         BNE b16E1
+
         JSR s2494
-        LDA #$00     ;#%00000000
+
+        LDA #$00
         STA a2305
         STA a6E
+
         JSR s03FC
         JSR s225C
         JSR s096A
-        LDA #$32     ;#%00110010
+
+        LDA #$32
         STA a0BE4
-        LDA #$40     ;#%01000000
+        LDA #$40
         STA a0BE8
-        LDA #$01     ;#%00000001
+        LDA #$01
         STA a0BEC
-        LDX #$02     ;#%00000010
+
+        LDX #$02
 b170A   LDA f0BF1,X
         STA f0BED,X
         DEX
         BPL b170A
-        LDA #$04     ;#%00000100
+
+        LDA #$04
         STA aE3
         STA a11C1
         STA aD0
-        LDA #$00     ;#%00000000
+        LDA #$00
         STA a0912
         STA a2480
         STA a0967
@@ -2514,84 +2528,88 @@ b170A   LDA f0BF1,X
         STA aE4
         STA a0E
         STA a0A40
-        STA $D015    ;Sprite display Enable
-        STA $D020    ;Border Color
-        STA $D021    ;Background Color 0
+        STA $D015                       ;Sprite display Enable
+        STA $D020                       ;Border Color
+        STA $D021                       ;Background Color 0
         STA a2482
         STA a0F
         STA a101E
         STA aE6
         STA a0B
-        LDA #$07     ;#%00000111
+        LDA #$07
         STA a1A47
-        LDA #$96     ;#%10010110
-        STA $DD00    ;CIA2: Data Port Register A
-        LDA #$0F     ;#%00001111
-        STA $D018    ;VIC Memory Control Register
-        LDA #$32     ;#%00110010
+        LDA #$96                        ;#%10010110
+        STA $DD00                       ;CIA2: Data Port Register A
+        LDA #$0F                        ;#%00001111
+        STA $D018                       ;VIC Memory Control Register
+        LDA #$32
         STA a1299
         JSR s0983
-        LDA #$00     ;#%00000000
+        LDA #$00
         STA a1D62
         JSR b12BC
         JSR s19C5
         JSR s0C9C
-        LDA #$01     ;#%00000001
+        LDA #$01
         JSR s8100
-        LDA #$AC     ;#%10101100
+        LDA #$AC
         STA a8A
-        LDA #$96     ;#%10010110
+        LDA #$96
         STA a52
         JSR s1BD4
         JSR s12A7
-        LDA $D016    ;VIC Control Register 2
-        ORA #$10     ;#%00010000
-        STA $D016    ;VIC Control Register 2
-        LDA #$04     ;#%00000100
+        LDA $D016                       ;VIC Control Register 2
+        ORA #$10                        ;#%00010000
+        STA $D016                       ;VIC Control Register 2
+        LDA #$04
         STA a1D8E
-        LDA #$00     ;#%00000000
-        STA $D022    ;Background Color 1, Multi-Color Register 0
-        STA $D020    ;Border Color
-        STA $D01B    ;Sprite to Background Display Priority
-        LDA #$08     ;#%00001000
-        STA $D023    ;Background Color 2, Multi-Color Register 1
-        LDA #$0B     ;#%00001011
-        STA $D021    ;Background Color 0
-        LDA #$FF     ;#%11111111
-        STA $D01C    ;Sprites Multi-Color Mode Select
-        LDA #$01     ;#%00000001
-        STA $D025    ;Sprite Multi-Color Register 0
+        LDA #$00                        ;Color Black
+        STA $D022                       ;Background Color 1, Multi-Color Register 0
+        STA $D020                       ;Border Color
+        STA $D01B                       ;Sprite to Background Display Priority
+        LDA #$08                        ;Color Orange
+        STA $D023                       ;Background Color 2, Multi-Color Register 1
+        LDA #$0B                        ;Color Grey 1 (dark)
+        STA $D021                       ;Background Color 0
+        LDA #$FF                        ;#%11111111
+        STA $D01C                       ;Sprites Multi-Color Mode Select
+        LDA #$01                        ;Color White
+        STA $D025                       ;Sprite Multi-Color Register 0
         STA a0D3B
-        LDA #$00     ;#%00000000
-        STA $D026    ;Sprite Multi-Color Register 1
-        STA $D017    ;Sprites Expand 2x Vertical (Y)
-        STA $D01D    ;Sprites Expand 2x Horizontal (X)
+        LDA #$00                        ;Color Black
+        STA $D026                       ;Sprite Multi-Color Register 1
+        STA $D017                       ;Sprites Expand 2x Vertical (Y)
+        STA $D01D                       ;Sprites Expand 2x Horizontal (X)
         STA aFF
         STA aFE
-        LDA #$3C     ;#%00111100
+        LDA #$3C
         STA aF8
-        LDA #$0A     ;#%00001010
+        LDA #$0A
         STA aA6
-        LDX #$07     ;#%00000111
-        LDA #$00     ;#%00000000
+
+        LDX #$07
+        LDA #$00
         STX a0D23
-b17CB   STA a7FF8,X
+b17CB   STA a7FF8,X                     ;Sprite frames
         DEX
         BPL b17CB
-        LDX #$07     ;#%00000111
-        LDA #$1A     ;#%00011010
+
+        LDX #$07
+        LDA #$1A
         JSR s8100
-        LDX #$19     ;#%00011001
+
+        LDX #$19
 b17DA   TXA
         PHA
         JSR s1FCF
-        LDA #$01     ;#%00000001
+        LDA #$01
         STA a1D8C
         JSR j0D3D
         PLA
         TAX
         DEX
         BNE b17DA
+
         JSR b12C7
         JSR s0C9C
         JSR s1985
@@ -2604,20 +2622,20 @@ b17DA   TXA
         JSR s1F9B
         JMP j1DD5
 
-s180D   LDA #$00     ;#%00000000
-        STA $D011    ;VIC Control Register 1
+s180D   LDA #$00
+        STA $D011                       ;VIC Control Register 1
         RTS
 
-s1813   LDA #$10     ;#%00010000
-        STA $D011    ;VIC Control Register 1
+s1813   LDA #$10
+        STA $D011                       ;VIC Control Register 1
         RTS
 
-s1819   LDX #$02     ;#%00000010
-b181B   LDA f1965,X
-        BEQ b1823
+s1819   LDX #$02
+_L00    LDA f1965,X
+        BEQ _L01
         JSR s1827
-b1823   DEX
-        BPL b181B
+_L01    DEX
+        BPL _L00
         RTS
 
 s1827   CMP #$09     ;#%00001001
@@ -3235,6 +3253,7 @@ j1D2A   LDA a1D3E
         RTS
 
 a1D3E   .BYTE $00
+
 b1D3F   LDA a0966
         BEQ b1D47
         JMP j08D4
@@ -3257,6 +3276,7 @@ a1D64   .BYTE $00
 a1D65   .BYTE $00
 a1D66   .BYTE $00
 a1D67   .BYTE $00
+
 j1D68   LDA a0A
         STA a1D8C
         BEQ b1D76
@@ -3275,12 +3295,13 @@ b1D7D   LSR A
 
 b1D83   LSR A
         BCC b1D89
-        JMP j1E09
+        JMP GAME_HARD_SCROLL_RIGHT
 
-b1D89   JMP j1EE3
+b1D89   JMP GAME_HARD_SCROLL_LEFT
 
 a1D8C   .BYTE $00,$00
 a1D8E   .BYTE $00
+
 j1D8F   LDX #$0D     ;#%00001101
 b1D91   LDA f45,X
         STA f37,X
@@ -3320,96 +3341,105 @@ s1DCB   INC a0C
         CMP #$07     ;#%00000111
         BEQ b1DE0
         INC aE4
-j1DD5   LDA $D016    ;VIC Control Register 2
-        AND #$10     ;#%00010000
-        ORA aE4
-        STA $D016    ;VIC Control Register 2
+
+j1DD5   LDA $D016                       ;VIC Control Register 2
+        AND #$10                        ;Mask x-smooth scrolling
+        ORA aE4                         ;X-smooth scrolling
+        STA $D016                       ;VIC Control Register 2
         RTS
 
-b1DE0   LDA #$00     ;#%00000000
+b1DE0   LDA #$00
         STA aE4
         LDA a0A
-        ORA #$04     ;#%00000100
+        ORA #$04
         STA a0A
         JMP j1DD5
 
+        ; Soft Scroll right (two pixels)
 s1DED   INC a0C
         LDA aE4
-        CMP #$06     ;#%00000110
-        BEQ b1DFC
+        CMP #$06                        ;#%00000110
+        BEQ _L00
         INC aE4
         INC aE4
         JMP j1DD5
 
-b1DFC   LDA #$00     ;#%00000000
+_L00    LDA #$00
         STA aE4
         LDA a0A
-        ORA #$04     ;#%00000100
+        ORA #$04                        ;#%00000100
         STA a0A
         JMP j1DD5
 
-j1E09   DEC aF8
-        LDX #$26     ;#%00100110
-b1E0D   LDA p4000,X
-        STA f4001,X
-        LDA f4028,X
-        STA f4029,X
-        LDA f4050,X
-        STA f4051,X
-        LDA f4078,X
-        STA f4079,X
-        LDA f40A0,X
-        STA f40A1,X
-        LDA f40C8,X
-        STA f40C9,X
-        LDA f40F0,X
-        STA f40F1,X
-        LDA f4118,X
-        STA f4119,X
-        LDA f4140,X
-        STA f4141,X
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+; $1E09
+; Hard Scroll right (one character)
+GAME_HARD_SCROLL_RIGHT
+        DEC aF8
+        LDX #38
+_L00    LDA $4000,X
+        STA $4000+1,X
+        LDA $4000+40*1,X
+        STA $4000+40*1+1,X
+        LDA $4000+40*2,X
+        STA $4000+40*2+1,X
+        LDA $4000+40*3,X
+        STA $4000+40*3+1,X
+        LDA $4000+40*4,X
+        STA $4000+40*4+1,X
+        LDA $4000+40*5,X
+        STA $4000+40*5+1,X
+        LDA $4000+40*6,X
+        STA $4000+40*6+1,X
+        LDA $4000+40*7,X
+        STA $4000+40*7+1,X
+        LDA $4000+40*8,X
+        STA $4000+40*8+1,X
         DEX
-        BPL b1E0D
-        LDX #$26     ;#%00100110
-b1E48   LDA f4168,X
-        STA f4169,X
-        LDA f4190,X
-        STA f4191,X
-        LDA f41B8,X
-        STA f41B9,X
-        LDA f41E0,X
-        STA f41E1,X
-        LDA f4208,X
-        STA f4209,X
-        LDA f4230,X
-        STA f4231,X
-        LDA f4258,X
-        STA f4259,X
-        LDA f4280,X
-        STA f4281,X
-        LDA f42A8,X
-        STA f42A9,X
+        BPL _L00
+
+        LDX #38
+_L01    LDA $4000+40*9,X
+        STA $4000+40*9+1,X
+        LDA $4000+40*10,X
+        STA $4000+40*10+1,X
+        LDA $4000+40*11,X
+        STA $4000+40*11+1,X
+        LDA $4000+40*12,X
+        STA $4000+40*12+1,X
+        LDA $4000+40*13,X
+        STA $4000+40*13+1,X
+        LDA $4000+40*14,X
+        STA $4000+40*14+1,X
+        LDA $4000+40*15,X
+        STA $4000+40*15+1,X
+        LDA $4000+40*16,X
+        STA $4000+40*16+1,X
+        LDA $4000+40*17,X
+        STA $4000+40*17+1,X
         DEX
-        BPL b1E48
-        LDX #$26     ;#%00100110
-b1E83   LDA f42D0,X
-        STA f42D1,X
-        LDA f42F8,X
-        STA f42F9,X
-        LDA f4320,X
-        STA f4321,X
-        LDA f4348,X
-        STA f4349,X
-        LDA f4370,X
-        STA f4371,X
-        LDA f4398,X
-        STA f4399,X
-        LDA f43C0,X
-        STA f43C1,X
+        BPL _L01
+
+        LDX #38
+_L02    LDA $4000+40*18,X
+        STA $4000+40*18+1,X
+        LDA $4000+40*19,X
+        STA $4000+40*19+1,X
+        LDA $4000+40*20,X
+        STA $4000+40*20+1,X
+        LDA $4000+40*21,X
+        STA $4000+40*21+1,X
+        LDA $4000+40*22,X
+        STA $4000+40*22+1,X
+        LDA $4000+40*23,X
+        STA $4000+40*23+1,X
+        LDA $4000+40*24,X
+        STA $4000+40*24+1,X
         DEX
-        BPL b1E83
+        BPL _L02
         RTS
 
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 s1EB1   DEC a0C
         LDA aE4
         BEQ b1EBC
@@ -3437,9 +3467,11 @@ b1ED6   LDA #$06     ;#%00000110
         STA a0A
         JMP j1DD5
 
-j1EE3   INC aF8
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+GAME_HARD_SCROLL_LEFT
+        INC aF8
         LDX #$00     ;#%00000000
-b1EE7   LDA f4001,X
+_L00    LDA f4001,X
         STA p4000,X
         LDA f4029,X
         STA f4028,X
@@ -3458,10 +3490,11 @@ b1EE7   LDA f4001,X
         LDA f4141,X
         STA f4140,X
         INX
-        CPX #$27     ;#%00100111
-        BNE b1EE7
+        CPX #39
+        BNE _L00
+
         LDX #$00     ;#%00000000
-b1F24   LDA f4169,X
+_L01    LDA f4169,X
         STA f4168,X
         LDA f4191,X
         STA f4190,X
@@ -3480,10 +3513,11 @@ b1F24   LDA f4169,X
         LDA f42A9,X
         STA f42A8,X
         INX
-        CPX #$27     ;#%00100111
-        BNE b1F24
-        LDX #$00     ;#%00000000
-b1F61   LDA f42D1,X
+        CPX #39
+        BNE _L01
+
+        LDX #$00
+_L02    LDA f42D1,X
         STA f42D0,X
         LDA f42F9,X
         STA f42F8,X
@@ -3498,19 +3532,20 @@ b1F61   LDA f42D1,X
         LDA f43C1,X
         STA f43C0,X
         INX
-        CPX #$27     ;#%00100111
-        BNE b1F61
+        CPX #39
+        BNE _L02
         RTS
 
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 s1F91   INC a0D
         LDA aE3
-        CMP #$07     ;#%00000111
+        CMP #$07
         BCS b1FA6
         INC aE3
-s1F9B   LDA $D011    ;VIC Control Register 1
-        AND #$70     ;#%01110000
-        ORA aE3
-        STA $D011    ;VIC Control Register 1
+s1F9B   LDA $D011                       ;VIC Control Register 1
+        AND #$70                        ;Mask y-smooth scrolling
+        ORA aE3                         ;Y-smooth scrolling
+        STA $D011                       ;VIC Control Register 1
         RTS
 
 b1FA6   LDA #$00     ;#%00000000
@@ -3535,16 +3570,18 @@ b1FC2   LDA #$00     ;#%00000000
         STA a0A
         JMP s1F9B
 
-s1FCF   LDX #$13     ;#%00010011
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+; Some kind of scrolling
+s1FCF   LDX #19
         INC aFE
         BNE b1FD7
         INC aFF
-b1FD7   LDA f4168,X
+b1FD7   LDA $4000+40*9,X
         STA f211D,X
-        LDA f417C,X
+        LDA $4000+40*9+20,X
         STA f2131,X
-        LDA f4140,X
-        STA f4168,X
+        LDA $4000+40*8,X
+        STA $4000+40*9,X
         LDA f4154,X
         STA f417C,X
         LDA f4118,X
@@ -3581,7 +3618,8 @@ b1FD7   LDA f4168,X
         STA f403C,X
         DEX
         BPL b1FD7
-        LDX #$13     ;#%00010011
+
+        LDX #19
 b2054   LDA f42A8,X
         STA f2145,X
         LDA f42BC,X
@@ -3620,7 +3658,8 @@ b2054   LDA f42A8,X
         STA f41A4,X
         DEX
         BPL b2054
-        LDX #$13     ;#%00010011
+
+        LDX #19
 b20C5   LDA f4398,X
         STA f43C0,X
         LDA f43AC,X
