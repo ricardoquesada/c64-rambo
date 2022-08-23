@@ -861,7 +861,6 @@ s0983   LDA #$00     ;#%00000000
         JSR s8100
         LDA #$09     ;#%00001001
         JSR s8100
-a09A0   =*+$02
         JSR j1D2A
         LDA a1D62
         STA a0981
@@ -7299,8 +7298,10 @@ b885B   LDA (p26),Y
         BPL b885B
         JMP j8718
 
-        LDY #$0D     ;#%00001101
-        BIT a09A0
+        LDY #$0D
+        .BYTE $2C                       ;It is a BIT. Clobbers the next instruction
+b886A
+        LDY #$09
 b886C   LDA (p26),Y
         STA f8135,Y
         DEY
@@ -7707,7 +7708,9 @@ b8B97   LDA (p26),Y
         JMP j8A53
 
         LDY #$0D     ;#%00001101
-        BIT a09A0
+        .BYTE $2C                       ;It is a BIT. Clobbers the next instruction
+b8BA6
+        LDY #$09
 b8BA8   LDA (p26),Y
         STA f817A,Y
         DEY
@@ -8111,8 +8114,10 @@ b8ECE   LDA (p26),Y
         BPL b8ECE
         JMP j8D8F
 
-        LDY #$0D     ;#%00001101
-        BIT a09A0
+        LDY #$0D
+        .BYTE $2C                       ;It is a BIT. Clobbers the next instruction
+b8EDD
+        LDY #$09
 b8EDF   LDA (p26),Y
         STA f81BF,Y
         DEY
@@ -8740,8 +8745,10 @@ b9C14   LDA #$01     ;#%00000001
         LDY #$9D     ;#%10011101
         BNE b9C14
         LDA #$10     ;#%00010000
-        BIT a0BA9
-        BIT a09A9
+        .BYTE $2C
+        LDA #$0B
+        .BYTE $2C
+        LDA #$09
         STA a9E4D
         LDY #$14     ;#%00010100
         JMP b83D6
@@ -9199,8 +9206,9 @@ bA604   LSR A
         PHA
         BCC bA60B
         LDA #$59     ;#%01011001
-bA60B   =*+$01
-        BIT $4EA9                       ;XXX: Sprites ???
+        .BYTE $2C                       ;It is a BIT. Clobbers the next instruction
+bA60B
+        LDA #$4E
         STA f0421,X
         PLA
         DEX
