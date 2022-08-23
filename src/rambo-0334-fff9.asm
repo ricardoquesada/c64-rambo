@@ -179,7 +179,6 @@ f00E0 = $00E0
 ; **** ABSOLUTE ADRESSES ****
 ;
 a028A = $028A
-a02A0 = $02A0
 a4400 = $4400                           ;Sprite
 a442A = $442a                           ;Sprite ?
 a4440 = $4440                           ;Sprite
@@ -288,7 +287,6 @@ j0393   JSR j07D5
         JSR j0D3D
         JSR j1D68
         JSR j0B2B
-a03A0   =*+$01
         JSR s0F6C
         INC a0559
         LDA a0559
@@ -574,8 +572,7 @@ a0678
         #STR_CODE_FONT_BIG
         .TEXT "YOUR[PRESENCE"
         #STR_CODE_SET_COORDS $04,$06
-        .TEXT "HAS[BEEN[RELAY"
-a06A0   .TEXT "ED"
+        .TEXT "HAS[BEEN[RELAYED"
         #STR_CODE_SET_COORDS $08,$09
         .TEXT "T"
 f06A7   .TEXT "O[ENEMY[H.Q."
@@ -614,8 +611,7 @@ p0712   .TEXT "IONS."
         #STR_CODE_FONT_SMALL
         .TEXT "YOU[KNOW[YOU[MUST[NOW[RETURN[TO[GET"
         #STR_CODE_SET_COORDS $03,$11
-        .TEXT "MORE[UNFORTUNA"
-a07A0   .TEXT "TE[SOLDIERS[TRAPPED"
+        .TEXT "MORE[UNFORTUNATE[SOLDIERS[TRAPPED"
         #STR_CODE_SET_COORDS $0C,$13
         .TEXT "BY[ENEMY[FORCES<"                ; '<' is a period in small font
         #STR_CODE_END
@@ -1115,7 +1111,7 @@ b0B35   LDA f0BE1,X
         STA aA5
         STA a9D
         LDA a97
-a0BA0   CLC
+        CLC
         ADC #$01     ;#%00000001
         STA a8F
         LDA a51
@@ -1378,7 +1374,6 @@ s0D99   LDA a0967
         BEQ b0D9F
         RTS
 
-a0DA0   =*+$01
 b0D9F   LDX #$07     ;#%00000111
         LDY a0E59
         BPL b0DCA
@@ -1654,7 +1649,6 @@ s0F90   CMP #$05     ;#%00000101
 
 b0F9A   CMP #$04     ;#%00000100
         BNE b0FBB
-a0FA0   =*+$02
         JSR j1184
         LDA f1100,X
         BEQ b0FAA
@@ -2574,7 +2568,7 @@ b170A   LDA f0BF1,X
         STA $D023    ;Background Color 2, Multi-Color Register 1
         LDA #$0B     ;#%00001011
         STA $D021    ;Background Color 0
-a17A0   LDA #$FF     ;#%11111111
+        LDA #$FF     ;#%11111111
         STA $D01C    ;Sprites Multi-Color Mode Select
         LDA #$01     ;#%00000001
         STA $D025    ;Sprite Multi-Color Register 0
@@ -6690,6 +6684,7 @@ JUMPY = JUMPY_0 .. JUMPY_1 .. JUMPY_2 .. JUMPY_3
 f836E   .BYTE <JUMPY
 f838D   .BYTE >JUMPY
 
+a83AC
         LDX a9291
         LDA f90B9,X
         STA a9299
@@ -6697,19 +6692,20 @@ f838D   .BYTE >JUMPY
         LDA f90B9,X
         STA a929A
         LDY #$11     ;#%00010001
-        BIT a02A0
-        BIT a06A0
-        BIT a0BA0
-        BIT a0FA0
-        BIT a0DA0
-        BIT a17A0
-        BIT a07A0
-        BIT a03A0
+        BIT $02A0
+        BIT $06A0
+        BIT $0BA0
+        BIT $0FA0
+        BIT $0DA0
+        BIT $17A0
+        BIT $07A0
+        BIT $03A0
 b83D6   STY a85EB
         LDY #$00     ;#%00000000
         STY a85EC
         RTS
 
+a83DF
         LDX a9291
         LDA f90B9,X
         STA a9291
@@ -6730,12 +6726,14 @@ b8402   LDX #<p8423  ;#%00100011
         STY a859F
         RTS
 
+a840D
         LDA #$00     ;#%00000000
         STA a845B
         ORA a845C
         BEQ b845D
         RTS
 
+a8418
         LDA #$00     ;#%00000000
         STA a845C
         ORA a845B
@@ -6770,6 +6768,7 @@ b845A   RTS
 
 a845B   .BYTE $00
 a845C   .BYTE $00
+
 b845D   LDA #$00     ;#%00000000
         STA a859F
         STA a859E
