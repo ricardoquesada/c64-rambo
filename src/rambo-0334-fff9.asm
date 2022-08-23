@@ -184,7 +184,7 @@ a442A = $442a                           ;Sprite ?
 a4440 = $4440                           ;Sprite
 a4840 = $4840                           ;Sprite
 a4855 = $4855                           ;Sprite
-a7ED8 = $7ED8                           ;Updatign charset?
+a7ED8 = $7ED8                           ;Updating charset?
 a7FF8 = $7FF8                           ; or using unused space as variables?
 
 ;
@@ -10186,41 +10186,48 @@ jC006   JMP MAIN
 
         JMP jCF17
 
-jC00C   ASL A
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+; Params: A
+jC00C   ASL A 				;A *= 2
         TAX
-        LDA fC06D,X
+
+        LDA fC06D,X 			;Load origin
         STA aFB
         LDA fC06E,X
         STA aFC
-        LDA fC06F,X
+	
+        LDA fC06F,X 			;Load destination
         STA aFD
         LDA fC070,X
         STA aFE
+
         LDA fC071,X
         STA aC065
         LDA fC072,X
         TAX
-        LDA #$30     ;#%00110000
-        STA a01
-        LDY #$00     ;#%00000000
-bC032   LDA (pFD),Y
+        LDA #$30     			;#%00110000
+        STA a01 			;See only RAM: No ROMs, I/O, etc.
+        LDY #$00
+_L00 	LDA (pFD),Y
         STA aC073
         LDA (pFB),Y
         STA (pFD),Y
         LDA aC073
         STA (pFB),Y
         INY
-        BNE bC032
+        BNE _L00
+
         DEX
-        BEQ bC04C
+        BEQ _L01
         INC aFC
         INC aFE
-        BNE bC032
-bC04C   INC aFC
+        BNE _L00
+
+_L01 	INC aFC
         INC aFE
         LDA aC065
-        BEQ bC068
-bC055   LDA (pFD),Y
+        BEQ _L03
+_L02 	LDA (pFD),Y
         STA aC073
         LDA (pFB),Y
         STA (pFD),Y
@@ -10229,8 +10236,8 @@ bC055   LDA (pFD),Y
         INY
 aC065   =*+$01
         CPY #$FF     ;#%11111111
-        BNE bC055
-bC068   LDA #$35     ;#%00110101
+        BNE _L02
+_L03 	LDA #$35     ;#%00110101
         STA a01
         RTS
 
