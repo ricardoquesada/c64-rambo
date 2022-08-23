@@ -215,10 +215,8 @@ STR_CODE_FONT_SMALL     .MACRO
         .BYTE $ff,$05
                         .ENDM
 
-;
-; **** EXTERNAL JUMPS ****
-;
 
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
         * = $0334
 
         JMP j1D8F
@@ -249,13 +247,13 @@ s0358   JMP j0CB3
 
 s035B   JMP j07DE
 
-        JMP j0382
+        JMP GAME_INIT
 
 j0361   JMP j0D24
 
 s0364   JMP j07D5
 
-s0367   JMP j0382
+s0367   JMP GAME_INIT
 
 s036A   JMP j1659
 
@@ -274,7 +272,10 @@ s037C   JMP j042D
 j037F   JMP j0444
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
-j0382   JSR s16DA
+; $0382
+; Game init (not main menu)
+GAME_INIT
+	JSR s16DA
         JSR s09F3
         LDA #$0C     ;#%00001100
         JSR s8100
@@ -319,16 +320,18 @@ b03B4   JSR s040B
 j03F6   JSR j28FF
         JMP j0393
 
-s03FC   LDY #$0D     ;#%00001101
-b03FE   LDX fB5,Y
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+s03FC   LDY #13
+_L00 	LDX fB5,Y
         LDA f45,X
-        BNE b0408
+        BNE _L01
         DEY
-        BPL b03FE
+        BPL _L00
         INY
-b0408   STY aFC
+_L01 	STY aFC
         RTS
 
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 s040B   LDA aFF
         BNE b0426
         LDA aFE
@@ -368,7 +371,7 @@ s043F   LDA a0F
 
 j0444   JSR s044C
         DEC a0F
-        JMP j0382
+        JMP GAME_INIT
 
 s044C   INC a0F
         JSR s046E
@@ -433,7 +436,7 @@ b04C0   LDA $D012    ;Raster Position
         JSR s8100
         BEQ b04D3
         BNE b04C0
-b04D3   JSR s180D
+b04D3   JSR VIC_SCREEN_DISABLE
         LDA #$01     ;#%00000001
         JSR s8100
         LDA #$00     ;#%00000000
@@ -487,7 +490,7 @@ b052D   LDA #$08     ;#%00001000
         STA a0A
         LDA #$10     ;#%00010000
         STA $D016    ;VIC Control Register 2
-        JSR s1813
+        JSR VIC_SCREEN_ENABLE
         JSR s1F9B
         JMP j1DD5
 
@@ -865,7 +868,7 @@ s0983   LDA #$00
         JSR sC000
         .ADDR STR_READY
 
-        JSR s1813
+        JSR VIC_SCREEN_ENABLE
 b09AF   LDA $D012                       ;Raster Position
         CMP #$64
         BNE b09AF
@@ -888,7 +891,7 @@ s09CA   JSR j1D2A
         AND #$10     ;#%00010000
 b09E0   RTS
 
-b09E1   JSR s180D
+b09E1   JSR VIC_SCREEN_DISABLE
         LDA #$0D                        ;Color
         STA a1093
 
@@ -2486,13 +2489,14 @@ b16C5   AND #$F8     ;#%11111000
         STA a31
         RTS
 
-s16DA   JSR s180D
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+s16DA   JSR VIC_SCREEN_DISABLE
 
         LDX #$FD
         LDA #$00
-b16E1   STA f02,X
+_L00 	STA f02,X
         DEX
-        BNE b16E1
+        BNE _L00
 
         JSR s2494
 
@@ -2619,18 +2623,25 @@ b17DA   TXA
         JSR j2506
         JSR j1D8F
         JSR j28FF
-        JSR s1813
+        JSR VIC_SCREEN_ENABLE
         JSR s1F9B
         JMP j1DD5
 
-s180D   LDA #$00
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+; $180D
+VIC_SCREEN_DISABLE   
+	LDA #$00
         STA $D011                       ;VIC Control Register 1
         RTS
 
-s1813   LDA #$10
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+; $1813
+VIC_SCREEN_ENABLE   
+	LDA #$10
         STA $D011                       ;VIC Control Register 1
         RTS
 
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 s1819   LDX #$02
 _L00    LDA f1965,X
         BEQ _L01
@@ -3303,35 +3314,41 @@ b1D89   JMP GAME_HARD_SCROLL_LEFT
 a1D8C   .BYTE $00,$00
 a1D8E   .BYTE $00
 
-j1D8F   LDX #$0D     ;#%00001101
-b1D91   LDA f45,X
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+j1D8F   LDX #13
+_L00 	LDA f45,X
         STA f37,X
         LDA f61,X
         STA f53,X
         LDA fB5,X
         STA fA7,X
         DEX
-        BPL b1D91
-        LDX #$04     ;#%00000100
-b1DA2   LDA f7D,X
+        BPL _L00
+
+        LDX #$04
+_L01 	LDA f7D,X
         STA f6F,X
         DEX
-        BPL b1DA2
+        BPL _L01
+
         LDA a8A
         STA a7C
         LDA a89
         STA a7B
-        LDX #$06     ;#%00000110
-b1DB3   LDA f82,X
+
+        LDX #$06
+_L02 	LDA f82,X
         ASL A
         STA f74,X
         ROL f58,X
         DEX
-        BPL b1DB3
+        BPL _L02
+
         LDA aD1
         STA aD2
         RTS
 
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 j1DC2   LDA a2305
         BEQ j1DC2
         DEC a2305
@@ -3811,6 +3828,7 @@ s225C   SEI
         STA $FFFE    ;IRQ
         LDA #>a228b
         STA $FFFF    ;IRQ
+
         LDA #$00     ;#%00000000
         STA $D011    ;VIC Control Register 1
         LDA #$01     ;#%00000001
@@ -4073,21 +4091,24 @@ f2483   .BYTE $FE,$FD,$FB,$F7,$EF,$DF,$BF,$7F
 f248B   .BYTE $01,$02,$04,$08,$10,$20,$40,$80
 a2493   .BYTE $00
 
-s2494   LDY #$0D     ;#%00001101
-b2496   TYA
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+s2494   LDY #$0D
+_L00 	TYA
         STA f00B5,Y
-        LDA #$00     ;#%00000000
+        LDA #$00
         STA fC3,X
-        LDA #$14     ;#%00010100
+        LDA #$14
         STA f0045,Y
         STA f0037,Y
         DEY
-        BPL b2496
-        LDA #$FF     ;#%11111111
-        STA $D015    ;Sprite display Enable
+        BPL _L00
+
+        LDA #$FF 			;All sprites
+        STA $D015    			;Sprite display Enable
         JSR j28FF
         JMP j1D8F
 
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 s24B4   LDA a24F4
         AND #$48     ;#%01001000
         ADC #$38     ;#%00111000
@@ -4102,6 +4123,7 @@ s24B4   LDA a24F4
         STA a24F4
         RTS
 
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 s24D3   STA a2746
         JSR s24B4
         STA a2745
@@ -4672,6 +4694,7 @@ b28FB   RTS
 
         JMP jC006
 
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 j28FF   LDA #$00     ;#%00000000
         STA a04
         LDX #$01     ;#%00000001
@@ -10159,7 +10182,7 @@ sC000   JMP PRINT_EXT_STR
 
 sC003   JMP jC00C
 
-jC006   JMP START
+jC006   JMP MAIN
 
         JMP jCF17
 
@@ -10470,7 +10493,7 @@ CODE_00                                 ;End of string
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 ; $C1BA
 ; Main init
-START
+MAIN
         LDX #$F0                        ;Set stack
         TXS
         JSR sC43C
