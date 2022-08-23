@@ -6675,9 +6675,9 @@ f835E   .BYTE $C8,$A7,$C8,$A7,$9E,$A9,$1A,$89
 ; 64tass doesn't support multiline lists, so create multiple lists
 ; and then append them together.
 JUMPY_0 = [j8553,a8474,a8466,a84B3,a84B8,a84B0,a84AA,a84AD]
-JUMPY_1 = [$8418,a84A1,a84A4,a84A7,a849B,$83BF,$83C2,$83C5]
-JUMPY_2 = [$83C8,$83CB,$83D1,$83DF,$83EC,$840D,$83F8,$83D4]
-JUMPY_3 = [$83AC,b8534,$850D,a84BE,a84BB,a849E,$83CE]
+JUMPY_1 = [a8418,a84A1,a84A4,a84A7,a849B,a83BF,a83C2,a83C5]
+JUMPY_2 = [a83C8,a83CB,a83D1,a83DF,a83EC,a840D,a83F8,a83D4]
+JUMPY_3 = [a83AC,b8534,a850D,a84BE,a84BB,a849E,a83CE]
 
 JUMPY = JUMPY_0 .. JUMPY_1 .. JUMPY_2 .. JUMPY_3
 
@@ -6691,15 +6691,32 @@ a83AC
         TAX
         LDA f90B9,X
         STA a929A
-        LDY #$11     ;#%00010001
-        BIT $02A0
-        BIT $06A0
-        BIT $0BA0
-        BIT $0FA0
-        BIT $0DA0
-        BIT $17A0
-        BIT $07A0
-        BIT $03A0
+        LDY #$11
+        .BYTE $2C                       ;It is a BIT. Clobbers the next instruction
+a83BF
+        LDY #$02
+        .BYTE $2C
+a83C2
+        LDY #$06
+        .BYTE $2C
+a83C5
+        LDY #$0B
+        .BYTE $2C
+a83C8
+        LDY #$0F
+        .BYTE $2C
+a83CB
+        LDY #$0D
+        .BYTE $2C
+a83CE
+        LDY #$17
+        .BYTE $2C
+a83D1
+        LDY #$07
+        .BYTE $2C
+a83D4
+        LDY #$03
+
 b83D6   STY a85EB
         LDY #$00     ;#%00000000
         STY a85EC
@@ -6711,11 +6728,13 @@ a83DF
         STA a9291
         LDY #$08     ;#%00001000
         BNE b83D6
+a83EC
         LDX #$01     ;#%00000001
         LDA a845B
         BNE b845A
         STX a845B
         BEQ b8402
+a83F8
         LDX #$01     ;#%00000001
         LDA a845C
         BNE b845A
@@ -6878,6 +6897,7 @@ b84EE   LDA #$01
         BPL b84EE
         RTS
 
+a850D
         STX a828A
         RTS
 
