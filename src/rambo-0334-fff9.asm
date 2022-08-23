@@ -6866,12 +6866,14 @@ b84CD   LDA f20,X
 j84DD
         LDA #$3F
         STA a29
+
         LDX #$05
 b84E3   LDA f91E3,Y
         STA f20,X
         DEY
         DEX
         BPL b84E3
+
         LDX #$02
 b84EE   LDA #$01
         STA f2A,X
@@ -7145,7 +7147,7 @@ b8723   LDY #$00     ;#%00000000
         TAX
         LDA f9189,X
         STA a8746
-        LDA f918A,X
+        LDA f9189+1,X
         STA a8747
         INY
         LDA (p20),Y
@@ -7156,7 +7158,7 @@ b8723   LDY #$00     ;#%00000000
         STA a27
 a8746   =*+$01
 a8747   =*+$02
-        JMP j88D1
+        JMP j88D1                       ;Modified in runtime
 
 b8748   STA a28
         CMP #$60     ;#%01100000
@@ -7554,7 +7556,7 @@ b8A5E   LDY #$00     ;#%00000000
         TAX
         LDA f91A7,X
         STA a8A81
-        LDA f91A8,X
+        LDA f91A7+1,X
         STA a8A82
         INY
         LDA (p22),Y
@@ -7565,7 +7567,7 @@ b8A5E   LDY #$00     ;#%00000000
         STA a27
 a8A81   =*+$01
 a8A82   =*+$02
-        JMP j8C0D
+        JMP j8C0D                       ;Modified in runtime
 
 b8A83   STA a28
         CMP #$60     ;#%01100000
@@ -7963,7 +7965,7 @@ b8D9A   LDY #$00     ;#%00000000
         TAX
         LDA f91C5,X
         STA a8DBD
-        LDA f91C6,X
+        LDA f91C5+1,X
         STA a8DBE
         INY
         LDA (p24),Y
@@ -8378,21 +8380,19 @@ f912A   .BYTE $12,$23,$34,$46,$5A,$6E,$84,$9B
         .BYTE $95,$A9,$FC,$A1,$69,$8C,$FE,$C2
         .BYTE $DF,$58,$34,$78,$2B,$53,$F7,$1F
         .BYTE $D2,$19,$FC,$85,$BD,$B0,$00
-f9189   .BYTE $11
-f918A   .BYTE $88,$77,$88,$67,$88,$9A,$88,$AA
-        .BYTE $88,$CA,$88,$C0,$88,$D1,$88,$92
-        .BYTE $88,$A1,$88,$D7,$88,$6A,$88,$29
-        .BYTE $88,$44,$88,$57,$88
-f91A7   .BYTE $4D
-f91A8   .BYTE $8B,$B3,$8B,$A3,$8B,$D6,$8B,$E6
-        .BYTE $8B,$06,$8C,$FC,$8B,$0D,$8C,$CE
-        .BYTE $8B,$DD,$8B,$13,$8C,$A6,$8B,$65
-        .BYTE $8B,$80,$8B,$93,$8B
-f91C5   .BYTE $84
-f91C6   .BYTE $8E,$EA,$8E,$DA,$8E,$0D,$8F,$1D
-        .BYTE $8F,$3D,$8F,$33,$8F,$44,$8F,$05
-        .BYTE $8F,$14,$8F,$4A,$8F,$DD,$8E,$9C
-        .BYTE $8E,$B7,$8E,$CA,$8E
+
+f9189   .WORD $8811,$8877,$8867,$889A,$88AA
+        .WORD $88CA,$88C0,$88D1,$8892,$88A1
+        .WORD $88D7,$886A,$8829,$8844,$8857
+
+f91A7   .WORD $8B4D,$8BB3,$8BA3,$8BD6,$8BE6
+        .WORD $8C06,$8BFC,$8C0D,$8BCE,$8BDD
+        .WORD $8C13,$8BA6,$8B65,$8B80,$8B93
+
+f91C5   .WORD $8E84,$8EEA,$8EDA,$8F0D,$8F1D
+        .WORD $8F3D,$8F33,$8F44,$8F05,$8F14
+        .WORD $8F4A,$8EDD,$8E9C,$8EB7,$8ECA
+
 f91E3   .BYTE $4A,$95,$F9,$96,$C3,$97,$09,$A7
         .BYTE $0C,$A7,$0F,$A7,$45,$9C,$FB,$9F
         .BYTE $FB,$9F,$0B,$99,$19,$99,$6B,$99
