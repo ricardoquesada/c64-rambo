@@ -342,7 +342,7 @@ a0415   CMP #$F0     ;#%11110000
         LDX a042C
         BNE b042B
         INC a042C
-f0421   LDA #$04     ;#%00000100
+        LDA #$04     ;#%00000100
 a0425   =*+$02
         JMP s8100
 
@@ -429,7 +429,6 @@ a04BE   .ADDR f0596                     ;This address is changed in runtime
 b04C0   LDA $D012    ;Raster Position
         CMP #$C8     ;#%11001000
         BNE b04C0
-f04C8   =*+$01
         JSR j117F
         LDA #$02     ;#%00000010
         JSR s8100
@@ -589,8 +588,7 @@ a06EC
 a0700
         #STR_CODE_SET_COLOR $01
         #STR_CODE_SET_COORDS $05,$00
-        .TEXT "CONGRATULAT"
-p0712   .TEXT "IONS."
+        .TEXT "CONGRATULATIONS."
         #STR_CODE_SET_COLOR $03
         #STR_CODE_SET_COORDS $07,$03
         .TEXT "THANKS[TO[YOU"
@@ -6002,7 +6000,7 @@ f3980   .BYTE $2C,$66,$66,$66,$66,$66,$2C,$00
         .BYTE $34,$66,$06,$14,$06,$66,$34,$00
         .BYTE $06,$16,$26,$46,$7F,$06,$0F,$00
         .BYTE $7E,$18,$40,$6C
-p39AC   .BYTE $06,$66,$6C,$00,$2C,$66,$60,$6C
+        .BYTE $06,$66,$6C,$00,$2C,$66,$60,$6C
         .BYTE $66,$66,$2C,$00,$7E,$60,$04,$0C
         .BYTE $18,$18,$18,$00,$2C,$66,$66,$2C
         .BYTE $66,$66,$2C,$00,$2C,$66,$66,$2E
@@ -7020,6 +7018,8 @@ s8611   LDY a85EB
         DEC a85EC
 b861E   RTS
 
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+; Params: A, X, Y
 s861F   STX a26
         STY a27
         STA a28
@@ -7029,13 +7029,14 @@ s861F   STX a26
         STA a29
         LDA f90BF,X
         STA a863A
-        LDX #$04     ;#%00000100
-        LDY #$1A     ;#%00011010
+        LDX #$04
+        LDY #$1A
 b8637   LDA (p26),Y
-a863A   =*+$01
-        STA $D409,X  ;Voice 2: Pulse Waveform Width - Low-Byte
+a863A   = *+$01
+        STA $D409,X                     ;Voice 2: Pulse Waveform Width - Low-Byte
         DEY
         DEX
+
         BPL b8637
         LDY #$1D     ;#%00011101
         LDX a863A
@@ -8715,14 +8716,17 @@ a929A   .BYTE $01,$00,$01,$02,$00,$01,$02,$0A
         .BYTE $14,$8E,$5A,$C0,$C2,$1C,$1C,$3A
         .BYTE $9B,$BF,$01,$86,$50,$84,$50,$86
         .BYTE $64,$87,$FF,$C0
+
         LDX #$D2     ;#%11010010
         LDY #$9D     ;#%10011101
         LDA #$00     ;#%00000000
         JSR s861F
+
         LDX #$10     ;#%00010000
         LDY #$9E     ;#%10011110
         LDA #$02     ;#%00000010
         JSR s861F
+
         LDX #$F1     ;#%11110001
         LDY #$9D     ;#%10011101
 b9C14   LDA #$01     ;#%00000001
@@ -9008,66 +9012,83 @@ a9E4D   .BYTE $0B,$D2,$FE,$9B,$5F,$04,$D2,$19
         .BYTE $00,$00,$00,$00,$00,$15,$00,$C7
         .BYTE $03,$07,$DA,$61
 
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
         ; Main for debug code for music ???
-bA451   JSR sA4F8
+bA451
+        JSR sA4F8
+
         LDA #$01
         JSR s8100
-        LDX #$0F
-        LDA #$19
+
+        LDX #$0F                        ;Set volume
+        LDA #25                         ; to 15 (max)
         JSR s8100
+
         LDX #$07
-        LDA #$1A
+        LDA #26
         JSR s8100
+
         JSR sA4DE
         JSR sA4DE
-jA46D   SEI
-        LDA #$64     ;#%01100100
-bA470   CMP $D012    ;Raster Position
-        BNE bA470
+
+_LOOP   SEI
+        LDA #$64
+_L00    CMP $D012                       ;Wait for raster at position $64
+        BNE _L00
+
         JSR sA548
         JSR $EA87                       ;Scan keyboard
         JSR $F13E                       ;Get a byte
         CMP #$0D
-        BNE bA488
-        JSR sA5FC
-        JMP jA46D
+        BNE _L01
 
-bA488   CMP #$32     ;#%00110010
-        BNE bA494
-        LDA #$1A     ;#%00011010
+        JSR sA5FC                       ;Key is $0D
+        JMP _LOOP
+
+_L01    CMP #$32
+        BNE _L02
+
+        LDA #$1A                        ;Key is $32
         STA aA4C8
-        JMP jA46D
+        JMP _LOOP
 
-bA494   CMP #$31     ;#%00110001
-        BNE bA4A0
-        LDA #$00     ;#%00000000
+_L02    CMP #$31
+        BNE _L03
+
+        LDA #$00                        ;Key is $31
         STA aA4C8
-        JMP jA46D
+        JMP _LOOP
 
-bA4A0   CMP #$5E     ;#%01011110
-        BNE bA4AA
-        JSR sA4DE
-        JMP jA46D
+_L03    CMP #$5E
+        BNE _L04
 
-bA4AA   CMP #$20     ;#%00100000
-        BEQ bA451
-        CMP #$5B     ;#%01011011
-        BCS jA46D
-        CMP #$41     ;#%01000001
-        BCC jA46D
-        SBC #$41     ;#%01000001
+        JSR sA4DE                       ;Key is $5e
+        JMP _LOOP
+
+_L04    CMP #$20
+        BEQ bA451                       ;Key is $20
+
+        CMP #$5B
+        BCS _LOOP
+
+        CMP #$41                        ;Is it < $41
+        BCC _LOOP                       ; Yes, loop when it is < than $41
+        SBC #$41
         CLC
         ADC aA4C8
-        DEC $D020    ;Border Color
+        DEC $D020                       ;Border Color
         JSR s8100
-        INC $D020    ;Border Color
-        JMP jA46D
+        INC $D020                       ;Border Color
+        JMP _LOOP
 
 aA4C8   .BYTE $00
         .BYTE $00
 
-        ; Unused? this will overwrite the code
-sA4CA   LDX #$00
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+; Part of the Debug Music code
+; Clears the screen
+SFX_DBG_CLEAR_SCR
+        LDX #$00
         LDA #$20                        ; space
 _L00    STA $0400,X
         STA $0500,X
@@ -9088,27 +9109,33 @@ sA4F0   JSR sA4F3
 sA4F3   LDA #$00
         JMP s8100
 
-sA4F8   JSR sA4CA
-        LDX #$15     ;#%00010101
-        LDA #$DA     ;#%11011010
-bA4FF   STA f20,X
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+; $A4F8
+; Part of the Debug Music code
+sA4F8
+        JSR SFX_DBG_CLEAR_SCR
+        LDX #$15
+        LDA #$DA
+_L00    STA f20,X
         DEX
-        BPL bA4FF
-        LDX #$44     ;#%01000100
-bA506   LDA #$0C     ;#%00001100
+        BPL _L00
+
+        LDX #$44
+_L01    LDA #$0C
         STA $D800+40*2,X
-        LDA #$0F     ;#%00001111
+        LDA #$0F
         STA $D800+40*5,X
-        LDA #$01     ;#%00000001
+        LDA #$01
         STA $D800+40*8,X
-        LDA #$20     ;#%00100000
+        LDA #$20
         STA f8135,X
         STA f817A,X
         STA f81BF,X
         DEX
-        BPL bA506
+        BPL _L01
+
         LDX #38
-bA525   LDA #$0C                        ;Color Grey 2
+_L02    LDA #$0C                        ;Color Grey 2
         STA $D800+40*11,X
         LDA #$0F                        ;Color Grey 3 (light)
         STA $D800+40*13,X
@@ -9119,12 +9146,16 @@ bA525   LDA #$0C                        ;Color Grey 2
         LDA #$01                        ;Color White
         STA $D800+40*15,X
         DEX
-        BPL bA525
+        BPL _L02
+
         LDA #$FF
         STA a028A
+
         RTS
 
-        ; Debug code not used ???
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+; $A548
+; Part of the Debug Music code
 sA548   LDA #$05                        ;Color Green
         STA $D020                       ;Border Color
         JSR s8597
@@ -9157,63 +9188,63 @@ sA548   LDA #$05                        ;Color Green
         LDA a845C
         STA a0427
 
-        LDX #$0F     ;#%00001111
-bA5A3   LDA f20,X
+        LDX #$0F
+_L00    LDA f20,X
         STA $0400,X
         DEX
-        BPL bA5A3
+        BPL _L00
 
         LDX #68
-bA5AD   LDA f8135,X
+_L01    LDA f8135,X
         STA $0400+40*2,X
         LDA f817A,X
         STA $0400+40*5,X
         LDA f81BF,X
         STA $0400+40*8,X
         DEX
-        BPL bA5AD
+        BPL _L01
 
         LDX #38
-bA5C4   LDA f8215,X
+_L02    LDA f8215,X
         STA $0400+40*11,X
         LDA f823C,X
         STA $0400+40*13,X
         LDA f8263,X
         STA $0400+40*15,X
         DEX
-        BPL bA5C4
+        BPL _L02
 
         LDX #227
-bA5DB   LDA a828A,X
+_L03    LDA a828A,X
         STA $400+40*16+39,X
         DEX
-        BNE bA5DB
+        BNE _L03
 
         LDA #$00                        ;Color Black
         STA $D020                       ;Border Color
         LDA a29
         LDX #$07
-bA5ED   LSR A
+_L04    LSR A
         PHA
         LDA #$00
         ADC #$30                        ;Number 0
         STA $0400+24,X
         PLA
         DEX
-        BPL bA5ED
+        BPL _L04
         BMI bA5FF
 
 sA5FC   INC a828A
 bA5FF   LDA a828A
-        LDX #$02     ;#%00000010
+        LDX #$02
 bA604   LSR A
         PHA
         BCC bA60B
-        LDA #$59     ;#%01011001
+        LDA #$59
         .BYTE $2C                       ;It is a BIT. Clobbers the next instruction
 bA60B
         LDA #$4E
-        STA f0421,X
+        STA $0400+33,X
         PLA
         DEX
         BPL bA604
@@ -9370,18 +9401,19 @@ bA60B
         .BYTE $00,$CE,$11,$00,$BF,$A0,$D8,$04
         .BYTE $D2,$F9,$AA,$D8,$04,$1A,$01,$DA
         .BYTE $DA
+
         DEC a27
         TAX
-        LDX #<p39AC  ;#%10101100
-        LDY #>p39AC  ;#%00111001
+        LDX #$AC
+        LDY #$39
         STX a8232
         STY a8233
-        LDA #<p0712  ;#%00010010
+        LDA #$12
         STA a8221
-        LDA #>p0712  ;#%00000111
+        LDA #$07
         STA a8222
-        LDX #<pFFBC  ;#%10111100
-        LDY #>pFFBC  ;#%11111111
+        LDX #$BC
+        LDY #$FF
         STX a821B
         STY a821C
         RTS
@@ -9891,18 +9923,19 @@ aB469   .BYTE $4F,$00,$FF,$00,$FF,$00,$FF,$FF
         .BYTE $BF,$A0,$D8,$04,$D2,$F9,$BA,$D8
         .BYTE $04,$1A,$01,$DA
         .BYTE $DA
+
         DEC a27
         TSX
-        LDX #<p39AC  ;#%10101100
-        LDY #>p39AC  ;#%00111001
+        LDX #$AC
+        LDY #$39
         STX a8232
         STY a8233
-        LDA #<p0712  ;#%00010010
+        LDA #$12
         STA a8221
-        LDA #>p0712  ;#%00000111
+        LDA #$07
         STA a8222
-        LDX #<pFFBC  ;#%10111100
-        LDY #>pFFBC  ;#%11111111
+        LDX #$BC
+        LDY #$FF
         STX a821B
         STY a821C
         RTS
@@ -12999,7 +13032,7 @@ fD82D   .BYTE $FD,$FD,$FD,$FD,$0D,$FD,$FD,$FD
         .BYTE $00,$00,$00,$00,$00,$00,$00,$00
         .BYTE $00,$00,$00,$00,$00,$00,$00,$00
         .BYTE $00,$00,$00,$00
-pFFBC   .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
+        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
         .BYTE $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
         .BYTE $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
         .BYTE $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
