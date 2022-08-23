@@ -3307,7 +3307,7 @@ b1D91   LDA f45,X
         STA fA7,X
         DEX
         BPL b1D91
-a1DA0   LDX #$04     ;#%00000100
+        LDX #$04     ;#%00000100
 b1DA2   LDA f7D,X
         STA f6F,X
         DEX
@@ -3948,7 +3948,6 @@ b236D   LDA #$E1     ;#%11100001
         PHA
         LDA a2480
         BNE b23A4
-a23A0   =*+$02
         JSR s15F1
         JMP j23A7
 
@@ -4730,7 +4729,7 @@ a2995   .BYTE $00
 a2996   .BYTE $00
 f2997   .BYTE $03,$01,$07,$03,$04,$05,$06,$00
         .BYTE $05
-a29A0   .BYTE $02,$07,$04,$02,$01,$06,$00,$FF
+        .BYTE $02,$07,$04,$02,$01,$06,$00,$FF
 f29A8   .BYTE $01,$04,$05,$06,$02,$02,$03,$01
         .BYTE $04,$01,$07,$02,$04,$03,$03,$01
         .BYTE $04,$06,$05,$FF,$06,$05,$FF,$7F
@@ -4922,7 +4921,7 @@ f29A8   .BYTE $01,$04,$05,$06,$02,$02,$03,$01
         .BYTE $00,$00,$FF,$FF,$00,$00,$FF,$FF
         .BYTE $00,$00,$FF,$FF,$00,$00,$FF,$FF
         .BYTE $00,$00,$FF,$FF,$00,$00,$FF,$7F
-a2FA0   .BYTE $00,$00,$FF,$FF,$00,$00,$FF,$FF
+        .BYTE $00,$00,$FF,$FF,$00,$00,$FF,$FF
         .BYTE $00,$00,$FF,$FF,$00,$00,$FF,$FF
         .BYTE $00,$00,$FF,$FF,$00,$00,$FF,$FF
         .BYTE $00,$00,$FF,$FF,$00,$00,$FF,$7F
@@ -6678,75 +6677,18 @@ f835E   .BYTE $C8,$A7,$C8,$A7,$9E,$A9,$1A,$89
         .BYTE $B3,$3F,$01,$01,$01,$05,$05,$04
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
-f836E   .BYTE <$8553  			;0
-	.BYTE <$8474
-	.BYTE <$8466
-	.BYTE <$84B3
-	.BYTE <$84B8
-	.BYTE <$84B0
-	.BYTE <$84AA
-	.BYTE <$84AD 			;7
 
-        .BYTE <$8418 			;8
-	.BYTE <$84A1
-	.BYTE <$84A4
-	.BYTE <$84A7
-	.BYTE <$849B
-	.BYTE <$83BF
-	.BYTE <$83C2
-	.BYTE <$83C5			;15
+; 64tass doesn't support multiline lists, so create multiple lists
+; and then append them together.
+JUMPY_0 = [j8553,a8474,a8466,a84B3,$84B8,a84B0,a84AA,a84AD]
+JUMPY_1 = [$8418,a84A1,a84A4,a84A7,a849B,$83BF,$83C2,$83C5]
+JUMPY_2 = [$83C8,$83CB,$83D1,$83DF,$83EC,$840D,$83F8,$83D4]
+JUMPY_3 = [$83AC,b8534,$850D,$84BE,$84BB,a849E,$83CE]
 
-        .BYTE <$83C8 			;16
-	.BYTE <$83CB
-	.BYTE <$83D1
-	.BYTE <$83DF
-	.BYTE <$83EC
-	.BYTE <$840D
-	.BYTE <$83F8
-	.BYTE <$83D4 			;23
+JUMPY = JUMPY_0 .. JUMPY_1 .. JUMPY_2 .. JUMPY_3
 
-        .BYTE <$83AC 			;24
-	.BYTE <$8534
-	.BYTE <$850D
-	.BYTE <$84BE
-	.BYTE <$84BB
-	.BYTE <$849E
-	.BYTE <$83CE 			;30
-
-f838D   .BYTE >$8553
-	.BYTE >$8474
-	.BYTE >$8466
-	.BYTE >$84B3
-	.BYTE >$84B8
-	.BYTE >$84B0
-	.BYTE >$84AA
-	.BYTE >$84AD
-
-        .BYTE >$8418
-	.BYTE >$84A1
-	.BYTE >$84A4
-	.BYTE >$84A7
-	.BYTE >$849B
-	.BYTE >$83BF
-	.BYTE >$83C2
-	.BYTE >$83C5
-
-        .BYTE >$83C8
-	.BYTE >$83CB
-	.BYTE >$83D1
-	.BYTE >$83DF
-	.BYTE >$83EC
-	.BYTE >$840D
-	.BYTE >$83F8
-	.BYTE >$83D4
-
-        .BYTE >$83AC
-	.BYTE >$8534
-	.BYTE >$850D
-	.BYTE >$84BE
-	.BYTE >$84BB
-	.BYTE >$849E
-	.BYTE >$83CE
+f836E   .BYTE <JUMPY
+f838D   .BYTE >JUMPY
 
         LDX a9291
         LDA f90B9,X
@@ -6833,6 +6775,7 @@ b845D   LDA #$00     ;#%00000000
         STA a859E
         RTS
 
+a8466
         LDA a29
         AND #$07     ;#%00000111
         ORA a8231
@@ -6840,6 +6783,7 @@ b845D   LDA #$00     ;#%00000000
         ORA a827F
         RTS
 
+a8474
         LDA #$38     ;#%00111000
         STA a29
         LDA #$00     ;#%00000000
@@ -6857,15 +6801,33 @@ b8488   STA $D400,X  ;Voice 1: Frequency Control - Low-Byte
         STA a845C
         RTS
 
-        LDY #$35     ;#%00110101
-        BIT j11A0
-        BIT a23A0
-        BIT a29A0
-        BIT a2FA0
-        BIT a17A0
-        BIT a1DA0
-        BIT a0BA0
-        BIT a05A0
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+a849B
+        LDY #$35
+        .BYTE $2C                       ;It is a BIT a clobbers the next instruction
+a849E
+        LDY #$11
+        .BYTE $2C                       ;Ditto
+a84A1
+        LDY #$23
+        .BYTE $2C                       ;Ditto
+a84A4
+        LDY #$29
+        .BYTE $2C                       ;Ditto
+a84A7
+        LDY #$2F
+        .BYTE $2C                       ;Ditto
+a84AA
+        LDY #$17
+        .BYTE $2C                       ;Ditto
+a84AD
+        LDY #$1D
+        .BYTE $2C                       ;Ditto
+a84B0
+        LDY #$0B
+        .BYTE $2C                       ;Ditto
+a84B3
+        LDY #$05
         JMP j84DD
 
         LDY #$3B     ;#%00111011
