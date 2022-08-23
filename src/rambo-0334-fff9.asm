@@ -220,7 +220,6 @@ STR_CODE_FONT_SMALL     .MACRO
 ;
 ; **** EXTERNAL JUMPS ****
 ;
-e00FF = $00FF
 
         * = $0334
 
@@ -323,7 +322,7 @@ j03F6   JSR j28FF
 
 s03FC   LDY #$0D     ;#%00001101
 b03FE   LDX fB5,Y
-f0400   LDA f45,X
+        LDA f45,X
         BNE b0408
         DEY
         BPL b03FE
@@ -339,7 +338,6 @@ a0411   CMP #$88     ;#%10001000
 a0413   BCC b0426
 a0416   =*+$01
 a0415   CMP #$F0     ;#%11110000
-f0418   =*+$01
         BCS b0426
         LDX a042C
         BNE b042B
@@ -374,7 +372,6 @@ j0444   JSR s044C
         JMP j0382
 
 s044C   INC a0F
-f0450   =*+$02
         JSR s046E
 j0451   LDA #$03     ;#%00000011
         JMP s046E
@@ -490,7 +487,7 @@ b052D   LDA #$08     ;#%00001000
         BNE b052D
         LDA #$00     ;#%00000000
         STA a0A
-f0540   LDA #$10     ;#%00010000
+        LDA #$10     ;#%00010000
         STA $D016    ;VIC Control Register 2
         JSR s1813
         JSR s1F9B
@@ -549,8 +546,7 @@ a05FC
         #STR_CODE_SET_COORDS $01,$03
         #STR_CODE_SET_COLOR $01
         #STR_CODE_FONT_BIG
-        .TEXT "TAS"
-f0608   .TEXT "K[ONE[COMPLETED."
+        .TEXT "TASK[ONE[COMPLETED."
         #STR_CODE_SET_COORDS $05,$06
         #STR_CODE_SET_COLOR $03
         .TEXT "NOW[RESCUE[THE"
@@ -560,8 +556,7 @@ f0608   .TEXT "K[ONE[COMPLETED."
         .TEXT "FROM[THE[CAMP."
         #STR_CODE_SET_COORDS $06,$0F
         #STR_CODE_SET_COLOR $0A
-        .TEXT "USE[ANY"
-f0658   .TEXT "[ENEMY"
+        .TEXT "USE[ANY[ENEMY"
         #STR_CODE_SET_COORDS $00,$12
         .TEXT "EQUIPMENT[NECESSARY."
         #STR_CODE_END
@@ -574,8 +569,7 @@ a0678
         #STR_CODE_SET_COORDS $04,$06
         .TEXT "HAS[BEEN[RELAYED"
         #STR_CODE_SET_COORDS $08,$09
-        .TEXT "T"
-f06A7   .TEXT "O[ENEMY[H.Q."
+        .TEXT "TO[ENEMY[H.Q."
         #STR_CODE_SET_COORDS $08,$0C
         #STR_CODE_SET_COLOR $05
         .TEXT "A[GUNSHIP[IS"
@@ -6922,13 +6916,13 @@ b8534   STX a820E
 
 b8537   LDA a820E
         ORA a820B
-        STA $D418    ;Select Filter Mode and Volume
+        STA $D418                       ;Select Filter Mode and Volume
         LDA a820A
-        STA $D417    ;Filter Resonance Control / Voice Input Control
+        STA $D417                       ;Filter Resonance Control / Voice Input Control
         LDA a8209
-        STA $D416    ;Filter Cutoff Frequency: High-Byte
+        STA $D416                       ;Filter Cutoff Frequency: High-Byte
         LDA a8208
-        STA $D415    ;Filter Cutoff Frequency: Low-Nybble
+        STA $D415                       ;Filter Cutoff Frequency: Low-Nybble
         RTS
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
@@ -6968,9 +6962,9 @@ s8597   LDA a859F
         BNE b859D
         RTS
 
-a859E   =*+$01
-a859F   =*+$02
-b859D   JMP e00FF
+a859E   = *+$01
+a859F   = *+$02
+b859D   JMP $00FF                       ;Modified in runtime
 
 s85A0   LDX a822B
         LDY a822C
@@ -7004,6 +6998,7 @@ s85DE   LDA a8271
 
 a85EB   .BYTE $FF
 a85EC   .BYTE $00
+
 b85ED   LDX f9259,Y
         LDA f9289,Y
         STA a28
@@ -9013,14 +9008,15 @@ a9E4D   .BYTE $0B,$D2,$FE,$9B,$5F,$04,$D2,$19
         .BYTE $00,$00,$00,$00,$00,$15,$00,$C7
         .BYTE $03,$07,$DA,$61
 
+        ; Main for debug code for music ???
 bA451   JSR sA4F8
-        LDA #$01     ;#%00000001
+        LDA #$01
         JSR s8100
-        LDX #$0F     ;#%00001111
-        LDA #$19     ;#%00011001
+        LDX #$0F
+        LDA #$19
         JSR s8100
-        LDX #$07     ;#%00000111
-        LDA #$1A     ;#%00011010
+        LDX #$07
+        LDA #$1A
         JSR s8100
         JSR sA4DE
         JSR sA4DE
@@ -9029,9 +9025,9 @@ jA46D   SEI
 bA470   CMP $D012    ;Raster Position
         BNE bA470
         JSR sA548
-        JSR $EA87
-        JSR $F13E
-        CMP #$0D     ;#%00001101
+        JSR $EA87                       ;Scan keyboard
+        JSR $F13E                       ;Get a byte
+        CMP #$0D
         BNE bA488
         JSR sA5FC
         JMP jA46D
@@ -9088,7 +9084,8 @@ sA4E7   JSR sA4EA
 sA4EA   JSR sA4ED
 sA4ED   JSR sA4F0
 sA4F0   JSR sA4F3
-sA4F3   LDA #$00     ;#%00000000
+
+sA4F3   LDA #$00
         JMP s8100
 
 sA4F8   JSR sA4CA
@@ -9099,48 +9096,49 @@ bA4FF   STA f20,X
         BPL bA4FF
         LDX #$44     ;#%01000100
 bA506   LDA #$0C     ;#%00001100
-        STA fD850,X
+        STA $D800+40*2,X
         LDA #$0F     ;#%00001111
-        STA fD8C8,X
+        STA $D800+40*5,X
         LDA #$01     ;#%00000001
-        STA fD940,X
+        STA $D800+40*8,X
         LDA #$20     ;#%00100000
         STA f8135,X
         STA f817A,X
         STA f81BF,X
         DEX
         BPL bA506
-        LDX #$26     ;#%00100110
-bA525   LDA #$0C     ;#%00001100
-        STA fD9B8,X
-        LDA #$0F     ;#%00001111
-        STA fDA08,X
-        LDA #$20     ;#%00100000
+        LDX #38
+bA525   LDA #$0C                        ;Color Grey 2
+        STA $D800+40*11,X
+        LDA #$0F                        ;Color Grey 3 (light)
+        STA $D800+40*13,X
+        LDA #$20
         STA f8215,X
         STA f823C,X
         STA f8263,X
-        LDA #$01     ;#%00000001
-        STA fDA58,X
+        LDA #$01                        ;Color White
+        STA $D800+40*15,X
         DEX
         BPL bA525
-        LDA #$FF     ;#%11111111
+        LDA #$FF
         STA a028A
         RTS
 
-sA548   LDA #$05     ;#%00000101
-        STA $D020    ;Border Color
+        ; Debug code not used ???
+sA548   LDA #$05                        ;Color Green
+        STA $D020                       ;Border Color
         JSR s8597
         JSR s8565
         JSR s8511
         JSR s8611
-        LDA #$0B     ;#%00001011
-        STA $D020    ;Border Color
+        LDA #$0B                        ;Color Grey 1 (dark)
+        STA $D020                       ;Border Color
         JSR s870C
-        LDA #$0C     ;#%00001100
-        STA $D020    ;Border Color
+        LDA #$0C                        ;Color Grey 2
+        STA $D020                       ;Border Color
         JSR s8A46
-        LDA #$0F     ;#%00001111
-        STA $D020    ;Border Color
+        LDA #$0F                        ;Color Grey 3 (light)
+        STA $D020                       ;Border Color
         JSR s8D82
         LDA a820B
         STA a0411
@@ -9158,47 +9156,53 @@ sA548   LDA #$05     ;#%00000101
         STA b0426
         LDA a845C
         STA a0427
+
         LDX #$0F     ;#%00001111
 bA5A3   LDA f20,X
-        STA f0400,X
+        STA $0400,X
         DEX
         BPL bA5A3
-        LDX #$44     ;#%01000100
+
+        LDX #68
 bA5AD   LDA f8135,X
-        STA f0450,X
+        STA $0400+40*2,X
         LDA f817A,X
-        STA f04C8,X
+        STA $0400+40*5,X
         LDA f81BF,X
-        STA f0540,X
+        STA $0400+40*8,X
         DEX
         BPL bA5AD
-        LDX #$26     ;#%00100110
+
+        LDX #38
 bA5C4   LDA f8215,X
-        STA f05B8,X
+        STA $0400+40*11,X
         LDA f823C,X
-        STA f0608,X
+        STA $0400+40*13,X
         LDA f8263,X
-        STA f0658,X
+        STA $0400+40*15,X
         DEX
         BPL bA5C4
-        LDX #$E3     ;#%11100011
+
+        LDX #227
 bA5DB   LDA a828A,X
-        STA f06A7,X
+        STA $400+40*16+39,X
         DEX
         BNE bA5DB
-        LDA #$00     ;#%00000000
-        STA $D020    ;Border Color
+
+        LDA #$00                        ;Color Black
+        STA $D020                       ;Border Color
         LDA a29
-        LDX #$07     ;#%00000111
+        LDX #$07
 bA5ED   LSR A
         PHA
-        LDA #$00     ;#%00000000
-        ADC #$30     ;#%00110000
-        STA f0418,X
+        LDA #$00
+        ADC #$30                        ;Number 0
+        STA $0400+24,X
         PLA
         DEX
         BPL bA5ED
         BMI bA5FF
+
 sA5FC   INC a828A
 bA5FF   LDA a828A
         LDX #$02     ;#%00000010
@@ -10397,16 +10401,17 @@ START
         LDX #$F0                        ;Set stack
         TXS
         JSR sC43C
-        LDA #$19 			;Jump to index $19
-        LDX #$0F     ;#%00001111
+        LDA #25 			                  ;Jump to index 25
+        LDX #$0F                        ;Argument: Music to 15
         JSR s8100
-        LDA #$00     ;#%00000000
-        STA $D021    ;Background Color 0
-        STA $D020    ;Border Color
-        STA $D022    ;Background Color 1, Multi-Color Register 0
-        STA $D015    ;Sprite display Enable
-        LDA #$8D     ;#%10001101
-        STA aCF01
+
+        LDA #$00
+        STA $D021                       ;Background Color 0
+        STA $D020                       ;Border Color
+        STA $D022                       ;Background Color 1, Multi-Color Register 0
+        STA $D015                       ;Sprite display Enable
+        LDA #$8D                        ;'STA abs' opcode
+        STA aCF01                       ; Patch code in runtime
         SEI
         LDA #$35     ;#%00110101
         STA a01
@@ -10458,8 +10463,8 @@ bC219   STA fB000,Y
         STA $D016    			;VIC Control Register 2
         LDA #$00
         JSR jC00C
-        LDA #$8D     ;#%10001101
-        STA aCF01
+        LDA #$8D                        ;'STA abs' opcode
+        STA aCF01                       ; Patch code in runtime
         LDA #$1B     			;#%00011011
         STA $D011    			;VIC Control Register 1
         LDA aB469
@@ -11241,8 +11246,8 @@ _L03    PLA                             ;Pop special-modifier
         CPX #$FF                        ;Special is #ff ?
         BNE _L04                        ; No
 
-        LDA #$2C
-        STA aCF01
+        LDA #$2C                        ;'BIT abs' opcode
+        STA aCF01                       ; Patch code in runtime
 
 _L04    CPX #$FE                        ;Special is #fe ?
         BNE _L05                        ; No
@@ -11280,14 +11285,14 @@ _L06    JSR bC2D3
         BNE _L09
 _L07    LDA #$00     ;#%00000000
         STA aCFFF
-        LDA #$8D     ;#%10001101
+        LDA #$8D                        ;'STA abs' opcode
         STA aCF01
 _L08    LDA aCF0E
         BEQ _L06
         DEC aCF0E
         JMP _L00
 
-_L09    LDX #$8D     ;#%10001101
+_L09    LDX #$8D                        ;'STA abs' opcode
         STX aCF01
         RTS
 
@@ -11653,8 +11658,10 @@ sCEC1   LDA #$18     ;#%00011000
         SEC
         SBC #$01     ;#%00000001
         AND #$07     ;#%00000111
-aCF01   STA aCF0D
-        CMP #$02     ;#%00000010
+aCF01   STA aCF0D                       ;Gets patched in runtime. Switches
+                                        ; 'STA abs' and
+                                        ; 'BIT abs'  (this is kind of a NOP)
+        CMP #$02
         BNE bCF0B
         INC aCF0E
 bCF0B   RTS
@@ -11730,7 +11737,7 @@ fD82D   .BYTE $FD,$FD,$FD,$FD,$0D,$FD,$FD,$FD
         .BYTE $FD,$FD,$0D,$FD,$FD,$FD,$FD,$FD
         .BYTE $FD,$FD,$FD,$FD,$2D,$FD,$FD,$FD
         .BYTE $FD,$FD,$FD
-fD850   .BYTE $FD,$FD,$FD,$0D,$0D,$6D,$FD,$FD
+        .BYTE $FD,$FD,$FD,$0D,$0D,$6D,$FD,$FD
         .BYTE $FD,$FD,$FD,$FD,$FD,$FD,$FD,$9D
         .BYTE $FD,$FD,$2D,$FD,$FD,$FD,$FD,$FD
         .BYTE $FD,$FD,$FD,$FD,$FD,$FD,$FD,$FD
@@ -11745,7 +11752,7 @@ fD850   .BYTE $FD,$FD,$FD,$0D,$0D,$6D,$FD,$FD
         .BYTE $FD,$FD,$FD,$0D,$FD,$2D,$FD,$FD
         .BYTE $0D,$FD,$FD,$FD,$FD,$FD,$2D,$FD
         .BYTE $2D,$FD,$FD,$FD,$0D,$FD,$FD,$FD
-fD8C8   .BYTE $FD,$FD,$FD,$FD,$FD,$FD,$0D,$FD
+        .BYTE $FD,$FD,$FD,$FD,$FD,$FD,$0D,$FD
         .BYTE $FD,$FD,$FD,$FD,$2D,$FD,$FD,$FD
         .BYTE $FD,$1D,$FD,$FD,$FD,$FD,$FD,$FD
         .BYTE $FD,$FD,$FD,$FD,$FD,$FD,$FD,$FD
@@ -11760,7 +11767,7 @@ fD8C8   .BYTE $FD,$FD,$FD,$FD,$FD,$FD,$0D,$FD
         .BYTE $FD,$CD,$FD,$FD,$FD,$FD,$FD,$0D
         .BYTE $FD,$FD,$FD,$FD,$FD,$FD,$FD,$CD
         .BYTE $FD,$2D,$FD,$FD,$FD,$FD,$FD,$FD
-fD940   .BYTE $FD,$1D,$FD,$FD,$FD,$FD,$0D,$FD
+        .BYTE $FD,$1D,$FD,$FD,$FD,$FD,$0D,$FD
         .BYTE $FD,$FD,$FD,$FD,$FD,$FD,$FD,$FD
         .BYTE $FD,$FD,$2D,$FD,$0D,$FD,$FD,$FD
         .BYTE $FD,$FD,$FD,$FD,$FD,$FD,$FD,$FD
@@ -11775,7 +11782,7 @@ fD940   .BYTE $FD,$1D,$FD,$FD,$FD,$FD,$0D,$FD
         .BYTE $FD,$FD,$0D,$FD,$FD,$FD,$FD,$FD
         .BYTE $FD,$FD,$FD,$FD,$FD,$FD,$FD,$FD
         .BYTE $FD,$FD,$FD,$9D,$FD,$FD,$FD,$2D
-fD9B8   .BYTE $FD,$2D,$FD,$FD,$2D,$FD,$FD,$FD
+        .BYTE $FD,$2D,$FD,$FD,$2D,$FD,$FD,$FD
         .BYTE $FD,$FD,$FD,$FD,$0D,$FD,$0D,$FD
         .BYTE $FD,$CD,$FD,$2D,$FD,$FD,$FD,$FD
         .BYTE $1D,$FD,$FD,$FD,$9D,$2D,$FD,$FD
@@ -11785,7 +11792,7 @@ fD9B8   .BYTE $FD,$2D,$FD,$FD,$2D,$FD,$FD,$FD
         .BYTE $9D,$FD,$FD,$0D,$FD,$2D,$FD,$2D
         .BYTE $FD,$FD,$FD,$FD,$0D,$FD,$0D,$FD
         .BYTE $FD,$FD,$FD,$6D,$2D,$FD,$FD,$FD
-fDA08   .BYTE $FD,$FD,$FD,$FD,$FD,$FD,$0D,$FD
+        .BYTE $FD,$FD,$FD,$FD,$FD,$FD,$0D,$FD
         .BYTE $FD,$1D,$FD,$1D,$FD,$6D,$6D,$0D
         .BYTE $FD,$FD,$FD,$FD,$0D,$2D,$0D,$FD
         .BYTE $FD,$FD,$FD,$FD,$FD,$FD,$1D,$FD
@@ -11795,7 +11802,7 @@ fDA08   .BYTE $FD,$FD,$FD,$FD,$FD,$FD,$0D,$FD
         .BYTE $9D,$9D,$2D,$1D,$FD,$FD,$FD,$FD
         .BYTE $FD,$FD,$FD,$FD,$FD,$2D,$FD,$FD
         .BYTE $FD,$FD,$FD,$0D,$CD,$FD,$FD,$FD
-fDA58   .BYTE $FD,$FD,$FD,$FD,$FD,$FD,$FD,$FD
+        .BYTE $FD,$FD,$FD,$FD,$FD,$FD,$FD,$FD
         .BYTE $FD,$2D,$FD,$FD,$FD,$FD,$FD,$FD
         .BYTE $FD,$FD,$FD,$FD,$FD,$FD,$FD,$1D
         .BYTE $FD,$1D,$FD,$FD,$FD,$0D,$FD,$FD
