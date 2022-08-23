@@ -191,8 +191,6 @@ a7FF8 = $7FF8                           ; or using unused space as variables?
 ; **** POINTERS ****
 ;
 p0026 = $0026
-p0135 = $0135
-p0232 = $0232
 
 ;
 ; **** MACROS ****
@@ -3779,9 +3777,9 @@ s225C   SEI
         STA $D01A    ;VIC Interrupt Mask Register (IMR)
         STA $DC0D    ;CIA1: CIA Interrupt Control Register
         LDA $DC0D    ;CIA1: CIA Interrupt Control Register
-        LDA #>p0135  ;#%00000001
+        LDA #$01
         STA a02
-        LDA #<p0135  ;#%00110101
+        LDA #$35
         STA a01
         LDA #$07     ;#%00000111
         STA a09
@@ -5853,13 +5851,13 @@ j37B7   STA a3825
         LDA #$01     ;#%00000001
         STA aCF
         STA aC7
-        LDA #>pF0    ;#%00000000
+        LDA #$00
         STA a3565
-        LDA #<pF0    ;#%11110000
+        LDA #$F0
         STA a3564
-        LDA #>p0232  ;#%00000010
+        LDA #$02
         STA a3567
-        LDA #<p0232  ;#%00110010
+        LDA #$32
         STA a3566
         JSR j3775
         LDX #$0F     ;#%00001111
@@ -7249,7 +7247,7 @@ b8801   STA a2A
         INC a21
 b880E   JMP j88DE
 
-        INC a2D
+a8811   INC a2D
         LDY a2D
         CPY #$08     ;#%00001000
         BEQ b8822
@@ -7262,7 +7260,7 @@ b8822   LDA a29
         STA a29
         RTS
 
-        LDX a2D
+a8829   LDX a2D
         CLC
         TYA
         ADC a20
@@ -7276,7 +7274,7 @@ b8822   LDA a29
         TYA
         JMP j871A
 
-        LDX a2D
+a8844   LDX a2D
         DEC f8173,X
         BEQ b8850
         INX
@@ -7284,11 +7282,11 @@ b8822   LDA a29
         TAY
         BPL b8819
 b8850   INC a2D
-        LDA #$01     ;#%00000001
+        LDA #$01
         JMP j871A
 
-        LDY #$04     ;#%00000100
-        LDX #$1C     ;#%00011100
+a8857   LDY #$04
+        LDX #$1C
 b885B   LDA (p26),Y
         STA f8135,X
         DEX
@@ -7296,7 +7294,7 @@ b885B   LDA (p26),Y
         BPL b885B
         JMP j8718
 
-        LDY #$0D
+a8867   LDY #$0D
         .BYTE $2C                       ;It is a BIT. Clobbers the next instruction
 b886A
         LDY #$09
@@ -7306,7 +7304,7 @@ b886C   LDA (p26),Y
         BPL b886C
         JMP j8718
 
-        INY
+a8877   INY
         PHA
         LDA (p20),Y
         STA a26
@@ -7323,7 +7321,7 @@ b8884   LDA (p26),Y
         LDA #$05     ;#%00000101
         JMP j871A
 
-        INY
+a8892   INY
         LDA (p20),Y
         STA f8204
 j8898   LDA a27
@@ -7331,36 +7329,36 @@ j889A   STX a20
         STA a21
         JMP b8723
 
-        LDA #$87     ;#%10000111
+a88A1   LDA #>j8718-1
         PHA
-        LDA #$17     ;#%00010111
+        LDA #<j8718-1
         PHA
         JMP (p0026)
 
-        LDA #$03     ;#%00000011
+a88AA   LDA #$03
 b88AC   LDY a2D
         CLC
         ADC a20
         STA f8162,Y
-        LDA #$00     ;#%00000000
+        LDA #$00
         ADC a21
         STA f816A,Y
         DEC a2D
         JMP j8898
 
-        INY
+a88C0   INY
         LDA (p20),Y
         STA f8204
         LDA #$04     ;#%00000100
         BNE b88AC
-        STX f8204
+a88CA   STX f8204
         TYA
         JMP j871A
 
 j88D1   STA f8135,X
         JMP j8718
 
-        STA f8215,X
+a88D7   STA f8215,X
         JMP j8718
 
 b88DD   RTS
@@ -7740,9 +7738,9 @@ j8BD6   STX a22
         STA a23
         JMP b8A5E
 
-        LDA #$8A     ;#%10001010
+        LDA #>j8A53-1
         PHA
-        LDA #$52     ;#%01010010
+        LDA #<j8A53-1
         PHA
         JMP (p0026)
 
@@ -8147,9 +8145,9 @@ j8F0D   STX a24
         STA a25
         JMP b8D9A
 
-        LDA #$8D     ;#%10001101
+        LDA #>j8D8F-1
         PHA
-        LDA #$8E     ;#%10001110
+        LDA #<j8D8F-1
         PHA
         JMP (p0026)
 
@@ -8381,17 +8379,17 @@ f912A   .BYTE $12,$23,$34,$46,$5A,$6E,$84,$9B
         .BYTE $DF,$58,$34,$78,$2B,$53,$F7,$1F
         .BYTE $D2,$19,$FC,$85,$BD,$B0,$00
 
-f9189   .WORD $8811,$8877,$8867,$889A,$88AA
-        .WORD $88CA,$88C0,$88D1,$8892,$88A1
-        .WORD $88D7,$886A,$8829,$8844,$8857
+f9189   .WORD a8811,a8877,a8867,j889A,a88AA
+        .WORD a88CA,a88C0,j88D1,a8892,a88A1
+        .WORD a88D7,b886A,a8829,a8844,a8857
 
-f91A7   .WORD $8B4D,$8BB3,$8BA3,$8BD6,$8BE6
-        .WORD $8C06,$8BFC,$8C0D,$8BCE,$8BDD
-        .WORD $8C13,$8BA6,$8B65,$8B80,$8B93
+f91A7   .WORD $8B4D,$8BB3,$8BA3,j8BD6,$8BE6
+        .WORD $8C06,$8BFC,j8C0D,$8BCE,$8BDD
+        .WORD $8C13,b8BA6,$8B65,$8B80,$8B93
 
-f91C5   .WORD $8E84,$8EEA,$8EDA,$8F0D,$8F1D
-        .WORD $8F3D,$8F33,$8F44,$8F05,$8F14
-        .WORD $8F4A,$8EDD,$8E9C,$8EB7,$8ECA
+f91C5   .WORD $8E84,$8EEA,$8EDA,j8F0D,$8F1D
+        .WORD $8F3D,$8F33,j8F44,$8F05,$8F14
+        .WORD $8F4A,b8EDD,$8E9C,$8EB7,$8ECA
 
 f91E3   .BYTE $4A,$95,$F9,$96,$C3,$97,$09,$A7
         .BYTE $0C,$A7,$0F,$A7,$45,$9C,$FB,$9F
@@ -8402,7 +8400,9 @@ f91E3   .BYTE $4A,$95,$F9,$96,$C3,$97,$09,$A7
         .BYTE $00,$A7,$03,$A7,$06,$A7,$BF,$98
         .BYTE $C3,$98,$D7,$98,$82,$9A,$BB,$9A
         .BYTE $F6,$9A,$EE,$A0,$18,$A1,$3F,$A1
+
         .TEXT "MUSIC BY MARTIN GALWAY"
+
 f9241   .BYTE $80,$05,$01,$80,$80,$01,$02,$80
         .BYTE $80,$80,$01,$01,$80,$00,$80,$00
         .BYTE $80,$00,$80,$01,$00,$80,$01,$01
