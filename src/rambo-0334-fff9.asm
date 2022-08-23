@@ -6680,10 +6680,10 @@ f835E   .BYTE $C8,$A7,$C8,$A7,$9E,$A9,$1A,$89
 
 ; 64tass doesn't support multiline lists, so create multiple lists
 ; and then append them together.
-JUMPY_0 = [j8553,a8474,a8466,a84B3,$84B8,a84B0,a84AA,a84AD]
+JUMPY_0 = [j8553,a8474,a8466,a84B3,a84B8,a84B0,a84AA,a84AD]
 JUMPY_1 = [$8418,a84A1,a84A4,a84A7,a849B,$83BF,$83C2,$83C5]
 JUMPY_2 = [$83C8,$83CB,$83D1,$83DF,$83EC,$840D,$83F8,$83D4]
-JUMPY_3 = [$83AC,b8534,$850D,$84BE,$84BB,a849E,$83CE]
+JUMPY_3 = [$83AC,b8534,$850D,a84BE,a84BB,a849E,$83CE]
 
 JUMPY = JUMPY_0 .. JUMPY_1 .. JUMPY_2 .. JUMPY_3
 
@@ -6802,9 +6802,10 @@ b8488   STA $D400,X  ;Voice 1: Frequency Control - Low-Byte
         RTS
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+; Jump table that hardcodes Y to a fixed value.
 a849B
         LDY #$35
-        .BYTE $2C                       ;It is a BIT a clobbers the next instruction
+        .BYTE $2C                       ;It is a BIT. Clobbers the next instruction
 a849E
         LDY #$11
         .BYTE $2C                       ;Ditto
@@ -6830,15 +6831,20 @@ a84B3
         LDY #$05
         JMP j84DD
 
-        LDY #$3B     ;#%00111011
-        BIT $47A0                       ;XXX: Sprites???
-        BIT a41A0
-        LDX #$D4     ;#%11010100
+a84B8
+        LDY #$3B
+        .BYTE $2C                       ;Ditto
+a84BB
+        LDY #$47
+        .BYTE $2C                       ;Ditto
+a84BE
+        LDY #$41
+        LDX #$D4
 b84C2   LDA f8134,X
         STA a828A,X
         DEX
         BNE b84C2
-        LDX #$0F     ;#%00001111
+        LDX #$0F
 b84CD   LDA f20,X
         STA f835E,X
         DEX
@@ -6846,27 +6852,28 @@ b84CD   LDA f20,X
         ASL a29
         SEC
         ROR a29
-        LDA #$BF     ;#%10111111
-j84DD   =*+$01
-        BIT a3FA9
+        LDA #$BF
+        .BYTE $2C                       ;It is a BIT. Clobbers the next instructions
+j84DD
+        LDA #$3F
         STA a29
-        LDX #$05     ;#%00000101
+        LDX #$05
 b84E3   LDA f91E3,Y
         STA f20,X
         DEY
         DEX
         BPL b84E3
-        LDX #$02     ;#%00000010
-b84EE   LDA #$01     ;#%00000001
+        LDX #$02
+b84EE   LDA #$01
         STA f2A,X
-        LDA #$07     ;#%00000111
+        LDA #$07
         STA f2D,X
-        LDA #$00     ;#%00000000
+        LDA #$00
         STA f8204,X
         LDY f90C2,X
         STA f8142,Y
         STA f8146,Y
-        LDA #$08     ;#%00001000
+        LDA #$08
         STA f814C,Y
         DEX
         BPL b84EE
