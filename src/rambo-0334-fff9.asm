@@ -6501,13 +6501,13 @@ f8000   .BYTE $00,$00,$00,$01,$01,$02,$03,$04
 ; Args: A
 MUSIC_FN
         TAY
-        LDA f836E,Y
+        LDA MUSIC_FNS_LO,Y
         STA _JMP_LSB
-        LDA f838D,Y
+        LDA MUSIC_FNS_HI,Y
         STA _JMP_MSB
 _JMP_LSB = *+$01
 _JMP_MSB = *+$02
-        JMP j8553                       ;Updated in runtime
+        JMP MUSIC_FN_00                       ;Updated in runtime
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 j8110   LDX a822D
@@ -6734,15 +6734,14 @@ f835E   .BYTE $C8,$A7,$C8,$A7,$9E,$A9,$1A,$89
 
 ; 64tass doesn't support multiline lists, so create multiple lists
 ; and then append them together.
-JUMPY_0 = [j8553,a8474,a8466,a84B3,a84B8,a84B0,a84AA,a84AD]     ;0-7
-JUMPY_1 = [a8418,a84A1,a84A4,a84A7,a849B,a83BF,a83C2,a83C5]     ;8-15
-JUMPY_2 = [a83C8,a83CB,a83D1,a83DF,a83EC,a840D,a83F8,a83D4]     ;16-23
-JUMPY_3 = [a83AC,b8534,a850D,a84BE,a84BB,a849E,a83CE]           ;24-30
+_JUMPY_0 = [MUSIC_FN_00,MUSIC_FN_01,MUSIC_FN_02,MUSIC_FN_03,MUSIC_FN_04,MUSIC_FN_05,MUSIC_FN_06,MUSIC_FN_07]     ;0-7
+_JUMPY_1 = [a8418,a84A1,a84A4,a84A7,a849B,a83BF,a83C2,a83C5]     ;8-15
+_JUMPY_2 = [a83C8,a83CB,a83D1,a83DF,a83EC,a840D,a83F8,a83D4]     ;16-23
+_JUMPY_3 = [a83AC,b8534,a850D,a84BE,a84BB,a849E,a83CE]           ;24-30
+_JUMPY = _JUMPY_0 .. _JUMPY_1 .. _JUMPY_2 .. _JUMPY_3
 
-JUMPY = JUMPY_0 .. JUMPY_1 .. JUMPY_2 .. JUMPY_3
-
-f836E   .BYTE <JUMPY
-f838D   .BYTE >JUMPY
+MUSIC_FNS_LO    .BYTE <_JUMPY
+MUSIC_FNS_HI    .BYTE >_JUMPY
 
 a83AC
         LDX a9291
@@ -6853,7 +6852,7 @@ b845D   LDA #$00     ;#%00000000
         STA a859E
         RTS
 
-a8466
+MUSIC_FN_02
         LDA a29
         AND #$07     ;#%00000111
         ORA a8231
@@ -6861,7 +6860,7 @@ a8466
         ORA a827F
         RTS
 
-a8474
+MUSIC_FN_01
         LDA #$38     ;#%00111000
         STA a29
         LDA #$00     ;#%00000000
@@ -6896,20 +6895,20 @@ a84A4
 a84A7
         LDY #$2F
         .BYTE $2C                       ;Ditto
-a84AA
+MUSIC_FN_06
         LDY #$17
         .BYTE $2C                       ;Ditto
-a84AD
+MUSIC_FN_07
         LDY #$1D
         .BYTE $2C                       ;Ditto
-a84B0
+MUSIC_FN_05
         LDY #$0B
         .BYTE $2C                       ;Ditto
-a84B3
+MUSIC_FN_03
         LDY #$05
         JMP j84DD
 
-a84B8
+MUSIC_FN_04
         LDY #$3B
         .BYTE $2C                       ;Ditto
 a84BB
@@ -6995,7 +6994,8 @@ b8537   LDA a820E
         RTS
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
-j8553   JSR s8597
+MUSIC_FN_00
+        JSR s8597
         JSR s8511
         JSR s8611
         JSR s870C
