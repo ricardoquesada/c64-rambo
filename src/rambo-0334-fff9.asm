@@ -6829,19 +6829,22 @@ p8423   LDA a828A
         BNE b8442
         LDA #$30     ;#%00110000
         STA a845B
-        LDX #$42     ;#%01000010
-        LDY #$A2     ;#%10100010
-        LDA #$00     ;#%00000000
+
+        LDX #<$A242
+        LDY #>$A242
+        LDA #$00                        ;Voice 0
         JSR s861F
+
 b8442   LDA a845C
         BEQ b845A
         DEC a845C
         BNE b845A
         LDA #$2D     ;#%00101101
         STA a845C
-        LDX #$23     ;#%00100011
-        LDY #$A2     ;#%10100010
-        LDA #$01     ;#%00000001
+
+        LDX #<$A223
+        LDY #>$A223
+        LDA #$01                        ;Voice 1
         JMP s861F
 
 b845A   RTS
@@ -7071,13 +7074,14 @@ s85DE   LDA a8271
 a85EB   .BYTE $FF
 a85EC   .BYTE $00
 
-b85ED   LDX f9259,Y
+b85ED   LDX f9259,Y                     ;Lo
         LDA f9289,Y
         STA a28
         LDA f9271,Y
-        TAY
-        LDA a28
+        TAY                             ;Hi
+        LDA a28                         ;Voice
         JSR s861F
+
         LDY a85EB
         DEC a85EB
         LDA f9241,Y
@@ -7094,6 +7098,8 @@ b861E   RTS
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 ; Params: A, X, Y
+; X/Y: Points to Waveform table
+; A voice: 0, 1 or 2
 s861F   STX a26
         STY a27
         STA a28
@@ -7102,23 +7108,24 @@ s861F   STX a26
         AND a29
         STA a29
         LDA f90BF,X
-        STA a863A
+        STA _ADDR_LO
+
         LDX #$04
         LDY #$1A
-b8637   LDA (p26),Y
-a863A   = *+$01
-        STA $D409,X                     ;Voice 2: Pulse Waveform Width - Low-Byte
+_L00    LDA (p26),Y
+_ADDR_LO = *+$01                        ;Voice 1, 2 or 3: Pulse Waveform Width - Low-Byte
+        STA $D409,X                     ; Gets modified in runtime
         DEY
         DEX
+        BPL _L00
 
-        BPL b8637
         LDY #$1D     ;#%00011101
-        LDX a863A
+        LDX _ADDR_LO
         LDA (p26),Y
-        STA $D3FE,X
+        STA $D400-2,X                   ;-2 is to make x-2
         INY
         LDA (p26),Y
-        STA $D3FF,X
+        STA $D400-1,X                   ;-1 is to make x-1
         LDY a28
         LDX f90BC,Y
         LDY #$1B     ;#%00011011
@@ -8503,12 +8510,16 @@ f91E3   .BYTE $4A,$95,$F9,$96,$C3,$97,$09,$A7
 f9241   .BYTE $80,$05,$01,$80,$80,$01,$02,$80
         .BYTE $80,$80,$01,$01,$80,$00,$80,$00
         .BYTE $80,$00,$80,$01,$00,$80,$01,$01
+
+        ; Lo Waveform addresses (?)
 f9259   .BYTE $88,$A7,$69,$61,$FC,$DD,$BE,$1B
         .BYTE $80,$3A,$59,$78,$97,$B6,$D5,$F4
         .BYTE $13,$32,$2F,$2F,$2F,$C6,$E5,$04
+        ; Hi Waveform addresses (?)
 f9271   .BYTE $A1,$A1,$A1,$A2,$A2,$A2,$A2,$A3
         .BYTE $A2,$A3,$A3,$A3,$A3,$A3,$A3,$A3
         .BYTE $A4,$A4,$9E,$9E,$9E,$A1,$A1,$A2
+
 f9289   .BYTE $01,$00,$02,$02,$00,$01,$02,$01
 a9291   .BYTE $00,$00,$01,$02,$01,$02,$02,$00
 a9299   .BYTE $00
@@ -8814,39 +8825,42 @@ a929A   .BYTE $01,$00,$01,$02,$00,$01,$02,$0A
         .BYTE $9B,$BF,$01,$86,$50,$84,$50,$86
         .BYTE $64,$87,$FF,$C0
 
-        LDX #$D2     ;#%11010010
-        LDY #$9D     ;#%10011101
-        LDA #$00     ;#%00000000
+        LDX #<$9DD2
+        LDY #>$9DD2
+        LDA #$00                        ;Voice 0
         JSR s861F
 
-        LDX #$10     ;#%00010000
-        LDY #$9E     ;#%10011110
-        LDA #$02     ;#%00000010
+        LDX #<$9E10
+        LDY #>$9E10
+        LDA #$02                        ;Voice 2
         JSR s861F
 
-        LDX #$F1     ;#%11110001
-        LDY #$9D     ;#%10011101
-b9C14   LDA #$01     ;#%00000001
+        LDX #<$9DF1
+        LDY #>$9DF1
+_L00    LDA #$01                        ;Voice 1
         JMP s861F
 
-        LDX #$B3     ;#%10110011
-        LDY #$9D     ;#%10011101
-        LDA #$02     ;#%00000010
+        LDX #<$9DB3
+        LDY #>$9DB3
+        LDA #$02                        ;Voice 2
         JSR s861F
-        LDX #$75     ;#%01110101
-        LDY #$9D     ;#%10011101
-        LDA #$00     ;#%00000000
+
+        LDX #<$9D75
+        LDY #>$9D75
+        LDA #$00                        ;Voice 0
         JSR s861F
-        LDX #$94     ;#%10010100
-        LDY #$9D     ;#%10011101
-        BNE b9C14
-        LDA #$10     ;#%00010000
+
+        LDX #<$9D94
+        LDY #>$9D94
+        BNE _L00
+
+        LDA #$10
         .BYTE $2C
         LDA #$0B
         .BYTE $2C
         LDA #$09
         STA a9E4D
-        LDY #$14     ;#%00010100
+        LDY #$14
         JMP b83D6
 
         .BYTE $06,$0C,$12,$18,$C2,$20,$03,$41
