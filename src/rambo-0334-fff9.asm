@@ -6735,7 +6735,7 @@ f835E   .BYTE $C8,$A7,$C8,$A7,$9E,$A9,$1A,$89
 ; 64tass doesn't support multiline lists, so create multiple lists
 ; and then append them together.
 _JUMPY_0 = [MUSIC_FN_00,MUSIC_FN_01,MUSIC_FN_02,MUSIC_FN_03,MUSIC_FN_04,MUSIC_FN_05,MUSIC_FN_06,MUSIC_FN_07]     ;0-7
-_JUMPY_1 = [a8418,a84A1,a84A4,a84A7,a849B,a83BF,a83C2,a83C5]     ;8-15
+_JUMPY_1 = [MUSIC_FN_08,MUSIC_FN_09,MUSIC_FN_10,MUSIC_FN_11,MUSIC_FN_12,MUSIC_FN_13,MUSIC_FN_14,MUSIC_FN_15]     ;8-15
 _JUMPY_2 = [a83C8,a83CB,a83D1,a83DF,a83EC,a840D,a83F8,a83D4]     ;16-23
 _JUMPY_3 = [a83AC,b8534,a850D,a84BE,a84BB,a849E,a83CE]           ;24-30
 _JUMPY = _JUMPY_0 .. _JUMPY_1 .. _JUMPY_2 .. _JUMPY_3
@@ -6752,13 +6752,13 @@ a83AC
         STA a929A
         LDY #$11
         .BYTE $2C                       ;It is a BIT. Clobbers the next instruction
-a83BF
+MUSIC_FN_13
         LDY #$02
         .BYTE $2C
-a83C2
+MUSIC_FN_14
         LDY #$06
         .BYTE $2C
-a83C5
+MUSIC_FN_15
         LDY #$0B
         .BYTE $2C
 a83C8
@@ -6811,7 +6811,7 @@ a840D
         BEQ b845D
         RTS
 
-a8418
+MUSIC_FN_08
         LDA #$00     ;#%00000000
         STA a845C
         ORA a845B
@@ -6880,19 +6880,19 @@ b8488   STA $D400,X  ;Voice 1: Frequency Control - Low-Byte
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 ; Jump table that hardcodes Y to a fixed value.
-a849B
+MUSIC_FN_12
         LDY #$35
         .BYTE $2C                       ;It is a BIT. Clobbers the next instruction
 a849E
         LDY #$11
         .BYTE $2C                       ;Ditto
-a84A1
+MUSIC_FN_09
         LDY #$23
         .BYTE $2C                       ;Ditto
-a84A4
+MUSIC_FN_10
         LDY #$29
         .BYTE $2C                       ;Ditto
-a84A7
+MUSIC_FN_11
         LDY #$2F
         .BYTE $2C                       ;Ditto
 MUSIC_FN_06
