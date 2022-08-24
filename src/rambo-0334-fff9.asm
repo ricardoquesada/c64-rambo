@@ -7198,6 +7198,11 @@ s86F3   LDA a826E
         STA a8282
 b870B   RTS
 
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+;
+; Voice 1 related functions
+;
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 s870C   LDA a29
         LSR A
         BCC b8715
@@ -7217,10 +7222,10 @@ b8723   LDY #$00     ;#%00000000
         BCC b8748
         AND #$3F     ;#%00111111
         TAX
-        LDA f9189,X
-        STA a8746
-        LDA f9189+1,X
-        STA a8747
+        LDA VOICE_1_EFFECTS_TBL,X
+        STA _ADDR_LO
+        LDA VOICE_1_EFFECTS_TBL+1,X
+        STA _ADDR_HI
         INY
         LDA (p20),Y
         TAX
@@ -7228,8 +7233,8 @@ b8723   LDY #$00     ;#%00000000
         INY
         LDA (p20),Y
         STA a27
-a8746   =*+$01
-a8747   =*+$02
+_ADDR_LO = *+$01
+_ADDR_HI = *+$02
         JMP j88D1                       ;Modified in runtime
 
 b8748   STA a28
@@ -7252,12 +7257,12 @@ b8765   LDA a29
         BEQ b8762
         LDY #$04     ;#%00000100
 b876D   LDA #$00     ;#%00000000
-        STA $D402,Y  ;Voice 1: Pulse Waveform Width - Low-Byte
+        STA $D402,Y                     ;Voice 1: Pulse Waveform Width - Low-Byte
         LDA f814B,Y
         CPY #$02     ;#%00000010
         BNE b877B
         AND #$F7     ;#%11110111
-b877B   STA $D402,Y  ;Voice 1: Pulse Waveform Width - Low-Byte
+b877B   STA $D402,Y                     ;Voice 1: Pulse Waveform Width - Low-Byte
         DEY
         BPL b876D
         LDA a814D
@@ -7456,7 +7461,7 @@ b8900   LDA a8230
         DEC a8231
         BNE b8926
         LDX #$06     ;#%00000110
-b890C   STA $D400,X  ;Voice 1: Frequency Control - Low-Byte
+b890C   STA $D400,X                     ;Voice 1: Frequency Control - Low-Byte
         DEX
         BPL b890C
         LDA #$08     ;#%00001000
@@ -7593,8 +7598,8 @@ b8A1A   TXA
 j8A23   TAY
 b8A24   STX a8232
         STY a8233
-        STX $D400    ;Voice 1: Frequency Control - Low-Byte
-        STY $D401    ;Voice 1: Frequency Control - High-Byte
+        STX $D400                       ;Voice 1: Frequency Control - Low-Byte
+        STY $D401                       ;Voice 1: Frequency Control - High-Byte
         RTS
 
 b8A31   LDA a8222
@@ -7607,6 +7612,11 @@ b8A31   LDA a8222
 b8A40   JSR s811C
         JMP j89D5
 
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+;
+; Voice 2 related functions
+;
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 s8A46   LDA a29
         AND #$02     ;#%00000010
         BEQ b8A50
@@ -7626,10 +7636,10 @@ b8A5E   LDY #$00     ;#%00000000
         BCC b8A83
         AND #$3F     ;#%00111111
         TAX
-        LDA f91A7,X
-        STA a8A81
-        LDA f91A7+1,X
-        STA a8A82
+        LDA VOICE_2_EFFECTS_TBL,X
+        STA _ADDR_LO
+        LDA VOICE_2_EFFECTS_TBL+1,X
+        STA _ADDR_HI
         INY
         LDA (p22),Y
         TAX
@@ -7637,8 +7647,8 @@ b8A5E   LDY #$00     ;#%00000000
         INY
         LDA (p22),Y
         STA a27
-a8A81   = *+$01
-a8A82   = *+$02
+_ADDR_LO = *+$01
+_ADDR_HI = *+$02
         JMP j8C0D                       ;Modified in runtime
 
 b8A83   STA a28
@@ -7661,12 +7671,12 @@ b8AA1   LDA a29
         BEQ b8A9E
         LDY #$04     ;#%00000100
 b8AA9   LDA #$00     ;#%00000000
-        STA $D409,Y  ;Voice 2: Pulse Waveform Width - Low-Byte
+        STA $D409,Y                     ;Voice 2: Pulse Waveform Width - Low-Byte
         LDA f8190,Y
         CPY #$02     ;#%00000010
         BNE b8AB7
         AND #$F7     ;#%11110111
-b8AB7   STA $D409,Y  ;Voice 2: Pulse Waveform Width - Low-Byte
+b8AB7   STA $D409,Y                     ;Voice 2: Pulse Waveform Width - Low-Byte
         DEY
         BPL b8AA9
         LDA a8192
@@ -7865,7 +7875,7 @@ b8C3C   LDA a8257
         DEC a8258
         BNE b8C62
         LDX #$06     ;#%00000110
-b8C48   STA $D407,X  ;Voice 2: Frequency Control - Low-Byte
+b8C48   STA $D407,X                     ;Voice 2: Frequency Control - Low-Byte
         DEX
         BPL b8C48
         LDA #$10     ;#%00010000
@@ -7877,7 +7887,7 @@ b8C55   DEC a8257
         BNE b8C62
         LDA a8256
         AND #$F6     ;#%11110110
-b8C5F   STA $D40B    ;Voice 2: Control Register
+b8C5F   STA $D40B                       ;Voice 2: Control Register
 b8C62   LDA a824D
         BEQ b8CC4
         LDA a824C
@@ -7922,8 +7932,8 @@ b8CB2   JSR s85C5
 
 j8CB8   STX a825F
         STY a8260
-        STX $D409    ;Voice 2: Pulse Waveform Width - Low-Byte
-        STY $D40A    ;Voice 2: Pulse Waveform Width - High-Nybble
+        STX $D409                       ;Voice 2: Pulse Waveform Width - Low-Byte
+        STY $D40A                       ;Voice 2: Pulse Waveform Width - High-Nybble
 b8CC4   LDA a8249
         BEQ b8CEF
         AND #$08     ;#%00001000
@@ -8002,8 +8012,8 @@ b8D56   TXA
 j8D5F   TAY
 b8D60   STX a8259
         STY a825A
-        STX $D407    ;Voice 2: Frequency Control - Low-Byte
-        STY $D408    ;Voice 2: Frequency Control - High-Byte
+        STX $D407                       ;Voice 2: Frequency Control - Low-Byte
+        STY $D408                       ;Voice 2: Frequency Control - High-Byte
         RTS
 
 b8D6D   LDA a8249
@@ -8015,6 +8025,12 @@ b8D6D   LDA a8249
 
 b8D7C   JSR s86B9
         JMP j8D11
+
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+;
+; Voice 3 related functions
+;
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 
 s8D82   LDA a29
         AND #$04     ;#%00000100
@@ -8035,10 +8051,10 @@ b8D9A   LDY #$00     ;#%00000000
         BCC b8DBF
         AND #$3F     ;#%00111111
         TAX
-        LDA f91C5,X
-        STA a8DBD
-        LDA f91C5+1,X
-        STA a8DBE
+        LDA VOICE_3_EFFECTS_TBL,X
+        STA _ADDR_LO
+        LDA VOICE_3_EFFECTS_TBL+1,X
+        STA _ADDR_HI
         INY
         LDA (p24),Y
         TAX
@@ -8046,8 +8062,8 @@ b8D9A   LDY #$00     ;#%00000000
         INY
         LDA (p24),Y
         STA a27
-a8DBD   =*+$01
-a8DBE   =*+$02
+_ADDR_LO = *+$01
+_ADDR_HI = *+$02
         JMP j8F44
 
 b8DBF   STA a28
@@ -8271,8 +8287,8 @@ b8F73   LDA a827E
         BNE b8F8C
         DEC a827F
         BNE b8F99
-        LDX #$06     ;#%00000110
-b8F7F   STA $D40E,X  ;Voice 3: Frequency Control - Low-Byte
+        LDX #$06
+b8F7F   STA $D40E,X                     ;Voice 3: Frequency Control - Low-Byte
         DEX
         BPL b8F7F
         LDA #$20     ;#%00100000
@@ -8409,8 +8425,8 @@ b908D   TXA
 j9096   TAY
 b9097   STX a8280
         STY a8281
-        STX $D40E    ;Voice 3: Frequency Control - Low-Byte
-        STY $D40F    ;Voice 3: Frequency Control - High-Byte
+        STX $D40E                       ;Voice 3: Frequency Control - Low-Byte
+        STY $D40F                       ;Voice 3: Frequency Control - High-Byte
         RTS
 
 b90A4   LDA a8270
@@ -8457,15 +8473,18 @@ FREQ_TBL_LO
         .BYTE $DF,$58,$34,$78,$2B,$53,$F7,$1F
         .BYTE $D2,$19,$FC,$85,$BD,$B0,$00
 
-f9189   .WORD a8811,a8877,a8867,j889A,a88AA
+VOICE_1_EFFECTS_TBL
+        .WORD a8811,a8877,a8867,j889A,a88AA
         .WORD a88CA,a88C0,j88D1,a8892,a88A1
         .WORD a88D7,b886A,a8829,a8844,a8857
 
-f91A7   .WORD a8B4D,a8BB3,a8BA3,j8BD6,a8BE6
+VOICE_2_EFFECTS_TBL
+        .WORD a8B4D,a8BB3,a8BA3,j8BD6,a8BE6
         .WORD a8C06,a8BFC,j8C0D,a8BCE,a8BDD
         .WORD a8C13,b8BA6,a8B65,a8B80,a8B93
 
-f91C5   .WORD a8E84,a8EEA,a8EDA,j8F0D,a8F1D
+VOICE_3_EFFECTS_TBL
+        .WORD a8E84,a8EEA,a8EDA,j8F0D,a8F1D
         .WORD a8F3D,a8F33,j8F44,a8F05,a8F14
         .WORD a8F4A,b8EDD,a8E9C,a8EB7,a8ECA
 
