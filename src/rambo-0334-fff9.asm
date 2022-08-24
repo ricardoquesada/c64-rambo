@@ -10637,53 +10637,67 @@ _L00    STA fB000,Y
         JSR sC276
         JMP jC1F3
 
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 sC276   LDA aC2D1
         CMP HISCORE_TBL_IDX+$4F
-        BNE bC27F
+        BNE _L00
         RTS
 
-bC27F   JSR PRINT_EXT_STR
+_L00    JSR PRINT_EXT_STR
         .ADDR STR_CLEAR_SCREEN
 
         JSR PRINT_EXT_STR
         .ADDR STR_CONGRATULATIONS
 
-        LDX #$4F     ;#%01001111
+        LDX #$4F
         LDA aC2D1
-bC28E   CMP HISCORE_TBL_IDX,X
-        BEQ bC296
+_L01    CMP HISCORE_TBL_IDX,X
+        BEQ _L02
         DEX
-        BPL bC28E
-bC296   STX aCD72
+        BPL _L01
+
+_L02    STX aCD72
+
         LDA #$08
         STA aCCD3
         JSR sCCD5
 
         JSR PRINT_EXT_STR
-        .ADDR aCCB6
+        .ADDR STR_PLAYER_HISCORE
 
         LDA #$05
         STA aC2D2
         JSR MUSIC_FN
-bC2AE   JSR sC3DE
+
+_L03    JSR sC3DE
+
         LDA #$00
         JSR MUSIC_FN
+
         DEC aC2D2
-        BNE bC2AE
+        BNE _L03
+
         LDA #$02
         STA aC2D2
+
         JSR sCCD5
 
         JSR PRINT_EXT_STR
-        .ADDR aCCB6
+        .ADDR STR_PLAYER_HISCORE
 
         JSR sC589
+
         LDA aC5CC
-        BEQ bC2AE
+        BEQ _L03
+
         RTS
+
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 
 aC2D1   .BYTE $00
 aC2D2   .BYTE $00
+
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 
 bC2D3   LDA aCF0C
         BEQ bC2D3
@@ -11327,7 +11341,7 @@ bC863   STA aCD72
         JSR sCCD5
 
         JSR PRINT_EXT_STR
-        .ADDR aCCB6
+        .ADDR STR_PLAYER_HISCORE
 
 jC86E   JSR bC2D3
         JSR sCD73
@@ -11525,14 +11539,18 @@ STR_CLEAR_SCREEN
         #STR_CODE_FONT_BIG
         #STR_CODE_END
 
-aCCB6   #STR_CODE_SET_COORDS $00,$17
-aCCBC   = *+2
+STR_PLAYER_HISCORE
+        #STR_CODE_SET_COORDS $00,$17
+PLAYER_HISCORE_COLOR   = *+2
         #STR_CODE_SET_COLOR $06
-aCCBD   .TEXT "["
-aCCBE   .TEXT "7\"
-fCCC0   .TEXT "\\\\\\\\\\["
-fCCCB   .TEXT "0"
-fCCCC   .TEXT "74000"
+PLAYER_HISCORE_STR_POSITION
+        .TEXT "[7"                      ;Postion goes here
+        .TEXT "\"                       ;'\' is period in big font (?)
+PLAYER_HISCORE_STR_NAME
+        .TEXT "\\\\\\\\\\"              ;Name goes here
+        .TEXT "["                       ;Space
+PLAYER_HISCORE_STR_SCORE
+        .TEXT "074000"                  ;Score goes here
         #STR_CODE_END
 
 aCCD3   .BYTE $01
@@ -11546,7 +11564,7 @@ sCCD5   LDY aCD72
 bCCE1   DEX
         STX aCCD3
         LDA fC6BA,X
-        STA aCCBC
+        STA PLAYER_HISCORE_COLOR
         LDX #$00     ;#%00000000
         TYA
         CLC
@@ -11559,17 +11577,17 @@ bCCF1   SEC
 bCCF9   ADC #$0A     ;#%00001010
         CLC
         ADC #$30     ;#%00110000
-        STA aCCBE
+        STA PLAYER_HISCORE_STR_POSITION+1
         CPX #$00     ;#%00000000
         BNE bCD0D
         LDA #$5B     ;#%01011011
-        STA aCCBD
+        STA PLAYER_HISCORE_STR_POSITION
         JMP jCD14
 
 bCD0D   TXA
         CLC
         ADC #$30     ;#%00110000
-        STA aCCBD
+        STA PLAYER_HISCORE_STR_POSITION
 jCD14   LDA #$00     ;#%00000000
         STA aFE
         STA aFF
@@ -11592,7 +11610,7 @@ bCD2F   CLC
         STA aFF
         LDY #$09     ;#%00001001
 bCD3C   LDA (pFE),Y
-        STA fCCC0,Y
+        STA PLAYER_HISCORE_STR_NAME,Y
         DEY
         BPL bCD3C
         TXA
@@ -11606,7 +11624,7 @@ bCD50   LDA fB000,Y
         AND #$0F     ;#%00001111
         CLC
         ADC #$30     ;#%00110000
-        STA fCCCC,X
+        STA PLAYER_HISCORE_STR_SCORE+1,X
         LDA fB000,Y
         AND #$F0     ;#%11110000
         LSR A
@@ -11615,7 +11633,7 @@ bCD50   LDA fB000,Y
         LSR A
         CLC
         ADC #$30     ;#%00110000
-        STA fCCCB,X
+        STA PLAYER_HISCORE_STR_SCORE,X
         INY
         INX
         INX
