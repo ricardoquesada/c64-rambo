@@ -7262,12 +7262,12 @@ b877B   STA $D402,Y  ;Voice 1: Pulse Waveform Width - Low-Byte
         BPL b876D
         LDA a814D
         STA a822F
-        LDY f90CB,X
-        LDA f912A,X
+        LDY FREQ_TBL_HI,X
+        LDA FREQ_TBL_LO,X
         STA a822D
         STY a822E
-        STA $D400    ;Voice 1: Frequency Control - Low-Byte
-        STY $D401    ;Voice 1: Frequency Control - High-Byte
+        STA $D400                       ;Voice 1: Frequency Control - Low-Byte
+        STY $D401                       ;Voice 1: Frequency Control - High-Byte
         LDA f8146
         STA a8226
         BEQ b87AF
@@ -7545,10 +7545,10 @@ b89BC   LDA a821F
         DEX
         STX a8221
         TAY
-        LDX f912A,Y
-        LDA f90CB,Y
-        STX $D400    ;Voice 1: Frequency Control - Low-Byte
-        STA $D401    ;Voice 1: Frequency Control - High-Byte
+        LDX FREQ_TBL_LO,Y
+        LDA FREQ_TBL_HI,Y
+        STX $D400                       ;Voice 1: Frequency Control - Low-Byte
+        STA $D401                       ;Voice 1: Frequency Control - High-Byte
         RTS
 
 j89D5   CLC
@@ -7671,12 +7671,12 @@ b8AB7   STA $D409,Y  ;Voice 2: Pulse Waveform Width - Low-Byte
         BPL b8AA9
         LDA a8192
         STA a8256
-        LDY f90CB,X
-        LDA f912A,X
+        LDY FREQ_TBL_HI,X
+        LDA FREQ_TBL_LO,X
         STA a8254
         STY a8255
-        STA $D407    ;Voice 2: Frequency Control - Low-Byte
-        STY $D408    ;Voice 2: Frequency Control - High-Byte
+        STA $D407                       ;Voice 2: Frequency Control - Low-Byte
+        STY $D408                       ;Voice 2: Frequency Control - High-Byte
         LDA a818B
         STA a824D
         BEQ b8AEB
@@ -7954,10 +7954,10 @@ b8CF8   LDA a8246
         DEX
         STX a8248
         TAY
-        LDX f912A,Y
-        LDA f90CB,Y
-        STX $D407    ;Voice 2: Frequency Control - Low-Byte
-        STA $D408    ;Voice 2: Frequency Control - High-Byte
+        LDX FREQ_TBL_LO,Y
+        LDA FREQ_TBL_HI,Y
+        STX $D407                       ;Voice 2: Frequency Control - Low-Byte
+        STA $D408                       ;Voice 2: Frequency Control - High-Byte
         RTS
 
 j8D11   CLC
@@ -8078,12 +8078,12 @@ b8DEE   STA $D410,Y  ;Voice 3: Pulse Waveform Width - Low-Byte
         BPL b8DE5
         LDA a81D7
         STA a827D
-        LDY f90CB,X
-        LDA f912A,X
+        LDY FREQ_TBL_HI,X
+        LDA FREQ_TBL_LO,X
         STA a827B
         STY a827C
-        STA $D40E    ;Voice 3: Frequency Control - Low-Byte
-        STY $D40F    ;Voice 3: Frequency Control - High-Byte
+        STA $D40E                       ;Voice 3: Frequency Control - Low-Byte
+        STY $D40F                       ;Voice 3: Frequency Control - High-Byte
         LDA a81D0
         STA a8274
         BEQ b8E22
@@ -8361,10 +8361,10 @@ b902F   LDA a826D
         DEX
         STX a826F
         TAY
-        LDX f912A,Y
-        LDA f90CB,Y
-        STX $D40E    ;Voice 3: Frequency Control - Low-Byte
-        STA $D40F    ;Voice 3: Frequency Control - High-Byte
+        LDX FREQ_TBL_LO,Y
+        LDA FREQ_TBL_HI,Y
+        STX $D40E                       ;Voice 3: Frequency Control - Low-Byte
+        STA $D40F                       ;Voice 3: Frequency Control - High-Byte
         RTS
 
 j9048   CLC
@@ -8428,7 +8428,9 @@ f90BC   .BYTE $17,$3E,$65
 f90BF   .BYTE $02,$09,$10
 f90C2   .BYTE $00,$45,$8A,$09,$12,$24
 f90C8   .BYTE $37,$2F,$1F
-f90CB   .BYTE $01,$01,$01,$01,$01,$01,$01,$01
+
+FREQ_TBL_HI
+        .BYTE $01,$01,$01,$01,$01,$01,$01,$01
         .BYTE $01,$01,$01,$02,$02,$02,$02,$02
         .BYTE $02,$02,$03,$03,$03,$03,$03,$04
         .BYTE $04,$04,$04,$05,$05,$05,$06,$06
@@ -8440,7 +8442,9 @@ f90CB   .BYTE $01,$01,$01,$01,$01,$01,$01,$01
         .BYTE $44,$48,$4C,$51,$56,$5B,$60,$66
         .BYTE $6C,$73,$7A,$81,$89,$91,$99,$A3
         .BYTE $AC,$B7,$C1,$CD,$D9,$E6,$00
-f912A   .BYTE $12,$23,$34,$46,$5A,$6E,$84,$9B
+
+FREQ_TBL_LO
+        .BYTE $12,$23,$34,$46,$5A,$6E,$84,$9B
         .BYTE $B3,$CD,$E9,$06,$25,$45,$68,$8C
         .BYTE $B3,$DC,$08,$36,$67,$9B,$D2,$0C
         .BYTE $49,$8B,$D0,$19,$67,$B9,$10,$6C
