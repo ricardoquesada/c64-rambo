@@ -279,7 +279,7 @@ GAME_INIT
         JSR s09F3
         LDA #12
         JSR MUSIC_FN
-        LDA #$FF
+        LDA #$FF                        ;Select all sprites
         STA $D015                       ;Sprite display Enable
         CLI
 j0393   JSR j07D5
@@ -9664,23 +9664,26 @@ bA60B
         .BYTE $00,$FF,$00,$FF,$00,$00,$FF,$00
         .BYTE $FF,$00,$FF,$00,$FF,$FF,$00,$FF
         .BYTE $00,$FF,$00,$FF,$00
-fB000   .BYTE $08
-        .BYTE $00,$00,$07,$90,$00,$07,$80,$00
-        .BYTE $07,$70,$00,$07,$60,$00,$07,$50
-        .BYTE $00,$07,$40,$00,$07,$30,$00,$07
-        .BYTE $20,$00,$07,$10,$00,$07,$00,$00
-        .BYTE $06,$90,$00,$06,$80,$00,$06,$70
-        .BYTE $00,$06,$60,$00,$06,$50,$00,$06
-        .BYTE $40,$00,$06,$30,$00,$06,$20,$00
-        .BYTE $06,$10,$00,$06,$00,$00,$05,$90
-        .BYTE $00,$05,$80,$00,$05,$70,$00,$05
-        .BYTE $60,$00,$05,$50,$00,$05,$40,$00
-        .BYTE $05,$30,$00,$05,$20,$00,$05,$10
-        .BYTE $00,$05,$00,$00,$04,$90,$00,$04
-        .BYTE $80,$00,$04,$70,$00,$04,$60,$00
-        .BYTE $04,$50,$00,$04,$40,$00,$04,$30
-        .BYTE $00,$04,$20,$00,$04,$10,$00,$04
-        .BYTE $00,$00,$03,$90,$00,$03,$80,$00
+
+fB000   .BYTE $08,$00,$00,$07,$90,$00,$07,$80
+        .BYTE $00,$07,$70,$00,$07,$60,$00,$07
+        .BYTE $50,$00,$07,$40,$00,$07,$30,$00
+        .BYTE $07,$20,$00,$07,$10,$00,$07,$00
+        .BYTE $00,$06,$90,$00,$06,$80,$00,$06
+        .BYTE $70,$00,$06,$60,$00,$06,$50,$00
+        .BYTE $06,$40,$00,$06,$30,$00,$06,$20
+        .BYTE $00,$06,$10,$00,$06,$00,$00,$05
+        .BYTE $90,$00,$05,$80,$00,$05,$70,$00
+        .BYTE $05,$60,$00,$05,$50,$00,$05,$40
+        .BYTE $00,$05,$30,$00,$05,$20,$00,$05
+        .BYTE $10,$00,$05,$00,$00,$04,$90,$00
+        .BYTE $04,$80,$00,$04,$70,$00,$04,$60
+        .BYTE $00,$04,$50,$00,$04,$40,$00,$04
+        .BYTE $30,$00,$04,$20,$00,$04,$10,$00
+        .BYTE $04,$00,$00,$03,$90,$00,$03,$80
+
+        ; $B080
+        .BYTE $00
         .BYTE $03,$70,$00,$03,$60,$00,$03,$50
         .BYTE $00,$03,$40,$00,$03,$30,$00,$03
         .BYTE $20,$00,$03,$10,$00,$03,$00,$00
@@ -9697,6 +9700,7 @@ fB000   .BYTE $08
         .BYTE $00,$00,$20,$00,$00,$10,$00
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+; $B0F0
         .TEXT "[[CODING[["
         .TEXT "[[[[BY[[[["
         .TEXT "]]]TONY]]]"
@@ -9779,18 +9783,23 @@ fB000   .BYTE $08
         .TEXT "]UNKNOWN]["
         .TEXT "[[[[[[[[[["
 
-fB41A   .BYTE $00
-fB41B   .BYTE $01,$02,$03,$04,$05,$06,$07,$08
-        .BYTE $09,$0A,$0B,$0C,$0D,$0E,$0F,$10
-        .BYTE $11,$12,$13,$14,$15,$16,$17,$18
-        .BYTE $19,$1A,$1B,$1C,$1D,$1E,$1F,$20
-        .BYTE $21,$22,$23,$24,$25,$26,$27,$28
-        .BYTE $29,$2A,$2B,$2C,$2D,$2E,$2F,$30
-        .BYTE $31,$32,$33,$34,$35,$36,$37,$38
-        .BYTE $39,$3A,$3B,$3C,$3D,$3E,$3F,$40
-        .BYTE $41,$42,$43,$44,$45,$46,$47,$48
-        .BYTE $49,$4A,$4B,$4C,$4D,$4E
-aB469   .BYTE $4F,$00,$FF,$00,$FF,$00,$FF,$FF
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+; 80-values table with values form 0 to 79, and gets rotated in runtime
+fB41A
+        .BYTE $00,$01,$02,$03,$04,$05,$06,$07
+        .BYTE $08,$09,$0A,$0B,$0C,$0D,$0E,$0F
+        .BYTE $10,$11,$12,$13,$14,$15,$16,$17
+        .BYTE $18,$19,$1A,$1B,$1C,$1D,$1E,$1F
+        .BYTE $20,$21,$22,$23,$24,$25,$26,$27
+        .BYTE $28,$29,$2A,$2B,$2C,$2D,$2E,$2F
+        .BYTE $30,$31,$32,$33,$34,$35,$36,$37
+        .BYTE $38,$39,$3A,$3B,$3C,$3D,$3E,$3F
+        .BYTE $40,$41,$42,$43,$44,$45,$46,$47
+        .BYTE $48,$49,$4A,$4B,$4C,$4D,$4E,$4F
+
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+        ; $B46A garbage
+        .BYTE $00,$FF,$00,$FF,$00,$FF,$FF
         .BYTE $00,$FF,$00,$FF,$00,$FF,$00,$00
         .BYTE $FF,$00,$FF,$00,$FF,$00,$FF,$FF
         .BYTE $00,$FF,$00,$FF,$00,$FF,$00,$00
@@ -10307,11 +10316,11 @@ PRINT_EXT_STR
         LDA aFA
         CLC
         ADC #$02                        ;Re-write stack so that the ret address points to
-        STA aC19C                       ; to where it should return: callee + 2
+        STA TMP_C19C                       ; to where it should return: callee + 2
         LDA aFB
         ADC #$00
         PHA
-        LDA aC19C
+        LDA TMP_C19C
         PHA
 
         JSR POINT_TO_NEXT_CHAR
@@ -10351,14 +10360,14 @@ _L03    ASL A                           ;Multiply by 4
         ASL A                           ; Since each letter has 4 chars
         CLC
         ADC #60                         ;And add 60, since letter A starts there.
-        STA aC19C                       ; Technically it starts at 64, but char 0 is A
+        STA TMP_C19C                       ; Technically it starts at 64, but char 0 is A
                                         ; instead of char 1, so offset is 60 and not 64.
 
         LDX #$03                        ;Chars to print: 4
-_L04    LDA aC19C
+_L04    LDA TMP_C19C
         LDY BIG_LETTER_OFFSET,X
         JSR PRINT_CHAR_WITH_ATTRIBUTE
-        INC aC19C
+        INC TMP_C19C
         DEX
         BPL _L04
 
@@ -10468,7 +10477,7 @@ CODE_01                                 ;Set string start coordinates
         LDA #$00
         STA aFD
         JSR GET_CHAR
-        STA aC19C
+        STA TMP_C19C
         JSR GET_CHAR
         ASL A
         ASL A
@@ -10486,17 +10495,16 @@ CODE_01                                 ;Set string start coordinates
         STA aFD
         LDA aFC
         CLC
-        ADC aC19C
+        ADC TMP_C19C
         STA aFC
         LDA aFD
         ADC #$00     ;#%00000000
         STA aFD
         RTS
 
-aC19C   .BYTE $B8
-aC19D   .BYTE $B8
-CHAR_COLOR
-        .BYTE $06
+TMP_C19C        .BYTE $B8
+aC19D           .BYTE $B8
+CHAR_COLOR      .BYTE $06
 
         ; Get current char and update pointer to next char
 GET_CHAR
@@ -10529,12 +10537,12 @@ CODE_00                                 ;End of string
 MAIN
         LDX #$F0                        ;Set stack
         TXS
-        JSR sC43C
-        LDA #25                         ;Jump to index 25
+        JSR INIT_B000_B07F
+        LDA #25                         ;FN = 25
         LDX #$0F                        ;Argument: Music to 15
         JSR MUSIC_FN
 
-        LDA #$00
+        LDA #$00                        ;Color Black
         STA $D021                       ;Background Color 0
         STA $D020                       ;Border Color
         STA $D022                       ;Background Color 1, Multi-Color Register 0
@@ -10549,45 +10557,54 @@ MAIN
         JSR SWAP_CHARSETS
 
         LDA #$96                        ;#%10010110
-        STA $DD00                       ;CIA2: Data Port Register A
+        STA $DD00                       ; CIA2: Data Port Register A
+                                        ; VIC Bank 1 ($4000-$7FFF)
         LDA #$0F                        ;#%00001111
-        STA $D018                       ;VIC Memory Control Register
+        STA $D018                       ; VIC Memory Control Register
+                                        ; Charset:   $7800 (bank + $3800)
+                                        ; Video RAM: $4000 (bank + $0000)
         LDA #$08                        ;#%00001000
-        STA $D016                       ;VIC Control Register 2
+        STA $D016                       ; VIC Control Register 2
+                                        ; 40=cols, smooth_x=0, no MC
 
 jC1F3   JSR PRINT_EXT_STR
         .ADDR STR_CLEAR_SCREEN
 
         LDA #$00
         STA aCFFF
-        JSR sCE30
+        JSR INIT_INTERRUPTS
         JSR sC3E6
         JSR sC2FC
         JSR sC82E
-        LDA aB469
-        STA aC19C
+
+        LDA fB41A+79
+        STA TMP_C19C
         ASL A
         CLC
-        ADC aC19C
+        ADC TMP_C19C
         TAY
         LDX #$02
         LDA #$00
-bC219   STA fB000,Y
+_L00    STA fB000,Y
         INY
         DEX
-        BPL bC219
+        BPL _L00
 
         LDA #$1B                        ;#%00011011
-        STA $D011                       ;VIC Control Register 1
+        STA $D011                       ; VIC Control Register 1
+                                        ; Raster 8-bit = 0
         JSR sC74C
+
         LDA #30
         JSR MUSIC_FN
+
         JSR sC36E
 
         LDA #$00
         JSR SWAP_CHARSETS
 
         JSR s0367
+
         SEI
         LDA #$00
         STA $D015                       ;Sprite display Enable
@@ -10602,10 +10619,12 @@ bC219   STA fB000,Y
         LDA #$8D                        ;'STA abs' opcode
         STA aCF01                       ; Patch code in runtime
         LDA #$1B                        ;#%00011011
-        STA $D011                       ;VIC Control Register 1
-        LDA aB469
+        STA $D011                       ; VIC Control Register 1
+                                        ; Raster 8-bit = 0
+        LDA fB41A+79
         STA aC2D1
         JSR sC2E1
+
         LDA #$01
         JSR MUSIC_FN
         LDA #$1A
@@ -10619,7 +10638,7 @@ bC219   STA fB000,Y
         JMP jC1F3
 
 sC276   LDA aC2D1
-        CMP aB469
+        CMP fB41A+79
         BNE bC27F
         RTS
 
@@ -10673,11 +10692,11 @@ bC2D3   LDA aCF0C
         JSR MUSIC_FN
         RTS
 
-sC2E1   LDA aB469
-        STA aC19C
+sC2E1   LDA fB41A+79
+        STA TMP_C19C
         ASL A
         CLC
-        ADC aC19C
+        ADC TMP_C19C
         TAY
         LDX #$00
 bC2EF   JSR s035B
@@ -10712,11 +10731,11 @@ bC306   LDY aC36D
 bC329   LDY aC36D
         LDA fB41A,Y
         PHA
-        LDA fB41B,Y
+        LDA fB41A+1,Y
         STA fB41A,Y
         PLA
-        STA fB41B,Y
-        LDA #$01     ;#%00000001
+        STA fB41A+1,Y
+        LDA #$01
         STA aC36C
 jC33F   DEC aC36D
         BPL bC306
@@ -10766,15 +10785,15 @@ sC36E   LDA #$00
         LDA #$00
         STA aFF
         LDY #$09
-        LDA aB469
+        LDA fB41A+79
         ASL A
-        STA aC19C
+        STA TMP_C19C
         ASL A
         ROL aFF
         ASL A
         ROL aFF
         CLC
-        ADC aC19C
+        ADC TMP_C19C
         BCC bC3B3
         INC aFF
 bC3B3   CLC
@@ -10802,14 +10821,16 @@ bC3E0   CMP $D012    ;Raster Position
         BNE bC3E0
         RTS
 
-sC3E6   LDY #$00     ;#%00000000
-bC3E8   TYA
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+sC3E6   LDY #$00
+_L00    TYA
         STA fB41A,Y
         INY
-        CPY #$50     ;#%01010000
-        BNE bC3E8
+        CPY #$50
+        BNE _L00
         RTS
 
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 sC3F2   JSR sC3DE
         LDA #$00
         JSR MUSIC_FN
@@ -10846,29 +10867,32 @@ aC437   = *+2
         #STR_CODE_END
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
-sC43C   LDX #$4F     ;#%01001111
-        LDY #$00     ;#%00000000
+; Random ???
+INIT_B000_B07F
+        LDX #79
+        LDY #$00
         SED
-        LDA #$81     ;#%10000001
+        LDA #$81
 _L00    SEC
-        SBC #$01     ;#%00000001
-        STA aC19C
+        SBC #$01
+        STA TMP_C19C
         ASL A
         ASL A
         ASL A
         ASL A
         STA fB000+1,Y
 
-        LDA aC19C
+        LDA TMP_C19C
         LSR A
         LSR A
         LSR A
         LSR A
         STA fB000,Y
-        LDA aC19C
+        LDA TMP_C19C
         INY
         INY
         INY
+
         DEX
         BPL _L00
 
@@ -11552,12 +11576,12 @@ jCD14   LDA #$00     ;#%00000000
         LDA fB41A,Y
         TAX
         ASL A
-        STA aC19C
+        STA TMP_C19C
         ASL A
         ROL aFF
         ASL A
         ROL aFF
-        ADC aC19C
+        ADC TMP_C19C
         BCC bCD2F
         INC aFF
 bCD2F   CLC
@@ -11572,10 +11596,10 @@ bCD3C   LDA (pFE),Y
         DEY
         BPL bCD3C
         TXA
-        STA aC19C
+        STA TMP_C19C
         ASL A
         CLC
-        ADC aC19C
+        ADC TMP_C19C
         TAY
         LDX #$00     ;#%00000000
 bCD50   LDA fB000,Y
@@ -11687,7 +11711,8 @@ _L01    LDA $D800+40 * 19 + 0,Y
         RTS
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
-sCE30   SEI
+INIT_INTERRUPTS
+        SEI
         LDA #<aCE71
         STA $FFFE                       ;IRQ
         LDA #>aCE71
@@ -11695,16 +11720,17 @@ sCE30   SEI
         LDA #$C8
         STA $D012                       ;Raster Position
         LDA #$1B                        ;#%00011011
-        STA $D011                       ;VIC Control Register 1
-        LDA #$01
-        STA $D01A                       ;VIC Interrupt Mask Register (IMR)
-        STA $DC0D                       ;CIA1: CIA Interrupt Control Register
-        LDA $DC0D                       ;CIA1: CIA Interrupt Control Register
+        STA $D011                       ; VIC Control Register 1
+                                        ; Turn off bit-8 in raster
+        LDA #$01                        ;Enable Interrupts
+        STA $D01A                       ; Raster interrupt
+        STA $DC0D                       ; Timer A interrupt
+        LDA $DC0D                       ;ACK Timer A interrupt
         LDA #$7F                        ;#%01111111
-        STA $D019                       ;VIC Interrupt Request Register (IRR)
+        STA $D019                       ;ACK Raster interrupt
         LDA #$00
         STA a02
-        LDA #$35
+        LDA #$35                        ;RAM / IO / RAM
         STA a01
         CLI
         RTS
