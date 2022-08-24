@@ -10813,7 +10813,10 @@ jC33F   DEC aC36D
         .BYTE $DD
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
-sC34B   LDX #$00
+; $C34B
+; Checks something with the hiscores... whether the score is equal to what ???
+sC34B
+        LDX #$00
 _L00    LDA HISCORE_TBL,Y
         STY aC6EA
         LDY aC6E9
