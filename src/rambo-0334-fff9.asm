@@ -253,7 +253,8 @@ j0361   JMP j0D24
 
 s0364   JMP j07D5
 
-s0367   JMP GAME_INIT
+GAME_INIT_BIS
+        JMP GAME_INIT
 
 s036A   JMP j1659
 
@@ -2501,7 +2502,7 @@ s16DA   JSR VIC_SCREEN_DISABLE
 
         LDX #$FD
         LDA #$00
-_L00 	STA f02,X
+_L00    STA f02,X
         DEX
         BNE _L00
 
@@ -3832,25 +3833,25 @@ b2253   LDA a2482
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 s225C   SEI
         LDA #<a228b
-        STA $FFFE    ;IRQ
+        STA $FFFE                       ;IRQ
         LDA #>a228b
-        STA $FFFF    ;IRQ
+        STA $FFFF                       ;IRQ
 
-        LDA #$00     ;#%00000000
-        STA $D011    ;VIC Control Register 1
-        LDA #$01     ;#%00000001
-        STA $D01A    ;VIC Interrupt Mask Register (IMR)
-        STA $DC0D    ;CIA1: CIA Interrupt Control Register
-        LDA $DC0D    ;CIA1: CIA Interrupt Control Register
+        LDA #$00                        ;#%00000000
+        STA $D011                       ;VIC Control Register 1
+        LDA #$01                        ;#%00000001
+        STA $D01A                       ;VIC Interrupt Mask Register (IMR)
+        STA $DC0D                       ;CIA1: CIA Interrupt Control Register
+        LDA $DC0D                       ;CIA1: CIA Interrupt Control Register
         LDA #$01
         STA a02
-        LDA #$35
+        LDA #$35                        ;RAM / IO /RAM
         STA a01
-        LDA #$07     ;#%00000111
+        LDA #$07
         STA a09
-        LDA #$32     ;#%00110010
+        LDA #$32
         STA aFB
-        STA $D012    ;Raster Position
+        STA $D012                       ;Raster Position
         RTS
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
@@ -9161,7 +9162,7 @@ aA4C8   .BYTE $00
 ; Clears the screen
 SFX_DBG_CLEAR_SCR
         LDX #$00
-        LDA #$20                        ; space
+        LDA #$20                        ;space
 _L00    STA $0400,X
         STA $0500,X
         STA $0600,X
@@ -9701,6 +9702,7 @@ fB000   .BYTE $08,$00,$00,$07,$90,$00,$07,$80
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 ; $B0F0
+HISCORE_NAMES_TBL
         .TEXT "[[CODING[["
         .TEXT "[[[[BY[[[["
         .TEXT "]]]TONY]]]"
@@ -9784,6 +9786,7 @@ fB000   .BYTE $08,$00,$00,$07,$90,$00,$07,$80
         .TEXT "[[[[[[[[[["
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+; $B41A
 ; 80-values table that contains the index to the hiscores.
 HISCORE_TBL_IDX
         .BYTE $00,$01,$02,$03,$04,$05,$06,$07
@@ -10567,7 +10570,8 @@ MAIN
         STA $D016                       ; VIC Control Register 2
                                         ; 40=cols, smooth_x=0, no MC
 
-jC1F3   JSR PRINT_EXT_STR
+TITLE_LOOP
+        JSR PRINT_EXT_STR
         .ADDR STR_CLEAR_SCREEN
 
         LDA #$00
@@ -10600,10 +10604,11 @@ _L00    STA fB000,Y
 
         JSR sC36E
 
-        LDA #$00
+        LDA #$00                        ;Use charset for game
         JSR SWAP_CHARSETS
 
-        JSR s0367
+        JSR GAME_INIT_BIS               ;Jump into game
+                                        ; When it returns, it means that the game is over
 
         SEI
         LDA #$00
@@ -10613,7 +10618,7 @@ _L00    STA fB000,Y
         LDA #$08                        ;#%00001000
         STA $D016                       ;VIC Control Register 2
 
-        LDA #$00
+        LDA #$00                        ;Use charset for title
         JSR SWAP_CHARSETS
 
         LDA #$8D                        ;'STA abs' opcode
@@ -10633,12 +10638,16 @@ _L00    STA fB000,Y
 
         JSR sC2FC
 
-        ; $C270 (Triggered when user has high-score)
-        JSR sC276
-        JMP jC1F3
+        JSR MAYBE_DISPLAY_HISCORE
+        JMP TITLE_LOOP
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
-sC276   LDA aC2D1
+; $C276
+; If the score is high enough, it enters in the hiscore table
+; and the score is displayed.
+; Otherwise it returns immediately
+MAYBE_DISPLAY_HISCORE
+        LDA aC2D1
         CMP HISCORE_TBL_IDX+$4F
         BNE _L00
         RTS
@@ -10669,7 +10678,7 @@ _L02    STX aCD72
         STA aC2D2
         JSR MUSIC_FN
 
-_L03    JSR sC3DE
+_L03    JSR WAIT_RASTER_F8
 
         LDA #$00
         JSR MUSIC_FN
@@ -10781,9 +10790,10 @@ aC36D   .BYTE $FF
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 sC36E   LDA #$00
         STA $D011                       ;VIC Control Register 1
+                                        ; Blank screen
         SEI
-        LDA #$01
-        STA $D015                       ;Sprite display Enable
+        LDA #$01                        ;Only one sprite
+        STA $D015                       ; Sprite display Enable
         JSR MUSIC_FN
 
         LDX #$00
@@ -10792,14 +10802,18 @@ sC36E   LDA #$00
         STX $D020                       ;Border Color
         STX $D021                       ;Background Color 0
         STX aC528
+
         LDA #29
         STA aC651
         JSR MUSIC_FN
+
         JSR sC494
+
         LDA #$00
         STA aFF
-        LDY #$09
-        LDA HISCORE_TBL_IDX+$4F
+
+        LDY #$09                        ;Name len: 10 chars
+        LDA HISCORE_TBL_IDX+$4F         ;Whats' the last value
         ASL A
         STA TMP_C19C
         ASL A
@@ -10808,31 +10822,37 @@ sC36E   LDA #$00
         ROL aFF
         CLC
         ADC TMP_C19C
-        BCC bC3B3
+        BCC _L00
         INC aFF
-bC3B3   CLC
-        ADC #$F0     ;#%11110000
+_L00    CLC
+        ADC #<HISCORE_NAMES_TBL
         STA aFE
         LDA aFF
-        ADC #$B0     ;#%10110000
-        STA aFF
-        LDA #$5B     ;#%01011011
-bC3C0   STA (pFE),Y
+        ADC #>HISCORE_NAMES_TBL
+        STA aFF                         ;$FE/$FF points to the name to update
+
+        LDA #$5B                        ;space
+_L01    STA (pFE),Y
         DEY
-        BPL bC3C0
+        BPL _L01
+
         JSR sC559
         JSR sC589
-        LDA #$1B     ;#%00011011
-        STA $D011    ;VIC Control Register 1
+
+        LDA #$1B                        ;#%00011011
+        STA $D011                       ;VIC Control Register 1
+                                        ; Raster bit-8 disabled
         JSR sC3F2
-        JSR sC3DE
-        LDA #$00     ;#%00000000
-        STA $D015    ;Sprite display Enable
+        JSR WAIT_RASTER_F8
+        LDA #$00
+        STA $D015                       ;Sprite display Enable
         JMP j0379
 
-sC3DE   LDA #$F8     ;#%11111000
-bC3E0   CMP $D012    ;Raster Position
-        BNE bC3E0
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+WAIT_RASTER_F8
+        LDA #$F8
+_L00    CMP $D012    ;Raster Position
+        BNE _L00
         RTS
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
@@ -10845,7 +10865,7 @@ _L00    TYA
         RTS
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
-sC3F2   JSR sC3DE
+sC3F2   JSR WAIT_RASTER_F8
         LDA #$00
         JSR MUSIC_FN
         JSR sC529
@@ -10924,18 +10944,22 @@ sC465   LDA aC5CC
         BNE bC49C
         INC aC49E
         LDA aC49E
-        CMP #$02     ;#%00000010
+        CMP #$02
         BNE bC49C
-        JSR sC489
+        JSR USE_UNKNOWN_AS_NAME
         PLA
         PLA
         RTS
 
-sC489   LDY #$09     ;#%00001001
-bC48B   LDA fC49F,Y
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+; $C489
+; Updates player name with "UNKNOWN"
+USE_UNKNOWN_AS_NAME
+        LDY #$09                        ;Name len = 10 chars
+_L00    LDA UNKNOWN_NAME,Y
         STA (pFE),Y
         DEY
-        BPL bC48B
+        BPL _L00
         RTS
 
 sC494   LDA #$00     ;#%00000000
@@ -10945,7 +10969,8 @@ bC49C   RTS
 
 aC49D   .BYTE $00
 aC49E   .BYTE $00
-fC49F   .TEXT "]UNKNOWN]["
+UNKNOWN_NAME
+        .TEXT "]UNKNOWN]["              ;Player Name: Unknown
 
 sC4A9   LDY #$09     ;#%00001001
 bC4AB   LDA (pFE),Y
@@ -10984,7 +11009,7 @@ sC4EA   CPX #$1B
         BEQ bC4FB
         DEC aC528
         DEY
-        LDA #$5B
+        LDA #$5B                        ;space
         STA (pFE),Y
 bC4FB   PLA
         PLA
@@ -11011,7 +11036,7 @@ bC50C   CPX #$1D
         SEI
         LDA aC528
         BNE bC523
-        JSR sC489
+        JSR USE_UNKNOWN_AS_NAME
 bC523   PLA
         PLA
         PLA
@@ -11220,7 +11245,8 @@ bC6A3   LDA aC6B1,X
 aC6B1   .BYTE $00
 fC6B2   .BYTE $00,$06,$02,$04,$05,$03,$07
 aC6B9   .BYTE $01
-fC6BA   .BYTE $00,$06,$02,$04,$05,$03,$07,$01
+COLOR_FOR_HISCORE_TBL
+        .BYTE $00,$06,$02,$04,$05,$03,$07,$01
         .BYTE $07,$03,$05,$04,$02
 sC6C7   PHA
         LDA #$00     ;#%00000000
@@ -11344,7 +11370,7 @@ bC863   STA aCD72
         .ADDR STR_PLAYER_HISCORE
 
 jC86E   JSR bC2D3
-        JSR sCD73
+        JSR SCREEN_SCROLL_UP_ONE_ROW
         JSR sC589
         LDA aC5CC
         BNE bC884
@@ -11356,7 +11382,7 @@ bC884   RTS
 
 bC885   DEC aCF0E
 bC888   JSR bC2D3
-        JSR sCD73
+        JSR SCREEN_SCROLL_UP_ONE_ROW
         JSR sC589
         LDA aC5CC
         BNE bC884
@@ -11370,7 +11396,7 @@ bC8A2   STA f4398,Y
         DEY
         BPL bC8A2
 bC8AB   JSR bC2D3
-        JSR sCD73
+        JSR SCREEN_SCROLL_UP_ONE_ROW
         JSR sC589
         LDA aC5CC
         BNE bC884
@@ -11457,7 +11483,7 @@ _L05    TYA
         .ADDR aCC75
 
 _L06    JSR bC2D3
-        JSR sCD73
+        JSR SCREEN_SCROLL_UP_ONE_ROW
         JSR sC589
         LDA aCFFF
         BNE _L07
@@ -11556,39 +11582,42 @@ PLAYER_HISCORE_STR_SCORE
 aCCD3   .BYTE $01
 aCCD4   .BYTE $00
 
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 sCCD5   LDY aCD72
         LDX aCCD3
-        CPX #$01     ;#%00000001
-        BNE bCCE1
-        LDX #$0D     ;#%00001101
-bCCE1   DEX
+        CPX #$01
+        BNE _L00
+
+        LDX #$0D
+_L00    DEX
         STX aCCD3
-        LDA fC6BA,X
+        LDA COLOR_FOR_HISCORE_TBL,X
         STA PLAYER_HISCORE_COLOR
-        LDX #$00     ;#%00000000
+        LDX #$00
         TYA
         CLC
-        ADC #$01     ;#%00000001
-bCCF1   SEC
-        SBC #$0A     ;#%00001010
-        BCC bCCF9
+        ADC #$01
+_L01    SEC
+        SBC #$0A
+        BCC _L02
         INX
-        BNE bCCF1
-bCCF9   ADC #$0A     ;#%00001010
-        CLC
-        ADC #$30     ;#%00110000
-        STA PLAYER_HISCORE_STR_POSITION+1
-        CPX #$00     ;#%00000000
-        BNE bCD0D
-        LDA #$5B     ;#%01011011
-        STA PLAYER_HISCORE_STR_POSITION
-        JMP jCD14
+        BNE _L01
 
-bCD0D   TXA
+_L02    ADC #$0A
         CLC
-        ADC #$30     ;#%00110000
+        ADC #$30                        ;0
+        STA PLAYER_HISCORE_STR_POSITION+1
+        CPX #$00
+        BNE _L03
+        LDA #$5B                        ;space
         STA PLAYER_HISCORE_STR_POSITION
-jCD14   LDA #$00     ;#%00000000
+        JMP _L04
+
+_L03    TXA
+        CLC
+        ADC #$30                        ;0
+        STA PLAYER_HISCORE_STR_POSITION
+_L04    LDA #$00
         STA aFE
         STA aFF
         LDA HISCORE_TBL_IDX,Y
@@ -11600,55 +11629,59 @@ jCD14   LDA #$00     ;#%00000000
         ASL A
         ROL aFF
         ADC TMP_C19C
-        BCC bCD2F
+        BCC _L05
         INC aFF
-bCD2F   CLC
-        ADC #$F0     ;#%11110000
+_L05    CLC
+        ADC #$F0
         STA aFE
         LDA aFF
-        ADC #$B0     ;#%10110000
+        ADC #$B0
         STA aFF
-        LDY #$09     ;#%00001001
-bCD3C   LDA (pFE),Y
+        LDY #$09
+_L06    LDA (pFE),Y
         STA PLAYER_HISCORE_STR_NAME,Y
         DEY
-        BPL bCD3C
+        BPL _L06
         TXA
         STA TMP_C19C
         ASL A
         CLC
         ADC TMP_C19C
         TAY
-        LDX #$00     ;#%00000000
-bCD50   LDA fB000,Y
-        AND #$0F     ;#%00001111
+        LDX #$00
+_L07    LDA fB000,Y
+        AND #$0F
         CLC
-        ADC #$30     ;#%00110000
+        ADC #$30
         STA PLAYER_HISCORE_STR_SCORE+1,X
         LDA fB000,Y
-        AND #$F0     ;#%11110000
+        AND #$F0
         LSR A
         LSR A
         LSR A
         LSR A
         CLC
-        ADC #$30     ;#%00110000
+        ADC #$30
         STA PLAYER_HISCORE_STR_SCORE,X
         INY
         INX
         INX
-        CPX #$06     ;#%00000110
-        BNE bCD50
+        CPX #$06
+        BNE _L07
         RTS
 
 aCD72   .BYTE $06
-sCD73   LDA aCF0E
-        BNE bCD79
+
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+; $CD73
+SCREEN_SCROLL_UP_ONE_ROW
+        LDA aCF0E
+        BNE _L00
         RTS
 
         ; Scroll up one row from row 24 to row 10
-bCD79   LDY #$00
-_L00    LDA $4000+40 * 11 + 0,Y
+_L00    LDY #$00
+_L01    LDA $4000+40 * 11 + 0,Y
         STA $4000+40 * 10 + 0,Y
         LDA $D800+40 * 11 + 0,Y
         STA $D800+40 * 10 + 0,Y
@@ -11692,10 +11725,10 @@ _L00    LDA $4000+40 * 11 + 0,Y
         STA $4000+40 * 18 + 0,Y         ; Bug? Why was the loop split in two?
         INY
         CPY #40
-        BNE _L00
+        BNE _L01
 
         LDY #$00
-_L01    LDA $D800+40 * 19 + 0,Y
+_L02    LDA $D800+40 * 19 + 0,Y
         STA $D800+40 * 18 + 0,Y
 
         LDA $4000+40 * 20 + 0,Y
@@ -11725,10 +11758,11 @@ _L01    LDA $D800+40 * 19 + 0,Y
 
         INY
         CPY #40
-        BNE _L01
+        BNE _L02
         RTS
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+; $CE30
 INIT_INTERRUPTS
         SEI
         LDA #<aCE71
@@ -11754,25 +11788,30 @@ INIT_INTERRUPTS
         RTS
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
-        LDA #$36     ;#%00110110
+; $CE5F
+; It seems that nobody is calling this function
+NMI_HANDLER
+        LDA #$36                        ;RAM / IO / KERNAL
         STA a01
-        JMP $FE66
+        JMP $FE66                       ;Warm start basic
 
-        LDA #$5F     ;#%01011111
-        STA $FFFA    ;NMI
-        LDA #$CE     ;#%11001110
-        STA $FFFB    ;NMI
+aCE66
+        LDA #<NMI_HANDLER
+        STA $FFFA                       ;NMI LO
+        LDA #>NMI_HANDLER
+        STA $FFFB                       ;NMI HI
         RTS
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+; $CE71
 ; IRQ Handler
 aCE71   PHA
         TYA
         PHA
         TXA
         PHA
-        LDA #$01     ;#%00000001
-        STA $D019    ;VIC Interrupt Request Register (IRR)
+        LDA #$01
+        STA $D019                       ;ACK Raster interrupt
         NOP
         NOP
         NOP
@@ -11786,18 +11825,18 @@ aCE71   PHA
         NOP
 aCE87   =*+$01
 aCE88   =*+$02
-        JSR sCEC1
+        JSR sCEC1                       ;Gets patched in runtime
         INC a02
         LDA a02
-        CMP #$04     ;#%00000100
-        BNE bCE95
-        LDA #$00     ;#%00000000
+        CMP #$04
+        BNE _L00
+        LDA #$00
         STA a02
-bCE95   ASL A
+_L00    ASL A
         TAX
         LDA fCEA9,X
         STA aCE87
-        LDA fCEAA,X
+        LDA fCEA9+1,X
         STA aCE88
         PLA
         TAX
@@ -11806,53 +11845,69 @@ bCE95   ASL A
         PLA
         RTI
 
-fCEA9   .BYTE $B1
-fCEAA   .BYTE $CE,$C1,$CE,$D4,$CE,$E7,$CE
+fCEA9   .WORD aCEB1
+        .WORD sCEC1
+        .WORD aCED4
+        .WORD aCEE7
 
-        LDA #$1B     ;#%00011011
-        STA $D011    ;VIC Control Register 1
-        LDA #$08     ;#%00001000
-        STA $D016    ;VIC Control Register 2
-        LDA #$81     ;#%10000001
-        STA $D012    ;Raster Position
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+; Raster $00
+aCEB1
+        LDA #$1B                        ;Raster 8-bit disabled
+        STA $D011                       ; VIC Control Register 1
+        LDA #$08                        ;Default: x-smooth=0, 40=cols
+        STA $D016                       ; VIC Control Register 2
+        LDA #$81
+        STA $D012                       ;Raster Position
         RTS
 
-sCEC1   LDA #$18     ;#%00011000
-        STA $D016    ;VIC Control Register 2
-        LDA #$50     ;#%01010000
-        ORA aCF0D
-        STA $D011    ;VIC Control Register 1
-        LDA #$89     ;#%10001001
-        STA $D012    ;Raster Position
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+; Raster $81
+sCEC1   LDA #$18                        ;Multicolor enabled
+        STA $D016                       ; VIC Control Register 2
+        LDA #$50                        ;Extended color
+        ORA aCF0D                       ; Update y-smooth
+        STA $D011                       ; VIC Control Register 1
+        LDA #$89
+        STA $D012                       ;Raster Position
         RTS
 
-        LDA $D011    ;VIC Control Register 1
-        AND #$3F     ;#%00111111
-        STA $D011    ;VIC Control Register 1
-        LDA #$08     ;#%00001000
-        STA $D016    ;VIC Control Register 2
-        LDA #$E9     ;#%11101001
-        STA $D012    ;Raster Position
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+; Raster $89
+aCED4
+        LDA $D011
+        AND #$3F                        ;Extended color / rater 8-bit masked
+        STA $D011                       ; VIC Control Register 1
+        LDA #$08                        ;Multicolor disabled
+        STA $D016                       ; VIC Control Register 2
+        LDA #$E9
+        STA $D012                       ;Raster Position
         RTS
 
-        LDA #$18     ;#%00011000
-        STA $D016    ;VIC Control Register 2
-        LDA #$5B     ;#%01011011
-        STA $D011    ;VIC Control Register 1
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+; Raster $E9
+aCEE7
+        LDA #$18                        ;Multicolor enabled
+        STA $D016                       ; VIC Control Register 2
+        LDA #$5B                        ;Extended color enabled
+        STA $D011                       ; VIC Control Register 1
+
         INC aCF0C
-        LDA #$00     ;#%00000000
-        STA $D012    ;Raster Position
+
+        LDA #$00
+        STA $D012                       ;Raster Position
+
         LDA aCF0D
         SEC
-        SBC #$01     ;#%00000001
-        AND #$07     ;#%00000111
+        SBC #$01
+        AND #$07
 aCF01   STA aCF0D                       ;Gets patched in runtime. Switches
                                         ; 'STA abs' and
                                         ; 'BIT abs'  (this is kind of a NOP)
         CMP #$02
-        BNE bCF0B
+        BNE _L00
         INC aCF0E
-bCF0B   RTS
+_L00    RTS
 
 aCF0C   .BYTE $00
 aCF0D   .BYTE $07
@@ -11865,18 +11920,20 @@ jCF17   LDX #$03     ;#%00000011
         STA $DD0E    ;CIA2: CIA Control Register A
         LDA #$08     ;#%00001000
         STA $DD0F    ;CIA2: CIA Control Register B
-bCF23   LDA fCF0F,X
+_L00    LDA fCF0F,X
         STA $DD08,X  ;CIA2: Time-of-Day Clock: 1/10 Seconds
         DEX
-        BPL bCF23
+        BPL _L00
+
         LDX #$03     ;#%00000011
         LDA #$80     ;#%10000000
         STA $DD0F    ;CIA2: CIA Control Register B
-bCF33   LDA fCF13,X
+_L01    LDA fCF13,X
         STA $DD08,X  ;CIA2: Time-of-Day Clock: 1/10 Seconds
         DEY
         DEX
-        BPL bCF33
+        BPL _L01
+
         RTS
 
         .BYTE $DF,$60,$DF,$20,$DF,$20,$DF,$20
