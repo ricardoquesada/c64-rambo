@@ -410,8 +410,9 @@ b048C   LDA f00E0,Y
         JSR sC000
         .ADDR STR_CLEAR_SCREEN_BIS
 
-        LDA #$00     ;#%00000000
-        JSR sC003
+        LDA #$00
+        JSR SWAP_CHARSETS_BIS
+
         LDX #$07     ;#%00000111
         LDA #$1A     ;#%00011010
         JSR s8100
@@ -439,8 +440,10 @@ b04C0   LDA $D012    ;Raster Position
 b04D3   JSR VIC_SCREEN_DISABLE
         LDA #$01     ;#%00000001
         JSR s8100
-        LDA #$00     ;#%00000000
-        JSR sC003
+
+        LDA #$00
+        JSR SWAP_CHARSETS_BIS
+
         LDA #$FF     ;#%11111111
         STA $D015    ;Sprite display Enable
         LDA #$0C     ;#%00001100
@@ -851,7 +854,8 @@ a0982   .BYTE $00
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 s0983   LDA #$00
-        JSR sC003
+        JSR SWAP_CHARSETS_BIS
+
         LDA #$01
         STA a1093
         LDA #$1A
@@ -899,7 +903,7 @@ b09E1   JSR VIC_SCREEN_DISABLE
         .ADDR STR_CLEAR_SCREEN_BIS
 
         LDA #$00
-        JSR sC003
+        JSR SWAP_CHARSETS_BIS
 
 s09F3   LDA #$E0
         STA a0A06
@@ -2629,14 +2633,14 @@ b17DA   TXA
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 ; $180D
-VIC_SCREEN_DISABLE   
+VIC_SCREEN_DISABLE
 	LDA #$00
         STA $D011                       ;VIC Control Register 1
         RTS
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 ; $1813
-VIC_SCREEN_ENABLE   
+VIC_SCREEN_ENABLE
 	LDA #$10
         STA $D011                       ;VIC Control Register 1
         RTS
@@ -10180,39 +10184,50 @@ aB469   .BYTE $4F,$00,$FF,$00,$FF,$00,$FF,$FF
 
 sC000   JMP PRINT_EXT_STR
 
-sC003   JMP jC00C
+SWAP_CHARSETS_BIS
+        JMP SWAP_CHARSETS
 
 jC006   JMP MAIN
 
         JMP jCF17
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
-; Params: A
-jC00C   ASL A 				;A *= 2
+; Swap charsets from $D000 to $7800
+; Switches to $01 RAM/RAM/RAM during the copy.
+; Restores $01 to RAM/IO/RAM after it finishes the copy.
+; This function is always called with A=0
+; If A != 0 it will break.
+; Seems to have been copied from another game where more addresses were used.
+;
+; Params: A=0
+SWAP_CHARSETS
+        ASL A                           ;A *= 2
         TAX
 
-        LDA fC06D,X 			;Load origin
+        LDA _SRC_ADDR,X                 ;Load origin
         STA aFB
-        LDA fC06E,X
+        LDA _SRC_ADDR+1,X
         STA aFC
-	
-        LDA fC06F,X 			;Load destination
+
+        LDA _DST_ADDR,X                 ;Load destination
         STA aFD
-        LDA fC070,X
+        LDA _DST_ADDR+1,X
         STA aFE
 
-        LDA fC071,X
-        STA aC065
-        LDA fC072,X
+        LDA _COPY_LEN,X                 ;It is always $ff
+        STA _LEN_LSB
+        LDA _COPY_LEN+1,X               ;It is always $07
         TAX
-        LDA #$30     			;#%00110000
-        STA a01 			;See only RAM: No ROMs, I/O, etc.
+        LDA #$30                        ;#%00110000
+        STA a01                         ; RAM / RAM / RAM
+
+        ; Swap first block of $ff
         LDY #$00
-_L00 	LDA (pFD),Y
-        STA aC073
+_L00    LDA (pFD),Y
+        STA _TMP
         LDA (pFB),Y
         STA (pFD),Y
-        LDA aC073
+        LDA _TMP
         STA (pFB),Y
         INY
         BNE _L00
@@ -10223,35 +10238,39 @@ _L00 	LDA (pFD),Y
         INC aFE
         BNE _L00
 
-_L01 	INC aFC
+_L01    INC aFC
         INC aFE
-        LDA aC065
+        LDA _LEN_LSB
         BEQ _L03
-_L02 	LDA (pFD),Y
-        STA aC073
+
+        ; Loop until all blocs have been swapped
+_L02    LDA (pFD),Y
+        STA _TMP
         LDA (pFB),Y
         STA (pFD),Y
-        LDA aC073
+        LDA _TMP
         STA (pFB),Y
         INY
-aC065   =*+$01
-        CPY #$FF     ;#%11111111
+_LEN_LSB = *+$01
+        CPY #$FF
         BNE _L02
-_L03 	LDA #$35     ;#%00110101
-        STA a01
+
+_L03    LDA #$35                        ;#%00110101
+        STA a01                         ; RAM / IO / RAM
         RTS
 
-fC06D   .BYTE $00
-fC06E   .BYTE $D0
-fC06F   .BYTE $00
-fC070   .BYTE $78
-fC071   .BYTE $FF
-fC072   .BYTE $07
-aC073   .BYTE $00
+_SRC_ADDR
+        .WORD $D000
+_DST_ADDR
+        .WORD $7800
+_COPY_LEN
+        .WORD $07FF
+_TMP   .BYTE $00
 
+aC074
         JMP PRINT_EXT_STR
 
-        JMP jC00C
+        JMP SWAP_CHARSETS
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 ; $C07A
@@ -10504,7 +10523,7 @@ MAIN
         LDX #$F0                        ;Set stack
         TXS
         JSR sC43C
-        LDA #25 			                  ;Jump to index 25
+        LDA #25                         ;Jump to index 25
         LDX #$0F                        ;Argument: Music to 15
         JSR s8100
 
@@ -10516,16 +10535,18 @@ MAIN
         LDA #$8D                        ;'STA abs' opcode
         STA aCF01                       ; Patch code in runtime
         SEI
-        LDA #$35     ;#%00110101
-        STA a01
-        LDA #$00     ;#%00000000
-        JSR jC00C
-        LDA #$96     ;#%10010110
-        STA $DD00    ;CIA2: Data Port Register A
-        LDA #$0F     ;#%00001111
-        STA $D018    ;VIC Memory Control Register
-        LDA #$08     ;#%00001000
-        STA $D016    ;VIC Control Register 2
+        LDA #$35                        ;#%00110101
+        STA a01                         ; RAM / IO / RAM
+
+        LDA #$00
+        JSR SWAP_CHARSETS
+
+        LDA #$96                        ;#%10010110
+        STA $DD00                       ;CIA2: Data Port Register A
+        LDA #$0F                        ;#%00001111
+        STA $D018                       ;VIC Memory Control Register
+        LDA #$08                        ;#%00001000
+        STA $D016                       ;VIC Control Register 2
 
 jC1F3   JSR PRINT_EXT_STR
         .ADDR STR_CLEAR_SCREEN
@@ -10542,42 +10563,48 @@ jC1F3   JSR PRINT_EXT_STR
         CLC
         ADC aC19C
         TAY
-        LDX #$02     ;#%00000010
-        LDA #$00     ;#%00000000
+        LDX #$02
+        LDA #$00
 bC219   STA fB000,Y
         INY
         DEX
         BPL bC219
-        LDA #$1B     ;#%00011011
-        STA $D011    ;VIC Control Register 1
+
+        LDA #$1B                        ;#%00011011
+        STA $D011                       ;VIC Control Register 1
         JSR sC74C
-        LDA #$1E     ;#%00011110
+        LDA #30
         JSR s8100
         JSR sC36E
-        LDA #$00     ;#%00000000
-        JSR jC00C
+
+        LDA #$00
+        JSR SWAP_CHARSETS
+
         JSR s0367
         SEI
         LDA #$00
-        STA $D015			;Sprite display Enable
-        STA $D020    			;Border Color
-        STA $D021    			;Background Color 0
-        LDA #$08     			;#%00001000
-        STA $D016    			;VIC Control Register 2
+        STA $D015                       ;Sprite display Enable
+        STA $D020                       ;Border Color
+        STA $D021                       ;Background Color 0
+        LDA #$08                        ;#%00001000
+        STA $D016                       ;VIC Control Register 2
+
         LDA #$00
-        JSR jC00C
+        JSR SWAP_CHARSETS
+
         LDA #$8D                        ;'STA abs' opcode
         STA aCF01                       ; Patch code in runtime
-        LDA #$1B     			;#%00011011
-        STA $D011    			;VIC Control Register 1
+        LDA #$1B                        ;#%00011011
+        STA $D011                       ;VIC Control Register 1
         LDA aB469
         STA aC2D1
         JSR sC2E1
         LDA #$01
         JSR s8100
-        LDA #$1A     ;#%00011010
-        LDX #$07     ;#%00000111
+        LDA #$1A
+        LDX #$07
         JSR s8100
+
         JSR sC2FC
 
         ; $C270 (Triggered when user has high-score)
