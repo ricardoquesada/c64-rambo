@@ -172,7 +172,6 @@ f0061 = $0061
 f007D = $007D
 f008B = $008B
 f0099 = $0099
-f00A2 = $00A2
 f00B5 = $00B5
 f00C3 = $00C3
 f00E0 = $00E0
@@ -9704,7 +9703,12 @@ bA60B
         .BYTE $FF,$00,$FF,$00,$FF,$FF,$00,$FF
         .BYTE $00,$FF,$00,$FF,$00
 
-fB000   .BYTE $08,$00,$00,$07,$90,$00,$07,$80
+        ; Hi-Score table. Each score contains 3 bytes
+        ; They are in MSB order. E.g:
+        ;   .BYTE $08,$00,$00 -> 80000
+        ; The table is 240 bytes long: 80 * 3 = 240
+HISCORE_TBL
+        .BYTE $08,$00,$00,$07,$90,$00,$07,$80
         .BYTE $00,$07,$70,$00,$07,$60,$00,$07
         .BYTE $50,$00,$07,$40,$00,$07,$30,$00
         .BYTE $07,$20,$00,$07,$10,$00,$07,$00
@@ -9720,23 +9724,22 @@ fB000   .BYTE $08,$00,$00,$07,$90,$00,$07,$80
         .BYTE $00,$04,$50,$00,$04,$40,$00,$04
         .BYTE $30,$00,$04,$20,$00,$04,$10,$00
         .BYTE $04,$00,$00,$03,$90,$00,$03,$80
+        .BYTE $00,$03,$70,$00,$03,$60,$00,$03
+        .BYTE $50,$00,$03,$40,$00,$03,$30,$00
+        .BYTE $03,$20,$00,$03,$10,$00,$03,$00
+        .BYTE $00,$02,$90,$00,$02,$80,$00,$02
+        .BYTE $70,$00,$02,$60,$00,$02,$50,$00
+        .BYTE $02,$40,$00,$02,$30,$00,$02,$20
+        .BYTE $00,$02,$10,$00,$02,$00,$00,$01
+        .BYTE $90,$00,$01,$80,$00,$01,$70,$00
+        .BYTE $01,$60,$00,$01,$50,$00,$01,$40
+        .BYTE $00,$01,$30,$00,$01,$20,$00,$01
+        .BYTE $10,$00,$01,$00,$00,$00,$90,$00
+        .BYTE $00,$80,$00,$00,$70,$00,$00,$60
 
-        ; $B080
-        .BYTE $00
-        .BYTE $03,$70,$00,$03,$60,$00,$03,$50
-        .BYTE $00,$03,$40,$00,$03,$30,$00,$03
-        .BYTE $20,$00,$03,$10,$00,$03,$00,$00
-        .BYTE $02,$90,$00,$02,$80,$00,$02,$70
-        .BYTE $00,$02,$60,$00,$02,$50,$00,$02
-        .BYTE $40,$00,$02,$30,$00,$02,$20,$00
-        .BYTE $02,$10,$00,$02,$00,$00,$01,$90
-        .BYTE $00,$01,$80,$00,$01,$70,$00,$01
-        .BYTE $60,$00,$01,$50,$00,$01,$40,$00
-        .BYTE $01,$30,$00,$01,$20,$00,$01,$10
-        .BYTE $00,$01,$00,$00,$00,$90,$00,$00
-        .BYTE $80,$00,$00,$70,$00,$00,$60,$00
-        .BYTE $00,$50,$00,$00,$40,$00,$00,$30
-        .BYTE $00,$00,$20,$00,$00,$10,$00
+        ; $B0F0
+        .BYTE $00,$00,$50,$00,$00,$40,$00,$00
+        .BYTE $30,$00,$00,$20,$00,$00,$10,$00
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 ; $B0F0
@@ -10578,7 +10581,7 @@ CODE_00                                 ;End of string
 MAIN
         LDX #$F0                        ;Set stack
         TXS
-        JSR INIT_B000_B07F
+        JSR INIT_HISCORE_TBL
         LDA #25                         ;FN = 25
         LDX #$0F                        ;Argument: Music to 15
         JSR MUSIC_FN
@@ -10615,7 +10618,7 @@ TITLE_LOOP
         LDA #$00
         STA aCFFF
         JSR INIT_INTERRUPTS
-        JSR sC3E6
+        JSR INIT_HISCORE_TBL_IDX
         JSR sC2FC
         JSR sC82E
 
@@ -10627,7 +10630,7 @@ TITLE_LOOP
         TAY
         LDX #$02
         LDA #$00
-_L00    STA fB000,Y
+_L00    STA HISCORE_TBL,Y
         INY
         DEX
         BPL _L00
@@ -10761,30 +10764,33 @@ sC2E1   LDA HISCORE_TBL_IDX+$4F
         TAY
         LDX #$00
 bC2EF   JSR s035B
-        STA fB000,Y
+        STA HISCORE_TBL,Y
         INY
         INX
         CPX #$03     ;#%00000011
         BNE bC2EF
         RTS
 
-sC2FC   LDA #$4E                        ;XXX: >$4e00 ???
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+sC2FC   LDA #$4E                        ;Index to HISCORE_TBL_IDX
         STA aC36D
-        LDA #$00                        ;XXX: <$4e00 ???
+        LDA #$00
         STA aC36C
+
 bC306   LDY aC36D
         INY
         LDA HISCORE_TBL_IDX,Y
         ASL A
         CLC
         ADC HISCORE_TBL_IDX,Y
-        STA aC6E9
+        STA aC6E9                       ;Index = Index * 3
+
         LDY aC36D
         LDA HISCORE_TBL_IDX,Y
         ASL A
         CLC
         ADC HISCORE_TBL_IDX,Y
-        TAY
+        TAY                             ;Y = Index * 3
         JSR sC34B
         BCC bC329
         JMP jC33F
@@ -10804,22 +10810,24 @@ jC33F   DEC aC36D
         BNE sC2FC
         RTS
 
-sC34B   =*+$01
-        CMP f00A2,b,X
-bC34D   LDA fB000,Y
+        .BYTE $DD
+
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+sC34B   LDX #$00
+_L00    LDA HISCORE_TBL,Y
         STY aC6EA
         LDY aC6E9
-        CMP fB000,Y
-        BEQ bC35F
+        CMP HISCORE_TBL,Y
+        BEQ _L01
         LDY aC6EA
         RTS
 
-bC35F   LDY aC6EA
+_L01    LDY aC6EA
         INY
         INC aC6E9
         INX
-        CPX #$03     ;#%00000011
-        BNE bC34D
+        CPX #$03
+        BNE _L00
         RTS
 
 aC36C   .BYTE $00
@@ -10894,7 +10902,9 @@ _L00    CMP $D012    ;Raster Position
         RTS
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
-sC3E6   LDY #$00
+; $C3E6
+INIT_HISCORE_TBL_IDX
+        LDY #$00
 _L00    TYA
         STA HISCORE_TBL_IDX,Y
         INY
@@ -10939,8 +10949,8 @@ aC437   = *+2
         #STR_CODE_END
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
-; Random ???
-INIT_B000_B07F
+; Sets the default values for the hi-scores table
+INIT_HISCORE_TBL
         LDX #79
         LDY #$00
         SED
@@ -10952,14 +10962,14 @@ _L00    SEC
         ASL A
         ASL A
         ASL A
-        STA fB000+1,Y
+        STA HISCORE_TBL+1,Y
 
         LDA TMP_C19C
         LSR A
         LSR A
         LSR A
         LSR A
-        STA fB000,Y
+        STA HISCORE_TBL,Y
         LDA TMP_C19C
         INY
         INY
@@ -11696,12 +11706,12 @@ _L06    LDA (pFE),Y
         ADC TMP_C19C
         TAY
         LDX #$00
-_L07    LDA fB000,Y
+_L07    LDA HISCORE_TBL,Y
         AND #$0F
         CLC
         ADC #$30
         STA PLAYER_HISCORE_STR_SCORE+1,X
-        LDA fB000,Y
+        LDA HISCORE_TBL,Y
         AND #$F0
         LSR A
         LSR A
