@@ -9784,8 +9784,8 @@ fB000   .BYTE $08,$00,$00,$07,$90,$00,$07,$80
         .TEXT "[[[[[[[[[["
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
-; 80-values table with values form 0 to 79, and gets rotated in runtime
-fB41A
+; 80-values table that contains the index to the hiscores.
+HISCORE_TBL_IDX
         .BYTE $00,$01,$02,$03,$04,$05,$06,$07
         .BYTE $08,$09,$0A,$0B,$0C,$0D,$0E,$0F
         .BYTE $10,$11,$12,$13,$14,$15,$16,$17
@@ -10577,7 +10577,7 @@ jC1F3   JSR PRINT_EXT_STR
         JSR sC2FC
         JSR sC82E
 
-        LDA fB41A+79
+        LDA HISCORE_TBL_IDX+$4F
         STA TMP_C19C
         ASL A
         CLC
@@ -10621,7 +10621,7 @@ _L00    STA fB000,Y
         LDA #$1B                        ;#%00011011
         STA $D011                       ; VIC Control Register 1
                                         ; Raster 8-bit = 0
-        LDA fB41A+79
+        LDA HISCORE_TBL_IDX+$4F
         STA aC2D1
         JSR sC2E1
 
@@ -10638,7 +10638,7 @@ _L00    STA fB000,Y
         JMP jC1F3
 
 sC276   LDA aC2D1
-        CMP fB41A+79
+        CMP HISCORE_TBL_IDX+$4F
         BNE bC27F
         RTS
 
@@ -10650,12 +10650,12 @@ bC27F   JSR PRINT_EXT_STR
 
         LDX #$4F     ;#%01001111
         LDA aC2D1
-bC28E   CMP fB41A,X
+bC28E   CMP HISCORE_TBL_IDX,X
         BEQ bC296
         DEX
         BPL bC28E
 bC296   STX aCD72
-        LDA #$08     ;#%00001000
+        LDA #$08
         STA aCCD3
         JSR sCCD5
 
@@ -10692,7 +10692,7 @@ bC2D3   LDA aCF0C
         JSR MUSIC_FN
         RTS
 
-sC2E1   LDA fB41A+79
+sC2E1   LDA HISCORE_TBL_IDX+$4F
         STA TMP_C19C
         ASL A
         CLC
@@ -10713,28 +10713,28 @@ sC2FC   LDA #$4E                        ;XXX: >$4e00 ???
         STA aC36C
 bC306   LDY aC36D
         INY
-        LDA fB41A,Y
+        LDA HISCORE_TBL_IDX,Y
         ASL A
         CLC
-        ADC fB41A,Y
+        ADC HISCORE_TBL_IDX,Y
         STA aC6E9
         LDY aC36D
-        LDA fB41A,Y
+        LDA HISCORE_TBL_IDX,Y
         ASL A
         CLC
-        ADC fB41A,Y
+        ADC HISCORE_TBL_IDX,Y
         TAY
         JSR sC34B
         BCC bC329
         JMP jC33F
 
 bC329   LDY aC36D
-        LDA fB41A,Y
+        LDA HISCORE_TBL_IDX,Y
         PHA
-        LDA fB41A+1,Y
-        STA fB41A,Y
+        LDA HISCORE_TBL_IDX+1,Y
+        STA HISCORE_TBL_IDX,Y
         PLA
-        STA fB41A+1,Y
+        STA HISCORE_TBL_IDX+1,Y
         LDA #$01
         STA aC36C
 jC33F   DEC aC36D
@@ -10785,7 +10785,7 @@ sC36E   LDA #$00
         LDA #$00
         STA aFF
         LDY #$09
-        LDA fB41A+79
+        LDA HISCORE_TBL_IDX+$4F
         ASL A
         STA TMP_C19C
         ASL A
@@ -10824,7 +10824,7 @@ bC3E0   CMP $D012    ;Raster Position
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 sC3E6   LDY #$00
 _L00    TYA
-        STA fB41A,Y
+        STA HISCORE_TBL_IDX,Y
         INY
         CPY #$50
         BNE _L00
@@ -11573,7 +11573,7 @@ bCD0D   TXA
 jCD14   LDA #$00     ;#%00000000
         STA aFE
         STA aFF
-        LDA fB41A,Y
+        LDA HISCORE_TBL_IDX,Y
         TAX
         ASL A
         STA TMP_C19C
