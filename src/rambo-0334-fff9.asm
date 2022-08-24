@@ -6736,14 +6736,14 @@ f835E   .BYTE $C8,$A7,$C8,$A7,$9E,$A9,$1A,$89
 ; and then append them together.
 _JUMPY_0 = [MUSIC_FN_00,MUSIC_FN_01,MUSIC_FN_02,MUSIC_FN_03,MUSIC_FN_04,MUSIC_FN_05,MUSIC_FN_06,MUSIC_FN_07]     ;0-7
 _JUMPY_1 = [MUSIC_FN_08,MUSIC_FN_09,MUSIC_FN_10,MUSIC_FN_11,MUSIC_FN_12,MUSIC_FN_13,MUSIC_FN_14,MUSIC_FN_15]     ;8-15
-_JUMPY_2 = [a83C8,a83CB,a83D1,a83DF,a83EC,a840D,a83F8,a83D4]     ;16-23
-_JUMPY_3 = [a83AC,b8534,a850D,a84BE,a84BB,a849E,a83CE]           ;24-30
+_JUMPY_2 = [MUSIC_FN_16,MUSIC_FN_17,MUSIC_FN_18,MUSIC_FN_19,MUSIC_FN_20,MUSIC_FN_21,MUSIC_FN_22,MUSIC_FN_23]     ;16-23
+_JUMPY_3 = [MUSIC_FN_24,MUSIC_FN_25,MUSIC_FN_26,MUSIC_FN_27,MUSIC_FN_28,MUSIC_FN_29,MUSIC_FN_30]           ;24-30
 _JUMPY = _JUMPY_0 .. _JUMPY_1 .. _JUMPY_2 .. _JUMPY_3
 
 MUSIC_FNS_LO    .BYTE <_JUMPY
 MUSIC_FNS_HI    .BYTE >_JUMPY
 
-a83AC
+MUSIC_FN_24
         LDX a9291
         LDA f90B9,X
         STA a9299
@@ -6761,19 +6761,19 @@ MUSIC_FN_14
 MUSIC_FN_15
         LDY #$0B
         .BYTE $2C
-a83C8
+MUSIC_FN_16
         LDY #$0F
         .BYTE $2C
-a83CB
+MUSIC_FN_17
         LDY #$0D
         .BYTE $2C
-a83CE
+MUSIC_FN_30
         LDY #$17
         .BYTE $2C
-a83D1
+MUSIC_FN_18
         LDY #$07
         .BYTE $2C
-a83D4
+MUSIC_FN_23
         LDY #$03
 
 b83D6   STY a85EB
@@ -6781,19 +6781,19 @@ b83D6   STY a85EB
         STY a85EC
         RTS
 
-a83DF
+MUSIC_FN_19
         LDX a9291
         LDA f90B9,X
         STA a9291
         LDY #$08     ;#%00001000
         BNE b83D6
-a83EC
+MUSIC_FN_20
         LDX #$01     ;#%00000001
         LDA a845B
         BNE b845A
         STX a845B
         BEQ b8402
-a83F8
+MUSIC_FN_22
         LDX #$01     ;#%00000001
         LDA a845C
         BNE b845A
@@ -6804,7 +6804,7 @@ b8402   LDX #<p8423  ;#%00100011
         STY a859F
         RTS
 
-a840D
+MUSIC_FN_21
         LDA #$00     ;#%00000000
         STA a845B
         ORA a845C
@@ -6883,7 +6883,7 @@ b8488   STA $D400,X  ;Voice 1: Frequency Control - Low-Byte
 MUSIC_FN_12
         LDY #$35
         .BYTE $2C                       ;It is a BIT. Clobbers the next instruction
-a849E
+MUSIC_FN_29
         LDY #$11
         .BYTE $2C                       ;Ditto
 MUSIC_FN_09
@@ -6911,10 +6911,10 @@ MUSIC_FN_03
 MUSIC_FN_04
         LDY #$3B
         .BYTE $2C                       ;Ditto
-a84BB
+MUSIC_FN_28
         LDY #$47
         .BYTE $2C                       ;Ditto
-a84BE
+MUSIC_FN_27
         LDY #$41
         LDX #$D4
 b84C2   LDA f8134,X
@@ -6958,7 +6958,7 @@ b84EE   LDA #$01
         BPL b84EE
         RTS
 
-a850D
+MUSIC_FN_26
         STX a828A
         RTS
 
@@ -6974,13 +6974,14 @@ s8511   LDA a820D
         TXA
         BEQ b8537
         DEX
-        BPL b8534
+        BPL MUSIC_FN_25
 b852D   BCC b8537
         CPX #$0F     ;#%00001111
         BEQ b8537
         INX
 
-b8534   STX a820E
+MUSIC_FN_25
+        STX a820E
 
 b8537   LDA a820E
         ORA a820B
