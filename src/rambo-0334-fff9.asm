@@ -275,12 +275,12 @@ j037F   JMP j0444
 ; $0382
 ; Game init (not main menu)
 GAME_INIT
-	JSR s16DA
+        JSR s16DA
         JSR s09F3
-        LDA #$0C     ;#%00001100
-        JSR s8100
-        LDA #$FF     ;#%11111111
-        STA $D015    ;Sprite display Enable
+        LDA #12
+        JSR MUSIC_FN
+        LDA #$FF
+        STA $D015                       ;Sprite display Enable
         CLI
 j0393   JSR j07D5
         JSR j0D3D
@@ -289,9 +289,9 @@ j0393   JSR j07D5
         JSR s0F6C
         INC a0559
         LDA a0559
-        CMP #$06     ;#%00000110
+        CMP #$06
         BCC b03B4
-        LDA #$00     ;#%00000000
+        LDA #$00
         STA a0559
         JMP j03F6
 
@@ -322,43 +322,40 @@ j03F6   JSR j28FF
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 s03FC   LDY #13
-_L00 	LDX fB5,Y
+_L00    LDX fB5,Y
         LDA f45,X
         BNE _L01
         DEY
         BPL _L00
         INY
-_L01 	STY aFC
+_L01    STY aFC
         RTS
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 s040B   LDA aFF
         BNE b0426
         LDA aFE
-a0412   =*+$01
-a0411   CMP #$88     ;#%10001000
-a0413   BCC b0426
-a0416   =*+$01
-a0415   CMP #$F0     ;#%11110000
+a0411   CMP #$88
+        BCC b0426
+        CMP #$F0
         BCS b0426
         LDX a042C
         BNE b042B
         INC a042C
-        LDA #$04     ;#%00000100
-a0425   =*+$02
-        JMP s8100
+        LDA #$04
+        JMP MUSIC_FN
 
-a0427   =*+$01
-b0426   LDX #$00     ;#%00000000
+b0426   LDX #$00
         STX a042C
 b042B   RTS
 
 a042C   .BYTE $00
+
 j042D   STA f2576,X
         RTS
 
-j0431   LDX #$05     ;#%00000101
-        LDA #$00     ;#%00000000
+j0431   LDX #$05
+        LDA #$00
 b0435   STA f2576,X
         STA f256A,X
         DEX
@@ -375,7 +372,7 @@ j0444   JSR s044C
 
 s044C   INC a0F
         JSR s046E
-j0451   LDA #$03     ;#%00000011
+j0451   LDA #$03
         JMP s046E
 
 s0456   LDA a0B29
@@ -384,7 +381,7 @@ s0456   LDA a0B29
         BEQ b046A
         LDX a0912
         BNE b046A
-        LDA #$03     ;#%00000011
+        LDA #$03
         STA a0F
         BNE s046E
 b046A   CLC
@@ -392,30 +389,31 @@ b046A   CLC
 s046E   PHA
         STA a0558
         SEI
-        LDA #$00     ;#%00000000
-        STA $D015    ;Sprite display Enable
-        STA $D021    ;Background Color 0
-        LDA #$08     ;#%00001000
-        STA $D016    ;VIC Control Register 2
-        LDA #$1B     ;#%00011011
-        STA $D011    ;VIC Control Register 1
-        LDA #$01     ;#%00000001
-        JSR s8100
-        LDY #$1F     ;#%00011111
+        LDA #$00
+        STA $D015                       ;Sprite display Enable
+        STA $D021                       ;Background Color 0
+        LDA #$08                        ;#%00001000
+        STA $D016                       ;VIC Control Register 2
+        LDA #$1B                        ;#%00011011
+        STA $D011                       ;VIC Control Register 1
+        LDA #$01
+        JSR MUSIC_FN
+        LDY #$1F
 b048C   LDA f00E0,Y
         STA f0566,Y
         DEY
         BPL b048C
 
-        JSR sC000
+        JSR PRINT_EXT_STR_BIS
         .ADDR STR_CLEAR_SCREEN_BIS
 
         LDA #$00
         JSR SWAP_CHARSETS_BIS
 
-        LDX #$07     ;#%00000111
-        LDA #$1A     ;#%00011010
-        JSR s8100
+        LDX #$07
+        LDA #26
+        JSR MUSIC_FN
+
         PLA
         ASL A
         TAX
@@ -424,37 +422,39 @@ b048C   LDA f00E0,Y
         LDA f0596+1,X
         STA a04BE+1
         LDA f058C,X
-        JSR s8100
+        JSR MUSIC_FN
 
-        JSR sC000
+        JSR PRINT_EXT_STR_BIS
 a04BE   .ADDR f0596                     ;This address is changed in runtime
 
-b04C0   LDA $D012    ;Raster Position
-        CMP #$C8     ;#%11001000
+b04C0   LDA $D012                       ;Raster Position
+        CMP #$C8                        ;Wait until raster gets to $c8
         BNE b04C0
+
         JSR j117F
-        LDA #$02     ;#%00000010
-        JSR s8100
+
+        LDA #$02
+        JSR MUSIC_FN
         BEQ b04D3
         BNE b04C0
 b04D3   JSR VIC_SCREEN_DISABLE
-        LDA #$01     ;#%00000001
-        JSR s8100
+        LDA #$01
+        JSR MUSIC_FN
 
         LDA #$00
         JSR SWAP_CHARSETS_BIS
 
-        LDA #$FF     ;#%11111111
-        STA $D015    ;Sprite display Enable
-        LDA #$0C     ;#%00001100
-        JSR s8100
+        LDA #$FF
+        STA $D015                       ;Sprite display Enable
+        LDA #12
+        JSR MUSIC_FN
         LDX a0D23
-        LDA #$1A     ;#%00011010
-        JSR s8100
-        LDA #$0B     ;#%00001011
-        STA $D021    ;Background Color 0
+        LDA #26
+        JSR MUSIC_FN
+        LDA #$0B                        ;Color Grey 1 (dark)
+        STA $D021                       ;Background Color 0
 
-        JSR sC000
+        JSR PRINT_EXT_STR_BIS
         .ADDR a0586
 
         LDY #$1F     ;#%00011111
@@ -826,8 +826,8 @@ b0919   LDA a0966
         ADC aE4
         STA a0969
         JSR s0AB7
-        LDA #$1B     ;#%00011011
-        JMP s8100
+        LDA #27
+        JMP MUSIC_FN
 
 b0965   RTS
 
@@ -860,16 +860,16 @@ s0983   LDA #$00
         STA a1093
         LDA #$1A
         LDX #$07
-        JSR s8100
+        JSR MUSIC_FN
         LDA #$01
-        JSR s8100
+        JSR MUSIC_FN
         LDA #$09
-        JSR s8100
+        JSR MUSIC_FN
         JSR j1D2A
         LDA a1D62
         STA a0981
 
-        JSR sC000
+        JSR PRINT_EXT_STR_BIS
         .ADDR STR_READY
 
         JSR VIC_SCREEN_ENABLE
@@ -877,9 +877,9 @@ b09AF   LDA $D012                       ;Raster Position
         CMP #$64
         BNE b09AF
         LDA #$00
-        JSR s8100
+        JSR MUSIC_FN
         LDA #$02
-        JSR s8100
+        JSR MUSIC_FN
         BEQ b09E1
         JSR s09CA
         BEQ b09AF
@@ -899,7 +899,7 @@ b09E1   JSR VIC_SCREEN_DISABLE
         LDA #$0D                        ;Color
         STA a1093
 
-        JSR sC000
+        JSR PRINT_EXT_STR_BIS
         .ADDR STR_CLEAR_SCREEN_BIS
 
         LDA #$00
@@ -1289,6 +1289,7 @@ b0CEC   RTS
 
 a0CED   .BYTE $00
 f0CEE   .BYTE $80,$40,$20,$10,$08,$04,$02,$01
+
 j0CF6   LDA #$0D     ;#%00001101
         JSR s26FA
         BCC b0D1C
@@ -1302,12 +1303,12 @@ j0CF6   LDA #$0D     ;#%00001101
         EOR #$07     ;#%00000111
         STA a0D23
         TAX
-        LDA #$1A     ;#%00011010
-        JMP s8100
+        LDA #26
+        JMP MUSIC_FN
 
 b0D1B   RTS
 
-b0D1C   LDA #$00     ;#%00000000
+b0D1C   LDA #$00
         STA a0D22
         RTS
 
@@ -1321,7 +1322,7 @@ j0D24   STA a0D3C
         LDA a0D3B
         BNE b0D36
         LDA a0D3C
-        JSR s8100
+        JSR MUSIC_FN
 b0D36   PLA
         TAY
         PLA
@@ -1330,6 +1331,7 @@ b0D36   PLA
 
 a0D3B   .BYTE $00
 a0D3C   .BYTE $00
+
 j0D3D   LDA a1D8C
         BNE b0D43
         RTS
@@ -1866,8 +1868,9 @@ f1165   .BYTE $00,$00,$00,$00,$01,$01,$01,$00
         .BYTE $FF,$FF,$FF,$01,$FF
 f1172   .BYTE $00,$01,$FF,$00,$00,$01,$FF,$00
         .BYTE $00,$01,$FF,$00,$00
-j117F   LDA #$00     ;#%00000000
-        JMP s8100
+
+j117F   LDA #$00
+        JMP MUSIC_FN
 
 j1184   LDA f45,X
         CMP #$C5     ;#%11000101
@@ -2560,7 +2563,7 @@ b170A   LDA f0BF1,X
         JSR s19C5
         JSR s0C9C
         LDA #$01
-        JSR s8100
+        JSR MUSIC_FN
         LDA #$AC
         STA a8A
         LDA #$96
@@ -2604,8 +2607,8 @@ b17CB   STA a7FF8,X                     ;Sprite frames
         BPL b17CB
 
         LDX #$07
-        LDA #$1A
-        JSR s8100
+        LDA #26
+        JSR MUSIC_FN
 
         LDX #$19
 b17DA   TXA
@@ -4696,7 +4699,7 @@ a28EB   =*+$01
 
 b28FB   RTS
 
-        JMP jC006
+        JMP MAIN_BIS
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 j28FF   LDA #$00     ;#%00000000
@@ -5684,10 +5687,10 @@ b357E   LDX #$0C     ;#%00001100
         BCC b35C2
         CMP #$1E     ;#%00011110
         BCS b35C2
-        LDA #$08     ;#%00001000
-        JSR s8100
-        LDA #$15     ;#%00010101
-        JSR s8100
+        LDA #$08
+        JSR MUSIC_FN
+        LDA #21
+        JSR MUSIC_FN
         LDA a336D
         CMP #$2A     ;#%00101010
         BNE b35B6
@@ -5764,7 +5767,7 @@ j35C3   LDX a3774
         JSR s32DE
         LDX a3315
         LDA f362C,X
-        JMP s8100
+        JMP MUSIC_FN
 
 f362C   .BYTE $08,$16
 a362E   .BYTE $82
@@ -5942,11 +5945,11 @@ b3807   LDA #$C3     ;#%11000011
         DEX
         BPL b3807
         JSR s32DE
-        LDA #$19     ;#%00011001
-        LDX #$0F     ;#%00001111
-        JSR s8100
-        LDA #$14     ;#%00010100
-        JSR s8100
+        LDA #25
+        LDX #$0F
+        JSR MUSIC_FN
+        LDA #20
+        JSR MUSIC_FN
         CLI
         JMP j3009
 
@@ -6496,14 +6499,15 @@ f8000   .BYTE $00,$00,$00,$01,$01,$02,$03,$04
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 ; Args: A
-s8100   TAY
+MUSIC_FN
+        TAY
         LDA f836E,Y
-        STA a810E
+        STA _JMP_LSB
         LDA f838D,Y
-        STA a810F
-a810E   =*+$01
-a810F   =*+$02
-        JMP j8553
+        STA _JMP_MSB
+_JMP_LSB = *+$01
+_JMP_MSB = *+$02
+        JMP j8553                       ;Updated in runtime
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 j8110   LDX a822D
@@ -6730,10 +6734,10 @@ f835E   .BYTE $C8,$A7,$C8,$A7,$9E,$A9,$1A,$89
 
 ; 64tass doesn't support multiline lists, so create multiple lists
 ; and then append them together.
-JUMPY_0 = [j8553,a8474,a8466,a84B3,a84B8,a84B0,a84AA,a84AD]
-JUMPY_1 = [a8418,a84A1,a84A4,a84A7,a849B,a83BF,a83C2,a83C5]
-JUMPY_2 = [a83C8,a83CB,a83D1,a83DF,a83EC,a840D,a83F8,a83D4]
-JUMPY_3 = [a83AC,b8534,a850D,a84BE,a84BB,a849E,a83CE]
+JUMPY_0 = [j8553,a8474,a8466,a84B3,a84B8,a84B0,a84AA,a84AD]     ;0-7
+JUMPY_1 = [a8418,a84A1,a84A4,a84A7,a849B,a83BF,a83C2,a83C5]     ;8-15
+JUMPY_2 = [a83C8,a83CB,a83D1,a83DF,a83EC,a840D,a83F8,a83D4]     ;16-23
+JUMPY_3 = [a83AC,b8534,a850D,a84BE,a84BB,a849E,a83CE]           ;24-30
 
 JUMPY = JUMPY_0 .. JUMPY_1 .. JUMPY_2 .. JUMPY_3
 
@@ -6774,7 +6778,7 @@ a83D4
         LDY #$03
 
 b83D6   STY a85EB
-        LDY #$00     ;#%00000000
+        LDY #$00
         STY a85EC
         RTS
 
@@ -9085,15 +9089,15 @@ bA451
         JSR sA4F8
 
         LDA #$01
-        JSR s8100
+        JSR MUSIC_FN
 
         LDX #$0F                        ;Set volume
         LDA #25                         ; to 15 (max)
-        JSR s8100
+        JSR MUSIC_FN
 
         LDX #$07
         LDA #26
-        JSR s8100
+        JSR MUSIC_FN
 
         JSR sA4DE
         JSR sA4DE
@@ -9144,7 +9148,7 @@ _L04    CMP #$20
         CLC
         ADC aA4C8
         DEC $D020                       ;Border Color
-        JSR s8100
+        JSR MUSIC_FN
         INC $D020                       ;Border Color
         JMP _LOOP
 
@@ -9174,7 +9178,7 @@ sA4ED   JSR sA4F0
 sA4F0   JSR sA4F3
 
 sA4F3   LDA #$00
-        JMP s8100
+        JMP MUSIC_FN
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 ; $A4F8
@@ -9241,19 +9245,19 @@ sA548   LDA #$05                        ;Color Green
         LDA a820B
         STA a0411
         LDA a820D
-        STA a0412
+        STA $0412
         LDA a820C
-        STA a0413
+        STA $0413
         LDA a85EB
-        STA a0415
+        STA $0415
         LDA a85EC
-        STA a0416
+        STA $0416
         LDA aA4C8
-        STA a0425
+        STA $0425
         LDA a845B
-        STA b0426
+        STA $0426
         LDA a845C
-        STA a0427
+        STA $0427
 
         LDX #$0F
 _L00    LDA f20,X
@@ -10182,12 +10186,14 @@ aB469   .BYTE $4F,$00,$FF,$00,$FF,$00,$FF,$FF
         .BYTE $02,$1E,$02,$C6,$59,$BF,$C5,$CE
         .BYTE $C4,$00,$CE,$C4,$FF
 
-sC000   JMP PRINT_EXT_STR
+PRINT_EXT_STR_BIS
+        JMP PRINT_EXT_STR
 
 SWAP_CHARSETS_BIS
         JMP SWAP_CHARSETS
 
-jC006   JMP MAIN
+MAIN_BIS
+        JMP MAIN
 
         JMP jCF17
 
@@ -10525,7 +10531,7 @@ MAIN
         JSR sC43C
         LDA #25                         ;Jump to index 25
         LDX #$0F                        ;Argument: Music to 15
-        JSR s8100
+        JSR MUSIC_FN
 
         LDA #$00
         STA $D021                       ;Background Color 0
@@ -10574,7 +10580,7 @@ bC219   STA fB000,Y
         STA $D011                       ;VIC Control Register 1
         JSR sC74C
         LDA #30
-        JSR s8100
+        JSR MUSIC_FN
         JSR sC36E
 
         LDA #$00
@@ -10600,10 +10606,10 @@ bC219   STA fB000,Y
         STA aC2D1
         JSR sC2E1
         LDA #$01
-        JSR s8100
+        JSR MUSIC_FN
         LDA #$1A
         LDX #$07
-        JSR s8100
+        JSR MUSIC_FN
 
         JSR sC2FC
 
@@ -10636,15 +10642,15 @@ bC296   STX aCD72
         JSR PRINT_EXT_STR
         .ADDR aCCB6
 
-        LDA #$05     ;#%00000101
+        LDA #$05
         STA aC2D2
-        JSR s8100
+        JSR MUSIC_FN
 bC2AE   JSR sC3DE
-        LDA #$00     ;#%00000000
-        JSR s8100
+        LDA #$00
+        JSR MUSIC_FN
         DEC aC2D2
         BNE bC2AE
-        LDA #$02     ;#%00000010
+        LDA #$02
         STA aC2D2
         JSR sCCD5
 
@@ -10662,8 +10668,8 @@ aC2D2   .BYTE $00
 bC2D3   LDA aCF0C
         BEQ bC2D3
         DEC aCF0C
-        LDA #$00     ;#%00000000
-        JSR s8100
+        LDA #$00
+        JSR MUSIC_FN
         RTS
 
 sC2E1   LDA aB469
@@ -10672,7 +10678,7 @@ sC2E1   LDA aB469
         CLC
         ADC aC19C
         TAY
-        LDX #$00     ;#%00000000
+        LDX #$00
 bC2EF   JSR s035B
         STA fB000,Y
         INY
@@ -10737,25 +10743,28 @@ bC35F   LDY aC6EA
 
 aC36C   .BYTE $00
 aC36D   .BYTE $FF
-sC36E   LDA #$00     ;#%00000000
-        STA $D011    ;VIC Control Register 1
+
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+sC36E   LDA #$00
+        STA $D011                       ;VIC Control Register 1
         SEI
-        LDA #$01     ;#%00000001
-        STA $D015    ;Sprite display Enable
-        JSR s8100
-        LDX #$00     ;#%00000000
-        STX $D010    ;Sprites 0-7 MSB of X coordinate
-        STX $D01D    ;Sprites Expand 2x Horizontal (X)
-        STX $D020    ;Border Color
-        STX $D021    ;Background Color 0
+        LDA #$01
+        STA $D015                       ;Sprite display Enable
+        JSR MUSIC_FN
+
+        LDX #$00
+        STX $D010                       ;Sprites 0-7 MSB of X coordinate
+        STX $D01D                       ;Sprites Expand 2x Horizontal (X)
+        STX $D020                       ;Border Color
+        STX $D021                       ;Background Color 0
         STX aC528
-        LDA #$1D     ;#%00011101
+        LDA #29
         STA aC651
-        JSR s8100
+        JSR MUSIC_FN
         JSR sC494
-        LDA #$00     ;#%00000000
+        LDA #$00
         STA aFF
-        LDY #$09     ;#%00001001
+        LDY #$09
         LDA aB469
         ASL A
         STA aC19C
@@ -10801,8 +10810,8 @@ bC3E8   TYA
         RTS
 
 sC3F2   JSR sC3DE
-        LDA #$00     ;#%00000000
-        JSR s8100
+        LDA #$00
+        JSR MUSIC_FN
         JSR sC529
         JSR sC589
         JSR sC5CE
@@ -10817,7 +10826,7 @@ sC3F2   JSR sC3DE
 sC418   LDA aC528
         ASL A
         CLC
-        ADC #$0A     ;#%00001010
+        ADC #$0A
         STA aC433
         LDX aC547
         LDA fC549,X
@@ -10924,40 +10933,42 @@ bC4D4   LDX aC651
         LDA fC72C,X
         JSR sC4EA
         LDY aC528
-        CPY #$0A     ;#%00001010
+        CPY #$0A
         BEQ bC4E9
         STA (pFE),Y
         INC aC528
 bC4E9   RTS
 
-sC4EA   CPX #$1B     ;#%00011011
+sC4EA   CPX #$1B
         BNE bC4FE
         LDY aC528
         BEQ bC4FB
         DEC aC528
         DEY
-        LDA #$5B     ;#%01011011
+        LDA #$5B
         STA (pFE),Y
 bC4FB   PLA
         PLA
         RTS
 
-bC4FE   CPX #$1C     ;#%00011100
+bC4FE   CPX #$1C
         BNE bC505
-        LDA #$5D     ;#%01011101
+        LDA #$5D
         RTS
 
-bC505   CPX #$1A     ;#%00011010
+bC505   CPX #$1A
         BNE bC50C
-        LDA #$5B     ;#%01011011
+
+        LDA #$5B
         RTS
 
-bC50C   CPX #$1D     ;#%00011101
+bC50C   CPX #$1D
         BNE bC527
-        LDA #$00     ;#%00000000
-        STA $D011    ;VIC Control Register 1
-        LDA #$01     ;#%00000001
-        JSR s8100
+
+        LDA #$00
+        STA $D011                       ;VIC Control Register 1
+        LDA #$01
+        JSR MUSIC_FN
         SEI
         LDA aC528
         BNE bC523
@@ -11262,13 +11273,13 @@ STR_CONGRATULATIONS
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 ; $C82E
-sC82E   LDA #$01     ;#%00000001
-        JSR s8100
-        LDA #$1A     ;#%00011010
-        LDX #$07     ;#%00000111
-        JSR s8100
-        LDA #$03     ;#%00000011
-        JSR s8100
+sC82E   LDA #$01
+        JSR MUSIC_FN
+        LDA #26
+        LDX #$07
+        JSR MUSIC_FN
+        LDA #$03
+        JSR MUSIC_FN
 
 jC83F   LDA #$08     ;#%00001000
         STA aCCD3
