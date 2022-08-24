@@ -7637,8 +7637,8 @@ b8A5E   LDY #$00     ;#%00000000
         INY
         LDA (p22),Y
         STA a27
-a8A81   =*+$01
-a8A82   =*+$02
+a8A81   = *+$01
+a8A82   = *+$02
         JMP j8C0D                       ;Modified in runtime
 
 b8A83   STA a28
@@ -7730,7 +7730,7 @@ b8B3D   STA a2B
         INC a23
 b8B4A   JMP j8C1A
 
-        INC a2E
+a8B4D   INC a2E
         LDY a2E
         CPY #$08     ;#%00001000
         BEQ b8B5E
@@ -7743,13 +7743,13 @@ b8B5E   LDA a29
         STA a29
         RTS
 
-        LDX a2E
+a8B65   LDX a2E
         CLC
         TYA
         ADC a22
         STA f81A7,X
         LDA a23
-        ADC #$00     ;#%00000000
+        ADC #$00
         STA f81AF,X
         LDA a26
         STA f81B7,X
@@ -7757,7 +7757,7 @@ b8B5E   LDA a29
         TYA
         JMP j8A55
 
-        LDX a2E
+a8B80   LDX a2E
         DEC f81B8,X
         BEQ b8B8C
         INX
@@ -7765,10 +7765,10 @@ b8B5E   LDA a29
         TAY
         BPL b8B55
 b8B8C   INC a2E
-        LDA #$01     ;#%00000001
+        LDA #$01
         JMP j8A55
 
-        LDY #$04     ;#%00000100
+a8B93   LDY #$04
         LDX #$1C     ;#%00011100
 b8B97   LDA (p26),Y
         STA f817A,X
@@ -7777,7 +7777,7 @@ b8B97   LDA (p26),Y
         BPL b8B97
         JMP j8A53
 
-        LDY #$0D     ;#%00001101
+a8BA3   LDY #$0D     ;#%00001101
         .BYTE $2C                       ;It is a BIT. Clobbers the next instruction
 b8BA6
         LDY #$09
@@ -7787,7 +7787,7 @@ b8BA8   LDA (p26),Y
         BPL b8BA8
         JMP j8A53
 
-        INY
+a8BB3   INY
         PHA
         LDA (p22),Y
         STA a26
@@ -7804,7 +7804,7 @@ b8BC0   LDA (p26),Y
         LDA #$05     ;#%00000101
         JMP j8A55
 
-        INY
+a8BCE   INY
         LDA (p22),Y
         STA a8205
 j8BD4   LDA a27
@@ -7812,13 +7812,13 @@ j8BD6   STX a22
         STA a23
         JMP b8A5E
 
-        LDA #>j8A53-1
+a8BDD   LDA #>j8A53-1
         PHA
         LDA #<j8A53-1
         PHA
         JMP (p0026)
 
-        LDA #$03     ;#%00000011
+a8BE6   LDA #$03     ;#%00000011
 b8BE8   LDY a2E
         CLC
         ADC a22
@@ -7829,19 +7829,19 @@ b8BE8   LDY a2E
         DEC a2E
         JMP j8BD4
 
-        INY
+a8BFC  INY
         LDA (p22),Y
         STA a8205
         LDA #$04     ;#%00000100
         BNE b8BE8
-        STX a8205
+a8C06   STX a8205
         TYA
         JMP j8A55
 
 j8C0D   STA f817A,X
         JMP j8A53
 
-        STA f823C,X
+a8C13   STA f823C,X
         JMP j8A53
 
 b8C19   RTS
@@ -8137,7 +8137,7 @@ b8E74   STA a2C
         INC a25
 b8E81   JMP j8F51
 
-        INC a2F
+a8E84   INC a2F
         LDY a2F
         CPY #$08     ;#%00001000
         BEQ b8E95
@@ -8150,7 +8150,7 @@ b8E95   LDA a29
         STA a29
         RTS
 
-        LDX a2F
+a8E9C   LDX a2F
         CLC
         TYA
         ADC a24
@@ -8164,7 +8164,7 @@ b8E95   LDA a29
         TYA
         JMP j8D91
 
-        LDX a2F
+a8EB7   LDX a2F
         DEC f81FD,X
         BEQ b8EC3
         INX
@@ -8172,10 +8172,10 @@ b8E95   LDA a29
         TAY
         BPL b8E8C
 b8EC3   INC a2F
-        LDA #$01     ;#%00000001
+        LDA #$01
         JMP j8D91
 
-        LDY #$04     ;#%00000100
+a8ECA   LDY #$04
         LDX #$1C     ;#%00011100
 b8ECE   LDA (p26),Y
         STA f81BF,X
@@ -8184,7 +8184,7 @@ b8ECE   LDA (p26),Y
         BPL b8ECE
         JMP j8D8F
 
-        LDY #$0D
+a8EDA   LDY #$0D
         .BYTE $2C                       ;It is a BIT. Clobbers the next instruction
 b8EDD
         LDY #$09
@@ -8194,7 +8194,7 @@ b8EDF   LDA (p26),Y
         BPL b8EDF
         JMP j8D8F
 
-        INY
+a8EEA   INY
         PHA
         LDA (p24),Y
         STA a26
@@ -8211,7 +8211,7 @@ b8EF7   LDA (p26),Y
         LDA #$05     ;#%00000101
         JMP j8D91
 
-        INY
+a8F05   INY
         LDA (p24),Y
         STA a8206
 j8F0B   LDA a27
@@ -8219,13 +8219,13 @@ j8F0D   STX a24
         STA a25
         JMP b8D9A
 
-        LDA #>j8D8F-1
+a8F14   LDA #>j8D8F-1
         PHA
         LDA #<j8D8F-1
         PHA
         JMP (p0026)
 
-        LDA #$03     ;#%00000011
+a8F1D   LDA #$03     ;#%00000011
 b8F1F   LDY a2F
         CLC
         ADC a24
@@ -8236,19 +8236,19 @@ b8F1F   LDY a2F
         DEC a2F
         JMP j8F0B
 
-        INY
+a8F33   INY
         LDA (p24),Y
         STA a8206
         LDA #$04     ;#%00000100
         BNE b8F1F
-        STX a8206
+a8F3D   STX a8206
         TYA
         JMP j8D91
 
 j8F44   STA f81BF,X
         JMP j8D8F
 
-        STA f8263,X
+a8F4A   STA f8263,X
         JMP j8D8F
 
 b8F50   RTS
@@ -8461,13 +8461,13 @@ f9189   .WORD a8811,a8877,a8867,j889A,a88AA
         .WORD a88CA,a88C0,j88D1,a8892,a88A1
         .WORD a88D7,b886A,a8829,a8844,a8857
 
-f91A7   .WORD $8B4D,$8BB3,$8BA3,j8BD6,$8BE6
-        .WORD $8C06,$8BFC,j8C0D,$8BCE,$8BDD
-        .WORD $8C13,b8BA6,$8B65,$8B80,$8B93
+f91A7   .WORD a8B4D,a8BB3,a8BA3,j8BD6,a8BE6
+        .WORD a8C06,a8BFC,j8C0D,a8BCE,a8BDD
+        .WORD a8C13,b8BA6,a8B65,a8B80,a8B93
 
-f91C5   .WORD $8E84,$8EEA,$8EDA,j8F0D,$8F1D
-        .WORD $8F3D,$8F33,j8F44,$8F05,$8F14
-        .WORD $8F4A,b8EDD,$8E9C,$8EB7,$8ECA
+f91C5   .WORD a8E84,a8EEA,a8EDA,j8F0D,a8F1D
+        .WORD a8F3D,a8F33,j8F44,a8F05,a8F14
+        .WORD a8F4A,b8EDD,a8E9C,a8EB7,a8ECA
 
 f91E3   .BYTE $4A,$95,$F9,$96,$C3,$97,$09,$A7
         .BYTE $0C,$A7,$0F,$A7,$45,$9C,$FB,$9F
