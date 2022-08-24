@@ -11823,9 +11823,9 @@ aCE71   PHA
         NOP
         NOP
         NOP
-aCE87   =*+$01
-aCE88   =*+$02
-        JSR sCEC1                       ;Gets patched in runtime
+_ADDR_LO = *+$01
+_ADDR_HI =*+$02
+        JSR TITLE_RASTER_81                       ;Gets patched in runtime
         INC a02
         LDA a02
         CMP #$04
@@ -11834,10 +11834,10 @@ aCE88   =*+$02
         STA a02
 _L00    ASL A
         TAX
-        LDA fCEA9,X
-        STA aCE87
-        LDA fCEA9+1,X
-        STA aCE88
+        LDA TITLE_RASTER_TBL,X
+        STA _ADDR_LO
+        LDA TITLE_RASTER_TBL+1,X
+        STA _ADDR_HI
         PLA
         TAX
         PLA
@@ -11845,14 +11845,15 @@ _L00    ASL A
         PLA
         RTI
 
-fCEA9   .WORD aCEB1
-        .WORD sCEC1
-        .WORD aCED4
-        .WORD aCEE7
+TITLE_RASTER_TBL
+        .WORD TITLE_RASTER_00
+        .WORD TITLE_RASTER_81
+        .WORD TITLE_RASTER_89
+        .WORD TITLE_RASTER_E9
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 ; Raster $00
-aCEB1
+TITLE_RASTER_00
         LDA #$1B                        ;Raster 8-bit disabled
         STA $D011                       ; VIC Control Register 1
         LDA #$08                        ;Default: x-smooth=0, 40=cols
@@ -11863,7 +11864,8 @@ aCEB1
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 ; Raster $81
-sCEC1   LDA #$18                        ;Multicolor enabled
+TITLE_RASTER_81
+        LDA #$18                        ;Multicolor enabled
         STA $D016                       ; VIC Control Register 2
         LDA #$50                        ;Extended color
         ORA aCF0D                       ; Update y-smooth
@@ -11874,10 +11876,11 @@ sCEC1   LDA #$18                        ;Multicolor enabled
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 ; Raster $89
-aCED4
-        LDA $D011
-        AND #$3F                        ;Extended color / rater 8-bit masked
+TITLE_RASTER_89
+        LDA $D011                       ; Honor previous y-smooth
+        AND #$3F                        ; Extended color / rater 8-bit masked
         STA $D011                       ; VIC Control Register 1
+
         LDA #$08                        ;Multicolor disabled
         STA $D016                       ; VIC Control Register 2
         LDA #$E9
@@ -11886,7 +11889,7 @@ aCED4
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 ; Raster $E9
-aCEE7
+TITLE_RASTER_E9
         LDA #$18                        ;Multicolor enabled
         STA $D016                       ; VIC Control Register 2
         LDA #$5B                        ;Extended color enabled
