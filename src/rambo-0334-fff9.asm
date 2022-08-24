@@ -41,7 +41,8 @@ fDE = $DE
 ; **** ZP ABSOLUTE ADRESSES ****
 ;
 a01 = $01
-a02 = $02
+a02 = $02                               ;In title, it is used as raster idx
+                                        ; In game, as delay (??)
 a04 = $04
 a05 = $05
 a06 = $06
@@ -11340,24 +11341,28 @@ STR_CONGRATULATIONS
 ; $C82E
 sC82E   LDA #$01
         JSR MUSIC_FN
+
         LDA #26
         LDX #$07
         JSR MUSIC_FN
+
         LDA #$03
         JSR MUSIC_FN
 
-jC83F   LDA #$08     ;#%00001000
+jC83F   LDA #$08
         STA aCCD3
-        LDA #$00     ;#%00000000
+        LDA #$00
         STA aCF0E
         STA aCF0D
         STA aCFFF
-        LDA #$20     ;#%00100000
-        LDX #$27     ;#%00100111
-bC853   STA f4348,X
-        STA f4370,X
+
+        ; Clear rows 21 and 22
+        LDA #$20                        ;space
+        LDX #39
+_L00    STA $4000+40*21,X
+        STA $4000+40*22,X
         DEX
-        BPL bC853
+        BPL _L00
 
         JSR PRINT_EXT_STR
         .ADDR STR_TITLE_RAMBO
@@ -11389,12 +11394,15 @@ bC888   JSR bC2D3
         LDA aCF0E
         BEQ bC888
         DEC aCF0E
-        LDY #$27     ;#%00100111
-        LDA #$20     ;#%00100000
-bC8A2   STA f4398,Y
-        STA f43C0,Y
+
+        ; Clear rows 23 and 24
+        LDY #39
+        LDA #$20                        ;space
+_L00    STA $4000+40*23,Y
+        STA $4000+40*24,Y
         DEY
-        BPL bC8A2
+        BPL _L00
+
 bC8AB   JSR bC2D3
         JSR SCREEN_SCROLL_UP_ONE_ROW
         JSR sC589
@@ -11558,7 +11566,8 @@ aCC7D   = *+2
         ; 40 spaces
 fCC7E   .TEXT "[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[["
         #STR_CODE_END
-        .BYTE $FF,$00,$00,$00,$00,$00
+
+        .BYTE $FF,$00,$00,$00,$00,$00   ;Garbage (?)
 
 STR_CLEAR_SCREEN
         #STR_CODE_CLR_SCREEN $20,$01
@@ -11583,6 +11592,7 @@ aCCD3   .BYTE $01
 aCCD4   .BYTE $00
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+; Cycles color of high score, and updtes the score (?)
 sCCD5   LDY aCD72
         LDX aCCD3
         CPX #$01
@@ -11765,9 +11775,9 @@ _L02    LDA $D800+40 * 19 + 0,Y
 ; $CE30
 INIT_INTERRUPTS
         SEI
-        LDA #<aCE71
+        LDA #<TITLE_IRQ_HANDLER
         STA $FFFE                       ;IRQ
-        LDA #>aCE71
+        LDA #>TITLE_IRQ_HANDLER
         STA $FFFF                       ;IRQ
         LDA #$C8
         STA $D012                       ;Raster Position
@@ -11789,7 +11799,7 @@ INIT_INTERRUPTS
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 ; $CE5F
-; It seems that nobody is calling this function
+; Unused, it seems that nobody is calling this function
 NMI_HANDLER
         LDA #$36                        ;RAM / IO / KERNAL
         STA a01
@@ -11805,7 +11815,8 @@ aCE66
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 ; $CE71
 ; IRQ Handler
-aCE71   PHA
+TITLE_IRQ_HANDLER
+        PHA
         TYA
         PHA
         TXA
@@ -11824,7 +11835,7 @@ aCE71   PHA
         NOP
         NOP
 _ADDR_LO = *+$01
-_ADDR_HI =*+$02
+_ADDR_HI = *+$02
         JSR TITLE_RASTER_81                       ;Gets patched in runtime
         INC a02
         LDA a02
@@ -11918,21 +11929,23 @@ aCF0E   .BYTE $00
 fCF0F   .BYTE $00,$00,$00,$00
 fCF13   .BYTE $00,$20,$05,$00
 
-jCF17   LDX #$03     ;#%00000011
-        LDA #$81     ;#%10000001
-        STA $DD0E    ;CIA2: CIA Control Register A
-        LDA #$08     ;#%00001000
-        STA $DD0F    ;CIA2: CIA Control Register B
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+; Unused (?)
+jCF17   LDX #$03
+        LDA #$81                        ;#%10000001
+        STA $DD0E                       ;CIA2: CIA Control Register A
+        LDA #$08                        ;#%00001000
+        STA $DD0F                       ;CIA2: CIA Control Register B
 _L00    LDA fCF0F,X
-        STA $DD08,X  ;CIA2: Time-of-Day Clock: 1/10 Seconds
+        STA $DD08,X                     ;CIA2: Time-of-Day Clock: 1/10 Seconds
         DEX
         BPL _L00
 
-        LDX #$03     ;#%00000011
-        LDA #$80     ;#%10000000
-        STA $DD0F    ;CIA2: CIA Control Register B
+        LDX #$03
+        LDA #$80                        ;#%10000000
+        STA $DD0F                       ;CIA2: CIA Control Register B
 _L01    LDA fCF13,X
-        STA $DD08,X  ;CIA2: Time-of-Day Clock: 1/10 Seconds
+        STA $DD08,X                     ;CIA2: Time-of-Day Clock: 1/10 Seconds
         DEY
         DEX
         BPL _L01
