@@ -10772,12 +10772,13 @@ bC2EF   JSR s035B
         RTS
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+; Something with the Hiscore / Hiscore index
 sC2FC   LDA #$4E                        ;Index to HISCORE_TBL_IDX
         STA aC36D
         LDA #$00
         STA aC36C
 
-bC306   LDY aC36D
+_L00    LDY aC36D
         INY
         LDA HISCORE_TBL_IDX,Y
         ASL A
@@ -10792,10 +10793,10 @@ bC306   LDY aC36D
         ADC HISCORE_TBL_IDX,Y
         TAY                             ;Y = Index * 3
         JSR sC34B
-        BCC bC329
-        JMP jC33F
+        BCC _L01
+        JMP _L02
 
-bC329   LDY aC36D
+_L01    LDY aC36D
         LDA HISCORE_TBL_IDX,Y
         PHA
         LDA HISCORE_TBL_IDX+1,Y
@@ -10804,8 +10805,8 @@ bC329   LDY aC36D
         STA HISCORE_TBL_IDX+1,Y
         LDA #$01
         STA aC36C
-jC33F   DEC aC36D
-        BPL bC306
+_L02    DEC aC36D
+        BPL _L00
         LDA aC36C
         BNE sC2FC
         RTS
@@ -11471,7 +11472,7 @@ bC8AB   JSR bC2D3
         BCC jC86E
 
         JSR PRINT_EXT_STR
-        .ADDR STR_TITLE_INSTRUCTIONS
+        .ADDR STR_TITLE_INSTRUCTIONS_WORD
 
 ; $C8D7
         LDA #$00
@@ -11481,15 +11482,15 @@ bC8AB   JSR bC2D3
         LDA #>pC96C
         STA aFF
 
-	; Reads from the lines to scroll.
-	; A copies each line, one-by-one, in a temporal
-	; buffer.
-	; And this temporal buffer is printed using the
-	; PRINT_EXT_STR function
+        ; Reads from the lines to scroll.
+        ; A copies each line, one-by-one, in a temporal
+        ; buffer.
+        ; And this temporal buffer is printed using the
+        ; PRINT_EXT_STR function
 _L00    LDY #$00
 _L01    LDA (pFE),Y                     ;Read char to print
         BMI _L02                        ;Is it special char? Yes
-        STA fCC7E,Y                     ; No?,just place it in buffer
+        STA INSTRUCTIONS_ROW,Y          ; No?,just place it in buffer
         INY                             ;Next char
         JMP _L01
 
@@ -11507,7 +11508,7 @@ _L02    TAX                             ;Save special char in X
         INC aFF
 
 _L03    PLA                             ;Pop special-modifier
-        STA aCC7D                       ;Save it
+        STA INSTRUCTIONS_COLOR          ;Save it
         TAY
         CPX #$FF                        ;Special is #ff ?
         BNE _L04                        ; No
@@ -11521,24 +11522,24 @@ _L04    CPX #$FE                        ;Special is #fe ?
         JMP jC83F
 
 _L05    TYA
-        AND #$10     ;#%00010000
+        AND #$10
         LSR A
         LSR A
         LSR A
         LSR A
         CLC
-        ADC #$04     ;#%00000100
-        STA aCC7A
+        ADC #$04
+        STA INSTRUCTIONS_FONT_SIZE
         LDY aCCD4
         DEY
         DEY
-        LDA #$FF     ;#%11111111
-        STA fCC7E,Y
-        LDA #$00     ;#%00000000
-        STA fCC7E+1,Y
+        LDA #$FF                        ;Place "END STR"
+        STA INSTRUCTIONS_ROW,Y
+        LDA #$00
+        STA INSTRUCTIONS_ROW+1,Y
 
         JSR PRINT_EXT_STR
-        .ADDR aCC75
+        .ADDR STR_TITLE_INSTRUCTIONS_ONE_ROW
 
 _L06    JSR bC2D3
         JSR SCREEN_SCROLL_UP_ONE_ROW
@@ -11547,9 +11548,10 @@ _L06    JSR bC2D3
         BNE _L07
         LDA aC5CD
         BEQ _L08
-        AND #$10     ;#%00010000
+        AND #$10
         BNE _L09
-_L07    LDA #$00     ;#%00000000
+
+_L07    LDA #$00
         STA aCFFF
         LDA #$8D                        ;'STA abs' opcode
         STA aCF01
@@ -11601,20 +11603,22 @@ pC96C   .TEXT "[[[[[[YOU[HAVE[CHOSEN[TO[BECOME[AN[[[[[["
         .TEXT "[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[["
         .BYTE $80,$91,$FF,$91,$FE,$91
 
-STR_TITLE_INSTRUCTIONS
+STR_TITLE_INSTRUCTIONS_WORD
         #STR_CODE_SET_COORDS $0B,$09
         #STR_CODE_SET_COLOR $01
         #STR_CODE_FONT_SMALL
         .TEXT "   INSTRUCTIONS "
         #STR_CODE_END
 
-aCC75   #STR_CODE_SET_COORDS $00,$17
-aCC7A   = *+1
+STR_TITLE_INSTRUCTIONS_ONE_ROW
+        #STR_CODE_SET_COORDS $00,$17
+INSTRUCTIONS_FONT_SIZE = *+1
         #STR_CODE_FONT_SMALL
-aCC7D   = *+2
+INSTRUCTIONS_COLOR = *+2
         #STR_CODE_SET_COLOR $00
         ; 40 spaces
-fCC7E   .TEXT "[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[["
+INSTRUCTIONS_ROW
+        .TEXT "[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[["
         #STR_CODE_END
 
         .BYTE $FF,$00,$00,$00,$00,$00   ;Garbage (?)
