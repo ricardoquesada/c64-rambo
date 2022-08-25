@@ -245,7 +245,8 @@ s0352   JMP j2549
 
 s0358   JMP j0CB3
 
-s035B   JMP j07DE
+GET_SCORE_BCD_DIGIT_BIS
+        JMP GET_SCORE_BCD_DIGIT
 
         JMP GAME_INIT
 
@@ -626,25 +627,32 @@ j07D5   JSR j1DC2
         JSR j1D8F
         JMP j224E
 
-j07DE   TXA
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+; Gmae uses one byte to store one digit.
+; HI-Score table uses 1 byte to store two digits.
+; This functions returns 2 score digits in one byte
+; Parms: X: Digit to return (from 0,2)
+GET_SCORE_BCD_DIGIT
+        TXA
         PHA
-        ASL A
+        ASL A                           ;Index * 2
         TAX
-        LDA f256B,X
+        LDA f256A+1,X
         STA a2493
         LDA f256A,X
         ASL A
         ASL A
         ASL A
-        ASL A
+        ASL A                           ;Move MSB to 4 MSB bits
         ORA a2493
         STA a2493
         PLA
         TAX
-        LDA a2493
+        LDA a2493                       ;LSB uses 4 LSB bits
         RTS
 
-j07FB   LDX #$03     ;#%00000011
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+j07FB   LDX #$03
         STX a0827
 b0800   LDA f086E,X
         BEQ b080B
@@ -4209,8 +4217,7 @@ b255E   STA f256A,X
         BPL b254B
         RTS
 
-f256A   .BYTE $00
-f256B   .BYTE $00,$00,$00,$00,$00
+f256A   .BYTE $00,$00,$00,$00,$00,$00
 f2570   .BYTE $09,$09,$09,$09,$09
 f2575   .BYTE $09
 f2576   .BYTE $00,$00
@@ -10669,7 +10676,7 @@ _L00    STA HISCORE_TBL,Y
                                         ; Raster 8-bit = 0
         LDA HISCORE_TBL_IDX+$4F
         STA aC2D1
-        JSR sC2E1
+        JSR COPY_GAME_SCORE_TO_HISCORE_TBL
 
         LDA #$01
         JSR MUSIC_FN
@@ -10748,27 +10755,30 @@ aC2D1   .BYTE $00
 aC2D2   .BYTE $00
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
-
 bC2D3   LDA aCF0C
         BEQ bC2D3
         DEC aCF0C
+
         LDA #$00
         JSR MUSIC_FN
         RTS
 
-sC2E1   LDA HISCORE_TBL_IDX+$4F
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+COPY_GAME_SCORE_TO_HISCORE_TBL
+        LDA HISCORE_TBL_IDX+$4F
         STA TMP_C19C
         ASL A
         CLC
         ADC TMP_C19C
-        TAY
+        TAY                             ;Y = Index value * 3
+
         LDX #$00
-bC2EF   JSR s035B
+_L00    JSR GET_SCORE_BCD_DIGIT_BIS
         STA HISCORE_TBL,Y
         INY
         INX
-        CPX #$03     ;#%00000011
-        BNE bC2EF
+        CPX #$03
+        BNE _L00
         RTS
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
