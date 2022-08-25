@@ -10755,8 +10755,9 @@ aC2D1   .BYTE $00
 aC2D2   .BYTE $00
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
-bC2D3   LDA aCF0C
-        BEQ bC2D3
+WAIT_NEW_FRAME_AND_MUSIC_SMTH
+_L00    LDA aCF0C
+        BEQ _L00
         DEC aCF0C
 
         LDA #$00
@@ -11435,7 +11436,7 @@ bC863   STA aCD72
         JSR PRINT_EXT_STR
         .ADDR STR_PLAYER_HISCORE
 
-jC86E   JSR bC2D3
+jC86E   JSR WAIT_NEW_FRAME_AND_MUSIC_SMTH
         JSR SCREEN_SCROLL_UP_ONE_ROW
         JSR sC589
         LDA aC5CC
@@ -11447,7 +11448,7 @@ jC86E   JSR bC2D3
 bC884   RTS
 
 bC885   DEC aCF0E
-bC888   JSR bC2D3
+bC888   JSR WAIT_NEW_FRAME_AND_MUSIC_SMTH
         JSR SCREEN_SCROLL_UP_ONE_ROW
         JSR sC589
         LDA aC5CC
@@ -11464,7 +11465,7 @@ _L00    STA $4000+40*23,Y
         DEY
         BPL _L00
 
-bC8AB   JSR bC2D3
+bC8AB   JSR WAIT_NEW_FRAME_AND_MUSIC_SMTH
         JSR SCREEN_SCROLL_UP_ONE_ROW
         JSR sC589
         LDA aC5CC
@@ -11474,10 +11475,10 @@ bC8AB   JSR bC2D3
         DEC aCF0E
         LDA aCD72
         CLC
-        ADC #$01     ;#%00000001
-        CMP #$50     ;#%01010000
+        ADC #$01
+        CMP #$50
         BCC bC863
-        CMP #$54     ;#%01010100
+        CMP #$54
         STA aCD72
         BCC jC86E
 
@@ -11487,9 +11488,9 @@ bC8AB   JSR bC2D3
 ; $C8D7
         LDA #$00
         STA aCFFF
-        LDA #<pC96C
+        LDA #<SCROLLING_UP_TEXT
         STA aFE
-        LDA #>pC96C
+        LDA #>SCROLLING_UP_TEXT
         STA aFF
 
         ; Reads from the lines to scroll.
@@ -11551,7 +11552,7 @@ _L05    TYA
         JSR PRINT_EXT_STR
         .ADDR STR_TITLE_INSTRUCTIONS_ONE_ROW
 
-_L06    JSR bC2D3
+_L06    JSR WAIT_NEW_FRAME_AND_MUSIC_SMTH
         JSR SCREEN_SCROLL_UP_ONE_ROW
         JSR sC589
         LDA aCFFF
@@ -11575,41 +11576,49 @@ _L09    LDX #$8D                        ;'STA abs' opcode
         RTS
 
         ; WTF: Two different way to encode special chars?
-pC96C   .TEXT "[[[[[[YOU[HAVE[CHOSEN[TO[BECOME[AN[[[[[["
-        .BYTE $80,$91
+SCROLLING_UP_TEXT
+        .TEXT "[[[[[[YOU[HAVE[CHOSEN[TO[BECOME[AN[[[[[["
+        .BYTE $80,$91                   ;Color White
         .TEXT "[[[[[[[[[[AMERICAN[PEACETIME[HERO[[[[[[["
-        .BYTE $80, $91
+        .BYTE $80,$91                   ;Color White
         .TEXT "[[[[PLACE[YOUR[WEAPON[INTO[PORT[TWO[[[[["
-        .BYTE $80,$93
+        .BYTE $80,$93                   ;Color Cyan
         .TEXT "[[YOUR[MISSION[IS[TO[RETURN[TO[VIETNAM[["
-        .BYTE $80,$91
+        .BYTE $80,$91                   ;Color White
         .TEXT "[[[[ON[A[RECONNAISANCE[EXERCISE[TO[[[[[["
-        .BYTE $80,$91
+        .BYTE $80,$91                   ;Color White
         .TEXT "[[[ESTABLISH[WHETHER[P<O<W;S[ARE[STILL[["
-        .BYTE $80,$91
+        .BYTE $80,$91                   ;Color White
         .TEXT "[[[[[[[[BEING[HELD[CAPTIVE<<<[[[[[[[[[[["
-        .BYTE $80,$91
+        .BYTE $80,$91                   ;Color White
         .TEXT "[YOU[MUST[UNDER[NO[CIRCUMSTANCES[ENGAGE["
-        .BYTE $80,$95
+        .BYTE $80,$95                   ;Color Green
         .TEXT "[[[[[[[[[[[[[[[THE[ENEMY[[[[[[[[[[[[[[[["
-        .BYTE $80,$95
+        .BYTE $80,$95                   ;Color Green
         .TEXT "[[[[[[[[MOVE[JOYSTICK[TO[CONTINUE[[[[[[["
-        .BYTE $80,$93,$80,$93
+        .BYTE $80,$93,$80,$93           ;Color Cyan
 
         .TEXT "[[[[[[[[SPACE[BAR[SELECTS[WEAPON[[[[[[[["
-        .BYTE $FF,$93
+        .BYTE $FF,$93                   ;Color Cyan
         .TEXT "[[[[[=S=[TOGGLES[MUSIC[AND[SOUND[FX[[[[["
-        .BYTE $80,$93
+        .BYTE $80,$93                   ;Color Cyan
         .TEXT "[=RUN[STOP=[TOGGLES[SUSPENDED[ANIMATION["
-        .BYTE $80,$93,$80,$95
+        .BYTE $80,$93                   ;Color Cyan
+        ; Empty Line
+        .BYTE $80,$95                   ;Color Green
         .TEXT "[[[WATCH[OUT[FOR[EXTRA[WEAPONS[IN[THE[[["
-        .BYTE $80,$95
+        .BYTE $80,$95                   ;Color Green
         .TEXT "[[[[[[[TERRAIN[AND[ENEMY[CAMPSITE[[[[[[["
-        .BYTE $80,$95,$80,$91
+        .BYTE $80,$95                   ;Color Green
+        ; Empty Line
+        .BYTE $80,$91                   ;Color White
         .TEXT "[[[[[[[WHETHER[YOU[SUCCEED[OR[NOT[[[[[[["
-        .BYTE $80,$91,$80,$91
+        .BYTE $80,$91                   ;Color White
+        ; Empty Line
+        .BYTE $80,$91
         .TEXT "[[[[IS[UP[TO[YOU[[[["
-        .BYTE $80,$81,$80,$91
+        .BYTE $80,$81                   ;Big Font
+        .BYTE $80,$91                   ;Color White
         .TEXT "[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[["
         .BYTE $80,$91,$FF,$91,$FE,$91
 
