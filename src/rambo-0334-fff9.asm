@@ -2545,10 +2545,10 @@ _L00    STA f02,X
         STA a0BEC
 
         LDX #$02
-b170A   LDA f0BF1,X
+_L01    LDA f0BF1,X
         STA f0BED,X
         DEX
-        BPL b170A
+        BPL _L01
 
         LDA #$04
         STA aE3
@@ -2572,10 +2572,13 @@ b170A   LDA f0BF1,X
         STA a0B
         LDA #$07
         STA a1A47
+
         LDA #$96                        ;#%10010110
-        STA $DD00                       ;CIA2: Data Port Register A
+        STA $DD00                       ; Use VIC bank 1 ($4000-$7FFF)
+
         LDA #$0F                        ;#%00001111
-        STA $D018                       ;VIC Memory Control Register
+        STA $D018                       ; Charset: $7800-$7FFF
+                                        ; Video: $4000
         LDA #$32
         STA a1299
         JSR s0983
@@ -2592,11 +2595,14 @@ b170A   LDA f0BF1,X
         STA a52
         JSR s1BD4
         JSR s12A7
+
         LDA $D016                       ;VIC Control Register 2
-        ORA #$10                        ;#%00010000
-        STA $D016                       ;VIC Control Register 2
+        ORA #$10                        ; #%00010000
+        STA $D016                       ; 40=Cols
+
         LDA #$04
         STA a1D8E
+
         LDA #$00                        ;Color Black
         STA $D022                       ;Background Color 1, Multi-Color Register 0
         STA $D020                       ;Border Color
@@ -2614,6 +2620,7 @@ b170A   LDA f0BF1,X
         STA $D026                       ;Sprite Multi-Color Register 1
         STA $D017                       ;Sprites Expand 2x Vertical (Y)
         STA $D01D                       ;Sprites Expand 2x Horizontal (X)
+
         STA aFF
         STA aFE
         LDA #$3C
@@ -2624,16 +2631,16 @@ b170A   LDA f0BF1,X
         LDX #$07
         LDA #$00
         STX a0D23
-b17CB   STA a7FF8,X                     ;Sprite frames
+_L02    STA a7FF8,X                     ;Sprite frames
         DEX
-        BPL b17CB
+        BPL _L02
 
         LDX #$07
         LDA #26
         JSR MUSIC_FN
 
         LDX #$19
-b17DA   TXA
+_L03    TXA
         PHA
         JSR s1FCF
         LDA #$01
@@ -2642,7 +2649,7 @@ b17DA   TXA
         PLA
         TAX
         DEX
-        BNE b17DA
+        BNE _L03
 
         JSR b12C7
         JSR s0C9C
@@ -2659,19 +2666,20 @@ b17DA   TXA
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 ; $180D
 VIC_SCREEN_DISABLE
-	LDA #$00
+        LDA #$00
         STA $D011                       ;VIC Control Register 1
         RTS
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 ; $1813
 VIC_SCREEN_ENABLE
-	LDA #$10
+        LDA #$10
         STA $D011                       ;VIC Control Register 1
         RTS
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
-s1819   LDX #$02
+s1819
+        LDX #$02
 _L00    LDA f1965,X
         BEQ _L01
         JSR s1827
@@ -2822,6 +2830,7 @@ f1927   .BYTE $00,$00,$00,$00,$00,$0F,$00,$00
 a1931   .BYTE $00
 a1932   .BYTE $00
 a1933   .BYTE $00
+
 s1934   LDA #$41     ;#%01000001
         STA f94,X
         LDA #$0A     ;#%00001010
@@ -2891,6 +2900,7 @@ b19A7   LDA a1A47
 
 f19BD   .BYTE $22
 f19BE   .BYTE $22,$15,$16,$17,$18,$19,$1A
+
 s19C5   LDX #$07     ;#%00000111
 b19C7   LDA f242E,X
         STA f2426,X
@@ -2924,35 +2934,40 @@ b19FE   STA a242C
         STA a242D
         RTS
 
-j1A05   LDA #$00     ;#%00000000
-        STA $DC00    ;CIA1: Data Port Register A
-        LDA $DC01    ;CIA1: Data Port Register B
-        EOR #$FF     ;#%11111111
-        BNE b1A17
-        LDA #$FF     ;#%11111111
-        STA $DC00    ;CIA1: Data Port Register A
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+j1A05
+        LDA #$00                        ;Disable keyboard scanning
+        STA $DC00                       ; CIA1: Data Port Register A
+
+        LDA $DC01                       ;Read Joy port #2
+        EOR #$FF                        ; Flip bits since they are active low
+        BNE _L00                        ;Any activity in the joystick?
+                                        ; Yes, jump
+
+        LDA #$FF                        ;Enable keyboard scanning
+        STA $DC00                       ; CIA1: Data Port Register A
         RTS
 
-b1A17   LDA #$3C     ;#%00111100
+_L00    LDA #$3C
         JSR s26FA
-        LDA #$00     ;#%00000000
-        BCC b1A3F
+        LDA #$00
+        BCC _L04
         LDA a1A45
-        BEQ b1A29
+        BEQ _L01
         DEC a1A45
         RTS
 
-b1A29   JSR s19C5
-b1A2C   LDX a0E
-        BNE b1A32
+_L01    JSR s19C5
+_L02    LDX a0E
+        BNE _L03
         LDX #$06     ;#%00000110
-b1A32   DEX
+_L03    DEX
         STX a0E
         LDA a1A47
         AND f1A48,X
-        BEQ b1A2C
+        BEQ _L02
         LDA #$0A     ;#%00001010
-b1A3F   STA a1A45
+_L04    STA a1A45
         JMP j0CF6
 
 a1A45   .BYTE $00
@@ -2961,6 +2976,7 @@ a1A47   .BYTE $07
 f1A48   .BYTE $01
 f1A49   .BYTE $02,$04,$08,$10,$20,$40,$80
 a1A50   .BYTE $00
+
 s1A51   LDA a1D62
         AND #$10     ;#%00010000
         BEQ b1A5E
@@ -3344,8 +3360,9 @@ a1D8C   .BYTE $00,$00
 a1D8E   .BYTE $00
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
-j1D8F   LDX #13
-_L00 	LDA f45,X
+j1D8F
+        LDX #13
+_L00    LDA f45,X
         STA f37,X
         LDA f61,X
         STA f53,X
@@ -3355,7 +3372,7 @@ _L00 	LDA f45,X
         BPL _L00
 
         LDX #$04
-_L01 	LDA f7D,X
+_L01    LDA f7D,X
         STA f6F,X
         DEX
         BPL _L01
@@ -3366,7 +3383,7 @@ _L01 	LDA f7D,X
         STA a7B
 
         LDX #$06
-_L02 	LDA f82,X
+_L02    LDA f82,X
         ASL A
         STA f74,X
         ROL f58,X
@@ -4442,23 +4459,25 @@ b26F4   STA fDE,X
         STA fDA,X
         RTS
 
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 s26FA   STY a2734
         PHA
         LSR A
         LSR A
         LSR A
         TAY
-        LDA f2735,Y
-        STA $DC00    ;CIA1: Data Port Register A
+        LDA f2735,Y                     ;Filter keyboard row
+        STA $DC00                       ; CIA1: Data Port Register A
         PLA
-        AND #$07     ;#%00000111
+        AND #$07
         TAY
-        LDA $DC01    ;CIA1: Data Port Register B
+        LDA $DC01                       ;Ready keyboard column
         AND f273D,Y
         BNE b2725
-        LDA #$FF     ;#%11111111
-        STA $DC00    ;CIA1: Data Port Register A
-        LDA $DC01    ;CIA1: Data Port Register B
+
+        LDA #$FF                        ;Disable keyboard scanning
+        STA $DC00                       ; All rows desactivated
+        LDA $DC01                       ;Read Joy port #2
         AND f273D,Y
         BEQ b2725
         SEC
@@ -4466,10 +4485,11 @@ s26FA   STY a2734
 
 b2725   CLC
 j2726   LDY a2734
-        LDA #$FF     ;#%11111111
-        STA $DC00    ;CIA1: Data Port Register A
-        LDA #$7F     ;#%01111111
-        STA $DC01    ;CIA1: Data Port Register B
+
+        LDA #$FF                        ;Default values
+        STA $DC00
+        LDA #$7F                        ;Default values
+        STA $DC01
         RTS
 
 a2734   .BYTE $00
@@ -4478,6 +4498,7 @@ f273D   .BYTE $01,$02,$04,$08,$10,$20,$40,$80
 a2745   .BYTE $00
 a2746   .BYTE $00
 a2747   .BYTE $E2,$00,$00
+
 j274A   LDA #$27     ;#%00100111
         STA a27EF
         STA a2493
@@ -11207,10 +11228,10 @@ _L00    STA JOYSTICK_VALUE_RIGHT,X
         DEX
         BPL _L00
 
-        LDA $DC00                       ;Read Joy port #2
-        AND $DC01                       ;Read Joy port #1
-        EOR #$FF                        ;Reverse since they are active low
-        AND #$1F                        ;Mask direction and button
+        LDA $DC00                       ;Read Joy port #1
+        AND $DC01                       ;Read Joy port #2
+        EOR #$FF                        ; Flip bits since they are active low
+        AND #$1F                        ; Mask direction and button
         STA JOYSTICK_VALUE_ALL
         LSR A
         ROL JOYSTICK_VALUE_UP
