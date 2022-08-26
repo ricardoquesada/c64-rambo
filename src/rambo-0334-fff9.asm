@@ -10633,7 +10633,7 @@ MAIN
         STA $D016                       ; VIC Control Register 2
                                         ; 40=cols, smooth_x=0, no MC
 
-TITLE_LOOP
+TITLE_MAIN_LOOP
         JSR PRINT_EXT_STR
         .ADDR STR_CLEAR_SCREEN
 
@@ -10702,7 +10702,7 @@ _L00    STA HISCORE_TBL,Y
         JSR sC2FC
 
         JSR MAYBE_DISPLAY_HISCORE
-        JMP TITLE_LOOP
+        JMP TITLE_MAIN_LOOP
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 ; $C276
@@ -10883,7 +10883,7 @@ sC36E   LDA #$00
         STA aC651
         JSR MUSIC_FN
 
-        JSR sC494
+        JSR TROOPER_RESET_WAIT_FOR_JOY_DELAY
 
         LDA #$00
         STA aFF
@@ -10918,7 +10918,7 @@ _L01    STA (pFE),Y
         LDA #$1B                        ;#%00011011
         STA $D011                       ;VIC Control Register 1
                                         ; Raster bit-8 disabled
-        JSR sC3F2
+        JSR TROOPER_MAIN_LOOP
         JSR WAIT_RASTER_F8
 
         LDA #$00
@@ -10945,38 +10945,41 @@ _L00    TYA
         RTS
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
-sC3F2   JSR WAIT_RASTER_F8
+TROOPER_MAIN_LOOP
+        JSR WAIT_RASTER_F8
         LDA #$00
         JSR MUSIC_FN
         JSR sC529
         JSR TITLE_READ_JOYSTICK
-        JSR TITLE_UPDATE_CURSOR_POS
+        JSR TROOPER_UPDATE_MINI_CURSOR_POS
         JSR sC655
-        JSR TITLE_PRINT_TROOPER_NAME
-        JSR sC625
-        JSR sC4CE
-        JSR sC418
-        JSR sC465
-        JMP sC3F2
+        JSR TROOPER_PRINT_NAME
+        JSR TROOPER_CALCULATE_MINI_CURSOS_POS
+        JSR TROOPER_MAYBE_NEW_CHAR
+        JSR TROOPER_PRINT_BLINKY_CURSOR
+        JSR TROOPER_EXIT_IF_NO_JOY_INPUT
+        JMP TROOPER_MAIN_LOOP
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
-sC418   LDA aC528
+TROOPER_PRINT_BLINKY_CURSOR
+        LDA aC528
         ASL A
         CLC
         ADC #$0A
-        STA aC433
+        STA TEXT_TROOPER_BLINKY_CURSOR_COORD_X
         LDX aC547
-        LDA TITLE_SPRITE_COLOR_TBL,X
-        STA aC437
+        LDA TROOPER_SPRITE_COLOR_TBL,X
+        STA TEXT_TROOPER_BLINKY_CURSOR_COLOR
 
         JSR PRINT_EXT_STR
-        .ADDR aC431
+        .ADDR STR_TROOPER_BLINKY_CURSOR
 
         RTS
 
-aC433   = *+2
-aC431   #STR_CODE_SET_COORDS $00,$16
-aC437   = *+2
+TEXT_TROOPER_BLINKY_CURSOR_COORD_X   = *+2
+STR_TROOPER_BLINKY_CURSOR
+        #STR_CODE_SET_COORDS $00,$16
+TEXT_TROOPER_BLINKY_CURSOR_COLOR   = *+2
         #STR_CODE_SET_COLOR $00
         .TEXT ":["                      ; ': '
         #STR_CODE_END
@@ -11015,18 +11018,24 @@ _L00    SEC
         RTS
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
-sC465   LDA JOYSTICK_VALUE_FIRE
-        BNE sC494
+; If the Joystick is not moved after 256 vertical retraces,
+; exit the Trooper main loop, and use "UNKNOWN" as name
+TROOPER_EXIT_IF_NO_JOY_INPUT
+        LDA JOYSTICK_VALUE_FIRE
+        BNE TROOPER_RESET_WAIT_FOR_JOY_DELAY
         LDA JOYSTICK_VALUE_LEFT
-        BNE sC494
+        BNE TROOPER_RESET_WAIT_FOR_JOY_DELAY
         LDA JOYSTICK_VALUE_RIGHT
-        BNE sC494
-        INC aC49D
+        BNE TROOPER_RESET_WAIT_FOR_JOY_DELAY
+
+        INC TROOPER_WAIT_FOR_JOY_DELAY_LO
         BNE bC49C
-        INC aC49E
-        LDA aC49E
+        INC TROOPER_WAIT_FOR_JOY_DELAY_HI
+        LDA TROOPER_WAIT_FOR_JOY_DELAY_HI
         CMP #$02
         BNE bC49C
+
+        ; Use "UNKNWON" as name and return exit Troope's main loop
         JSR USE_UNKNOWN_AS_NAME
         PLA
         PLA
@@ -11043,18 +11052,20 @@ _L00    LDA UNKNOWN_NAME,Y
         BPL _L00
         RTS
 
-sC494   LDA #$00     ;#%00000000
-        STA aC49D
-        STA aC49E
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+TROOPER_RESET_WAIT_FOR_JOY_DELAY
+        LDA #$00
+        STA TROOPER_WAIT_FOR_JOY_DELAY_LO
+        STA TROOPER_WAIT_FOR_JOY_DELAY_HI
 bC49C   RTS
 
-aC49D   .BYTE $00
-aC49E   .BYTE $00
+TROOPER_WAIT_FOR_JOY_DELAY_LO   .BYTE $00
+TROOPER_WAIT_FOR_JOY_DELAY_HI   .BYTE $00
 UNKNOWN_NAME
         .TEXT "]UNKNOWN]["              ;Player Name: Unknown
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
-TITLE_PRINT_TROOPER_NAME
+TROOPER_PRINT_NAME
         LDY #$09
 _L00    LDA (pFE),Y
         STA TROOPER_NAME_TEXT,Y
@@ -11075,20 +11086,22 @@ TROOPER_NAME_TEXT
         #STR_CODE_END
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
-sC4CE   LDA JOYSTICK_VALUE_FIRE
-        BNE bC4D4
+TROOPER_MAYBE_NEW_CHAR
+        LDA JOYSTICK_VALUE_FIRE
+        BNE _L00
         RTS
 
-bC4D4   LDX aC651
+_L00    LDX aC651
         LDA fC72C,X
         JSR sC4EA
         LDY aC528
         CPY #$0A
-        BEQ bC4E9
+        BEQ _L01
         STA (pFE),Y
         INC aC528
-bC4E9   RTS
+_L01    RTS
 
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 sC4EA   CPX #$1B
         BNE bC4FE
         LDY aC528
@@ -11149,7 +11162,7 @@ _L01    STX aC547
 
 aC546   .BYTE $00
 aC547   .BYTE $00,$00
-TITLE_SPRITE_COLOR_TBL
+TROOPER_SPRITE_COLOR_TBL
         .BYTE $00,$0B,$0C,$0F,$01,$0F,$0C,$0B
 fC551   .BYTE $00,$06,$0E,$03,$01,$03,$0E,$06
 
@@ -11218,18 +11231,18 @@ JOYSTICK_VALUE_FIRE             .BYTE $00
 JOYSTICK_VALUE_ALL              .BYTE $00
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
-TITLE_UPDATE_CURSOR_POS
-        LDA TITLE_SPRITE_X
+TROOPER_UPDATE_MINI_CURSOR_POS
+        LDA TROOPER_MINI_CURSOR_POS_X
         STA $D000                       ;Sprite 0 X Pos
-        LDA TITLE_SPRITE_Y
+        LDA TROOPER_MINI_CURSOR_POS_Y
         STA $D001                       ;Sprite 0 Y Pos
-        LDA TITLE_SPRITE_X_MSB
+        LDA TROOPER_MINI_CURSOR_POS_X_MSB
         STA $D010                       ;Sprites 0-7 MSB of X coordinate
         LDA #$DF                        ;#%11011111
         STA f43F8
         LDX aC547
         LDY #29
-        LDA TITLE_SPRITE_COLOR_TBL,X
+        LDA TROOPER_SPRITE_COLOR_TBL,X
         STA $D027                       ;Sprite 0 Color
 _L00    STA fD82D,Y
         STA fD805,Y
@@ -11263,7 +11276,9 @@ bC61F   LDA #$1D     ;#%00011101
         STA aC651
         RTS
 
-sC625   LDX aC651
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+TROOPER_CALCULATE_MINI_CURSOS_POS
+        LDX aC651
         LDA fC6EC,X
         CLC
         ADC #$09     ;#%00001001
@@ -11274,11 +11289,11 @@ sC625   LDX aC651
         PHP
         CLC
         ADC #$06     ;#%00000110
-        STA TITLE_SPRITE_X
+        STA TROOPER_MINI_CURSOR_POS_X
         PLP
         LDA #$00     ;#%00000000
         ROL A
-        STA TITLE_SPRITE_X_MSB
+        STA TROOPER_MINI_CURSOR_POS_X_MSB
         LDA fC70C,X
         CLC
         ADC #$03     ;#%00000011
@@ -11287,14 +11302,15 @@ sC625   LDX aC651
         ASL A
         CLC
         ADC #$31     ;#%00110001
-        STA TITLE_SPRITE_Y
+        STA TROOPER_MINI_CURSOR_POS_Y
         RTS
 
 aC651   .BYTE $00
-TITLE_SPRITE_X          .BYTE $00
-TITLE_SPRITE_X_MSB      .BYTE $00
-TITLE_SPRITE_Y          .BYTE $00
+TROOPER_MINI_CURSOR_POS_X          .BYTE $00
+TROOPER_MINI_CURSOR_POS_X_MSB      .BYTE $00
+TROOPER_MINI_CURSOR_POS_Y          .BYTE $00
 
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 sC655   LDA aC65E
         BEQ bC65F
         DEC aC65E
@@ -11350,6 +11366,7 @@ aC6B9   .BYTE $01
 COLOR_FOR_HISCORE_TBL
         .BYTE $00,$06,$02,$04,$05,$03,$07,$01
         .BYTE $07,$03,$05,$04,$02
+
 sC6C7   PHA
         LDA #$00     ;#%00000000
         STA aFB
