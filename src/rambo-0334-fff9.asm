@@ -10880,7 +10880,7 @@ TROOPER_INIT
         STX $D01D                       ;Sprites Expand 2x Horizontal (X)
         STX $D020                       ;Border Color
         STX $D021                       ;Background Color 0
-        STX aC528
+        STX TROOPER_NAME_CHAR_POS
 
         LDA #29
         STA aC651
@@ -10965,7 +10965,7 @@ TROOPER_MAIN_LOOP
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 TROOPER_PRINT_BLINKY_CURSOR
-        LDA aC528
+        LDA TROOPER_NAME_CHAR_POS
         ASL A
         CLC
         ADC #$0A
@@ -11096,56 +11096,62 @@ TROOPER_MAYBE_NEW_CHAR
 
 _L00    LDX aC651
         LDA fC72C,X
-        JSR sC4EA
-        LDY aC528
+        JSR TROOPER_PROCESS_SPECIAL_CHAR
+        LDY TROOPER_NAME_CHAR_POS
         CPY #$0A
         BEQ _L01
         STA (pFE),Y
-        INC aC528
+        INC TROOPER_NAME_CHAR_POS
 _L01    RTS
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
-sC4EA   CPX #$1B
-        BNE bC4FE
-        LDY aC528
-        BEQ bC4FB
-        DEC aC528
+; $C4EA
+TROOPER_PROCESS_SPECIAL_CHAR
+        CPX #$1B                        ;Is it "RUB"? (backspace)
+        BNE _L01                        ; No
+
+        LDY TROOPER_NAME_CHAR_POS                       ; Yes, it is backspace
+        BEQ _L00
+        DEC TROOPER_NAME_CHAR_POS
         DEY
         LDA #$5B                        ;space
         STA (pFE),Y
-bC4FB   PLA
+_L00    PLA
         PLA
         RTS
 
-bC4FE   CPX #$1C
-        BNE bC505
-        LDA #$5D
+_L01    CPX #$1C                        ;Is it Heart?
+        BNE _L02                        ; No
+        LDA #$5D                        ; Yes, select 'heart' as big char
         RTS
 
-bC505   CPX #$1A
-        BNE bC50C
+_L02    CPX #$1A                        ;Is it space?
+        BNE _L03                        ; No
 
-        LDA #$5B
+        LDA #$5B                        ; Yes, select 'space' as big char
         RTS
 
-bC50C   CPX #$1D
-        BNE bC527
+_L03    CPX #$1D                        ;Is it "END"?
+        BNE _EXIT                       ; No
 
-        LDA #$00
+        ; It is end
+        LDA #$00                        ;Blank screen
         STA $D011                       ;VIC Control Register 1
         LDA #$01
         JSR MUSIC_FN
         SEI
-        LDA aC528
-        BNE bC523
-        JSR USE_UNKNOWN_AS_NAME
-bC523   PLA
-        PLA
-        PLA
-        PLA
-bC527   RTS
+        LDA TROOPER_NAME_CHAR_POS       ;If there is no selected name
+        BNE _L04                        ; then use "UNKNOWN"
+        JSR USE_UNKNOWN_AS_NAME         ; as the player's name
 
-aC528   .BYTE $00
+        ; Exit TROOPER_MAIN_LOOP
+_L04    PLA
+        PLA
+        PLA
+        PLA
+_EXIT   RTS
+
+TROOPER_NAME_CHAR_POS   .BYTE $00
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 sC529   LDA aC546
