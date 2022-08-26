@@ -10956,7 +10956,7 @@ TROOPER_MAIN_LOOP
         JSR WAIT_RASTER_F8
         LDA #$00
         JSR MUSIC_FN
-        JSR sC529
+        JSR TROOPER_UPDATE_COLOR_IDX
         JSR TITLE_READ_JOYSTICK
         JSR TROOPER_UPDATE_MINI_CURSOR_POS
         JSR sC655
@@ -10974,8 +10974,8 @@ TROOPER_PRINT_BLINKY_CURSOR
         CLC
         ADC #$0A
         STA TEXT_TROOPER_BLINKY_CURSOR_COORD_X
-        LDX aC547
-        LDA TROOPER_SPRITE_COLOR_TBL,X
+        LDX TROOPER_COLOR_IDX
+        LDA TROOPER_COLOR_TBL,X
         STA TEXT_TROOPER_BLINKY_CURSOR_COLOR
 
         JSR PRINT_EXT_STR
@@ -11158,26 +11158,27 @@ _EXIT   RTS
 TROOPER_NAME_CHAR_POS   .BYTE $00
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
-sC529   LDA aC546
+TROOPER_UPDATE_COLOR_IDX
+        LDA _TROOPER_COLOR_DELAY
         BEQ _L00
-        DEC aC546
+        DEC _TROOPER_COLOR_DELAY
         RTS
 
 _L00    LDA #$02
-        STA aC546
-        LDX aC547
+        STA _TROOPER_COLOR_DELAY
+        LDX TROOPER_COLOR_IDX
         LDA fC551,X
-        DEX
+        DEX                             ;Color index can be between 7-0
         BPL _L01
-        LDX #$07     ;#%00000111
-_L01    STX aC547
+        LDX #$07
+_L01    STX TROOPER_COLOR_IDX
         RTS
 
-aC546   .BYTE $00
-aC547   .BYTE $00,$00
-TROOPER_SPRITE_COLOR_TBL
-        .BYTE $00,$0B,$0C,$0F,$01,$0F,$0C,$0B
-fC551   .BYTE $00,$06,$0E,$03,$01,$03,$0E,$06
+_TROOPER_COLOR_DELAY    .BYTE $00
+TROOPER_COLOR_IDX       .BYTE $00
+        .BYTE $00
+TROOPER_COLOR_TBL       .BYTE $00,$0B,$0C,$0F,$01,$0F,$0C,$0B
+fC551                   .BYTE $00,$06,$0E,$03,$01,$03,$0E,$06
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 PRINT_TROOPER_ENTER_YOUR_NAME
@@ -11253,12 +11254,14 @@ TROOPER_UPDATE_MINI_CURSOR_POS
         STA $D010                       ;Sprites 0-7 MSB of X coordinate
         LDA #$DF                        ;#%11011111
         STA f43F8
-        LDX aC547
+
+        ; Blink "ENTER YOUR NAME" and the Mini cursor
+        LDX TROOPER_COLOR_IDX
         LDY #29
-        LDA TROOPER_SPRITE_COLOR_TBL,X
+        LDA TROOPER_COLOR_TBL,X
         STA $D027                       ;Sprite 0 Color
-_L00    STA fD82D,Y
-        STA fD805,Y
+_L00    STA $D800+40*1+5,Y              ;Update screen color
+        STA $D800+40*0+5,Y              ; for "ENTER YOUR NAME"
         DEY
         BPL _L00
         RTS
@@ -12136,12 +12139,12 @@ aCFFF   .BYTE $00
 
 ; $D800
         .BYTE $FD,$2D,$FD,$FD,$FD
-fD805   .BYTE $FD,$FD,$FD,$0D,$CD,$FD,$FD,$0D
+        .BYTE $FD,$FD,$FD,$0D,$CD,$FD,$FD,$0D
         .BYTE $FD,$0D,$0D,$FD,$FD,$FD,$FD,$FD
         .BYTE $0D,$FD,$FD,$FD,$2D,$FD,$2D,$FD
         .BYTE $FD,$FD,$FD,$FD,$FD,$FD,$FD,$0D
         .BYTE $FD,$FD,$0D,$FD,$0D,$FD,$FD,$FD
-fD82D   .BYTE $FD,$FD,$FD,$FD,$0D,$FD,$FD,$FD
+        .BYTE $FD,$FD,$FD,$FD,$0D,$FD,$FD,$FD
         .BYTE $FD,$FD,$FD,$FD,$FD,$FD,$0D,$FD
         .BYTE $FD,$FD,$0D,$FD,$FD,$FD,$FD,$FD
         .BYTE $FD,$FD,$FD,$FD,$2D,$FD,$FD,$FD
