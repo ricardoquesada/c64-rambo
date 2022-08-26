@@ -1335,6 +1335,7 @@ b0D1C   LDA #$00
 
 a0D22   .BYTE $00
 a0D23   .BYTE $00
+
 j0D24   STA a0D3C
         TXA
         PHA
@@ -5811,6 +5812,7 @@ f3684   .BYTE $00,$00,$00,$FA,$FA,$FA,$00,$00
         .BYTE $00,$06,$06,$06
 f3690   .BYTE $F3,$F3,$F3,$00,$00,$00,$0D,$0D
         .BYTE $0D,$00,$00,$00
+
 s369C   LDX #$01     ;#%00000001
 b369E   LDA f36C0,X
         BEQ b36A9
@@ -5967,7 +5969,7 @@ b3807   LDA #$C3     ;#%11000011
         BPL b3807
         JSR s32DE
         LDA #25
-        LDX #$0F
+        LDX #15
         JSR MUSIC_FN
         LDA #20
         JSR MUSIC_FN
@@ -10614,7 +10616,8 @@ MAIN
         STA $D022                       ;Background Color 1, Multi-Color Register 0
         STA $D015                       ;Sprite display Enable
         LDA #$8D                        ;'STA abs' opcode
-        STA aCF01                       ; Patch code in runtime
+        STA TITLE_TOGGLE_SMOOTH_Y       ; Patch code in runtime
+                                        ; Enable smooth-y scrolling
         SEI
         LDA #$35                        ;#%00110101
         STA a01                         ; RAM / IO / RAM
@@ -10686,7 +10689,8 @@ _L00    STA HISCORE_TBL,Y
         JSR SWAP_CHARSETS
 
         LDA #$8D                        ;'STA abs' opcode
-        STA aCF01                       ; Patch code in runtime
+        STA TITLE_TOGGLE_SMOOTH_Y       ; Patch code in runtime
+                                        ; Enable smooth-y scrolling
         LDA #$1B                        ;#%00011011
         STA $D011                       ; VIC Control Register 1
                                         ; Raster 8-bit = 0
@@ -10771,12 +10775,12 @@ aC2D1   .BYTE $00
 aC2D2   .BYTE $00
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
-WAIT_RASTER_AND_PLAY_INTRO_MUSIC
-_L00    LDA aCF0C
+WAIT_RASTER_AND_PLAY_MUSIC
+_L00    LDA TITLE_RASTER_TICK
         BEQ _L00
-        DEC aCF0C
+        DEC TITLE_RASTER_TICK
 
-        LDA #$00
+        LDA #$00                        ;Play the selected music
         JSR MUSIC_FN
         RTS
 
@@ -11475,14 +11479,14 @@ TITLE_SCROLLER_UP_INIT
         LDX #$07
         JSR MUSIC_FN
 
-        LDA #$03
+        LDA #$03                        ;Select "scroller up" music
         JSR MUSIC_FN
 
 jC83F   LDA #$08
         STA aCCD3
         LDA #$00
-        STA aCF0E
-        STA aCF0D
+        STA TITLE_SCROLL_Y_READY_FOR_NEW_LINE
+        STA TITLE_SMOOTH_Y
         STA aCFFF
 
         ; Clear rows 21 and 22
@@ -11504,26 +11508,26 @@ bC863   STA aCD72
         JSR PRINT_EXT_STR
         .ADDR STR_PLAYER_HISCORE
 
-jC86E   JSR WAIT_RASTER_AND_PLAY_INTRO_MUSIC
+jC86E   JSR WAIT_RASTER_AND_PLAY_MUSIC
         JSR SCREEN_SCROLL_UP_ONE_ROW
         JSR TITLE_READ_JOYSTICK
         LDA JOYSTICK_VALUE_FIRE
         BNE bC884
-        LDA aCF0E
+        LDA TITLE_SCROLL_Y_READY_FOR_NEW_LINE
         BNE bC885
         JMP jC86E
 
 bC884   RTS
 
-bC885   DEC aCF0E
-bC888   JSR WAIT_RASTER_AND_PLAY_INTRO_MUSIC
+bC885   DEC TITLE_SCROLL_Y_READY_FOR_NEW_LINE
+bC888   JSR WAIT_RASTER_AND_PLAY_MUSIC
         JSR SCREEN_SCROLL_UP_ONE_ROW
         JSR TITLE_READ_JOYSTICK
         LDA JOYSTICK_VALUE_FIRE
         BNE bC884
-        LDA aCF0E
+        LDA TITLE_SCROLL_Y_READY_FOR_NEW_LINE
         BEQ bC888
-        DEC aCF0E
+        DEC TITLE_SCROLL_Y_READY_FOR_NEW_LINE
 
         ; Clear rows 23 and 24
         LDY #39
@@ -11533,14 +11537,14 @@ _L00    STA $4000+40*23,Y
         DEY
         BPL _L00
 
-bC8AB   JSR WAIT_RASTER_AND_PLAY_INTRO_MUSIC
+bC8AB   JSR WAIT_RASTER_AND_PLAY_MUSIC
         JSR SCREEN_SCROLL_UP_ONE_ROW
         JSR TITLE_READ_JOYSTICK
         LDA JOYSTICK_VALUE_FIRE
         BNE bC884
-        LDA aCF0E
+        LDA TITLE_SCROLL_Y_READY_FOR_NEW_LINE
         BEQ bC8AB
-        DEC aCF0E
+        DEC TITLE_SCROLL_Y_READY_FOR_NEW_LINE
         LDA aCD72
         CLC
         ADC #$01
@@ -11593,7 +11597,8 @@ _L03    PLA                             ;Pop special-modifier
         BNE _L04                        ; No
 
         LDA #$2C                        ;'BIT abs' opcode
-        STA aCF01                       ; Patch code in runtime
+        STA TITLE_TOGGLE_SMOOTH_Y       ; Patch code in runtime
+                                        ; Disable smooth-y scrolling
 
 _L04    CPX #$FE                        ;Special is #fe ?
         BNE _L05                        ; No
@@ -11620,27 +11625,28 @@ _L05    TYA
         JSR PRINT_EXT_STR
         .ADDR STR_TITLE_INSTRUCTIONS_ONE_ROW
 
-_L06    JSR WAIT_RASTER_AND_PLAY_INTRO_MUSIC
+_L06    JSR WAIT_RASTER_AND_PLAY_MUSIC
         JSR SCREEN_SCROLL_UP_ONE_ROW
         JSR TITLE_READ_JOYSTICK
         LDA aCFFF
         BNE _L07
         LDA JOYSTICK_VALUE_ALL
         BEQ _L08
-        AND #$10
-        BNE _L09
+        AND #$10                        ;Joystick fire?
+        BNE _L09                        ; Yes
 
 _L07    LDA #$00
         STA aCFFF
         LDA #$8D                        ;'STA abs' opcode
-        STA aCF01
-_L08    LDA aCF0E
+        STA TITLE_TOGGLE_SMOOTH_Y       ; Enable smooth-y scrolling
+
+_L08    LDA TITLE_SCROLL_Y_READY_FOR_NEW_LINE
         BEQ _L06
-        DEC aCF0E
+        DEC TITLE_SCROLL_Y_READY_FOR_NEW_LINE
         JMP _L00
 
 _L09    LDX #$8D                        ;'STA abs' opcode
-        STX aCF01
+        STX TITLE_TOGGLE_SMOOTH_Y       ; Enable smooth-y scrolling
         RTS
 
         ; WTF: Two different way to encode special chars?
@@ -11826,7 +11832,7 @@ aCD72   .BYTE $06
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 ; $CD73
 SCREEN_SCROLL_UP_ONE_ROW
-        LDA aCF0E
+        LDA TITLE_SCROLL_Y_READY_FOR_NEW_LINE
         BNE _L00
         RTS
 
@@ -12020,7 +12026,7 @@ TITLE_RASTER_81
         LDA #$18                        ;Multicolor enabled
         STA $D016                       ; VIC Control Register 2
         LDA #$50                        ;Extended color
-        ORA aCF0D                       ; Update y-smooth
+        ORA TITLE_SMOOTH_Y              ; Update y-smooth
         STA $D011                       ; VIC Control Register 1
         LDA #$89
         STA $D012                       ;Raster Position
@@ -12047,26 +12053,27 @@ TITLE_RASTER_E9
         LDA #$5B                        ;Extended color enabled
         STA $D011                       ; VIC Control Register 1
 
-        INC aCF0C
+        INC TITLE_RASTER_TICK
 
         LDA #$00
         STA $D012                       ;Raster Position
 
-        LDA aCF0D
-        SEC
+        LDA TITLE_SMOOTH_Y              ;Values goes from 7-0
+        SEC                             ; Decrease value by one
         SBC #$01
         AND #$07
-aCF01   STA aCF0D                       ;Gets patched in runtime. Switches
+TITLE_TOGGLE_SMOOTH_Y
+        STA TITLE_SMOOTH_Y              ;Gets patched in runtime. Switches
                                         ; 'STA abs' and
                                         ; 'BIT abs'  (this is kind of a NOP)
-        CMP #$02
-        BNE _L00
-        INC aCF0E
+        CMP #$02                        ;Ready for hard scrolling?
+        BNE _L00                        ; No
+        INC TITLE_SCROLL_Y_READY_FOR_NEW_LINE                       ; Yes, trigger it
 _L00    RTS
 
-aCF0C   .BYTE $00
-aCF0D   .BYTE $07
-aCF0E   .BYTE $00
+TITLE_RASTER_TICK                       .BYTE $00
+TITLE_SMOOTH_Y                          .BYTE $07
+TITLE_SCROLL_Y_READY_FOR_NEW_LINE       .BYTE $00
 fCF0F   .BYTE $00,$00,$00,$00
 fCF13   .BYTE $00,$20,$05,$00
 
