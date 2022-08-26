@@ -10757,7 +10757,7 @@ _L03    JSR WAIT_RASTER_F8
         JSR PRINT_EXT_STR
         .ADDR STR_PLAYER_HISCORE
 
-        JSR READ_JOYSTICK
+        JSR TITLE_READ_JOYSTICK
 
         LDA JOYSTICK_VALUE_FIRE
         BEQ _L03
@@ -10913,15 +10913,17 @@ _L01    STA (pFE),Y
         BPL _L01
 
         JSR PRINT_TROOPER_ENTER_YOUR_NAME
-        JSR READ_JOYSTICK
+        JSR TITLE_READ_JOYSTICK
 
         LDA #$1B                        ;#%00011011
         STA $D011                       ;VIC Control Register 1
                                         ; Raster bit-8 disabled
         JSR sC3F2
         JSR WAIT_RASTER_F8
+
         LDA #$00
-        STA $D015                       ;Sprite display Enable
+        STA $D015                       ;Disable all sprites
+
         JMP RESET_SCORE_BIS
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
@@ -10947,23 +10949,24 @@ sC3F2   JSR WAIT_RASTER_F8
         LDA #$00
         JSR MUSIC_FN
         JSR sC529
-        JSR READ_JOYSTICK
-        JSR sC5CE
+        JSR TITLE_READ_JOYSTICK
+        JSR TITLE_UPDATE_CURSOR_POS
         JSR sC655
-        JSR sC4A9
+        JSR TITLE_PRINT_TROOPER_NAME
         JSR sC625
         JSR sC4CE
         JSR sC418
         JSR sC465
         JMP sC3F2
 
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 sC418   LDA aC528
         ASL A
         CLC
         ADC #$0A
         STA aC433
         LDX aC547
-        LDA fC549,X
+        LDA TITLE_SPRITE_COLOR_TBL,X
         STA aC437
 
         JSR PRINT_EXT_STR
@@ -11050,23 +11053,28 @@ aC49E   .BYTE $00
 UNKNOWN_NAME
         .TEXT "]UNKNOWN]["              ;Player Name: Unknown
 
-sC4A9   LDY #$09     ;#%00001001
-bC4AB   LDA (pFE),Y
-        STA fC4C2,Y
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+TITLE_PRINT_TROOPER_NAME
+        LDY #$09
+_L00    LDA (pFE),Y
+        STA TROOPER_NAME_TEXT,Y
         DEY
-        BPL bC4AB
+        BPL _L00
 
         JSR PRINT_EXT_STR
-        .ADDR aC4B9
+        .ADDR STR_TROOPER_NAME
 
         RTS
 
-aC4B9   #STR_CODE_SET_COORDS $0A,$16
+STR_TROOPER_NAME
+        #STR_CODE_SET_COORDS $0A,$16
         #STR_CODE_SET_COLOR $01
         #STR_CODE_FONT_BIG
-fC4C2   .TEXT "[[[[[[[[UD"
+TROOPER_NAME_TEXT
+        .TEXT "[[[[[[[[UD"
         #STR_CODE_END
 
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 sC4CE   LDA JOYSTICK_VALUE_FIRE
         BNE bC4D4
         RTS
@@ -11122,24 +11130,27 @@ bC523   PLA
 bC527   RTS
 
 aC528   .BYTE $00
+
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 sC529   LDA aC546
-        BEQ bC532
+        BEQ _L00
         DEC aC546
         RTS
 
-bC532   LDA #$02     ;#%00000010
+_L00    LDA #$02
         STA aC546
         LDX aC547
         LDA fC551,X
         DEX
-        BPL bC542
+        BPL _L01
         LDX #$07     ;#%00000111
-bC542   STX aC547
+_L01    STX aC547
         RTS
 
 aC546   .BYTE $00
 aC547   .BYTE $00,$00
-fC549   .BYTE $00,$0B,$0C,$0F,$01,$0F,$0C,$0B
+TITLE_SPRITE_COLOR_TBL
+        .BYTE $00,$0B,$0C,$0F,$01,$0F,$0C,$0B
 fC551   .BYTE $00,$06,$0E,$03,$01,$03,$0E,$06
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
@@ -11162,7 +11173,7 @@ STR_TROOPER_ENTER_YOUR_NAME
         #STR_CODE_END
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
-READ_JOYSTICK
+TITLE_READ_JOYSTICK
         LDA #$00
         LDX #$05
 _L00    STA JOYSTICK_VALUE_RIGHT,X
@@ -11207,24 +11218,26 @@ JOYSTICK_VALUE_FIRE             .BYTE $00
 JOYSTICK_VALUE_ALL              .BYTE $00
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
-sC5CE   LDA aC652
-        STA $D000    ;Sprite 0 X Pos
-        LDA aC654
-        STA $D001    ;Sprite 0 Y Pos
-        LDA aC653
-        STA $D010    ;Sprites 0-7 MSB of X coordinate
-        LDA #$DF     ;#%11011111
+TITLE_UPDATE_CURSOR_POS
+        LDA TITLE_SPRITE_X
+        STA $D000                       ;Sprite 0 X Pos
+        LDA TITLE_SPRITE_Y
+        STA $D001                       ;Sprite 0 Y Pos
+        LDA TITLE_SPRITE_X_MSB
+        STA $D010                       ;Sprites 0-7 MSB of X coordinate
+        LDA #$DF                        ;#%11011111
         STA f43F8
         LDX aC547
-        LDY #$1D     ;#%00011101
-        LDA fC549,X
-        STA $D027    ;Sprite 0 Color
-bC5F0   STA fD82D,Y
+        LDY #29
+        LDA TITLE_SPRITE_COLOR_TBL,X
+        STA $D027                       ;Sprite 0 Color
+_L00    STA fD82D,Y
         STA fD805,Y
         DEY
-        BPL bC5F0
+        BPL _L00
         RTS
 
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 sC5FA   LDA JOYSTICK_VALUE_LEFT
         BNE bC616
         LDA JOYSTICK_VALUE_RIGHT
@@ -11261,11 +11274,11 @@ sC625   LDX aC651
         PHP
         CLC
         ADC #$06     ;#%00000110
-        STA aC652
+        STA TITLE_SPRITE_X
         PLP
         LDA #$00     ;#%00000000
         ROL A
-        STA aC653
+        STA TITLE_SPRITE_X_MSB
         LDA fC70C,X
         CLC
         ADC #$03     ;#%00000011
@@ -11274,19 +11287,21 @@ sC625   LDX aC651
         ASL A
         CLC
         ADC #$31     ;#%00110001
-        STA aC654
+        STA TITLE_SPRITE_Y
         RTS
 
 aC651   .BYTE $00
-aC652   .BYTE $00
-aC653   .BYTE $00
-aC654   .BYTE $00
+TITLE_SPRITE_X          .BYTE $00
+TITLE_SPRITE_X_MSB      .BYTE $00
+TITLE_SPRITE_Y          .BYTE $00
+
 sC655   LDA aC65E
         BEQ bC65F
         DEC aC65E
         RTS
 
 aC65E   .BYTE $00
+
 bC65F   LDA #$03     ;#%00000011
         STA aC65E
         JSR sC69D
@@ -11462,7 +11477,7 @@ bC863   STA aCD72
 
 jC86E   JSR WAIT_RASTER_AND_PLAY_INTRO_MUSIC
         JSR SCREEN_SCROLL_UP_ONE_ROW
-        JSR READ_JOYSTICK
+        JSR TITLE_READ_JOYSTICK
         LDA JOYSTICK_VALUE_FIRE
         BNE bC884
         LDA aCF0E
@@ -11474,7 +11489,7 @@ bC884   RTS
 bC885   DEC aCF0E
 bC888   JSR WAIT_RASTER_AND_PLAY_INTRO_MUSIC
         JSR SCREEN_SCROLL_UP_ONE_ROW
-        JSR READ_JOYSTICK
+        JSR TITLE_READ_JOYSTICK
         LDA JOYSTICK_VALUE_FIRE
         BNE bC884
         LDA aCF0E
@@ -11491,7 +11506,7 @@ _L00    STA $4000+40*23,Y
 
 bC8AB   JSR WAIT_RASTER_AND_PLAY_INTRO_MUSIC
         JSR SCREEN_SCROLL_UP_ONE_ROW
-        JSR READ_JOYSTICK
+        JSR TITLE_READ_JOYSTICK
         LDA JOYSTICK_VALUE_FIRE
         BNE bC884
         LDA aCF0E
@@ -11578,7 +11593,7 @@ _L05    TYA
 
 _L06    JSR WAIT_RASTER_AND_PLAY_INTRO_MUSIC
         JSR SCREEN_SCROLL_UP_ONE_ROW
-        JSR READ_JOYSTICK
+        JSR TITLE_READ_JOYSTICK
         LDA aCFFF
         BNE _L07
         LDA JOYSTICK_VALUE_ALL
