@@ -267,7 +267,8 @@ s036A   JMP j1659
 
 j0376   JMP j0451
 
-j0379   JMP j0431
+RESET_SCORE_BIS
+        JMP RESET_SCORE
 
 s037C   JMP j042D
 
@@ -356,27 +357,33 @@ a042C   .BYTE $00
 j042D   STA f2576,X
         RTS
 
-j0431   LDX #$05
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+RESET_SCORE
+        LDX #$05
         LDA #$00
-b0435   STA f2576,X
-        STA f256A,X
+_L00    STA f2576,X
+        STA PLYR_SCORE,X
         DEX
-        BPL b0435
+        BPL _L00
         RTS
 
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 s043F   LDA a0F
         BNE j0451
         RTS
 
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 j0444   JSR s044C
         DEC a0F
         JMP GAME_INIT
 
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 s044C   INC a0F
         JSR s046E
 j0451   LDA #$03
         JMP s046E
 
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 s0456   LDA a0B29
         BEQ s046E
         LDX aE6
@@ -419,15 +426,15 @@ b048C   LDA f00E0,Y
         PLA
         ASL A
         TAX
-        LDA f0596,X
+        LDA IN_GAME_MSG_STR_TBL,X
         STA a04BE
-        LDA f0596+1,X
+        LDA IN_GAME_MSG_STR_TBL+1,X
         STA a04BE+1
-        LDA f058C,X
+        LDA IN_GAME_MSG_MUSIC_TBL,X
         JSR MUSIC_FN
 
         JSR PRINT_EXT_STR_BIS
-a04BE   .ADDR f0596                     ;This address is changed in runtime
+a04BE   .ADDR IN_GAME_MSG_STR_TBL       ;This address is changed in runtime
 
 b04C0   LDA $D012                       ;Raster Position
         CMP #$C8                        ;Wait until raster gets to $c8
@@ -524,21 +531,26 @@ f0566   .BYTE $00,$00,$00,$00,$00,$00,$00,$00
 a0586   #STR_CODE_CLR_SCREEN $20,$0D
         #STR_CODE_END
 
-f058C   .BYTE $0B,$0B,$06,$06,$07,$07,$0B,$0B
+        ;Music function to play for each text
+IN_GAME_MSG_MUSIC_TBL
+        .BYTE $0B,$0B
+        .BYTE $06,$06
+        .BYTE $07,$07
+        .BYTE $0B,$0B
         .BYTE $0A,$0A
 
-f0596   .ADDR a05A0
-        .ADDR a05FC
-        .ADDR a0678
-        .ADDR a06EC
-        .ADDR a0700
+IN_GAME_MSG_STR_TBL
+        .ADDR STR_RESCUE_POWS
+        .ADDR STR_RESCUE_POWS2
+        .ADDR STR_GUNSHIP_IN_PURSUIT
+        .ADDR STR_GAME_OVER
+        .ADDR STR_CONGRATULATIONS_YOU_WON
 
-a05A0
+STR_RESCUE_POWS
         #STR_CODE_SET_COORDS $01,$03
         #STR_CODE_SET_COLOR $01
         #STR_CODE_FONT_BIG
-        .TEXT "TASK[ONE[COMPLE"
-f05B8   .TEXT "TED."
+        .TEXT "TASK[ONE[COMPLETED."
         #STR_CODE_SET_COORDS $02,$06
         #STR_CODE_SET_COLOR $05
         .TEXT "YOUR[DATA[REVEALS"
@@ -548,7 +560,7 @@ f05B8   .TEXT "TED."
         .TEXT "TO[BE[RESCUED."
         #STR_CODE_END
 
-a05FC
+STR_RESCUE_POWS2
         #STR_CODE_SET_COORDS $01,$03
         #STR_CODE_SET_COLOR $01
         #STR_CODE_FONT_BIG
@@ -567,7 +579,7 @@ a05FC
         .TEXT "EQUIPMENT[NECESSARY."
         #STR_CODE_END
 
-a0678
+STR_GUNSHIP_IN_PURSUIT
         #STR_CODE_SET_COORDS $07,$03
         #STR_CODE_SET_COLOR $01
         #STR_CODE_FONT_BIG
@@ -585,14 +597,14 @@ a0678
         .TEXT "AND[IN[PURSUIT."
         #STR_CODE_END
 
-a06EC
+STR_GAME_OVER
         #STR_CODE_SET_COORDS $0B,$0B
         #STR_CODE_SET_COLOR $01
         #STR_CODE_FONT_BIG
         .TEXT "GAME[OVER"
         #STR_CODE_END
 
-a0700
+STR_CONGRATULATIONS_YOU_WON
         #STR_CODE_SET_COLOR $01
         #STR_CODE_SET_COORDS $05,$00
         .TEXT "CONGRATULATIONS."
@@ -628,7 +640,7 @@ j07D5   JSR j1DC2
         JMP j224E
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
-; Gmae uses one byte to store one digit.
+; Game uses one byte to store one digit.
 ; HI-Score table uses 1 byte to store two digits.
 ; This functions returns 2 score digits in one byte
 ; Parms: X: Digit to return (from 0,2)
@@ -637,9 +649,9 @@ GET_SCORE_BCD_DIGIT
         PHA
         ASL A                           ;Index * 2
         TAX
-        LDA f256A+1,X
+        LDA PLYR_SCORE+1,X
         STA a2493
-        LDA f256A,X
+        LDA PLYR_SCORE,X
         ASL A
         ASL A
         ASL A
@@ -4166,9 +4178,9 @@ j2506   LDA a1D8C
         BEQ b250C
         RTS
 
-b250C   LDX #$05     ;#%00000101
-b250E   LDA f256A,X
-        CMP f2570,X
+b250C   LDX #$05
+b250E   LDA PLYR_SCORE,X
+        CMP PLYR_SCORE_DUP,X
         BEQ b251F
         STX a2493
         JSR s2523
@@ -4202,24 +4214,25 @@ j2537   LDA f3980,X
         RTS
 
 j2549   LDX #$05     ;#%00000101
-b254B   LDA f256A,X
-        STA f2570,X
+b254B   LDA PLYR_SCORE,X
+        STA PLYR_SCORE_DUP,X
         CLC
         ADC f2576,X
         CMP #$0A     ;#%00001010
         BCC b255E
         SBC #$0A     ;#%00001010
-        INC f2575,X
-b255E   STA f256A,X
+        INC PLYR_SCORE_DUP+5,X
+b255E   STA PLYR_SCORE,X
         LDA #$00     ;#%00000000
         STA f2576,X
         DEX
         BPL b254B
         RTS
 
-f256A   .BYTE $00,$00,$00,$00,$00,$00
-f2570   .BYTE $09,$09,$09,$09,$09
-f2575   .BYTE $09
+PLYR_SCORE
+        .BYTE $00,$00,$00,$00,$00,$00
+PLYR_SCORE_DUP
+        .BYTE $09,$09,$09,$09,$09,$09
 f2576   .BYTE $00,$00
 a2578   .BYTE $00
 a2579   .BYTE $00,$00,$00,$00
@@ -10682,7 +10695,7 @@ _L00    STA HISCORE_TBL,Y
 
         LDA #$01
         JSR MUSIC_FN
-        LDA #$1A
+        LDA #26
         LDX #$07
         JSR MUSIC_FN
 
@@ -10706,7 +10719,7 @@ _L00    JSR PRINT_EXT_STR
         .ADDR STR_CLEAR_SCREEN
 
         JSR PRINT_EXT_STR
-        .ADDR STR_CONGRATULATIONS
+        .ADDR STR_CONGRATULATIONS_HIGH_SCORE
 
         LDX #$4F
         LDA aC2D1
@@ -10744,9 +10757,9 @@ _L03    JSR WAIT_RASTER_F8
         JSR PRINT_EXT_STR
         .ADDR STR_PLAYER_HISCORE
 
-        JSR sC589
+        JSR READ_JOYSTICK
 
-        LDA aC5CC
+        LDA JOYSTICK_VALUE_FIRE
         BEQ _L03
 
         RTS
@@ -10757,7 +10770,7 @@ aC2D1   .BYTE $00
 aC2D2   .BYTE $00
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
-WAIT_NEW_FRAME_AND_MUSIC_SMTH
+WAIT_RASTER_AND_PLAY_INTRO_MUSIC
 _L00    LDA aCF0C
         BEQ _L00
         DEC aCF0C
@@ -10899,8 +10912,8 @@ _L01    STA (pFE),Y
         DEY
         BPL _L01
 
-        JSR sC559
-        JSR sC589
+        JSR PRINT_TROOPER_ENTER_YOUR_NAME
+        JSR READ_JOYSTICK
 
         LDA #$1B                        ;#%00011011
         STA $D011                       ;VIC Control Register 1
@@ -10909,7 +10922,7 @@ _L01    STA (pFE),Y
         JSR WAIT_RASTER_F8
         LDA #$00
         STA $D015                       ;Sprite display Enable
-        JMP j0379
+        JMP RESET_SCORE_BIS
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 WAIT_RASTER_F8
@@ -10934,7 +10947,7 @@ sC3F2   JSR WAIT_RASTER_F8
         LDA #$00
         JSR MUSIC_FN
         JSR sC529
-        JSR sC589
+        JSR READ_JOYSTICK
         JSR sC5CE
         JSR sC655
         JSR sC4A9
@@ -10999,11 +11012,11 @@ _L00    SEC
         RTS
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
-sC465   LDA aC5CC
+sC465   LDA JOYSTICK_VALUE_FIRE
         BNE sC494
-        LDA aC5C9
+        LDA JOYSTICK_VALUE_LEFT
         BNE sC494
-        LDA aC5C8
+        LDA JOYSTICK_VALUE_RIGHT
         BNE sC494
         INC aC49D
         BNE bC49C
@@ -11054,7 +11067,7 @@ aC4B9   #STR_CODE_SET_COORDS $0A,$16
 fC4C2   .TEXT "[[[[[[[[UD"
         #STR_CODE_END
 
-sC4CE   LDA aC5CC
+sC4CE   LDA JOYSTICK_VALUE_FIRE
         BNE bC4D4
         RTS
 
@@ -11129,15 +11142,18 @@ aC547   .BYTE $00,$00
 fC549   .BYTE $00,$0B,$0C,$0F,$01,$0F,$0C,$0B
 fC551   .BYTE $00,$06,$0E,$03,$01,$03,$0E,$06
 
-sC559   LDA #$01     ;#%00000001
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+PRINT_TROOPER_ENTER_YOUR_NAME
+        LDA #$01
         STA a43F9
 
         JSR PRINT_EXT_STR
-        .ADDR aC564
+        .ADDR STR_TROOPER_ENTER_YOUR_NAME
 
         RTS
 
-aC564   #STR_CODE_FONT_BIG
+STR_TROOPER_ENTER_YOUR_NAME
+        #STR_CODE_FONT_BIG
         #STR_CODE_SET_COORDS $0D,$13
         #STR_CODE_SET_COLOR $05
         .TEXT "TROOPER"
@@ -11145,46 +11161,52 @@ aC564   #STR_CODE_FONT_BIG
         .TEXT "ENTER[YOUR[NAME"
         #STR_CODE_END
 
-sC589   LDA #$00     ;#%00000000
-        LDX #$05     ;#%00000101
-bC58D   STA aC5C8,X
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+READ_JOYSTICK
+        LDA #$00
+        LDX #$05
+_L00    STA JOYSTICK_VALUE_RIGHT,X
         DEX
-        BPL bC58D
-        LDA $DC00    ;CIA1: Data Port Register A
-        AND $DC01    ;CIA1: Data Port Register B
-        EOR #$FF     ;#%11111111
-        AND #$1F     ;#%00011111
-        STA aC5CD
+        BPL _L00
+
+        LDA $DC00                       ;Read Joy port #2
+        AND $DC01                       ;Read Joy port #1
+        EOR #$FF                        ;Reverse since they are active low
+        AND #$1F                        ;Mask direction and button
+        STA JOYSTICK_VALUE_ALL
         LSR A
-        ROL aC5CB
+        ROL JOYSTICK_VALUE_UP
         LSR A
-        ROL aC5CA
+        ROL JOYSTICK_VALUE_DOWN
         LSR A
-        ROL aC5C9
+        ROL JOYSTICK_VALUE_LEFT
         LSR A
-        ROL aC5C8
+        ROL JOYSTICK_VALUE_RIGHT
         LSR A
-        ROL aC5CC
-        LDA aC5CC
-        CMP aC5C7
-        BEQ bC5C0
-        STA aC5C7
+        ROL JOYSTICK_VALUE_FIRE
+
+        ; Prevents having the fire button triggering more than once
+        LDA JOYSTICK_VALUE_FIRE
+        CMP JOYSTICK_PREV_VALUE_FIRE
+        BEQ _L01
+        STA JOYSTICK_PREV_VALUE_FIRE
         RTS
 
-bC5C0   LDA #$00     ;#%00000000
-        STA aC5CC
+_L01    LDA #$00
+        STA JOYSTICK_VALUE_FIRE
         RTS
 
         RTS
 
-aC5C7   .BYTE $00
-aC5C8   .BYTE $00
-aC5C9   .BYTE $00
-aC5CA   .BYTE $00
-aC5CB   .BYTE $00
-aC5CC   .BYTE $00
-aC5CD   .BYTE $00
+JOYSTICK_PREV_VALUE_FIRE        .BYTE $00
+JOYSTICK_VALUE_RIGHT            .BYTE $00
+JOYSTICK_VALUE_LEFT             .BYTE $00
+JOYSTICK_VALUE_DOWN             .BYTE $00
+JOYSTICK_VALUE_UP               .BYTE $00
+JOYSTICK_VALUE_FIRE             .BYTE $00
+JOYSTICK_VALUE_ALL              .BYTE $00
 
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 sC5CE   LDA aC652
         STA $D000    ;Sprite 0 X Pos
         LDA aC654
@@ -11203,9 +11225,9 @@ bC5F0   STA fD82D,Y
         BPL bC5F0
         RTS
 
-sC5FA   LDA aC5C9
+sC5FA   LDA JOYSTICK_VALUE_LEFT
         BNE bC616
-        LDA aC5C8
+        LDA JOYSTICK_VALUE_RIGHT
         BNE bC605
         RTS
 
@@ -11380,7 +11402,7 @@ STR_TITLE_RAMBO
         #STR_CODE_FONT_BIG
         #STR_CODE_END
 
-STR_CONGRATULATIONS
+STR_CONGRATULATIONS_HIGH_SCORE
         #STR_CODE_SET_COLOR $0F
         #STR_CODE_SET_COORDS $05,$00
         .TEXT "CONGRATULATIONS"
@@ -11438,10 +11460,10 @@ bC863   STA aCD72
         JSR PRINT_EXT_STR
         .ADDR STR_PLAYER_HISCORE
 
-jC86E   JSR WAIT_NEW_FRAME_AND_MUSIC_SMTH
+jC86E   JSR WAIT_RASTER_AND_PLAY_INTRO_MUSIC
         JSR SCREEN_SCROLL_UP_ONE_ROW
-        JSR sC589
-        LDA aC5CC
+        JSR READ_JOYSTICK
+        LDA JOYSTICK_VALUE_FIRE
         BNE bC884
         LDA aCF0E
         BNE bC885
@@ -11450,10 +11472,10 @@ jC86E   JSR WAIT_NEW_FRAME_AND_MUSIC_SMTH
 bC884   RTS
 
 bC885   DEC aCF0E
-bC888   JSR WAIT_NEW_FRAME_AND_MUSIC_SMTH
+bC888   JSR WAIT_RASTER_AND_PLAY_INTRO_MUSIC
         JSR SCREEN_SCROLL_UP_ONE_ROW
-        JSR sC589
-        LDA aC5CC
+        JSR READ_JOYSTICK
+        LDA JOYSTICK_VALUE_FIRE
         BNE bC884
         LDA aCF0E
         BEQ bC888
@@ -11467,10 +11489,10 @@ _L00    STA $4000+40*23,Y
         DEY
         BPL _L00
 
-bC8AB   JSR WAIT_NEW_FRAME_AND_MUSIC_SMTH
+bC8AB   JSR WAIT_RASTER_AND_PLAY_INTRO_MUSIC
         JSR SCREEN_SCROLL_UP_ONE_ROW
-        JSR sC589
-        LDA aC5CC
+        JSR READ_JOYSTICK
+        LDA JOYSTICK_VALUE_FIRE
         BNE bC884
         LDA aCF0E
         BEQ bC8AB
@@ -11554,12 +11576,12 @@ _L05    TYA
         JSR PRINT_EXT_STR
         .ADDR STR_TITLE_INSTRUCTIONS_ONE_ROW
 
-_L06    JSR WAIT_NEW_FRAME_AND_MUSIC_SMTH
+_L06    JSR WAIT_RASTER_AND_PLAY_INTRO_MUSIC
         JSR SCREEN_SCROLL_UP_ONE_ROW
-        JSR sC589
+        JSR READ_JOYSTICK
         LDA aCFFF
         BNE _L07
-        LDA aC5CD
+        LDA JOYSTICK_VALUE_ALL
         BEQ _L08
         AND #$10
         BNE _L09
