@@ -10642,7 +10642,8 @@ TITLE_MAIN_LOOP
         JSR INIT_INTERRUPTS
         JSR INIT_HISCORE_TBL_IDX
         JSR sC2FC
-        JSR sC82E
+
+        JSR TITLE_SCROLLER_UP_INIT
 
         LDA HISCORE_TBL_IDX+$4F
         STA TMP_C19C
@@ -10660,12 +10661,12 @@ _L00    STA HISCORE_TBL,Y
         LDA #$1B                        ;#%00011011
         STA $D011                       ; VIC Control Register 1
                                         ; Raster 8-bit = 0
-        JSR sC74C
+        JSR TITLE_PRINT_CLEAR_SCREEN
 
         LDA #30
         JSR MUSIC_FN
 
-        JSR sC36E
+        JSR TROOPER_INIT
 
         LDA #$00                        ;Use charset for game
         JSR SWAP_CHARSETS
@@ -10864,11 +10865,13 @@ aC36C   .BYTE $00
 aC36D   .BYTE $FF
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
-sC36E   LDA #$00
+; $C36E
+TROOPER_INIT
+        LDA #$00
         STA $D011                       ;VIC Control Register 1
                                         ; Blank screen
         SEI
-        LDA #$01                        ;Only one sprite
+        LDA #$01                        ;Only one sprite, the mini cursor
         STA $D015                       ; Sprite display Enable
         JSR MUSIC_FN
 
@@ -11402,12 +11405,13 @@ fC70C   .BYTE $00,$01,$02,$03,$04,$06,$08,$0A
 fC72C   .TEXT "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
         .BYTE $5F,$61,$5C,$5D,$5E,$62
 
-sC74C   JSR PRINT_EXT_STR
-        .ADDR aC752
-
+TITLE_PRINT_CLEAR_SCREEN
+        JSR PRINT_EXT_STR
+        .ADDR STR_TITLE_CLEAR_SCREEN
         RTS
 
-aC752   #STR_CODE_CLR_SCREEN $00,$20            ;Bug? Reverse order. Should be $20,$00
+STR_TITLE_CLEAR_SCREEN
+        #STR_CODE_CLR_SCREEN $00,$20            ;Bug? Reverse order. Should be $20,$00
         #STR_CODE_END
 
 STR_TITLE_RAMBO
@@ -11457,7 +11461,8 @@ STR_CONGRATULATIONS_HIGH_SCORE
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 ; $C82E
-sC82E   LDA #$01
+TITLE_SCROLLER_UP_INIT
+        LDA #$01
         JSR MUSIC_FN
 
         LDA #26
@@ -11487,6 +11492,7 @@ _L00    STA $4000+40*21,X
 
         LDA #$00
 bC863   STA aCD72
+
         JSR sCCD5
 
         JSR PRINT_EXT_STR
