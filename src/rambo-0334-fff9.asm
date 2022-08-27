@@ -641,7 +641,9 @@ STR_CONGRATULATIONS_YOU_WON
         #STR_CODE_SET_COORDS $07,$09
         .TEXT "BEEN[RETURNED"
         #STR_CODE_SET_COORDS $05,$0C
-        .TEXT "TO[THE[HOMEL", $E8, "."          ;XXX ???
+        .TEXT "TO[THE[HOMEL", $E8, "."          ;Bug: Should say HOMELAND.
+                                                ; Present in ThunderMontain version only
+                                                ; Ocean version doesn't have it.
         #STR_CODE_SET_COLOR $07
         #STR_CODE_SET_COORDS $02,$0F
         #STR_CODE_FONT_SMALL
@@ -678,17 +680,17 @@ GET_SCORE_BCD_DIGIT
         ASL A                           ;Index * 2
         TAX
         LDA PLYR_SCORE+1,X
-        STA a2493
+        STA TMP_2493
         LDA PLYR_SCORE,X
         ASL A
         ASL A
         ASL A
         ASL A                           ;Move MSB to 4 MSB bits
-        ORA a2493
-        STA a2493
+        ORA TMP_2493
+        STA TMP_2493
         PLA
         TAX
-        LDA a2493                       ;LSB uses 4 LSB bits
+        LDA TMP_2493                    ;LSB uses 4 LSB bits
         RTS
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
@@ -1317,7 +1319,7 @@ _L00    LDA $4000+64*33,X               ;Original energy: left
         DEX
         BPL _L00
 
-        LDA #$30
+        LDA #48                         ;48 = width of 2 sprites (24*2)
         STA PLYR_ENERGY
         RTS
 
@@ -1337,26 +1339,28 @@ _L00    LDA PLYR_ENERGY
         PHA
         LSR A
         LSR A
-        LSR A
-        CMP #$03
-        BCC _L01
+        LSR A                           ;A = Energy / 8 (goes from 0 to 5)
+        CMP #$03                        ;Between 0 and 2?
+        BCC _L01                        ; Yes, Jump (1st sprite)
         CLC
-        ADC #$3D
-_L01    TAX
+        ADC #64-3                       ;Next sprite (2nd sprite)
+
+_L01    TAX                             ;X = ptr to the byte to modify
         PLA
         AND #$07
-        TAY
-        LDA #$06
-        STA a2493
+        TAY                             ;Y = bit to modify
+
+        LDA #$06                        ;7 rows in total to modify
+        STA TMP_2493
 
 _L02    LDA $4000+64*16,X               ;Spr frame #16: Energy
         EOR f0CEE,Y                     ; Invert bar
         STA $4000+64*16,X               ; according to life
-        INX                             ;Skip to the next byte for energy
+        INX                             ;Skip to the next row
         INX
         INX
-        DEC a2493
-        BPL _L02
+        DEC TMP_2493                    ;Done with 7 rows?
+        BPL _L02                        ; No, jump
 _EXIT   RTS
 
 PLYR_ENERGY     .BYTE $00
@@ -1485,9 +1489,9 @@ b0D9F   LDX #$07     ;#%00000111
 b0DCA   LDA (p32),Y
         CMP #$93     ;#%10010011
         BNE b0DD9
-        STY a2493
+        STY TMP_2493
         JSR s0DE1
-        LDY a2493
+        LDY TMP_2493
 b0DD9   DEY
         DEX
         BPL b0DCA
@@ -1511,7 +1515,7 @@ b0DED   LDA #$0E     ;#%00001110
         LDA #$00     ;#%00000000
         STA f106C,Y
         STY a2745
-        LDA a2493
+        LDA TMP_2493
         CLC
         ADC #$28     ;#%00101000
         TAY
@@ -1543,7 +1547,7 @@ j0E28   STA a8B,Y
         CLC
         ADC #$18     ;#%00011000
         STA a2745
-        LDA a2493
+        LDA TMP_2493
         ASL A
         ASL A
         CLC
@@ -1579,12 +1583,12 @@ b0E78   LDA GAME_SMOOTH_X
         CLC
         ADC #$11     ;#%00010001
         LSR A
-        STA a2493
+        STA TMP_2493
         TXA
         ASL A
         ASL A
         CLC
-        ADC a2493
+        ADC TMP_2493
         ASL A
         ROL a65
         STA a81
@@ -1635,19 +1639,19 @@ s0EDC   PHA
         PLA
         RTS
 
-b0EE4   LDA a2493
+b0EE4   LDA TMP_2493
         BEQ b0EF6
-        LDA #$01     ;#%00000001
+        LDA #$01
         STA a2745
         LDA #$51     ;#%01010001
-        STA a2493
+        STA TMP_2493
         JMP j0F00
 
 b0EF6   LDA #$00     ;#%00000000
         STA a2745
         LDA #$10     ;#%00010000
-        STA a2493
-j0F00   LDA a2493
+        STA TMP_2493
+j0F00   LDA TMP_2493
         STA a81
         LDA a2745
         STA a65
@@ -1676,14 +1680,14 @@ b0F20   LDA a28E6
         CLC
         ADC #$01     ;#%00000001
         LSR A
-        STA a2493
+        STA TMP_2493
         LDA a2747
         CLC
         ADC #$02     ;#%00000010
         ASL A
         ASL A
         CLC
-        ADC a2493
+        ADC TMP_2493
         ASL A
         STA a81
         LDA #$00     ;#%00000000
@@ -1931,10 +1935,10 @@ b1141   JMP j115A
 b1144   EOR #$FF     ;#%11111111
         CLC
         ADC #$01     ;#%00000001
-        STA a2493
+        STA TMP_2493
         LDA f7D,X
         SEC
-        SBC a2493
+        SBC TMP_2493
         STA f7D,X
         BCS j115A
         LDA #$00     ;#%00000000
@@ -2168,10 +2172,10 @@ s1366   LDA GAME_SMOOTH_X
         CLC
         ADC #$16     ;#%00010110
         AND #$FE     ;#%11111110
-        STA a2493
+        STA TMP_2493
         LDA a1932
         SEC
-        SBC a2493
+        SBC TMP_2493
         PHA
         BCS b137F
         LDA #$00     ;#%00000000
@@ -2223,8 +2227,8 @@ j1382   LSR A
         CPX #$30     ;#%00110000
         BNE b13D6
         INC a101E
-b13D6   STA a2493
-        CPX a2493
+b13D6   STA TMP_2493
+        CPX TMP_2493
         BNE b13E1
         JMP j14E9
 
@@ -2254,13 +2258,13 @@ b13E1   STA (pF4),Y
         STA aF0
         LDA aFE
         AND #$07     ;#%00000111
-        STA a2493
+        STA TMP_2493
         STA a14ED
         EOR #$07     ;#%00000111
         STA a14EB
         LDX #$00     ;#%00000000
         STX a2747
-        LDA a2493
+        LDA TMP_2493
         CMP a1A46
         BCS b1463
         LDA #$00     ;#%00000000
@@ -2421,7 +2425,7 @@ f1557   .BYTE $0D,$0B,$0B,$0B,$00,$0B,$00,$15
 
 s155F   STA a2745
         LDY #$03     ;#%00000011
-j1564   STY a2493
+j1564   STY TMP_2493
         LDA a2745
         SEC
         SBC #$03     ;#%00000011
@@ -2430,7 +2434,7 @@ j1564   STY a2493
         STA a25C6
         LDA f1557,Y
         STA a25C7
-        LDY a2493
+        LDY TMP_2493
         LDA f120B,Y
         BEQ b15EA
         CMP #$04
@@ -2491,7 +2495,7 @@ s15F1   LDX #$0D
         JSR j1659
         LDX #$03
         LDA GAME_JOY_STATE
-        STA a2493
+        STA TMP_2493
 b15FE   LDY f161F,X
         LDA (p30),Y
         STA a161E
@@ -2526,13 +2530,13 @@ j1659   LDA GAME_SMOOTH_X
         CLC
         ADC #$16     ;#%00010110
         LSR A
-        STA a2493
+        STA TMP_2493
         LDA f61,X
         LSR A
         LDA f7D,X
         ROR A
         SEC
-        SBC a2493
+        SBC TMP_2493
         BCS b1670
         LDA #$00     ;#%00000000
 b1670   LSR A
@@ -2541,10 +2545,10 @@ b1670   LSR A
         LDA GAME_SMOOTH_Y
         CLC
         ADC #$2D     ;#%00101101
-        STA a2493
+        STA TMP_2493
         LDA f45,X
         SEC
-        SBC a2493
+        SBC TMP_2493
         BCS b1686
         LDA #$00     ;#%00000000
 b1686   AND #$F8     ;#%11111000
@@ -2566,10 +2570,10 @@ s169C   LDA GAME_SMOOTH_X
         CLC
         ADC #$16     ;#%00010110
         LSR A
-        STA a2493
+        STA TMP_2493
         LDA f7D,X
         SEC
-        SBC a2493
+        SBC TMP_2493
         BCS b16AF
         LDA #$00     ;#%00000000
 b16AF   LSR A
@@ -2578,10 +2582,10 @@ b16AF   LSR A
         LDA GAME_SMOOTH_Y
         CLC
         ADC #$2D     ;#%00101101
-        STA a2493
+        STA TMP_2493
         LDA f45,X
         SEC
-        SBC a2493
+        SBC TMP_2493
         BCS b16C5
         LDA #$00     ;#%00000000
 b16C5   AND #$F8     ;#%11111000
@@ -2770,7 +2774,7 @@ s1827   CMP #$09     ;#%00001001
         BNE b182E
         JMP j1885
 
-b182E   STA a2493
+b182E   STA TMP_2493
         LDA f4E,X
         CMP #$0A     ;#%00001010
         BCS b1843
@@ -2792,7 +2796,7 @@ b184A   LDA f86,X
 
 b1853   CMP #$AC     ;#%10101100
         BCS s1837
-        LDA a2493
+        LDA TMP_2493
         CMP #$0A     ;#%00001010
         BNE b1861
         JMP j1968
@@ -2805,7 +2809,7 @@ b1861   LDA f4E,X
         CLC
         ADC f1B53,X
         STA f86,X
-        LDA a2493
+        LDA TMP_2493
         CMP #$04     ;#%00000100
         BEQ b1879
         RTS
@@ -2825,10 +2829,10 @@ j1885   LDA f1955,X
         LSR A
         CMP #$03     ;#%00000011
         BCS b189C
-        STA a2493
+        STA TMP_2493
         LDA #$38     ;#%00111000
         SEC
-        SBC a2493
+        SBC TMP_2493
         STA f94,X
 b189C   LDA f1955,X
         BPL b18DA
@@ -2993,9 +2997,9 @@ s19D1   LDX SELECTED_WEAPON
         LDY a1B70
         LDA f1B71,Y
         LDY PLYR_ENERGY
-        CPY #$0A
-        BCC _L00
-        LDY #$07
+        CPY #10                         ;Enegy < 10
+        BCC _L00                        ; Yes, jump
+        LDY #$07                        ;Not clear why it compares PLYR_ENERGY
         STY a2425
         JMP _L01
 
@@ -3194,7 +3198,7 @@ s1B88   LDA a1C28
         DEC a52
 b1B96   RTS
 
-s1B97   LDA a2493
+s1B97   LDA TMP_2493
         SEC
         BNE b1BA5
         LDA a8A
@@ -3203,7 +3207,7 @@ s1B97   LDA a2493
         INC a8A
 b1BA5   RTS
 
-s1BA6   LDA a2493
+s1BA6   LDA TMP_2493
         SEC
         BNE b1BB4
         LDA #$7A     ;#%01111010
@@ -3231,31 +3235,31 @@ b1BD0   ROL a1C28
 s1BD4   LDA GAME_JOY_STATE
         STA a1C27
         LDA #$00
-        STA a2493
+        STA TMP_2493
         STA a1C28
         JSR s1BB5
         LSR a1C27
         BCC b1BED
         JSR s1B88
-b1BED   ROR a2493
+b1BED   ROR TMP_2493
         LSR a1C27
         BCC b1BF8
         JSR s1B79
-b1BF8   ROR a2493
+b1BF8   ROR TMP_2493
         LSR a1C27
         BCC b1C03
         JSR s1BA6
-b1C03   ROR a2493
+b1C03   ROR TMP_2493
         LSR a1C27
         BCC b1C0E
         JSR s1B97
-b1C0E   ROR a2493
-        ROR a2493
-        ROR a2493
-        ROR a2493
-        ROR a2493
+b1C0E   ROR TMP_2493
+        ROR TMP_2493
+        ROR TMP_2493
+        ROR TMP_2493
+        ROR TMP_2493
         LDA a1D63
-        AND a2493
+        AND TMP_2493
         STA a1D63
         RTS
 
@@ -4159,7 +4163,7 @@ _L00    LDA #$E1
 
         LDA GAME_JOY_STATE_COPY
         STA GAME_JOY_STATE
-        LDA a2493
+        LDA TMP_2493
         PHA
         LDA a30
         PHA
@@ -4216,7 +4220,7 @@ _L08    JSR s0EB4
         BNE _L09
         JSR GAME_MAYBE_TOGGLE_PAUSE
 _L09    PLA
-        STA a2493
+        STA TMP_2493
         JMP EXIT_IRQ
 
         .BYTE $00
@@ -4264,11 +4268,11 @@ b246A   LDA a2480
         STA GAME_SPR_FRAME_00
         RTS
 
-a2480   .BYTE $00,$00
-a2482   .BYTE $00
-f2483   .BYTE $FE,$FD,$FB,$F7,$EF,$DF,$BF,$7F
-f248B   .BYTE $01,$02,$04,$08,$10,$20,$40,$80
-a2493   .BYTE $00
+a2480           .BYTE $00,$00
+a2482           .BYTE $00
+f2483           .BYTE $FE,$FD,$FB,$F7,$EF,$DF,$BF,$7F
+f248B           .BYTE $01,$02,$04,$08,$10,$20,$40,$80
+TMP_2493        .BYTE $00
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 s2494   LDY #$0D
@@ -4335,9 +4339,9 @@ _L00    LDX #$05
 _L01    LDA PLYR_SCORE,X
         CMP PLYR_SCORE_IN_SPRITE,X      ;Don't update sprite if it already has
         BEQ _L02                        ; this value
-        STX a2493
+        STX TMP_2493
         JSR _UPDATE_SPRITE_SCORE_DIGIT
-        LDX a2493
+        LDX TMP_2493
 _L02    DEX
         BPL _L01
         RTS
@@ -4349,10 +4353,10 @@ _UPDATE_SPRITE_SCORE_DIGIT
         CPX #$03
         TAX
         BCS _L03
-        LDY a2493
+        LDY TMP_2493
         JMP _L04
 
-_L03    LDA a2493
+_L03    LDA TMP_2493
         ADC #$3C
         TAY
 _L04    LDA CHARSET_DIGITS_0_9,X        ;Charset for 0-9
@@ -4532,15 +4536,15 @@ s2661   LDA #$05     ;#%00000101
         RTS
 
 b2673   LDA aFE
-        STA a2493
+        STA TMP_2493
         LDA aFF
         LSR A
-        ROR a2493
+        ROR TMP_2493
         LSR A
-        ROR a2493
-        LDA #$FF     ;#%11111111
+        ROR TMP_2493
+        LDA #$FF
         SEC
-        SBC a2493
+        SBC TMP_2493
         LSR A
         LSR A
         STX aD5
@@ -4564,7 +4568,7 @@ b2696   INC f1961,X
         LDA f007D,Y
         ROR A
         STA f82,X
-        STA a2493
+        STA TMP_2493
         LDA f0045,Y
         STA f4A,X
         LSR A
@@ -4572,7 +4576,7 @@ b2696   INC f1961,X
         LDA a8A
         LSR A
         SEC
-        SBC a2493
+        SBC TMP_2493
         BCS b26CE
         EOR #$FF     ;#%11111111
         ADC #$01     ;#%00000001
@@ -4648,7 +4652,7 @@ a2747   .BYTE $E2,$00,$00
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 j274A   LDA #$27     ;#%00100111
         STA a27EF
-        STA a2493
+        STA TMP_2493
         LDX #$00     ;#%00000000
         LDA #$40     ;#%01000000
         STA a27F0
@@ -4672,9 +4676,9 @@ j274A   LDA #$27     ;#%00100111
         LDA aF8
         JMP j27A6
 
-j277A   LDX #$00     ;#%00000000
+j277A   LDX #$00
         STX a27EF
-        STX a2493
+        STX TMP_2493
         LDA #$40     ;#%01000000
         STA a27F0
         LDA aFF
