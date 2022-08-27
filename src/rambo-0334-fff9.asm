@@ -127,8 +127,8 @@ aD4 = $D4
 aD5 = $D5
 aE0 = $E0
 aE1 = $E1
-aE3 = $E3
-aE4 = $E4
+GAME_SMOOTH_Y = $E3
+GAME_SMOOTH_X = $E4
 aE6 = $E6
 aF0 = $F0
 aF1 = $F1
@@ -286,20 +286,24 @@ GAME_INIT
         LDA #$FF                        ;Select all sprites
         STA $D015                       ;Sprite display Enable
         CLI
-j0393   JSR j07D5
+
+_GAME_MAIN_LOOP
+        JSR j07D5
         JSR j0D3D
         JSR j1D68
         JSR j0B2B
         JSR s0F6C
+
         INC a0559
         LDA a0559
         CMP #$06
-        BCC b03B4
+        BCC _L00
+
         LDA #$00
         STA a0559
-        JMP j03F6
+        JMP _L01
 
-b03B4   JSR s040B
+_L00    JSR s040B
         JSR s12A7
         JSR s1985
         JSR GAME_PLAY_MUSIC
@@ -321,8 +325,8 @@ b03B4   JSR s040B
         JSR j0CB3
         JSR s0900
         JSR s043F
-j03F6   JSR j28FF
-        JMP j0393
+_L01    JSR j28FF
+        JMP _GAME_MAIN_LOOP
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 s03FC   LDY #13
@@ -846,13 +850,13 @@ b0919   LDA a0966
         ASL A
         CLC
         ADC #$1A     ;#%00011010
-        ADC aE3
+        ADC GAME_SMOOTH_Y
         STA a0968
         LDA aF3
         ASL A
         ASL A
         ASL A
-        ADC aE4
+        ADC GAME_SMOOTH_X
         STA a0969
         JSR s0AB7
         LDA #27
@@ -1120,7 +1124,7 @@ b0B35   LDA f0BE1,X
         ASL A
         ASL A
         CLC
-        ADC aE3
+        ADC GAME_SMOOTH_Y
         CLC
         ADC #$1F     ;#%00011111
         STA a51
@@ -1134,7 +1138,7 @@ b0B35   LDA f0BE1,X
         STA a6D
         PLA
         CLC
-        ADC aE4
+        ADC GAME_SMOOTH_X
         STA a89
         LDA f0BF5,X
         STA a97
@@ -1491,9 +1495,9 @@ j0E28   STA f008B,Y
         ASL A
         CLC
         ADC #$48     ;#%01001000
-        ADC aE3
+        ADC GAME_SMOOTH_Y
         STA f0045,Y
-        LDA aE4
+        LDA GAME_SMOOTH_X
         LSR A
         CLC
         ADC #$18     ;#%00011000
@@ -1530,7 +1534,7 @@ b0E69   LDA f42D0,X
         STX a0EB3
         RTS
 
-b0E78   LDA aE4
+b0E78   LDA GAME_SMOOTH_X
         CLC
         ADC #$11     ;#%00010001
         LSR A
@@ -1545,7 +1549,7 @@ b0E78   LDA aE4
         STA a81
         LDA #$BC     ;#%10111100
         CLC
-        ADC aE3
+        ADC GAME_SMOOTH_Y
         STA a49
         LDA #$FF     ;#%11111111
         STA a0EB3
@@ -1611,7 +1615,7 @@ j0F00   LDA a2493
         ASL A
         ASL A
         CLC
-        ADC aE3
+        ADC GAME_SMOOTH_Y
         ADC #$2C     ;#%00101100
         STA a49
         JMP j0F48
@@ -1627,7 +1631,7 @@ b0F20   LDA a28E6
         BEQ b0F6A
         LDA #$2B     ;#%00101011
         STA a49
-        LDA aE4
+        LDA GAME_SMOOTH_X
         CLC
         ADC #$01     ;#%00000001
         LSR A
@@ -2117,7 +2121,7 @@ b135B   LDA a1D63
         STA a1D63
         JMP j1328
 
-s1366   LDA aE4
+s1366   LDA GAME_SMOOTH_X
         CLC
         ADC #$16     ;#%00010110
         AND #$FE     ;#%11111110
@@ -2140,7 +2144,7 @@ j1382   LSR A
         LDA a1931
         SEC
         SBC #$2D     ;#%00101101
-        SBC aE3
+        SBC GAME_SMOOTH_Y
         LSR A
         LSR A
         LSR A
@@ -2469,7 +2473,7 @@ f1628   .BYTE $40,$28,$40,$50,$40,$78,$40,$A0
         .BYTE $43
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
-j1659   LDA aE4
+j1659   LDA GAME_SMOOTH_X
         CLC
         ADC #$16     ;#%00010110
         LSR A
@@ -2485,7 +2489,7 @@ j1659   LDA aE4
 b1670   LSR A
         LSR A
         STA a30
-        LDA aE3
+        LDA GAME_SMOOTH_Y
         CLC
         ADC #$2D     ;#%00101101
         STA a2493
@@ -2509,7 +2513,7 @@ b1686   AND #$F8     ;#%11111000
 
         RTS
 
-s169C   LDA aE4
+s169C   LDA GAME_SMOOTH_X
         CLC
         ADC #$16     ;#%00010110
         LSR A
@@ -2522,7 +2526,7 @@ s169C   LDA aE4
 b16AF   LSR A
         LSR A
         STA a30
-        LDA aE3
+        LDA GAME_SMOOTH_Y
         CLC
         ADC #$2D     ;#%00101101
         STA a2493
@@ -2577,7 +2581,7 @@ _L01    LDA f0BF1,X
         BPL _L01
 
         LDA #$04
-        STA aE3
+        STA GAME_SMOOTH_Y
         STA a11C1
         STA aD0
         LDA #$00
@@ -2585,7 +2589,7 @@ _L01    LDA f0BF1,X
         STA a2480
         STA a0967
         STA a0B29
-        STA aE4
+        STA GAME_SMOOTH_X
         STA a0E
         STA a0A40
         STA $D015                       ;Sprite display Enable
@@ -3200,7 +3204,7 @@ b1C0E   ROR a2493
 
 a1C27   .BYTE $00
 a1C28   .BYTE $00
-s1C29   LDA aE4
+s1C29   LDA GAME_SMOOTH_X
         STA a1CC0
         LDA GAME_JOY_STATE
         TAX
@@ -3221,7 +3225,7 @@ s1C29   LDA aE4
 b1C49   LDA a1CC0
         EOR #$07                        ;#%00000111
         STA a1CC0
-b1C51   LDA aE3
+b1C51   LDA GAME_SMOOTH_Y
         SEC
         SBC a1CC0
         BPL b1C5E
@@ -3241,9 +3245,9 @@ b1C6F   RTS
 
 s1C70   LDA a1D3E
         BNE b1C6F
-        LDA aE4
+        LDA GAME_SMOOTH_X
         AND #$FE                        ;#%11111110
-        STA aE4
+        STA GAME_SMOOTH_X
         STA a1CC0
         LDA GAME_JOY_STATE
         TAX
@@ -3264,7 +3268,7 @@ s1C70   LDA a1D3E
 b1C99   LDA a1CC0
         EOR #$06                        ;#%00000110
         STA a1CC0
-b1CA1   LDA aE3
+b1CA1   LDA GAME_SMOOTH_Y
         SEC
         SBC a1CC0
         BPL b1CAE
@@ -3434,19 +3438,19 @@ j1DC2   LDA a2305
         RTS
 
 s1DCB   INC a0C
-        LDA aE4
-        CMP #$07     ;#%00000111
+        LDA GAME_SMOOTH_X
+        CMP #$07
         BEQ b1DE0
-        INC aE4
+        INC GAME_SMOOTH_X
 
 j1DD5   LDA $D016                       ;VIC Control Register 2
         AND #$10                        ;Mask x-smooth scrolling
-        ORA aE4                         ;X-smooth scrolling
+        ORA GAME_SMOOTH_X               ;X-smooth scrolling
         STA $D016                       ;VIC Control Register 2
         RTS
 
 b1DE0   LDA #$00
-        STA aE4
+        STA GAME_SMOOTH_X
         LDA a0A
         ORA #$04
         STA a0A
@@ -3454,15 +3458,15 @@ b1DE0   LDA #$00
 
         ; Soft Scroll right (two pixels)
 s1DED   INC a0C
-        LDA aE4
+        LDA GAME_SMOOTH_X
         CMP #$06                        ;#%00000110
         BEQ _L00
-        INC aE4
-        INC aE4
+        INC GAME_SMOOTH_X
+        INC GAME_SMOOTH_X
         JMP j1DD5
 
 _L00    LDA #$00
-        STA aE4
+        STA GAME_SMOOTH_X
         LDA a0A
         ORA #$04                        ;#%00000100
         STA a0A
@@ -3538,27 +3542,27 @@ _L02    LDA $4000+40*18,X
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 s1EB1   DEC a0C
-        LDA aE4
+        LDA GAME_SMOOTH_X
         BEQ b1EBC
-        DEC aE4
+        DEC GAME_SMOOTH_X
         JMP j1DD5
 
 b1EBC   LDA #$07     ;#%00000111
-        STA aE4
+        STA GAME_SMOOTH_X
         LDA a0A
         ORA #$08     ;#%00001000
         STA a0A
         JMP j1DD5
 
 s1EC9   DEC a0C
-        LDA aE4
+        LDA GAME_SMOOTH_X
         BEQ b1ED6
-        DEC aE4
-        DEC aE4
+        DEC GAME_SMOOTH_X
+        DEC GAME_SMOOTH_X
         JMP j1DD5
 
 b1ED6   LDA #$06     ;#%00000110
-        STA aE4
+        STA GAME_SMOOTH_X
         LDA a0A
         ORA #$08     ;#%00001000
         STA a0A
@@ -3581,9 +3585,9 @@ _L00    LDA f4001,X
         LDA f40C9,X
         STA f40C8,X
         LDA f40F1,X
-        STA f40F0,X
+        STA $4000+40*6+0,X
         LDA f4119,X
-        STA f4118,X
+        STA $4000+40*7+0,X
         LDA f4141,X
         STA f4140,X
         INX
@@ -3635,33 +3639,34 @@ _L02    LDA f42D1,X
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 s1F91   INC a0D
-        LDA aE3
+        LDA GAME_SMOOTH_Y
         CMP #$07
         BCS b1FA6
-        INC aE3
+        INC GAME_SMOOTH_Y
+
 s1F9B   LDA $D011                       ;VIC Control Register 1
         AND #$70                        ;Mask y-smooth scrolling
-        ORA aE3                         ;Y-smooth scrolling
+        ORA GAME_SMOOTH_Y               ;Y-smooth scrolling
         STA $D011                       ;VIC Control Register 1
         RTS
 
 b1FA6   LDA #$00     ;#%00000000
-        STA aE3
+        STA GAME_SMOOTH_Y
         LDA a0A
         ORA #$01     ;#%00000001
         STA a0A
         JMP s1F9B
 
 s1FB3   INC a0D
-        LDA aE3
+        LDA GAME_SMOOTH_Y
         CMP #$06     ;#%00000110
         BCS b1FC2
-        INC aE3
-        INC aE3
+        INC GAME_SMOOTH_Y
+        INC GAME_SMOOTH_Y
         JMP s1F9B
 
 b1FC2   LDA #$00     ;#%00000000
-        STA aE3
+        STA GAME_SMOOTH_Y
         LDA a0A
         ORA #$01     ;#%00000001
         STA a0A
@@ -3679,18 +3684,18 @@ b1FD7   LDA $4000+40*9,X
         STA f2131,X
         LDA $4000+40*8,X
         STA $4000+40*9,X
-        LDA f4154,X
-        STA f417C,X
-        LDA f4118,X
+        LDA $4000+40*8+20,X
+        STA $4000+40*9+20,X
+        LDA $4000+40*7+0,X
         STA f4140,X
         LDA f412C,X
-        STA f4154,X
-        LDA f40F0,X
-        STA f4118,X
+        STA $4000+40*8+20,X
+        LDA $4000+40*6+0,X
+        STA $4000+40*7+0,X
         LDA f4104,X
         STA f412C,X
         LDA f40C8,X
-        STA f40F0,X
+        STA $4000+40*6+0,X
         LDA f40DC,X
         STA f4104,X
         LDA f40A0,X
@@ -3802,28 +3807,28 @@ f2159   .BYTE $00,$00,$00,$00,$00,$00,$00,$00
         .BYTE $00,$00,$00,$00,$00,$00,$00,$00
         .BYTE $00,$00,$00,$00
 s216D   DEC a0D
-        LDA aE3
+        LDA GAME_SMOOTH_Y
         BEQ b2178
-        DEC aE3
+        DEC GAME_SMOOTH_Y
         JMP s1F9B
 
 b2178   LDA #$07     ;#%00000111
-        STA aE3
+        STA GAME_SMOOTH_Y
         LDA a0A
         ORA #$02     ;#%00000010
         STA a0A
         JMP s1F9B
 
 s2185   DEC a0D
-        LDA aE3
+        LDA GAME_SMOOTH_Y
         CMP #$02     ;#%00000010
         BCC b2194
-        DEC aE3
-        DEC aE3
+        DEC GAME_SMOOTH_Y
+        DEC GAME_SMOOTH_Y
         JMP s1F9B
 
 b2194   LDA #$06     ;#%00000110
-        STA aE3
+        STA GAME_SMOOTH_Y
         LDA a0A
         ORA #$02     ;#%00000010
         STA a0A
@@ -3836,6 +3841,7 @@ j21A1   LDX #$27     ;#%00100111
         CMP #$FF     ;#%11111111
         BNE b21B0
         DEC aFF
+
 b21B0   LDA f4028,X
         STA p4000,X
         LDA f4050,X
@@ -3846,12 +3852,12 @@ b21B0   LDA f4028,X
         STA f4078,X
         LDA f40C8,X
         STA f40A0,X
-        LDA f40F0,X
+        LDA $4000+40*6+0,X
         STA f40C8,X
-        LDA f4118,X
-        STA f40F0,X
+        LDA $4000+40*7+0,X
+        STA $4000+40*6+0,X
         LDA f4140,X
-        STA f4118,X
+        STA $4000+40*7+0,X
         LDA f4168,X
         STA f4140,X
         DEX
@@ -4833,6 +4839,7 @@ b295A   LDY #$00     ;#%00000000
 
 a295F   .BYTE $00
 a2960   .BYTE $00
+
 s2961   STY a2960
         STX a295F
         LDY a2995
@@ -5472,7 +5479,7 @@ b3337   LDA #$1E     ;#%00011110
         BCC b3342
 j3341   RTS
 
-b3342   LDA aE4
+b3342   LDA GAME_SMOOTH_X
         LSR A
         STA a336E
         LDA aF8
@@ -5490,7 +5497,7 @@ b3342   LDA aE4
         ASL A
         ASL A
         CLC
-        ADC aE3
+        ADC GAME_SMOOTH_Y
         SEC
         SBC a3566
         STA a362F
@@ -6394,14 +6401,14 @@ f40C9   .BYTE $20,$20,$20,$20,$20,$20,$20,$20
 f40DC   .BYTE $20,$20,$20,$20,$20,$20,$20,$20
         .BYTE $20,$20,$20,$20,$20,$20,$20,$20
         .BYTE $20,$20,$20,$20
-f40F0   .BYTE $20
+        .BYTE $20
 f40F1   .BYTE $20,$20,$20,$20,$20,$20,$20,$20
         .BYTE $20,$20,$20,$20,$7C,$7D,$40,$41
         .BYTE $84,$85,$8C
 f4104   .BYTE $8D,$A8,$A9,$60,$61,$60,$61,$20
         .BYTE $20,$20,$20,$20,$20,$20,$20,$20
         .BYTE $20,$20,$20,$20
-f4118   .BYTE $20
+        .BYTE $20
 f4119   .BYTE $20,$20,$20,$20,$20,$20,$20,$20
         .BYTE $20,$20,$20,$20,$7E,$7F,$42,$43
         .BYTE $86,$87,$8E
@@ -6412,14 +6419,14 @@ f4140   .BYTE $20
 f4141   .BYTE $20,$20,$20,$20,$20,$20,$20,$20
         .BYTE $20,$20,$20,$20,$20,$20,$20,$20
         .BYTE $20,$20,$20
-f4154   .BYTE $20,$20,$20,$20,$20,$20,$20,$20
+        .BYTE $20,$20,$20,$20,$20,$20,$20,$20
         .BYTE $20,$20,$20,$20,$20,$20,$20,$20
         .BYTE $20,$20,$20,$20
 f4168   .BYTE $20
 f4169   .BYTE $20,$20,$20,$20,$20,$20,$20,$20
         .BYTE $20,$20,$20,$01,$0C,$0C,$1B,$14
         .BYTE $09,$0D,$05
-f417C   .BYTE $1B,$08,$05,$12,$0F,$05,$13,$20
+        .BYTE $1B,$08,$05,$12,$0F,$05,$13,$20
         .BYTE $20,$20,$20,$20,$20,$20,$20,$20
         .BYTE $20,$20,$20,$20
 f4190   .BYTE $20
