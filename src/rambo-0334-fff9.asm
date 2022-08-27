@@ -8538,15 +8538,14 @@ VOICE_3_EFFECTS_TBL
         .WORD a8F3D,a8F33,j8F44,a8F05,a8F14
         .WORD a8F4A,b8EDD,a8E9C,a8EB7,a8ECA
 
-f91E3   .BYTE $4A,$95,$F9,$96,$C3,$97,$09,$A7
-        .BYTE $0C,$A7,$0F,$A7,$45,$9C,$FB,$9F
-        .BYTE $FB,$9F,$0B,$99,$19,$99,$6B,$99
-        .BYTE $A0,$99,$A4,$99,$C2,$99,$04,$9A
-        .BYTE $16,$9A,$2A,$9A,$93,$9F,$01,$A0
-        .BYTE $9D,$A0,$5C,$9B,$A5,$9B,$EE,$9B
-        .BYTE $00,$A7,$03,$A7,$06,$A7,$BF,$98
-        .BYTE $C3,$98,$D7,$98,$82,$9A,$BB,$9A
-        .BYTE $F6,$9A,$EE,$A0,$18,$A1,$3F,$A1
+f91E3   .WORD $954A,$96F9,$97C3,$A709,$A70C
+        .WORD $A70F,$9C45,$9FFB,$9FFB,$990B
+        .BYTE $19,$99,$6B,$99,$A0,$99,$A4,$99,$C2,$99
+        .BYTE $04,$9A,$16,$9A,$2A,$9A,$93,$9F,$01,$A0
+        .BYTE $9D,$A0,$5C,$9B,$A5,$9B,$EE,$9B,$00,$A7
+        .BYTE $03,$A7,$06,$A7,$BF,$98,$C3,$98,$D7,$98
+        .BYTE $82,$9A,$BB,$9A,$F6,$9A,$EE,$A0,$18,$A1
+        .BYTE $3F,$A1
 
         .TEXT "MUSIC BY MARTIN GALWAY"
 
@@ -8654,7 +8653,8 @@ a929A   .BYTE $01,$00,$01,$02,$00,$01,$02,$0A
         .BYTE $8A,$C6,$03,$95,$CC,$1F,$95,$1A
         .BYTE $C8,$1F,$95,$CA,$18,$CE,$1A,$EA
         .BYTE $00,$03,$CE,$1A,$8A,$C6,$12,$95
-        .BYTE $C8,$EF,$93,$5F,$0A,$BF,$32,$BF
+a954A   #MUSIC_PATCH $C8,$93EF
+        .BYTE $5F,$0A,$BF,$32,$BF
         .BYTE $00,$D4,$1C,$FF,$C4,$54,$93,$BF
         .BYTE $00,$BF,$80,$DC,$DB,$93,$60,$00
         .BYTE $BF,$30,$CE,$0C,$05,$CE,$0D,$05
@@ -8707,7 +8707,9 @@ a929A   .BYTE $01,$00,$01,$02,$00,$01,$02,$0A
         .BYTE $0C,$28,$D4,$0D,$07,$D4,$1D,$95
         .BYTE $D4,$1E,$44,$BF,$A8,$D4,$02,$D0
         .BYTE $D4,$03,$FF,$BF,$00,$D4,$1C,$FF
-        .BYTE $BF,$00,$BF,$F6,$C6,$4A,$95,$BF
+        .BYTE $BF,$00,$BF,$F6
+        #MUSIC_PATCH $C6,$954A
+        .BYTE $BF
         .BYTE $10,$C8,$EF,$93,$5F,$08,$C4,$38
         .BYTE $93,$CE,$1B,$64,$86,$32,$D4,$1D
         .BYTE $D8,$D4,$1E,$0C,$BF,$00,$D4,$1C
@@ -8912,12 +8914,13 @@ a9C37   LDA #$09
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 a9C41
-        .BYTE $06,$0C,$12,$18,$C2,$20,$03
-        .WORD a9C41                                     ;Address?
+        .BYTE $06,$0C,$12,$18
+a9C45   .BYTE $C2,$20,$03
+a9C48   .WORD a9C41                                     ;Address?
 
 a9C4A   #MUSIC_PATCH $C8,a9E4E
-a9C4D
-        #MUSIC_NOTE $D2,a9BFE,$5F,$04
+
+a9C4D   #MUSIC_NOTE $D2,a9BFE,$5F,$04
         #MUSIC_NOTE $D2,a9C19,$5F,$02
         #MUSIC_NOTE $D2,a9BFE,$5F,$02
         #MUSIC_NOTE $D2,a9BFE,$5F,$02
@@ -8951,12 +8954,12 @@ a9C4D
         #MUSIC_PATCH $C8,$9F25
         #MUSIC_PATCH $C8,$9EB4
 
-        #MUSIC_NOTE $D2,$9BFE,$5F,$04
-        #MUSIC_NOTE $D2,$9C19,$5F,$02
-        #MUSIC_NOTE $D2,$9BFE,$5F,$01
-        #MUSIC_NOTE $D2,$9BFE,$5F,$01
-        #MUSIC_NOTE $D2,$9BFE,$5F,$04
-        #MUSIC_NOTE $D2,$9C19,$5F,$04
+        #MUSIC_NOTE $D2,a9BFE,$5F,$04
+        #MUSIC_NOTE $D2,a9C19,$5F,$02
+        #MUSIC_NOTE $D2,a9BFE,$5F,$01
+        #MUSIC_NOTE $D2,a9BFE,$5F,$01
+        #MUSIC_NOTE $D2,a9BFE,$5F,$04
+        #MUSIC_NOTE $D2,a9C19,$5F,$04
 
         #MUSIC_PATCH $C8,$9F25
         #MUSIC_PATCH $C8,$9EFC
