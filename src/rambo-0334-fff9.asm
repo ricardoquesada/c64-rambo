@@ -1859,7 +1859,6 @@ j1105   LDY f1210,X
         LDA f106C,X
         BEQ b1112
         LDA #$00     ;#%00000000
-p1110   =*+$01
         JMP j1115
 
 b1112   LDA f1165,Y
@@ -2564,7 +2563,7 @@ _L00    STA f02,X
         STA a6E
 
         JSR s03FC
-        JSR s225C
+        JSR GAME_SETUP_IRQ
         JSR s096A
 
         LDA #$32
@@ -3618,20 +3617,21 @@ _L01    LDA $4000+40*9+1,X
         BNE _L01
 
         LDX #$00
-_L02    LDA f42D1,X
-        STA f42D0,X
-        LDA f42F9,X
-        STA f42F8,X
-        LDA f4321,X
-        STA f4320,X
-        LDA f4349,X
-        STA f4348,X
-        LDA f4371,X
-        STA f4370,X
-        LDA f4399,X
-        STA f4398,X
-        LDA f43C1,X
-        STA f43C0,X
+_L02
+        LDA $4000+40*18+1,X
+        STA $4000+40*18+0,X
+        LDA $4000+40*19+1,X
+        STA $4000+40*19+0,X
+        LDA $4000+40*20+1,X
+        STA $4000+40*20+0,X
+        LDA $4000+40*21+1,X
+        STA $4000+40*21+0,X
+        LDA $4000+40*22+1,X
+        STA $4000+40*22+0,X
+        LDA $4000+40*23+1,X
+        STA $4000+40*23+0,X
+        LDA $4000+40*24+1,X
+        STA $4000+40*24+0,X
         INX
         CPX #39
         BNE _L02
@@ -3674,11 +3674,12 @@ b1FC2   LDA #$00     ;#%00000000
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 ; Some kind of scrolling
-s1FCF   LDX #19
+s1FCF
+        LDX #19
         INC aFE
-        BNE b1FD7
+        BNE _L00
         INC aFF
-b1FD7   LDA $4000+40*9,X
+_L00    LDA $4000+40*9,X
         STA f211D,X
         LDA $4000+40*9+20,X
         STA f2131,X
@@ -3719,10 +3720,10 @@ b1FD7   LDA $4000+40*9,X
         LDA f4014,X
         STA f403C,X
         DEX
-        BPL b1FD7
+        BPL _L00
 
         LDX #19
-b2054   LDA f42A8,X
+_L01    LDA f42A8,X
         STA f2145,X
         LDA f42BC,X
         STA f2159,X
@@ -3759,10 +3760,10 @@ b2054   LDA f42A8,X
         LDA f2131,X
         STA f41A4,X
         DEX
-        BPL b2054
+        BPL _L01
 
         LDX #19
-b20C5   LDA f4398,X
+_L02    LDA f4398,X
         STA f43C0,X
         LDA f43AC,X
         STA f43D4,X
@@ -3791,7 +3792,7 @@ b20C5   LDA f4398,X
         LDA f2159,X
         STA f42E4,X
         DEX
-        BPL b20C5
+        BPL _L02
         RTS
 
 f211D   .BYTE $00,$00,$00,$00,$00,$00,$00,$00
@@ -3806,42 +3807,42 @@ f2145   .BYTE $00,$00,$00,$00,$00,$00,$00,$00
 f2159   .BYTE $00,$00,$00,$00,$00,$00,$00,$00
         .BYTE $00,$00,$00,$00,$00,$00,$00,$00
         .BYTE $00,$00,$00,$00
+
 s216D   DEC a0D
         LDA GAME_SMOOTH_Y
         BEQ b2178
         DEC GAME_SMOOTH_Y
         JMP s1F9B
 
-b2178   LDA #$07     ;#%00000111
+b2178   LDA #$07
         STA GAME_SMOOTH_Y
         LDA a0A
-        ORA #$02     ;#%00000010
+        ORA #$02
         STA a0A
         JMP s1F9B
 
 s2185   DEC a0D
         LDA GAME_SMOOTH_Y
-        CMP #$02     ;#%00000010
+        CMP #$02
         BCC b2194
         DEC GAME_SMOOTH_Y
         DEC GAME_SMOOTH_Y
         JMP s1F9B
 
-b2194   LDA #$06     ;#%00000110
+b2194   LDA #$06
         STA GAME_SMOOTH_Y
         LDA a0A
-        ORA #$02     ;#%00000010
+        ORA #$02
         STA a0A
         JMP s1F9B
 
-j21A1   LDX #$27     ;#%00100111
+j21A1   LDX #$27
         STX a0EB3
         DEC aFE
         LDA aFE
-        CMP #$FF     ;#%11111111
+        CMP #$FF
         BNE b21B0
         DEC aFF
-
 b21B0
         LDA $4000+40*1+0,X
         STA $4000+40*0+0,X
@@ -3863,7 +3864,8 @@ b21B0
         STA f4140,X
         DEX
         BPL b21B0
-        LDX #$27     ;#%00100111
+
+        LDX #39
 b21EB   LDA f4190,X
         STA f4168,X
         LDA f41B8,X
@@ -3882,7 +3884,8 @@ b21EB   LDA f4190,X
         STA f4280,X
         DEX
         BPL b21EB
-        LDX #$27     ;#%00100111
+
+        LDX #39
 b2220   LDA f42D0,X
         STA f42A8,X
         LDA f42F8,X
@@ -3910,21 +3913,22 @@ _L00    LDA a2482
         RTS
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
-s225C   SEI
+GAME_SETUP_IRQ
+        SEI
         LDA #<a228b
         STA $FFFE                       ;IRQ
         LDA #>a228b
         STA $FFFF                       ;IRQ
 
-        LDA #$00                        ;#%00000000
+        LDA #$00
         STA $D011                       ;VIC Control Register 1
-        LDA #$01                        ;#%00000001
+        LDA #$01
         STA $D01A                       ;VIC Interrupt Mask Register (IMR)
         STA $DC0D                       ;CIA1: CIA Interrupt Control Register
         LDA $DC0D                       ;CIA1: CIA Interrupt Control Register
         LDA #$01
         STA a02
-        LDA #$35                        ;RAM / IO /RAM
+        LDA #$35                        ;RAM / IO / RAM
         STA a01
         LDA #$07
         STA a09
@@ -3940,12 +3944,12 @@ a228b   PHA
         PHA
         TXA
         PHA
-        LDA #$FF     ;#%11111111
-        STA $D019    ;VIC Interrupt Request Register (IRR)
+        LDA #$FF
+        STA $D019                       ;ACK all interrupts
         CLD
         LDA aFB
         CLC
-        ADC #$0E     ;#%00001110
+        ADC #$0E
         STA aFB
         CLI
 b229E   LDY aFC
@@ -3956,43 +3960,45 @@ b229E   LDY aFC
         STA a06
         LDY a09
         LDA f99,X
-        STA $D027,Y  ;Sprite 0 Color
+        STA $D027,Y                     ;Sprite 0 Color
         LDA f8B,X
         STA f43F8,Y
-        LDA $D010    ;Sprites 0-7 MSB of X coordinate
+        LDA $D010                       ;Sprites 0-7 MSB of X coordinate
         AND f2483,Y
         LSR f53,X
         BCC b22C3
         ORA f248B,Y
 b22C3   ROL f53,X
-        STA $D010    ;Sprites 0-7 MSB of X coordinate
+        STA $D010                       ;Sprites 0-7 MSB of X coordinate
         TYA
         ASL A
         TAY
         LDA a06
-        STA $D001,Y  ;Sprite 0 Y Pos
+        STA $D001,Y                     ;Sprite 0 Y Pos
         LDA f6F,X
-        STA $D000,Y  ;Sprite 0 X Pos
+        STA $D000,Y                     ;Sprite 0 X Pos
         DEC aFC
         BMI b22E4
         DEC a09
         BNE b229E
-        LDA #$07     ;#%00000111
+        LDA #$07
         STA a09
         JMP b229E
 
-b22E4   LDA #$07     ;#%00000111
+b22E4   LDA #$07
         STA a09
-        LDA #$32     ;#%00110010
+        LDA #$32
         STA aFB
-        LDA #<a231F
-        STA $FFFE    ;IRQ
-        LDA #>a231F
-        STA $FFFF    ;IRQ
+        LDA #<GAME_IRQ_HANDLER_RASTER_DB
+        STA $FFFE                       ;IRQ
+        LDA #>GAME_IRQ_HANDLER_RASTER_DB
+        STA $FFFF                       ;IRQ
         INC a2305
-        LDA #$DB     ;#%11011011
-        STA $D012    ;Raster Position
-j22FE   PLA
+        LDA #$DB
+        STA $D012                       ;Raster Position
+
+EXIT_IRQ
+        PLA
         TAX
         PLA
         TAY
@@ -4002,6 +4008,7 @@ j22FE   PLA
         RTS
 
 a2305   .BYTE $00
+
 b2306   SBC #$0E     ;#%00001110
         CMP $D012    ;Raster Position
         BCS b2312
@@ -4019,53 +4026,59 @@ b2312   ADC #$00     ;#%00000000
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 ; IRQ Handler
-a231F   PHA
+GAME_IRQ_HANDLER_RASTER_DB
+        PHA
         TYA
         PHA
         TXA
         PHA
-        LDA #$01     ;#%00000001
-        STA $D019    ;VIC Interrupt Request Register (IRR)
+        LDA #$01
+        STA $D019                       ;ACK Raster interrupt
         CLD
         SEI
         LDA #<a228b
-        STA $FFFE    ;IRQ
+        STA $FFFE                       ;IRQ
         LDA #>a228b
-        STA $FFFF    ;IRQ
-        LDA #$C0     ;#%11000000
-        STA $D010    ;Sprites 0-7 MSB of X coordinate
-        LDA #$03     ;#%00000011
-        STA $D01D    ;Sprites Expand 2x Horizontal (X)
-        LDA #$FC     ;#%11111100
-        STA $D01C    ;Sprites Multi-Color Mode Select
-        LDA #$E1     ;#%11100001
-        STA $D001    ;Sprite 0 Y Pos
-        STA $D003    ;Sprite 1 Y Pos
-        LDA #$20     ;#%00100000
-        STA $D000    ;Sprite 0 X Pos
-        LDA #$50     ;#%01010000
-        STA $D002    ;Sprite 1 X Pos
-        LDA #<p1110  ;#%00010000
+        STA $FFFF                       ;IRQ
+        LDA #%11000000                  ;Sprite 6 and 7 with MSB on
+        STA $D010                       ;Sprites 0-7 MSB of X coordinate
+        LDA #%00000011                  ;Sprites 0 and 1 with 2X Horizontal
+        STA $D01D                       ;Sprites Expand 2x Horizontal (X)
+        LDA #%11111100                  ;All but sprites 0 and 1 with Multi-color
+        STA $D01C                       ;Sprites Multi-Color Mode Select
+
+        ; Setup pos for Sprites 0 and 1
+        LDA #225
+        STA $D001                       ;Sprite 0 Y Pos
+        STA $D003                       ;Sprite 1 Y Pos
+        LDA #32
+        STA $D000                       ;Sprite 0 X Pos
+        LDA #80
+        STA $D002                       ;Sprite 1 X Pos
+
+        LDA #$10
         STA f43F8
-        LDA #>p1110  ;#%00010001
+        LDA #$11                        ;Color White $11 = $01
         STA a43F9
         LDA a2425
-        STA $D027    ;Sprite 0 Color
-        STA $D028    ;Sprite 1 Color
-        LDY #$0A     ;#%00001010
-        LDX #$05     ;#%00000101
-b236D   LDA #$E1     ;#%11100001
-        STA $D005,Y  ;Sprite 2 Y Pos
+        STA $D027                       ;Sprite 0 Color
+        STA $D028                       ;Sprite 1 Color
+
+        LDY #$0A
+        LDX #$05
+_L00    LDA #$E1
+        STA $D005,Y                     ;Sprite 2 Y Pos
         LDA f2419,X
-        STA $D004,Y  ;Sprite 2 X Pos
+        STA $D004,Y                     ;Sprite 2 X Pos
         LDA a241F,X
         STA f43FA,X
         LDA f2426,X
-        STA $D029,X  ;Sprite 2 Color
+        STA $D029,X                     ;Sprite 2 Color
         DEY
         DEY
         DEX
-        BPL b236D
+        BPL _L00
+
         LDA GAME_JOY_STATE_COPY
         STA GAME_JOY_STATE
         LDA a2493
@@ -4075,58 +4088,58 @@ b236D   LDA #$E1     ;#%11100001
         LDA a31
         PHA
         LDA a2480
-        BNE b23A4
+        BNE _L01
         JSR s15F1
-        JMP j23A7
+        JMP _L02
 
-b23A4   JSR s3006
-j23A7   LDA #$0D     ;#%00001101
-        STA $D027    ;Sprite 0 Color
-        STA $D028    ;Sprite 1 Color
+_L01    JSR s3006
+_L02    LDA #$0D                        ;Color Light Green
+        STA $D027                       ;Sprite 0 Color
+        STA $D028                       ;Sprite 1 Color
         JSR s1B5A
         LDA a2480
-        BEQ b23BD
+        BEQ _L03
         JSR s1C70
-        JMP j23C0
+        JMP _L04
 
-b23BD   JSR s1C29
-j23C0   JSR s1312
+_L03    JSR s1C29
+_L04    JSR s1312
         LDA a242C
-        STA $D02D    ;Sprite 6 Color
-        STA $D02E    ;Sprite 7 Color
+        STA $D02D                       ;Sprite 6 Color
+        STA $D02E                       ;Sprite 7 Color
         PLA
         STA a31
         PLA
         STA a30
         LDA a0A40
-        BEQ b23F0
+        BEQ _L05
         LDA #$00
         STA GAME_JOY_STATE
         STA a1D63
         STA GAME_JOY_STATE_COPY
 
         LDA #$00
-        STA $D418    ;Select Filter Mode and Volume
+        STA $D418                       ;Select Filter Mode and Volume
         JSR s03FC
         DEC a2305
-        JMP j23F6
+        JMP _L06
 
-b23F0   INC a2482
+_L05    INC a2482
         JSR s03FC
-j23F6   LDA a2480
-        BEQ b2401
+_L06    LDA a2480
+        BEQ _L07
         JSR s3000
-        JMP j2404
+        JMP _L08
 
-b2401   JSR s1BD4
-j2404   JSR s0EB4
+_L07    JSR s1BD4
+_L08    JSR s0EB4
         JSR s2436
         LDA a0A
-        BNE b2411
+        BNE _L09
         JSR s0A1F
-b2411   PLA
+_L09    PLA
         STA a2493
-        JMP j22FE
+        JMP EXIT_IRQ
 
         .BYTE $00
 f2419   .BYTE $AA,$C8,$E0,$FC,$1C,$34
