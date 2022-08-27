@@ -16,7 +16,7 @@ f4E = $4E
 f53 = $53
 f58 = $58
 f61 = $61
-f6F = $6F
+GAME_SPRITE_X_TBL = $6F
 f74 = $74
 f7D = $7D
 f82 = $82
@@ -24,7 +24,7 @@ f86 = $86
 f8B = $8B
 f90 = $90
 f94 = $94
-f99 = $99
+GAME_SPRITE_COLOR_TBL = $99
 f9E = $9E
 fA2 = $A2
 fA7 = $A7
@@ -45,7 +45,7 @@ a02 = $02                               ;In title, it is used as raster idx
                                         ; In game, as delay (??)
 a04 = $04
 a05 = $05
-a06 = $06
+GAME_SPRITE_Y_TBL = $06
 a09 = $09
 a0A = $0A
 a0B = $0B
@@ -721,8 +721,8 @@ b0840   LDA #$32     ;#%00110010
         STA f7D,X
         LDA #$CF     ;#%11001111
         STA f8B,X
-        LDA #$0C     ;#%00001100
-        STA f99,X
+        LDA #$0C                        ;Color Gray 2
+        STA GAME_SPRITE_COLOR_TBL,X
         DEC a086D
         LDA #$14     ;#%00010100
         STA f086E,X
@@ -737,20 +737,20 @@ b0840   LDA #$32     ;#%00110010
 a086D   .BYTE $0A
 f086E   .BYTE $00,$00,$00,$00
 
-s0872   CMP #$01     ;#%00000001
+s0872   CMP #$01
         BEQ b0879
         JMP j08A6
 
 b0879   INC f7D,X
         BNE b0881
-        LDA #$01     ;#%00000001
+        LDA #$01
         STA f61,X
 b0881   JSR s08BE
         BCC b0893
         LDA f8B,X
-        CMP #$D6     ;#%11010110
+        CMP #$D6
         BNE b088E
-        LDA #$D2     ;#%11010010
+        LDA #$D2
 b088E   CLC
         ADC #$01     ;#%00000001
         STA f8B,X
@@ -1951,6 +1951,7 @@ b11B6   LDA a0B29
         RTS
 
 a11C1   .BYTE $00
+
 b11C2   DEC a11C1
 b11C5   LDA #$07     ;#%00000111
         JSR s24D3
@@ -1978,7 +1979,7 @@ b11C5   LDA #$07     ;#%00000111
         JSR s24D3
         TAY
         LDA f1207,Y
-        STA f99,X
+        STA GAME_SPRITE_COLOR_TBL,X
         JMP j10BE
 
         RTS
@@ -2671,7 +2672,7 @@ _L02    STA a7FF8,X                     ;Sprite frames
         LDX #$19
 _L03    TXA
         PHA
-        JSR s1FCF
+        JSR GAME_HARD_SCROLL_DOWN
         LDA #$01
         STA a1D8C
         JSR j0D3D
@@ -3380,11 +3381,11 @@ b1D76   RTS
 
 s1D77   LSR A
         BCC b1D7D
-        JMP s1FCF
+        JMP GAME_HARD_SCROLL_DOWN
 
 b1D7D   LSR A
         BCC b1D83
-        JMP j21A1
+        JMP GAME_HARD_SCROLL_UP
 
 b1D83   LSR A
         BCC b1D89
@@ -3409,7 +3410,7 @@ _L00    LDA f45,X
 
         LDX #$04
 _L01    LDA f7D,X
-        STA f6F,X
+        STA GAME_SPRITE_X_TBL,X
         DEX
         BPL _L01
 
@@ -3650,147 +3651,158 @@ s1F9B   LDA $D011                       ;VIC Control Register 1
         STA $D011                       ;VIC Control Register 1
         RTS
 
-b1FA6   LDA #$00     ;#%00000000
+b1FA6   LDA #$00
         STA GAME_SMOOTH_Y
         LDA a0A
-        ORA #$01     ;#%00000001
+        ORA #$01
         STA a0A
         JMP s1F9B
 
 s1FB3   INC a0D
         LDA GAME_SMOOTH_Y
-        CMP #$06     ;#%00000110
+        CMP #$06
         BCS b1FC2
         INC GAME_SMOOTH_Y
         INC GAME_SMOOTH_Y
         JMP s1F9B
 
-b1FC2   LDA #$00     ;#%00000000
+b1FC2   LDA #$00
         STA GAME_SMOOTH_Y
         LDA a0A
-        ORA #$01     ;#%00000001
+        ORA #$01
         STA a0A
         JMP s1F9B
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
-; Some kind of scrolling
-s1FCF
+; Scrolls down:
+;   - Starts from the middle of the screen possibly to avoid any kind of flicker
+;     with raster
+;   - Copies left part of screen / right part of the screen: I guess due to
+;     to raster flicker as well (???)
+;   - But the scroll up routine doesn't do this
+GAME_HARD_SCROLL_DOWN
         LDX #19
         INC aFE
         BNE _L00
         INC aFF
+
 _L00    LDA $4000+40*9,X
         STA f211D,X
         LDA $4000+40*9+20,X
         STA f2131,X
+
         LDA $4000+40*8,X
         STA $4000+40*9,X
         LDA $4000+40*8+20,X
         STA $4000+40*9+20,X
         LDA $4000+40*7+0,X
-        STA f4140,X
-        LDA f412C,X
+        STA $4000+40*8+0,X
+        LDA $4000+40*7+20,X
         STA $4000+40*8+20,X
         LDA $4000+40*6+0,X
         STA $4000+40*7+0,X
-        LDA f4104,X
-        STA f412C,X
-        LDA f40C8,X
+        LDA $4000+40*6+20,X
+        STA $4000+40*7+20,X
+        LDA $4000+40*5+0,X
         STA $4000+40*6+0,X
-        LDA f40DC,X
-        STA f4104,X
-        LDA f40A0,X
-        STA f40C8,X
-        LDA f40B4,X
-        STA f40DC,X
-        LDA f4078,X
-        STA f40A0,X
-        LDA f408C,X
-        STA f40B4,X
-        LDA f4050,X
-        STA f4078,X
-        LDA f4064,X
-        STA f408C,X
+        LDA $4000+40*5+20,X
+        STA $4000+40*6+20,X
+        LDA $4000+40*4+0,X
+        STA $4000+40*5+0,X
+        LDA $4000+40*4+20,X
+        STA $4000+40*5+20,X
+        LDA $4000+40*3+0,X
+        STA $4000+40*4+0,X
+        LDA $4000+40*3+20,X
+        STA $4000+40*4+20,X
+        LDA $4000+40*2+0,X
+        STA $4000+40*3+0,X
+        LDA $4000+40*2+20,X
+        STA $4000+40*3+20,X
         LDA $4000+40*1+0,X
-        STA f4050,X
-        LDA f403C,X
-        STA f4064,X
+        STA $4000+40*2+0,X
+        LDA $4000+40*1+20,X
+        STA $4000+40*2+20,X
         LDA $4000+40*0+0,X
         STA $4000+40*1+0,X
-        LDA f4014,X
-        STA f403C,X
+        LDA $4000+40*0+20,X
+        STA $4000+40*1+20,X
         DEX
         BPL _L00
 
         LDX #19
-_L01    LDA f42A8,X
+_L01    LDA $4000+40*17+0,X
         STA f2145,X
-        LDA f42BC,X
+        LDA $4000+40*17+20,X
         STA f2159,X
-        LDA f4280,X
-        STA f42A8,X
-        LDA f4294,X
-        STA f42BC,X
-        LDA f4258,X
-        STA f4280,X
-        LDA f426C,X
-        STA f4294,X
-        LDA f4230,X
-        STA f4258,X
-        LDA f4244,X
-        STA f426C,X
-        LDA f4208,X
-        STA f4230,X
-        LDA f421C,X
-        STA f4244,X
-        LDA f41E0,X
-        STA f4208,X
-        LDA f41F4,X
-        STA f421C,X
-        LDA f41B8,X
-        STA f41E0,X
-        LDA f41CC,X
-        STA f41F4,X
-        LDA f4190,X
-        STA f41B8,X
-        LDA f41A4,X
-        STA f41CC,X
+
+        LDA $4000+40*16+0,X
+        STA $4000+40*17+0,X
+        LDA $4000+40*16+20,X
+        STA $4000+40*17+20,X
+        LDA $4000+40*15+0,X
+        STA $4000+40*16+0,X
+        LDA $4000+40*15+20,X
+        STA $4000+40*16+20,X
+        LDA $4000+40*14+0,X
+        STA $4000+40*15+0,X
+        LDA $4000+40*14+20,X
+        STA $4000+40*15+20,X
+        LDA $4000+40*13+0,X
+        STA $4000+40*14+0,X
+        LDA $4000+40*13+20,X
+        STA $4000+40*14+20,X
+        LDA $4000+40*12+0,X
+        STA $4000+40*13+0,X
+        LDA $4000+40*12+20,X
+        STA $4000+40*13+20,X
+        LDA $4000+40*11+0,X
+        STA $4000+40*12+0,X
+        LDA $4000+40*11+20,X
+        STA $4000+40*12+20,X
+        LDA $4000+40*10+0,X
+        STA $4000+40*11+0,X
+        LDA $4000+40*10+20,X
+        STA $4000+40*11+20,X
+
         LDA f211D,X
-        STA f4190,X
+        STA $4000+40*10+0,X
         LDA f2131,X
-        STA f41A4,X
+        STA $4000+40*10+20,X
+
         DEX
         BPL _L01
 
         LDX #19
-_L02    LDA f4398,X
-        STA f43C0,X
-        LDA f43AC,X
-        STA f43D4,X
-        LDA f4370,X
-        STA f4398,X
-        LDA f4384,X
-        STA f43AC,X
-        LDA f4348,X
-        STA f4370,X
-        LDA f435C,X
-        STA f4384,X
-        LDA f4320,X
-        STA f4348,X
-        LDA f4334,X
-        STA f435C,X
-        LDA f42F8,X
-        STA f4320,X
-        LDA f430C,X
-        STA f4334,X
-        LDA f42D0,X
-        STA f42F8,X
-        LDA f42E4,X
-        STA f430C,X
+_L02    LDA $4000+40*23+0,X
+        STA $4000+40*24+0,X
+        LDA $4000+40*23+20,X
+        STA $4000+40*24+20,X
+        LDA $4000+40*22+0,X
+        STA $4000+40*23+0,X
+        LDA $4000+40*22+20,X
+        STA $4000+40*23+20,X
+        LDA $4000+40*21+0,X
+        STA $4000+40*22+0,X
+        LDA $4000+40*21+20,X
+        STA $4000+40*22+20,X
+        LDA $4000+40*20+0,X
+        STA $4000+40*21+0,X
+        LDA $4000+40*20+20,X
+        STA $4000+40*21+20,X
+        LDA $4000+40*19+0,X
+        STA $4000+40*20+0,X
+        LDA $4000+40*19+20,X
+        STA $4000+40*20+20,X
+        LDA $4000+40*18+0,X
+        STA $4000+40*19+0,X
+        LDA $4000+40*18+20,X
+        STA $4000+40*19+20,X
+
         LDA f2145,X
-        STA f42D0,X
+        STA $4000+40*18+0,X
         LDA f2159,X
-        STA f42E4,X
+        STA $4000+40*18+20,X
         DEX
         BPL _L02
         RTS
@@ -3836,72 +3848,77 @@ b2194   LDA #$06
         STA a0A
         JMP s1F9B
 
-j21A1   LDX #$27
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+;$21A1
+GAME_HARD_SCROLL_UP
+        LDX #39
         STX a0EB3
         DEC aFE
         LDA aFE
         CMP #$FF
-        BNE b21B0
+        BNE _L00
         DEC aFF
-b21B0
+_L00
         LDA $4000+40*1+0,X
         STA $4000+40*0+0,X
-        LDA f4050,X
+        LDA $4000+40*2+0,X
         STA $4000+40*1+0,X
-        LDA f4078,X
-        STA f4050,X
-        LDA f40A0,X
-        STA f4078,X
-        LDA f40C8,X
-        STA f40A0,X
+        LDA $4000+40*3+0,X
+        STA $4000+40*2+0,X
+        LDA $4000+40*4+0,X
+        STA $4000+40*3+0,X
+        LDA $4000+40*5+0,X
+        STA $4000+40*4+0,X
         LDA $4000+40*6+0,X
-        STA f40C8,X
+        STA $4000+40*5+0,X
         LDA $4000+40*7+0,X
         STA $4000+40*6+0,X
-        LDA f4140,X
+        LDA $4000+40*8+0,X
         STA $4000+40*7+0,X
-        LDA f4168,X
-        STA f4140,X
+        LDA $4000+40*9+0,X
+        STA $4000+40*8+0,X
         DEX
-        BPL b21B0
+        BPL _L00
 
         LDX #39
-b21EB   LDA f4190,X
-        STA f4168,X
-        LDA f41B8,X
-        STA f4190,X
-        LDA f41E0,X
-        STA f41B8,X
-        LDA f4208,X
-        STA f41E0,X
-        LDA f4230,X
-        STA f4208,X
-        LDA f4258,X
-        STA f4230,X
-        LDA f4280,X
-        STA f4258,X
-        LDA f42A8,X
-        STA f4280,X
+_L01
+        LDA $4000+40*10+0,X
+        STA $4000+40*9+0,X
+        LDA $4000+40*11+0,X
+        STA $4000+40*10+0,X
+        LDA $4000+40*12+0,X
+        STA $4000+40*11+0,X
+        LDA $4000+40*13+0,X
+        STA $4000+40*12+0,X
+        LDA $4000+40*14+0,X
+        STA $4000+40*13+0,X
+        LDA $4000+40*15+0,X
+        STA $4000+40*14+0,X
+        LDA $4000+40*16+0,X
+        STA $4000+40*15+0,X
+        LDA $4000+40*17+0,X
+        STA $4000+40*16+0,X
         DEX
-        BPL b21EB
+        BPL _L01
 
         LDX #39
-b2220   LDA f42D0,X
-        STA f42A8,X
-        LDA f42F8,X
-        STA f42D0,X
-        LDA f4320,X
-        STA f42F8,X
-        LDA f4348,X
-        STA f4320,X
-        LDA f4370,X
-        STA f4348,X
-        LDA f4398,X
-        STA f4370,X
-        LDA f43C0,X
-        STA f4398,X
+_L02
+        LDA $4000+40*18+0,X
+        STA $4000+40*17+0,X
+        LDA $4000+40*19+0,X
+        STA $4000+40*18+0,X
+        LDA $4000+40*20+0,X
+        STA $4000+40*19+0,X
+        LDA $4000+40*21+0,X
+        STA $4000+40*20+0,X
+        LDA $4000+40*22+0,X
+        STA $4000+40*21+0,X
+        LDA $4000+40*23+0,X
+        STA $4000+40*22+0,X
+        LDA $4000+40*24+0,X
+        STA $4000+40*23+0,X
         DEX
-        BPL b2220
+        BPL _L02
         RTS
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
@@ -3944,6 +3961,7 @@ a228b   PHA
         PHA
         TXA
         PHA
+
         LDA #$FF
         STA $D019                       ;ACK all interrupts
         CLD
@@ -3951,44 +3969,47 @@ a228b   PHA
         CLC
         ADC #$0E
         STA aFB
+
         CLI
-b229E   LDY aFC
+_L00    LDY aFC
         LDX fA7,Y
         LDA f37,X
         CMP aFB
         BCS b2306
-        STA a06
+
+        STA GAME_SPRITE_Y_TBL
         LDY a09
-        LDA f99,X
+        LDA GAME_SPRITE_COLOR_TBL,X
         STA $D027,Y                     ;Sprite 0 Color
         LDA f8B,X
         STA f43F8,Y
         LDA $D010                       ;Sprites 0-7 MSB of X coordinate
         AND f2483,Y
         LSR f53,X
-        BCC b22C3
+        BCC _L01
         ORA f248B,Y
-b22C3   ROL f53,X
+_L01    ROL f53,X
         STA $D010                       ;Sprites 0-7 MSB of X coordinate
         TYA
         ASL A
         TAY
-        LDA a06
+        LDA GAME_SPRITE_Y_TBL
         STA $D001,Y                     ;Sprite 0 Y Pos
-        LDA f6F,X
+        LDA GAME_SPRITE_X_TBL,X
         STA $D000,Y                     ;Sprite 0 X Pos
         DEC aFC
-        BMI b22E4
+        BMI _L02
         DEC a09
-        BNE b229E
+        BNE _L00
         LDA #$07
         STA a09
-        JMP b229E
+        JMP _L00
 
-b22E4   LDA #$07
+_L02    LDA #$07
         STA a09
         LDA #$32
         STA aFB
+
         LDA #<GAME_IRQ_HANDLER_RASTER_DB
         STA $FFFE                       ;IRQ
         LDA #>GAME_IRQ_HANDLER_RASTER_DB
@@ -4009,14 +4030,15 @@ EXIT_IRQ
 
 a2305   .BYTE $00
 
-b2306   SBC #$0E     ;#%00001110
-        CMP $D012    ;Raster Position
+b2306   SBC #$0E
+        CMP $D012                       ;Raster Position
         BCS b2312
-        LDA $D012    ;Raster Position
-        ADC #$02     ;#%00000010
-b2312   ADC #$00     ;#%00000000
-        STA $D012    ;Raster Position
+        LDA $D012                       ;Raster Position
+        ADC #$02
+b2312   ADC #$00
+        STA $D012                       ;Raster Position
         STA aFB
+
         PLA
         TAX
         PLA
