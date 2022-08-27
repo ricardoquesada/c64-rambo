@@ -51,7 +51,7 @@ a0A = $0A
 a0B = $0B
 a0C = $0C
 a0D = $0D
-a0E = $0E
+SELECTED_WEAPON = $0E
 a0F = $0F
 a20 = $20
 a21 = $21
@@ -99,6 +99,7 @@ a86 = $86
 a87 = $87
 a89 = $89
 a8A = $8A
+a8B = $8B
 a8F = $8F
 a90 = $90
 a91 = $91
@@ -170,7 +171,6 @@ f0037 = $0037
 f0045 = $0045
 f0061 = $0061
 f007D = $007D
-f008B = $008B
 f0099 = $0099
 f00B5 = $00B5
 f00C3 = $00C3
@@ -220,7 +220,8 @@ s0337   JMP j28FF
 
         JMP j1D2A
 
-s033D   JMP j1A05
+GAME_MAYBE_SELECT_NEXT_WEAPON_BIS
+        JMP GAME_MAYBE_SELECT_NEXT_WEAPON
 
 s0340   JMP j1D68
 
@@ -318,7 +319,7 @@ _L00    JSR s040B
         JSR s0C49
         JSR s0A41
         JSR s0D99
-        JSR j1A05
+        JSR GAME_MAYBE_SELECT_NEXT_WEAPON
         JSR j0CB3
         JSR s0900
         JSR s043F
@@ -811,24 +812,26 @@ b08EB   STX GAME_JOY_STATE
         STX a1D65
         JMP j07FB
 
-s0900   LDA a0E
-        BNE b090B
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+s0900   LDA SELECTED_WEAPON             ;Weapon used
+        BNE _EXIT0                      ; Knife? No
         LDA a161E
-        CMP #$E0                        ;#%11100000
-        BEQ b090C
-b090B   RTS
+        CMP #$E0
+        BEQ _L01
+_EXIT0  RTS
 
-b090C   LDA a0912
-        BEQ b0913
+_L01    LDA a0912
+        BEQ _L02
         RTS
 
 a0912   .BYTE $00
-b0913   LDA a0B2A
-        BNE b0919
+
+_L02    LDA a0B2A
+        BNE _L03
         RTS
 
-b0919   LDA a0966
-        BNE b0965
+_L03    LDA a0966
+        BNE _EXIT1
         INC a0912
         INC a0967
         LDA #$28     ;#%00101000
@@ -861,8 +864,7 @@ b0919   LDA a0966
         JSR s0AB7
         LDA #27
         JMP MUSIC_FN
-
-b0965   RTS
+_EXIT1  RTS
 
 a0966   .BYTE $00
 a0967   .BYTE $00
@@ -963,9 +965,11 @@ b0A15   LDA $EE70,Y
         BPL b0A15
         RTS
 
-s0A1F   LDA #$3F     ;#%00111111
-        JSR s26FA
-        BCC b0A39
+s0A1F   LDA #%00111111                  ;Stop key: Row=7, Col=7
+        JSR IS_KEY_PRESSED
+        BCC b0A39                       ;Not pressed
+
+        ; Set pause
         LDA a0A3F
         BNE b0A38
         LDA a0A40
@@ -1008,6 +1012,8 @@ b0A48   STA a25C4
 b0A74   LDX a0BE0
         LDA f0BED,X
         BMI b0A9F
+
+        ; Weapon picked up
         ORA a1A47
         STA a1A47
         TXA
@@ -1019,17 +1025,19 @@ b0A74   LDX a0BE0
         BEQ b0ADC
         LDA #$00
         STA f0BED,X
-        LDA #$03                ;Set 3000 points
+        LDA #$03                        ;Set 3000 points
         STA LOCAL_POINTS+2
         LDA #$1E
         JSR j0D24
         JMP j0BC9
 
-b0A9F   LDA a0E
-        BNE b0AB6
+b0A9F   LDA SELECTED_WEAPON             ;Weapon used
+        BNE b0AB6                       ; Knife? No
+
+        ; First prisoner rescued
         STA f0BED,X
         INC a0B29
-        LDA #$05                ;Set 5000 points
+        LDA #$05                        ;Set 5000 points
         STA LOCAL_POINTS+2
         LDA #$1E
         JSR j0D24
@@ -1234,7 +1242,7 @@ s0C10   LDA f45,X
         STA a0B
         TXA
         TAY
-        JMP j15C6
+        JMP ONE_ENEMY_KILLED
 
 b0C48   RTS
 
@@ -1332,9 +1340,11 @@ _L03    RTS
 a0CED   .BYTE $00
 f0CEE   .BYTE $80,$40,$20,$10,$08,$04,$02,$01
 
-j0CF6   LDA #$0D     ;#%00001101
-        JSR s26FA
-        BCC b0D1C
+j0CF6   LDA #%00001101                  ;'S' row=1,col=5
+        JSR IS_KEY_PRESSED
+        BCC b0D1C                       ;Not pressed
+
+        ; Toggle music/sfx
         LDA a0D22
         BNE b0D1B
         INC a0D22
@@ -1491,7 +1501,7 @@ b0DED   LDA #$0E     ;#%00001110
 b0E21   LDA #$0C     ;#%00001100
         STA f1210,Y
         LDA #$78     ;#%01111000
-j0E28   STA f008B,Y
+j0E28   STA a8B,Y
         LDA #$0E     ;#%00001110
         SEC
         SBC a0E5A
@@ -1739,8 +1749,8 @@ b0FDD   CMP #$03     ;#%00000011
         BNE b0FF0
         TYA
         PHA
-        LDY #$04     ;#%00000100
-        JSR j15C6
+        LDY #$04
+        JSR ONE_ENEMY_KILLED
         PLA
         TAY
         RTS
@@ -1861,6 +1871,7 @@ f10E2   .BYTE $6A,$6B,$6C,$6D,$00,$66,$67,$68
         .BYTE $00
 f10FB   .BYTE $00,$00,$00,$00,$00
 f1100   .BYTE $00,$00,$00,$00,$00
+
 j1105   LDY f1210,X
         LDA f106C,X
         BEQ b1112
@@ -2325,6 +2336,7 @@ a14EC   .BYTE $00
 a14ED   .BYTE $00
 a14EE   .BYTE $00
 a14EF   .BYTE $00
+
 s14F0   LDA a1D8C
         BEQ b14F6
         RTS
@@ -2380,6 +2392,7 @@ b1548   LDA #$02     ;#%00000010
 a154E   .BYTE $00
 f154F   .BYTE $0D,$0C,$0C,$0C,$00,$0C,$00,$18
 f1557   .BYTE $0D,$0B,$0B,$0B,$00,$0B,$00,$15
+
 s155F   STA a2745
         LDY #$03     ;#%00000011
 j1564   STY a2493
@@ -2394,7 +2407,7 @@ j1564   STY a2493
         LDY a2493
         LDA f120B,Y
         BEQ b15EA
-        CMP #$04     ;#%00000100
+        CMP #$04
         BEQ b15EA
         LDA f4E,X
         STA a25C4
@@ -2403,7 +2416,7 @@ j1564   STY a2493
         LDA f86,X
         ASL A
         STA a25C0
-        LDA #$00     ;#%00000000
+        LDA #$00
         ROL A
         STA a25C1
         LDA f007D,Y
@@ -2413,23 +2426,27 @@ j1564   STY a2493
         JSR s257D
         BCC b15EA
         LDA a2745
-        CMP #$08     ;#%00001000
+        CMP #$08
         BEQ b15C3
-        CMP #$05     ;#%00000101
+        CMP #$05
         BEQ b15C3
-        CMP #$0A     ;#%00001010
-        BEQ j15C6
+        CMP #$0A
+        BEQ ONE_ENEMY_KILLED
         JSR s1837
-        JMP j15C6
+        JMP ONE_ENEMY_KILLED
 
 b15C3   JSR s1934
-j15C6   LDA #$7E     ;#%01111110
-        STA f008B,Y
-        LDA #$01     ;#%00000001
+
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+; Args: Y (enemy that was killed)
+ONE_ENEMY_KILLED
+        LDA #$7E
+        STA a8B,Y
+        LDA #$01
         STA f106C,Y
-        LDA #$00     ;#%00000000
+        LDA #$00
         STA f1210,Y
-        LDA #$04     ;#%00000100
+        LDA #$04
         STA f120B,Y
         STA f1100,Y
         LDA #$01                        ;Set 100 points
@@ -2444,17 +2461,17 @@ b15EA   DEY
 
 b15EE   JMP j1564
 
-s15F1   LDX #$0D     ;#%00001101
+s15F1   LDX #$0D
         JSR j1659
-        LDX #$03     ;#%00000011
+        LDX #$03
         LDA GAME_JOY_STATE
         STA a2493
 b15FE   LDY f161F,X
         LDA (p30),Y
         STA a161E
-        CMP #$1B     ;#%00011011
+        CMP #$1B
         BCC b1611
-        CMP #$2A     ;#%00101010
+        CMP #$2A
         BCS b1611
         JMP j161A
 
@@ -2596,7 +2613,7 @@ _L01    LDA f0BF1,X
         STA a0967
         STA a0B29
         STA GAME_SMOOTH_X
-        STA a0E
+        STA SELECTED_WEAPON
         STA a0A40
         STA $D015                       ;Sprite display Enable
         STA $D020                       ;Border Color
@@ -2937,68 +2954,74 @@ b19A7   LDA a1A47
 f19BD   .BYTE $22
 f19BE   .BYTE $22,$15,$16,$17,$18,$19,$1A
 
-s19C5   LDX #$07     ;#%00000111
-b19C7   LDA f242E,X
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+s19C5   LDX #$07
+_L00    LDA f242E,X
         STA f2426,X
         DEX
-        BPL b19C7
+        BPL _L00
         RTS
 
-s19D1   LDX a0E
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+s19D1   LDX SELECTED_WEAPON
         LDY a1B70
         LDA f1B71,Y
         LDY a0CED
-        CPY #$0A     ;#%00001010
-        BCC b19E8
-        LDY #$07     ;#%00000111
+        CPY #$0A
+        BCC _L00
+        LDY #$07
         STY a2425
-        JMP j19EB
+        JMP _L01
 
-b19E8   STA a2425
-j19EB   CPX #$04     ;#%00000100
-        BEQ b19F7
-        CPX #$05     ;#%00000101
-        BEQ b19FE
+_L00    STA a2425
+_L01    CPX #$04                        ;Weapon: Machine gun
+        BEQ _L02
+        CPX #$05                        ;Weapon: Helicopter gun
+        BEQ _L03
         STA f2426,X
         RTS
 
-b19F7   STA a242A
+_L02    STA a242A                       ;Machine gun
         STA a242B
         RTS
 
-b19FE   STA a242C
+_L03    STA a242C                       ;Helicoper gun
         STA a242D
         RTS
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
-j1A05
-        LDA #$00                        ;Disable keyboard scanning
+; If space is pressed, select the next weapon
+GAME_MAYBE_SELECT_NEXT_WEAPON
+        LDA #$00
         STA $DC00                       ; CIA1: Data Port Register A
 
-        LDA $DC01                       ;Read Joy port #2
+        LDA $DC01                       ;Read Register B
         EOR #$FF                        ; Flip bits since they are active low
-        BNE _L00                        ;Any activity in the joystick?
+        BNE _L00                        ;Any activity?
                                         ; Yes, jump
 
         LDA #$FF                        ;Enable keyboard scanning
         STA $DC00                       ; CIA1: Data Port Register A
         RTS
 
-_L00    LDA #$3C
-        JSR s26FA
+_L00    LDA #%00111100                  ;Space: row=7, col=4
+        JSR IS_KEY_PRESSED
         LDA #$00
-        BCC _L04
+        BCC _L04                        ; Not pressed
         LDA a1A45
         BEQ _L01
         DEC a1A45
         RTS
 
 _L01    JSR s19C5
-_L02    LDX a0E
-        BNE _L03
-        LDX #$06     ;#%00000110
+        ; Select next weapon
+_L02    LDX SELECTED_WEAPON             ;Weapon used
+        BNE _L03                        ; Knife? No
+
+        LDX #$06                        ;Select max weapon
 _L03    DEX
-        STX a0E
+        STX SELECTED_WEAPON
+
         LDA a1A47
         AND f1A48,X
         BEQ _L02
@@ -3032,7 +3055,7 @@ b1A69   LDA f1965,X
         BPL b1A69
         RTS
 
-b1A72   LDY a0E
+b1A72   LDY SELECTED_WEAPON
         CPY #$04     ;#%00000100
         BNE b1A81
         LDA a11C1
@@ -3054,7 +3077,7 @@ b1A81   LDA f1AFA,Y
         STA f4E,X
         INC fCC,X
         LDY GAME_JOY_DIR_STATE
-        LDA a0E
+        LDA SELECTED_WEAPON
         BNE b1AAC
         LDA #$39     ;#%00111001
         JMP j1AD9
@@ -3112,6 +3135,7 @@ f1B48   .BYTE $FF,$FF,$01,$00,$00,$FF,$01,$00
 f1B53   .BYTE $00,$00,$00
 f1B56   .BYTE $00,$00,$00
 a1B59   .BYTE $00
+
 s1B5A   DEC a1B6F
         BPL b1B6E
         LDA #$02     ;#%00000010
@@ -3125,6 +3149,7 @@ b1B6E   RTS
 a1B6F   .BYTE $00
 a1B70   .BYTE $00
 f1B71   .BYTE $00,$0B,$0C,$0F,$01,$0F,$0C,$0B
+
 s1B79   LDA a1C28
         SEC
         BNE b1B87
@@ -4549,31 +4574,37 @@ b26F4   STA fDE,X
         RTS
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
-s26FA   STY a2734
+; Args: A= xx_rrr_ccc
+;       ccc = represents the Column to choose (bits 0-2)
+;       rrr = represents the Row to choose (bits 3-5)
+;       xx = must be 0 (bits 6,7)
+; Ready keyboard
+IS_KEY_PRESSED
+        STY _TMP_Y
         PHA
         LSR A
         LSR A
         LSR A
         TAY
-        LDA f2735,Y                     ;Filter keyboard row
+        LDA _KEYBOARD_ROW_MASK,Y        ;Filter keyboard row
         STA $DC00                       ; CIA1: Data Port Register A
         PLA
         AND #$07
         TAY
         LDA $DC01                       ;Ready keyboard column
-        AND f273D,Y
-        BNE b2725
+        AND _KEYBOARD_COL_MASK,Y
+        BNE _L00
 
         LDA #$FF                        ;Disable keyboard scanning
         STA $DC00                       ; All rows desactivated
         LDA $DC01                       ;Read Joy port #2
-        AND f273D,Y
-        BEQ b2725
-        SEC
-        JMP j2726
+        AND _KEYBOARD_COL_MASK,Y
+        BEQ _L00
+        SEC                             ;Tag it as pressed
+        JMP _L01
 
-b2725   CLC
-j2726   LDY a2734
+_L00    CLC                             ;Tag it as not-pressed
+_L01    LDY _TMP_Y
 
         LDA #$FF                        ;Default values
         STA $DC00
@@ -4581,13 +4612,14 @@ j2726   LDY a2734
         STA $DC01
         RTS
 
-a2734   .BYTE $00
-f2735   .BYTE $FE,$FD,$FB,$F7,$EF,$DF,$BF,$7F
-f273D   .BYTE $01,$02,$04,$08,$10,$20,$40,$80
+_TMP_Y                  .BYTE $00
+_KEYBOARD_ROW_MASK      .BYTE $FE,$FD,$FB,$F7,$EF,$DF,$BF,$7F
+_KEYBOARD_COL_MASK      .BYTE $01,$02,$04,$08,$10,$20,$40,$80
 a2745   .BYTE $00
 a2746   .BYTE $00
 a2747   .BYTE $E2,$00,$00
 
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 j274A   LDA #$27     ;#%00100111
         STA a27EF
         STA a2493
@@ -4678,9 +4710,9 @@ j27DC   LDA aF3
         CMP #$FD     ;#%11111101
         BNE b27EE
         JSR s0EDC
+
 a27EF   =*+$01
 a27F0   =*+$02
-
 b27EE   STA $4000
         LDA a27EF
         CLC
@@ -5136,7 +5168,7 @@ j3009   JSR s0364
         JSR s3210
         JSR s3140
         JSR s3272
-        JSR s033D
+        JSR GAME_MAYBE_SELECT_NEXT_WEAPON_BIS
         JSR s319D
         JSR s303F
         JSR s304E
@@ -5269,8 +5301,9 @@ f3128   .BYTE $1F,$1F,$1F,$09,$09,$09,$1F,$1F
         .BYTE $1F,$09,$09,$09
 f3134   .BYTE $0A,$0A,$0A,$22,$22,$22,$0A,$0A
         .BYTE $0A,$22,$22,$22
-s3140   LDA a0E
-        CMP #$05     ;#%00000101
+
+s3140   LDA SELECTED_WEAPON
+        CMP #$05
         BEQ b3147
         RTS
 
