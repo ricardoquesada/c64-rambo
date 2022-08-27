@@ -1230,12 +1230,12 @@ f0BF5   .BYTE $23,$24,$D7,$B9
 
 s0BF9   LDX a0C0F
         LDA f120B,X
-        CMP #$01     ;#%00000001
+        CMP #$01
         BNE b0C06
         JSR s0C10
 b0C06   DEX
         BPL b0C0B
-        LDX #$03     ;#%00000011
+        LDX #$03
 b0C0B   STX a0C0F
         RTS
 
@@ -1251,7 +1251,7 @@ s0C10   LDA f45,X
         STA a25C1
         LDA a8A
         STA a25C2
-        LDA #$00     ;#%00000000
+        LDA #$00
         STA a25C3
         LDA #$0C
         STA a25C7
@@ -1274,7 +1274,7 @@ s0C49   LDX a0C9B
         JSR s0C5D
 b0C54   DEX
         BPL b0C59
-        LDX #$03     ;#%00000011
+        LDX #$03
 b0C59   STX a0C9B
         RTS
 
@@ -1285,12 +1285,12 @@ s0C5D   LDA f4A,X
         LDA f82,X
         ASL A
         STA a25C0
-        LDA #$00     ;#%00000000
+        LDA #$00
         ROL A
         STA a25C1
         LDA a8A
         STA a25C2
-        LDA #$00     ;#%00000000
+        LDA #$00
         STA a25C3
         LDA #$0C
         STA a25C7
@@ -2668,7 +2668,7 @@ _L01    LDA f0BF1,X
         LDA #$00
         STA GAME_JOY_STATE
         JSR b12BC
-        JSR s19C5
+        JSR GAME_RESTORE_DASHBOARD_COLORS
         JSR RESET_ENERGY_SPRITE
         LDA #$01
         JSR MUSIC_FN
@@ -2956,14 +2956,14 @@ f197F   .BYTE $00,$00,$00
 b1982   JMP s1837
 
 s1985   LDA #$14     ;#%00010100
-        STA a241F
+        STA GAME_DASHBOARD_SPR_FRAME_TBL
         LDA #$13     ;#%00010011
         STA a2422
         LDA a1A47
         AND #$01     ;#%00000001
         BNE b199B
         LDA #$22     ;#%00100010
-        STA a241F
+        STA GAME_DASHBOARD_SPR_FRAME_TBL
 b199B   LDA a1A47
         AND #$08     ;#%00001000
         BNE b19A7
@@ -2985,9 +2985,10 @@ f19BD   .BYTE $22
 f19BE   .BYTE $22,$15,$16,$17,$18,$19,$1A
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
-s19C5   LDX #$07
-_L00    LDA f242E,X
-        STA f2426,X
+GAME_RESTORE_DASHBOARD_COLORS
+        LDX #$07                        ;6 sprites are used, but this table contains 8 entries
+_L00    LDA GAME_DASHBOARD_COLOR_REF_TBL,X
+        STA GAME_DASHBOARD_SPR_COLOR_TBL,X
         DEX
         BPL _L00
         RTS
@@ -3008,7 +3009,7 @@ _L01    CPX #$04                        ;Weapon: Machine gun
         BEQ _L02
         CPX #$05                        ;Weapon: Helicopter gun
         BEQ _L03
-        STA f2426,X
+        STA GAME_DASHBOARD_SPR_COLOR_TBL,X
         RTS
 
 _L02    STA a242A                       ;Machine gun
@@ -3043,7 +3044,7 @@ _L00    LDA #%00111100                  ;Space: row=7, col=4
         DEC a1A45
         RTS
 
-_L01    JSR s19C5
+_L01    JSR GAME_RESTORE_DASHBOARD_COLORS
         ; Select next weapon
 _L02    LDX SELECTED_WEAPON             ;Weapon used
         BNE _L03                        ; Knife? No
@@ -4138,23 +4139,23 @@ GAME_IRQ_HANDLER_RASTER_DB
         LDA #80
         STA $D002                       ;Sprite 1 X Pos
 
-        LDA #$10
+        LDA #16                         ;Energy/Score sprite frame (left)
         STA GAME_SPR_FRAME_00
-        LDA #$11                        ;Color White $11 = $01
+        LDA #17                         ;Energy/Score sprite frame (right)
         STA GAME_SPR_FRAME_01
         LDA a2425
-        STA $D027                       ;Sprite 0 Color
-        STA $D028                       ;Sprite 1 Color
+        STA $D027                       ;Sprite 0 Color: White ($11 = $01)
+        STA $D028                       ;Sprite 1 Color: Whtie ($11 = $01)
 
         LDY #$0A
         LDX #$05
-_L00    LDA #$E1
+_L00    LDA #225                        ;Same Y for all weapons
         STA $D005,Y                     ;Sprite 2 Y Pos
-        LDA f2419,X
+        LDA GAME_DASHBOARD_SPR_X_TBL,X
         STA $D004,Y                     ;Sprite 2 X Pos
-        LDA a241F,X
+        LDA GAME_DASHBOARD_SPR_FRAME_TBL,X
         STA GAME_SPR_FRAME_02_TBL,X
-        LDA f2426,X
+        LDA GAME_DASHBOARD_SPR_COLOR_TBL,X
         STA $D029,X                     ;Sprite 2 Color
         DEY
         DEY
@@ -4224,21 +4225,28 @@ _L09    PLA
         JMP EXIT_IRQ
 
         .BYTE $00
-f2419   .BYTE $AA,$C8,$E0,$FC,$1C,$34
-a241F   .BYTE $14,$1B,$1C
-a2422   .BYTE $13
-a2423   .BYTE $19
-a2424   .BYTE $1A
+GAME_DASHBOARD_SPR_X_TBL
+        .BYTE $AA,$C8,$E0,$FC,$1C,$34
+GAME_DASHBOARD_SPR_FRAME_TBL
+        .BYTE 20,27,28                  ;Sprite frames: Knife, Main Weapon Left, Main Weapon right
+a2422   .BYTE 19                        ;Grenade
+a2423   .BYTE 25                        ;GatlingGun/Missile left
+a2424   .BYTE $1A                       ;GatlingGun/Missile right
+
 a2425   .BYTE $00
-f2426   .BYTE $00,$00,$00,$00
+
+GAME_DASHBOARD_SPR_COLOR_TBL
+        .BYTE $00,$00,$00,$00
 a242A   .BYTE $00
 a242B   .BYTE $00
 a242C   .BYTE $00
 a242D   .BYTE $00
-f242E   .BYTE $0B,$04,$05,$05,$09,$0C,$09,$06
 
-s2436   LDA #$00     ;#%00000000
-        STA $D012    ;Raster Position
+GAME_DASHBOARD_COLOR_REF_TBL
+        .BYTE $0B,$04,$05,$05,$09,$0C,$09,$06
+
+s2436   LDA #$00
+        STA $D012                       ;Raster Position
         JSR s19D1
         LDA a2480
         BEQ b2449
@@ -4247,23 +4255,23 @@ s2436   LDA #$00     ;#%00000000
 
 b2449   JSR s1CC1
 j244C   LDA a44
-        STA $D001    ;Sprite 0 Y Pos
+        STA $D001                       ;Sprite 0 Y Pos
         LDA a7C
-        STA $D000    ;Sprite 0 X Pos
-        LDA $D010    ;Sprites 0-7 MSB of X coordinate
-        AND #$FE     ;#%11111110
-        STA $D010    ;Sprites 0-7 MSB of X coordinate
+        STA $D000                       ;Sprite 0 X Pos
+        LDA $D010                       ;Sprites 0-7 MSB of X coordinate
+        AND #$FE                        ;#%11111110
+        STA $D010                       ;Sprites 0-7 MSB of X coordinate
         LSR a60
         BCC b246A
-        LDA $D010    ;Sprites 0-7 MSB of X coordinate
-        ORA #$01     ;#%00000001
-        STA $D010    ;Sprites 0-7 MSB of X coordinate
+        LDA $D010                       ;Sprites 0-7 MSB of X coordinate
+        ORA #$01
+        STA $D010                       ;Sprites 0-7 MSB of X coordinate
 b246A   LDA a2480
-        STA $D027    ;Sprite 0 Color
-        LDA #$00     ;#%00000000
-        STA $D01D    ;Sprites Expand 2x Horizontal (X)
-        LDA #$FE     ;#%11111110
-        STA $D01C    ;Sprites Multi-Color Mode Select
+        STA $D027                       ;Sprite 0 Color
+        LDA #$00
+        STA $D01D                       ;Sprites Expand 2x Horizontal (X)
+        LDA #%11111110
+        STA $D01C                       ;Sprites Multi-Color Mode Select
         LDA aD2
         STA GAME_SPR_FRAME_00
         RTS
@@ -6498,8 +6506,8 @@ CHARSET_DIGITS_0_9
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 ; Sprite frames
         * = $43F8
-GAME_SPR_FRAME_00       .BYTE $47
-GAME_SPR_FRAME_01       .BYTE $11
+GAME_SPR_FRAME_00       .BYTE 71                ;Sprite Frame Rambo MC
+GAME_SPR_FRAME_01       .BYTE 17                ;Sprite Frame Energy/Score right
 GAME_SPR_FRAME_02_TBL   .BYTE $14,$4B,$3D,$6D,$68,$3C
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
@@ -11361,7 +11369,7 @@ fC551                   .BYTE $00,$06,$0E,$03,$01,$03,$0E,$06
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 PRINT_TROOPER_ENTER_YOUR_NAME
-        LDA #$01
+        LDA #$01                        ;Bug? Sprite Frame: Garbage
         STA GAME_SPR_FRAME_01
 
         JSR PRINT_EXT_STR
@@ -11431,7 +11439,7 @@ TROOPER_UPDATE_MINI_CURSOR_POS
         STA $D001                       ;Sprite 0 Y Pos
         LDA TROOPER_MINI_CURSOR_POS_X_MSB
         STA $D010                       ;Sprites 0-7 MSB of X coordinate
-        LDA #$DF                        ;#%11011111
+        LDA #223                        ;Mini cursor sprite frame
         STA GAME_SPR_FRAME_00
 
         ; Blink "ENTER YOUR NAME" and the Mini cursor
