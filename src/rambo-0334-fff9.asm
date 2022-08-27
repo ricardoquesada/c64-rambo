@@ -781,19 +781,19 @@ b08CA   DEC f08CF,X
 
 f08CF   .BYTE $00,$00,$00,$00,$00
 
-j08D4   LDX #$00     ;#%00000000
+j08D4   LDX #$00
         LDA a0968
         CLC
         ADC a0D
         STA a0968
         LDA a0966
-        CMP #$01     ;#%00000001
+        CMP #$01
         BEQ b08EB
         DEC a0966
-        LDX #$02     ;#%00000010
-b08EB   STX a1D62
-        STX a1D67
-        STX a1D66
+        LDX #$02
+b08EB   STX GAME_JOY_STATE
+        STX GAME_JOY_DIR_STATE
+        STX GAME_JOY_STATE_COPY
         STX a1D63
         STX a1D64
         STX a1D65
@@ -802,7 +802,7 @@ b08EB   STX a1D62
 s0900   LDA a0E
         BNE b090B
         LDA a161E
-        CMP #$E0     ;#%11100000
+        CMP #$E0                        ;#%11100000
         BEQ b090C
 b090B   RTS
 
@@ -887,7 +887,7 @@ s0983   LDA #$00
         LDA #$09
         JSR MUSIC_FN
         JSR j1D2A
-        LDA a1D62
+        LDA GAME_JOY_STATE
         STA a0981
 
         JSR PRINT_EXT_STR_BIS
@@ -906,8 +906,9 @@ b09AF   LDA $D012                       ;Raster Position
         BEQ b09AF
         JMP b09E1
 
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 s09CA   JSR j1D2A
-        LDA a1D62
+        LDA GAME_JOY_STATE
         STA a0982
         CMP a0981
         BEQ b09E0
@@ -2006,8 +2007,9 @@ f1267   .BYTE $09,$01,$02,$03,$0B,$0D,$0F,$11
         .BYTE $31,$31
 a1299   .BYTE $32,$33,$34,$35,$36,$37,$38,$39
         .BYTE $3A,$3B,$3C,$3D,$3E,$3F
-s12A7   LDA a1D62
-        AND #$0F     ;#%00001111
+
+s12A7   LDA GAME_JOY_STATE
+        AND #$0F                        ;Just the direction bits
         BEQ b12BB
         CMP a12F0
         BNE b12BC
@@ -2017,7 +2019,7 @@ s12A7   LDA a1D62
 b12BB   RTS
 
 b12BC   STA a12F0
-        LDA #$00     ;#%00000000
+        LDA #$00
         STA a12F2
         JMP j12DF
 
@@ -2033,8 +2035,8 @@ j12CC   LDX a12EF
         INC a12EF
         RTS
 
-j12DF   LDA a1D62
-        AND #$0F     ;#%00001111
+j12DF   LDA GAME_JOY_STATE
+        AND #$0F                        ;Just the direction bits
         TAY
         LDA f12F3,Y
         STA a12EF
@@ -2051,6 +2053,7 @@ f12F3   .BYTE $00,$00,$05,$00,$0F,$00,$05,$00
 f12FE   .BYTE $46,$47,$48,$49,$00,$4E,$4F,$50
         .BYTE $51,$00,$56,$57,$58,$59,$00,$5E
         .BYTE $5F,$60,$61,$00
+
 s1312   LDA a1D63
         AND a12F1
         STA a1D63
@@ -2414,7 +2417,7 @@ b15EE   JMP j1564
 s15F1   LDX #$0D     ;#%00001101
         JSR j1659
         LDX #$03     ;#%00000011
-        LDA a1D62
+        LDA GAME_JOY_STATE
         STA a2493
 b15FE   LDY f161F,X
         LDA (p30),Y
@@ -2425,16 +2428,17 @@ b15FE   LDY f161F,X
         BCS b1611
         JMP j161A
 
-b1611   LDA a1D62
+b1611   LDA GAME_JOY_STATE
         AND f1623,X
-        STA a1D62
+        STA GAME_JOY_STATE
 j161A   DEX
         BPL b15FE
         RTS
 
 a161E   .BYTE $00
 f161F   .BYTE $29,$50,$52,$79
-f1623   .BYTE $1E,$1B,$17,$1D
+        ;Mask: Up, Left, Right, Down
+f1623   .BYTE %00011110,%00011011,%00010111,%00011101
 f1627   .BYTE $00
 f1628   .BYTE $40,$28,$40,$50,$40,$78,$40,$A0
         .BYTE $40,$C8,$40,$F0,$40,$18,$41,$40
@@ -2583,7 +2587,7 @@ _L01    LDA f0BF1,X
         STA a1299
         JSR s0983
         LDA #$00
-        STA a1D62
+        STA GAME_JOY_STATE
         JSR b12BC
         JSR s19C5
         JSR s0C9C
@@ -2977,9 +2981,9 @@ f1A48   .BYTE $01
 f1A49   .BYTE $02,$04,$08,$10,$20,$40,$80
 a1A50   .BYTE $00
 
-s1A51   LDA a1D62
-        AND #$10     ;#%00010000
-        BEQ b1A5E
+s1A51   LDA GAME_JOY_STATE
+        AND #$10                        ;Fire pressed?
+        BEQ b1A5E                       ; No
         CMP a1B59
         BNE b1A64
         RTS
@@ -3017,7 +3021,7 @@ b1A81   LDA f1AFA,Y
         SBC #$05     ;#%00000101
         STA f4E,X
         INC fCC,X
-        LDY a1D67
+        LDY GAME_JOY_DIR_STATE
         LDA a0E
         BNE b1AAC
         LDA #$39     ;#%00111001
@@ -3125,25 +3129,25 @@ s1BA6   LDA a2493
         DEC a8A
 b1BB4   RTS
 
-s1BB5   LDA a1D62
-        AND #$04     ;#%00000100
+s1BB5   LDA GAME_JOY_STATE
+        AND #$04                        ;Left pressed?
         CLC
-        BEQ b1BC1
+        BEQ b1BC1                       ; No
         LDA #$7A     ;#%01111010
         CMP a8A
 b1BC1   ROL a1C28
-        LDA a1D62
-        AND #$08     ;#%00001000
+        LDA GAME_JOY_STATE
+        AND #$08                        ;Right pressed?
         CLC
-        BEQ b1BD0
+        BEQ b1BD0                       ; No
         LDA a8A
         CMP #$DE     ;#%11011110
 b1BD0   ROL a1C28
         RTS
 
-s1BD4   LDA a1D62
+s1BD4   LDA GAME_JOY_STATE
         STA a1C27
-        LDA #$00     ;#%00000000
+        LDA #$00
         STA a2493
         STA a1C28
         JSR s1BB5
@@ -3176,35 +3180,36 @@ a1C27   .BYTE $00
 a1C28   .BYTE $00
 s1C29   LDA aE4
         STA a1CC0
-        LDA a1D62
+        LDA GAME_JOY_STATE
         TAX
-        AND #$03     ;#%00000011
-        BEQ b1C6B
+        AND #$03                        ;Up or Down?
+        BEQ b1C6B                       ; No
         TXA
-        AND #$0C     ;#%00001100
-        BEQ b1C6B
+        AND #$0C                        ;Left or Right?
+        BEQ b1C6B                       ; No
         TXA
-        AND #$06     ;#%00000110
-        CMP #$06     ;#%00000110
-        BEQ b1C49
+        AND #$06                        ;Down and Left?
+        CMP #$06
+        BEQ b1C49                       ; No
         TXA
-        AND #$09     ;#%00001001
-        CMP #$09     ;#%00001001
-        BNE b1C51
+        AND #$09                        ;Up and Right?
+        CMP #$09
+        BNE b1C51                       ; Yes
+
 b1C49   LDA a1CC0
-        EOR #$07     ;#%00000111
+        EOR #$07                        ;#%00000111
         STA a1CC0
 b1C51   LDA aE3
         SEC
         SBC a1CC0
         BPL b1C5E
-        EOR #$FF     ;#%11111111
+        EOR #$FF
         CLC
-        ADC #$01     ;#%00000001
-b1C5E   CMP #$04     ;#%00000100
+        ADC #$01
+b1C5E   CMP #$04
         BEQ b1C6B
-        LDA a1D62
-        AND #$13     ;#%00010011
+        LDA GAME_JOY_STATE
+        AND #$13                        ;Up, Down, Fire
         STA a1D63
         RTS
 
@@ -3215,38 +3220,39 @@ b1C6F   RTS
 s1C70   LDA a1D3E
         BNE b1C6F
         LDA aE4
-        AND #$FE     ;#%11111110
+        AND #$FE                        ;#%11111110
         STA aE4
         STA a1CC0
-        LDA a1D62
+        LDA GAME_JOY_STATE
         TAX
-        AND #$03     ;#%00000011
-        BEQ b1C6B
+        AND #$03                        ;Up or Down?
+        BEQ b1C6B                       ; No
         TXA
-        AND #$0C     ;#%00001100
-        BEQ b1C6B
+        AND #$0C                        ;Left or Right?
+        BEQ b1C6B                       ; No
         TXA
-        AND #$06     ;#%00000110
-        CMP #$06     ;#%00000110
-        BEQ b1C99
+        AND #$06                        ;Down and Left?
+        CMP #$06
+        BEQ b1C99                       ; No
         TXA
-        AND #$09     ;#%00001001
-        CMP #$09     ;#%00001001
-        BNE b1CA1
+        AND #$09                        ;Up and Right?
+        CMP #$09
+        BNE b1CA1                       ; Yes
+
 b1C99   LDA a1CC0
-        EOR #$06     ;#%00000110
+        EOR #$06                        ;#%00000110
         STA a1CC0
 b1CA1   LDA aE3
         SEC
         SBC a1CC0
         BPL b1CAE
-        EOR #$FF     ;#%11111111
+        EOR #$FF
         CLC
-        ADC #$01     ;#%00000001
-b1CAE   CMP #$04     ;#%00000100
+        ADC #$01
+b1CAE   CMP #$04
         BEQ b1CBB
-        LDA a1D62
-        AND #$13     ;#%00010011
+        LDA GAME_JOY_STATE
+        AND #$13                        ;Up, Down, Fire
         STA a1D63
         RTS
 
@@ -3255,7 +3261,8 @@ b1CBB   TXA
         RTS
 
 a1CC0   .BYTE $00
-s1CC1   LDA #$00     ;#%00000000
+
+s1CC1   LDA #$00
         STA a0C
         STA a0D
         STA a0A
@@ -3271,14 +3278,14 @@ b1CD9   LSR a1D63
 b1CE1   LSR a1D63
         BCC b1CE9
         JSR s1EB1
-b1CE9   LDY a1D62
+b1CE9   LDY GAME_JOY_STATE
         LDA a0A
         BNE b1CF2
-        LDY #$FF     ;#%11111111
+        LDY #$FF
 b1CF2   STY a12F1
         RTS
 
-s1CF6   LDA #$00     ;#%00000000
+s1CF6   LDA #$00
         STA a0C
         STA a0D
         STA a0A
@@ -3294,45 +3301,48 @@ b1D0E   LSR a1D63
 b1D16   LSR a1D63
         BCC b1D1E
         JSR s1EC9
-b1D1E   LDY a1D62
+b1D1E   LDY GAME_JOY_STATE
         LDA a0A
         BNE b1CF2
-        LDY #$FF     ;#%11111111
+        LDY #$FF
         JMP b1CF2
 
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 j1D2A   LDA a1D3E
-        BEQ b1D3F
-        LDA #$00     ;#%00000000
-        STA a1D62
-        STA a1D66
-        STA a1D67
+        BEQ _L00
+
+        LDA #$00
+        STA GAME_JOY_STATE
+        STA GAME_JOY_STATE_COPY
+        STA GAME_JOY_DIR_STATE
         STA a1D63
         RTS
 
 a1D3E   .BYTE $00
 
-b1D3F   LDA a0966
-        BEQ b1D47
+_L00    LDA a0966
+        BEQ _L01
         JMP j08D4
 
-b1D47   LDA $DC01    ;CIA1: Data Port Register B
-        AND $DC00    ;CIA1: Data Port Register A
-        EOR #$FF     ;#%11111111
-        AND #$1F     ;#%00011111
-        STA a1D62
-        STA a1D66
-        AND #$0F     ;#%00001111
-        BEQ b1D5E
-        STA a1D67
-b1D5E   LDA a1D62
+_L01    LDA $DC01                       ;Read Joy port #2
+        AND $DC00                       ;And it wih Read Joy port #1
+        EOR #$FF                        ; Flip bits since it is active low
+        AND #$1F                        ; Mask direction+fire
+        STA GAME_JOY_STATE              ; Save the state
+        STA GAME_JOY_STATE_COPY         ; twice
+
+        AND #$0F                        ;Mask direction
+        BEQ _L02                        ; Joy movement? No
+        STA GAME_JOY_DIR_STATE          ;Save joy movement
+_L02    LDA GAME_JOY_STATE              ;Load full joy state
         RTS
 
-a1D62   .BYTE $00
-a1D63   .BYTE $00
-a1D64   .BYTE $00
-a1D65   .BYTE $00
-a1D66   .BYTE $00
-a1D67   .BYTE $00
+GAME_JOY_STATE          .BYTE $00
+a1D63                   .BYTE $00
+a1D64                   .BYTE $00       ;Unused?
+a1D65                   .BYTE $00       ;Unused?
+GAME_JOY_STATE_COPY                   .BYTE $00
+GAME_JOY_DIR_STATE      .BYTE $00
 
 j1D68   LDA a0A
         STA a1D8C
@@ -4025,8 +4035,8 @@ b236D   LDA #$E1     ;#%11100001
         DEY
         DEX
         BPL b236D
-        LDA a1D66
-        STA a1D62
+        LDA GAME_JOY_STATE_COPY
+        STA GAME_JOY_STATE
         LDA a2493
         PHA
         LDA a30
@@ -4059,11 +4069,12 @@ j23C0   JSR s1312
         STA a30
         LDA a0A40
         BEQ b23F0
-        LDA #$00     ;#%00000000
-        STA a1D62
+        LDA #$00
+        STA GAME_JOY_STATE
         STA a1D63
-        STA a1D66
-        LDA #$00     ;#%00000000
+        STA GAME_JOY_STATE_COPY
+
+        LDA #$00
         STA $D418    ;Select Filter Mode and Volume
         JSR s03FC
         DEC a2305
