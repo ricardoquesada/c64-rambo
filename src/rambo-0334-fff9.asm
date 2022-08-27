@@ -179,11 +179,6 @@ f00E0 = $00E0
 ; **** ABSOLUTE ADRESSES ****
 ;
 a028A = $028A
-a4400 = $4400                           ;Sprite
-a442A = $442a                           ;Sprite ?
-a4440 = $4440                           ;Sprite
-a4840 = $4840                           ;Sprite
-a4855 = $4855                           ;Sprite
 a7ED8 = $7ED8                           ;Updating charset?
 a7FF8 = $7FF8                           ; or using unused space as variables?
 
@@ -238,9 +233,10 @@ s0343   JMP j0D3D
 GAME_PLAY_MUSIC_BIS
         JMP GAME_PLAY_MUSIC
 
-s034F   JMP j2506
+GAME_UPDATE_SPRITE_SCORE_BIS
+        JMP GAME_UPDATE_SPRITE_SCORE
 
-s0352   JMP j2549
+s0352   JMP GAME_UPDATE_SCORE_FROM_POINTS
 
         JMP j123A
 
@@ -309,8 +305,8 @@ _L00    JSR s040B
         JSR GAME_PLAY_MUSIC
         JSR j1D2A
         JSR s14F0
-        JSR j2506
-        JSR j2549
+        JSR GAME_UPDATE_SPRITE_SCORE
+        JSR GAME_UPDATE_SCORE_FROM_POINTS
         JSR s1A51
         JSR j123A
         JSR s1819
@@ -360,14 +356,14 @@ b042B   RTS
 a042C   .BYTE $00
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
-j042D   STA f2576,X
+j042D   STA LOCAL_POINTS,X
         RTS
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 RESET_SCORE
         LDX #$05
         LDA #$00
-_L00    STA f2576,X
+_L00    STA LOCAL_POINTS,X
         STA PLYR_SCORE,X
         DEX
         BPL _L00
@@ -731,7 +727,7 @@ b0840   LDA #$32     ;#%00110010
         LDA #$01     ;#%00000001
         STA fC3,X
         LDA #$02     ;#%00000010
-        STA a2578
+        STA LOCAL_POINTS+2
         RTS
 
 a086D   .BYTE $0A
@@ -1020,7 +1016,7 @@ b0A74   LDX a0BE0
         LDA #$00     ;#%00000000
         STA f0BED,X
         LDA #$03     ;#%00000011
-        STA a2578
+        STA LOCAL_POINTS+2
         LDA #$1E     ;#%00011110
         JSR j0D24
         JMP j0BC9
@@ -1030,7 +1026,7 @@ b0A9F   LDA a0E
         STA f0BED,X
         INC a0B29
         LDA #$05     ;#%00000101
-        STA a2578
+        STA LOCAL_POINTS+2
         LDA #$1E     ;#%00011110
         JSR j0D24
         JMP j0BC9
@@ -1064,7 +1060,7 @@ b0ADC   JSR s0AB7
         STA a2480
         STA a0967
         STA a0B2A
-        JSR s0C9C
+        JSR RESET_ENERGY_SPRITE
         LDA a0912
         JSR s3003
         LDA #$00     ;#%00000000
@@ -1083,7 +1079,7 @@ b0ADC   JSR s0AB7
         STY a52
         JSR s1F9B
         JSR j1DD5
-        JSR s0C9C
+        JSR RESET_ENERGY_SPRITE
         JMP j12DF
 
 a0B29   .BYTE $00
@@ -1278,51 +1274,56 @@ s0C5D   LDA f4A,X
 b0C9A   RTS
 
 a0C9B   .BYTE $00
-s0C9C   LDX #$14     ;#%00010100
-b0C9E   LDA a4840,X
-        STA a4400,X
-        LDA a4855,X
-        STA a4440,X
+
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+RESET_ENERGY_SPRITE
+        LDX #20                         ;Update 21 bytes: 7 rows * 3 columns
+_L00    LDA $4000+64*33,X               ;Original energy: left
+        STA $4000+64*16,X               ;Player Energy left
+        LDA $4000+64*33+21,X            ;Original Energy right
+        STA $4000+64*17,X               ;Player Energy right
         DEX
-        BPL b0C9E
-        LDA #$30     ;#%00110000
+        BPL _L00
+
+        LDA #$30
         STA a0CED
         RTS
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 j0CB3   LDA a0B
-        BEQ b0CEC
+        BEQ _L03
         DEC a0B
         DEC a0CED
-        BPL b0CC3
+        BPL _L00
         LDA #$01
         STA a0F
         RTS
 
-b0CC3   LDA a0CED
+_L00    LDA a0CED
         PHA
         LSR A
         LSR A
         LSR A
-        CMP #$03     ;#%00000011
-        BCC b0CD1
+        CMP #$03
+        BCC _L01
         CLC
-        ADC #$3D     ;#%00111101
-b0CD1   TAX
+        ADC #$3D
+_L01    TAX
         PLA
-        AND #$07     ;#%00000111
+        AND #$07
         TAY
-        LDA #$06     ;#%00000110
+        LDA #$06
         STA a2493
-b0CDB   LDA a4400,X
-        EOR f0CEE,Y
-        STA a4400,X
-        INX
+
+_L02    LDA $4000+64*16,X               ;Spr frame #16: Energy
+        EOR f0CEE,Y                     ; Invert bar
+        STA $4000+64*16,X               ; according to life
+        INX                             ;Skip to the next byte for energy
         INX
         INX
         DEC a2493
-        BPL b0CDB
-b0CEC   RTS
+        BPL _L02
+_L03    RTS
 
 a0CED   .BYTE $00
 f0CEE   .BYTE $80,$40,$20,$10,$08,$04,$02,$01
@@ -1761,6 +1762,7 @@ f1012   .BYTE $01,$FD,$03,$03,$03,$02,$02,$02
         .BYTE $01,$01,$01
 a101D   .BYTE $00
 a101E   .BYTE $00
+
 b101F   JSR s1032
         JSR j1184
         LDA a24F4
@@ -2428,7 +2430,7 @@ j15C6   LDA #$7E     ;#%01111110
         STA f1100,Y
         LDA #$01     ;#%00000001
         STA f0099,Y
-        STA a2579
+        STA LOCAL_POINTS+3
         LDA #$12     ;#%00010010
         JMP j0D24
 
@@ -2616,7 +2618,7 @@ _L01    LDA f0BF1,X
         STA GAME_JOY_STATE
         JSR b12BC
         JSR s19C5
-        JSR s0C9C
+        JSR RESET_ENERGY_SPRITE
         LDA #$01
         JSR MUSIC_FN
         LDA #$AC
@@ -2682,11 +2684,11 @@ _L03    TXA
         BNE _L03
 
         JSR b12C7
-        JSR s0C9C
+        JSR RESET_ENERGY_SPRITE
         JSR s1985
-        JSR j2506
-        JSR j2549
-        JSR j2506
+        JSR GAME_UPDATE_SPRITE_SCORE
+        JSR GAME_UPDATE_SCORE_FROM_POINTS
+        JSR GAME_UPDATE_SPRITE_SCORE
         JSR j1D8F
         JSR j28FF
         JSR VIC_SCREEN_ENABLE
@@ -4269,69 +4271,74 @@ a24F7   .BYTE $34,$00,$00,$00,$00,$00,$00,$00
         .BYTE $00,$00,$00,$00,$00,$00,$00
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
-j2506   LDA a1D8C
-        BEQ b250C
+GAME_UPDATE_SPRITE_SCORE
+        LDA a1D8C
+        BEQ _L00
         RTS
 
-b250C   LDX #$05
-b250E   LDA PLYR_SCORE,X
-        CMP PLYR_SCORE_DUP,X
-        BEQ b251F
+_L00    LDX #$05
+_L01    LDA PLYR_SCORE,X
+        CMP PLYR_SCORE_IN_SPRITE,X      ;Don't update sprite if it already has
+        BEQ _L02                        ; this value
         STX a2493
-        JSR s2523
+        JSR _UPDATE_SPRITE_SCORE_DIGIT
         LDX a2493
-b251F   DEX
-        BPL b250E
+_L02    DEX
+        BPL _L01
         RTS
 
-s2523   ASL A
+_UPDATE_SPRITE_SCORE_DIGIT
         ASL A
         ASL A
-        CPX #$03     ;#%00000011
+        ASL A
+        CPX #$03
         TAX
-        BCS b2531
+        BCS _L03
         LDY a2493
-        JMP j2537
+        JMP _L04
 
-b2531   LDA a2493
-        ADC #$3C     ;#%00111100
+_L03    LDA a2493
+        ADC #$3C
         TAY
-j2537   LDA f3980,X
-        STA a442A,Y
+_L04    LDA CHARSET_DIGITS_0_9,X        ;Charset for 0-9
+        STA $4000+64*16+42,Y            ;Sprite frame for Score
         INY
         INY
         INY
         INX
         TXA
-        AND #$07     ;#%00000111
-        CMP #$07     ;#%00000111
-        BNE j2537
+        AND #$07
+        CMP #$07
+        BNE _L04
         RTS
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
-j2549   LDX #$05
+; Updates the player's total score based on points
+GAME_UPDATE_SCORE_FROM_POINTS
+        LDX #$05
 _L00    LDA PLYR_SCORE,X
-        STA PLYR_SCORE_DUP,X
+        STA PLYR_SCORE_IN_SPRITE,X
         CLC
-        ADC f2576,X
-        CMP #$0A
+        ADC LOCAL_POINTS,X
+        CMP #10
         BCC _L01
-        SBC #$0A
-        INC PLYR_SCORE_DUP+5,X
+
+        SBC #10
+        INC LOCAL_POINTS-1,X                   ;Bug? when x==0, it changes PLYR_SCORE_IN_SPRITE
 _L01    STA PLYR_SCORE,X
         LDA #$00
-        STA f2576,X
+        STA LOCAL_POINTS,X
         DEX
         BPL _L00
         RTS
 
 PLYR_SCORE
         .BYTE $00,$00,$00,$00,$00,$00
-PLYR_SCORE_DUP
+PLYR_SCORE_IN_SPRITE
         .BYTE $09,$09,$09,$09,$09,$09
-f2576   .BYTE $00,$00
-a2578   .BYTE $00
-a2579   .BYTE $00,$00,$00,$00
+LOCAL_POINTS
+        .BYTE $00,$00,$00,$00,$00,$00
+        .BYTE $00
 
 s257D   LDA a25C4
         SEC
@@ -5129,7 +5136,7 @@ j3009   JSR s0364
         JSR s319D
         JSR s303F
         JSR s304E
-        JSR s034F
+        JSR GAME_UPDATE_SPRITE_SCORE_BIS
         JSR s0352
         JSR s0337
         JMP j3009
@@ -6190,17 +6197,22 @@ a38E1   .BYTE $00,$C5,$CE,$C4,$00,$00,$00,$00
         .BYTE $00,$00,$7E,$00,$00,$00,$00,$00
         .BYTE $00,$00,$00,$00,$18,$18,$00,$00
         .BYTE $00,$00,$00,$00,$00,$00,$00
-f3980   .BYTE $2C,$66,$66,$66,$66,$66,$2C,$00
-        .BYTE $38,$18,$18,$18,$18,$18,$3C,$00
-        .BYTE $2C,$66,$06,$0C,$30,$06,$7E,$00
-        .BYTE $34,$66,$06,$14,$06,$66,$34,$00
-        .BYTE $06,$16,$26,$46,$7F,$06,$0F,$00
-        .BYTE $7E,$18,$40,$6C
-        .BYTE $06,$66,$6C,$00,$2C,$66,$60,$6C
-        .BYTE $66,$66,$2C,$00,$7E,$60,$04,$0C
-        .BYTE $18,$18,$18,$00,$2C,$66,$66,$2C
-        .BYTE $66,$66,$2C,$00,$2C,$66,$66,$2E
-        .BYTE $06,$66,$2C,$00,$00,$00,$18,$00
+
+        ;$3980
+CHARSET_DIGITS_0_9
+        .BYTE $2C,$66,$66,$66,$66,$66,$2C,$00   ;0
+        .BYTE $38,$18,$18,$18,$18,$18,$3C,$00   ;1
+        .BYTE $2C,$66,$06,$0C,$30,$06,$7E,$00   ;2
+        .BYTE $34,$66,$06,$14,$06,$66,$34,$00   ;3
+        .BYTE $06,$16,$26,$46,$7F,$06,$0F,$00   ;4
+        .BYTE $7E,$18,$40,$6C,$06,$66,$6C,$00   ;5
+        .BYTE $2C,$66,$60,$6C,$66,$66,$2C,$00   ;6
+        .BYTE $7E,$60,$04,$0C,$18,$18,$18,$00   ;7
+        .BYTE $2C,$66,$66,$2C,$66,$66,$2C,$00   ;8
+        .BYTE $2C,$66,$66,$2E,$06,$66,$2C,$00   ;9
+
+        ;$39d0 Unused?
+        .BYTE $00,$00,$18,$00
         .BYTE $00,$18,$00,$00,$00,$00,$00,$00
         .BYTE $00,$00,$00,$00,$00,$00,$00,$00
         .BYTE $00,$00,$00,$00,$00,$00,$00,$00
@@ -6388,7 +6400,7 @@ f3980   .BYTE $2C,$66,$66,$66,$66,$66,$2C,$00
         .BYTE $00,$00,$00,$00,$00,$00,$00,$00
         .BYTE $00,$00,$00,$00,$00,$00,$00,$00
         .BYTE $00,$00,$00,$00,$00
-a3FA9   .BYTE $00,$00,$00,$00,$00,$00,$00,$00
+        .BYTE $00,$00,$00,$00,$00,$00,$00,$00
         .BYTE $00,$00,$00,$00,$00,$00,$00,$00
         .BYTE $00,$00,$00,$00,$00,$00,$00,$00
         .BYTE $00,$00,$00,$00,$00,$00,$00,$00
