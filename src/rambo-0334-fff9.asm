@@ -208,11 +208,18 @@ STR_CODE_FONT_BIG       .MACRO
 STR_CODE_FONT_SMALL     .MACRO
         .BYTE $ff,$05
                         .ENDM
-; To define a music patch
-MUSIC_PATCH             .MACRO x, jaddr, y, z
+; Define a music note, which
+; is a single note
+MUSIC_NOTE             .MACRO x, code_addr, y, z
         .BYTE \x
-        .WORD \jaddr
+        .WORD \code_addr
         .BYTE \y, \z
+                        .ENDM
+; Define a music patch, which is a collection
+; of music notes
+MUSIC_PATCH             .MACRO x, note_list_addr
+        .BYTE \x
+        .WORD \note_list_addr
                         .ENDM
 
 
@@ -8903,45 +8910,86 @@ a9C37   LDA #$09
         LDY #$14
         JMP b83D6
 
-        .BYTE $06,$0C,$12,$18,$C2,$20,$03,$41
-        .BYTE $9C,$C8,$4E,$9E,$D2,$FE,$9B,$5F
-        .BYTE $04,$D2,$19,$9C,$5F,$02,$D2,$FE
-        .BYTE $9B,$5F,$02,$D2,$FE,$9B,$5F,$02
-        .BYTE $D2,$FE,$9B,$5F,$01,$D2,$FE,$9B
-        .BYTE $5F,$01,$D2,$19,$9C,$5F,$02,$D2
-        .BYTE $19,$9C,$5F,$02,$D2,$FE,$9B,$5F
-        .BYTE $02,$D2,$FE,$9B,$5F,$02,$D2,$19
-        .BYTE $9C,$5F,$04,$D2,$FE,$9B,$5F,$02
-        .BYTE $D2,$FE,$9B,$5F,$02,$D2,$19,$9C
-        .BYTE $5F,$04,$C8,$67,$9E,$C8,$25,$9F
-        .BYTE $C8,$86,$9E,$C8,$B4,$9E,$C8,$4E
-        .BYTE $9E,$C8,$86,$9E,$C8,$25,$9F,$C8
-        .BYTE $B4,$9E,$C8,$4E,$9E,$C8,$86,$9E
-        .BYTE $C8,$CE,$9E,$C8,$25,$9F,$C8,$FC
-        .BYTE $9E,$C8,$B4,$9E,$C8,$FC,$9E,$C8
-        .BYTE $CE,$9E,$C8,$25,$9F,$C8,$B4,$9E
-        .BYTE $D2,$FE,$9B,$5F,$04,$D2,$19,$9C
-        .BYTE $5F,$02,$D2,$FE,$9B,$5F,$01,$D2
-        .BYTE $FE,$9B,$5F,$01,$D2,$FE,$9B,$5F
-        .BYTE $04,$D2,$19,$9C,$5F,$04,$C8,$25
-        .BYTE $9F,$C8,$FC,$9E,$C8,$FC,$9E,$D2
-        .BYTE $FE,$9B,$5F,$04,$D2,$19,$9C,$5F
-        .BYTE $04,$D2,$FE,$9B,$5F,$01,$D2,$FE
-        .BYTE $9B,$5F,$01,$D2,$FE,$9B,$5F,$01
-        .BYTE $D2,$FE,$9B,$5F,$01,$D2,$19,$9C
-        .BYTE $5F,$04,$D2,$FE,$9B,$5F,$04,$D2
-        .BYTE $19,$9C,$5F,$02,$D2,$19,$9C,$5F
-        .BYTE $02,$D2,$FE,$9B,$5F,$02,$D2,$FE
-        .BYTE $9B,$5F,$02,$D2,$19,$9C,$5F,$04
-        .BYTE $D2,$FE,$9B,$5F,$04,$D2,$19,$9C
-        .BYTE $5F,$02,$D2,$19,$9C,$5F,$02,$D2
-        .BYTE $FE,$9B,$5F,$01,$D2,$FE,$9B,$5F
-        .BYTE $01,$D2,$FE,$9B,$5F,$02,$D2,$19
-        .BYTE $9C,$5F,$04,$D2,$FE,$9B,$5F,$04
-        .BYTE $D2,$FE,$9B,$5F,$04,$D2,$FE,$9B
-        .BYTE $5F,$02,$D2,$FE,$9B,$5F,$02,$D2
-        .BYTE $19,$9C,$5F,$02,$D2,$19,$9C,$5F
-        .BYTE $02,$C6,$4A,$9C
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+a9C41
+        .BYTE $06,$0C,$12,$18,$C2,$20,$03
+        .WORD a9C41                                     ;Address?
+
+a9C4A   #MUSIC_PATCH $C8,a9E4E
+a9C4D
+        #MUSIC_NOTE $D2,a9BFE,$5F,$04
+        #MUSIC_NOTE $D2,a9C19,$5F,$02
+        #MUSIC_NOTE $D2,a9BFE,$5F,$02
+        #MUSIC_NOTE $D2,a9BFE,$5F,$02
+        #MUSIC_NOTE $D2,a9BFE,$5F,$01
+        #MUSIC_NOTE $D2,a9BFE,$5F,$01
+        #MUSIC_NOTE $D2,a9C19,$5F,$02
+        #MUSIC_NOTE $D2,a9C19,$5F,$02
+        #MUSIC_NOTE $D2,a9BFE,$5F,$02
+        #MUSIC_NOTE $D2,a9BFE,$5F,$02
+        #MUSIC_NOTE $D2,a9C19,$5F,$04
+        #MUSIC_NOTE $D2,a9BFE,$5F,$02
+        #MUSIC_NOTE $D2,a9BFE,$5F,$02
+        #MUSIC_NOTE $D2,a9C19,$5F,$04
+
+        #MUSIC_PATCH $C8,a9E67
+        #MUSIC_PATCH $C8,$9F25
+        #MUSIC_PATCH $C8,$9E86
+        #MUSIC_PATCH $C8,$9EB4
+        #MUSIC_PATCH $C8,$9E4E
+        #MUSIC_PATCH $C8,$9E86
+        #MUSIC_PATCH $C8,$9F25
+        #MUSIC_PATCH $C8,$9EB4
+        #MUSIC_PATCH $C8,$9E4E
+        #MUSIC_PATCH $C8,$9E86
+        #MUSIC_PATCH $C8,$9ECE
+        #MUSIC_PATCH $C8,$9F25
+        #MUSIC_PATCH $C8,$9EFC
+        #MUSIC_PATCH $C8,$9EB4
+        #MUSIC_PATCH $C8,$9EFC
+        #MUSIC_PATCH $C8,$9ECE
+        #MUSIC_PATCH $C8,$9F25
+        #MUSIC_PATCH $C8,$9EB4
+
+        #MUSIC_NOTE $D2,$9BFE,$5F,$04
+        #MUSIC_NOTE $D2,$9C19,$5F,$02
+        #MUSIC_NOTE $D2,$9BFE,$5F,$01
+        #MUSIC_NOTE $D2,$9BFE,$5F,$01
+        #MUSIC_NOTE $D2,$9BFE,$5F,$04
+        #MUSIC_NOTE $D2,$9C19,$5F,$04
+
+        #MUSIC_PATCH $C8,$9F25
+        #MUSIC_PATCH $C8,$9EFC
+        #MUSIC_PATCH $C8,$9EFC
+
+        #MUSIC_NOTE $D2,a9BFE,$5F,$04
+        #MUSIC_NOTE $D2,a9C19,$5F,$04
+        #MUSIC_NOTE $D2,a9BFE,$5F,$01
+        #MUSIC_NOTE $D2,a9BFE,$5F,$01
+        #MUSIC_NOTE $D2,a9BFE,$5F,$01
+        #MUSIC_NOTE $D2,a9BFE,$5F,$01
+        #MUSIC_NOTE $D2,a9C19,$5F,$04
+        #MUSIC_NOTE $D2,a9BFE,$5F,$04
+        #MUSIC_NOTE $D2,a9C19,$5F,$02
+        #MUSIC_NOTE $D2,a9C19,$5F,$02
+        #MUSIC_NOTE $D2,a9BFE,$5F,$02
+        #MUSIC_NOTE $D2,a9BFE,$5F,$02
+        #MUSIC_NOTE $D2,a9C19,$5F,$04
+        #MUSIC_NOTE $D2,a9BFE,$5F,$04
+        #MUSIC_NOTE $D2,a9C19,$5F,$02
+        #MUSIC_NOTE $D2,a9C19,$5F,$02
+        #MUSIC_NOTE $D2,a9BFE,$5F,$01
+        #MUSIC_NOTE $D2,a9BFE,$5F,$01
+        #MUSIC_NOTE $D2,a9BFE,$5F,$02
+        #MUSIC_NOTE $D2,a9C19,$5F,$04
+        #MUSIC_NOTE $D2,a9BFE,$5F,$04
+        #MUSIC_NOTE $D2,a9BFE,$5F,$04
+        #MUSIC_NOTE $D2,a9BFE,$5F,$02
+        #MUSIC_NOTE $D2,a9BFE,$5F,$02
+        #MUSIC_NOTE $D2,a9C19,$5F,$02
+        #MUSIC_NOTE $D2,a9C19,$5F,$02
+
+        #MUSIC_PATCH $C6,a9C4A
 
 a9D75   .BYTE $00,$00,$00,$00,$00,$00,$00,$00
         .BYTE $00,$00,$00,$00,$00,$00,$00,$00
@@ -8987,68 +9035,68 @@ a9E2F   .BYTE $DA,$FD
 
 a9E4D   .BYTE $0B
 
-a9E4E   #MUSIC_PATCH $D2,a9BFE,$5F,$04
-        #MUSIC_PATCH $D2,a9C19,$5F,$04
-        #MUSIC_PATCH $D2,a9BFE,$5F,$02
-        #MUSIC_PATCH $D2,a9BFE,$5F,$02
-        #MUSIC_PATCH $D2,a9C19,$5F,$04
-        #MUSIC_PATCH $D2,a9BFE,$5F,$04
-        #MUSIC_PATCH $D2,a9C19,$5F,$03
-        #MUSIC_PATCH $D2,a9BFE,$5F,$01
-        #MUSIC_PATCH $D2,a9BFE,$5F,$02
-        #MUSIC_PATCH $D2,a9BFE,$5F,$02
-        #MUSIC_PATCH $D2,a9C19,$5F,$04
+a9E4E   #MUSIC_NOTE $D2,a9BFE,$5F,$04
+        #MUSIC_NOTE $D2,a9C19,$5F,$04
+        #MUSIC_NOTE $D2,a9BFE,$5F,$02
+        #MUSIC_NOTE $D2,a9BFE,$5F,$02
+        #MUSIC_NOTE $D2,a9C19,$5F,$04
+a9E67   #MUSIC_NOTE $D2,a9BFE,$5F,$04
+        #MUSIC_NOTE $D2,a9C19,$5F,$03
+        #MUSIC_NOTE $D2,a9BFE,$5F,$01
+        #MUSIC_NOTE $D2,a9BFE,$5F,$02
+        #MUSIC_NOTE $D2,a9BFE,$5F,$02
+        #MUSIC_NOTE $D2,a9C19,$5F,$04
         .BYTE $C0
 
-        #MUSIC_PATCH $D2,a9BFE,$5F,$02
-        #MUSIC_PATCH $D2,a9C31,$5F,$01
-        #MUSIC_PATCH $D2,a9C31,$5F,$01
-        #MUSIC_PATCH $D2,a9C19,$5F,$02
-        #MUSIC_PATCH $D2,a9BFE,$5F,$02
-        #MUSIC_PATCH $D2,a9BFE,$5F,$02
-        #MUSIC_PATCH $D2,a9BFE,$5F,$01
-        #MUSIC_PATCH $D2,a9BFE,$5F,$01
-        #MUSIC_PATCH $D2,a9C19,$5F,$04
+        #MUSIC_NOTE $D2,a9BFE,$5F,$02
+        #MUSIC_NOTE $D2,a9C31,$5F,$01
+        #MUSIC_NOTE $D2,a9C31,$5F,$01
+        #MUSIC_NOTE $D2,a9C19,$5F,$02
+        #MUSIC_NOTE $D2,a9BFE,$5F,$02
+        #MUSIC_NOTE $D2,a9BFE,$5F,$02
+        #MUSIC_NOTE $D2,a9BFE,$5F,$01
+        #MUSIC_NOTE $D2,a9BFE,$5F,$01
+        #MUSIC_NOTE $D2,a9C19,$5F,$04
         .BYTE $C0
 
-        #MUSIC_PATCH $D2,a9BFE,$5F,$04
-        #MUSIC_PATCH $D2,a9C19,$5F,$02
-        #MUSIC_PATCH $D2,a9BFE,$5F,$03
-        #MUSIC_PATCH $D2,a9BFE,$5F,$03
-        #MUSIC_PATCH $D2,a9C19,$5F,$04
+        #MUSIC_NOTE $D2,a9BFE,$5F,$04
+        #MUSIC_NOTE $D2,a9C19,$5F,$02
+        #MUSIC_NOTE $D2,a9BFE,$5F,$03
+        #MUSIC_NOTE $D2,a9BFE,$5F,$03
+        #MUSIC_NOTE $D2,a9C19,$5F,$04
         .BYTE $C0
 
-        #MUSIC_PATCH $D2,a9BFE,$5F,$02
-        #MUSIC_PATCH $D2,a9BFE,$5F,$02
-        #MUSIC_PATCH $D2,a9C19,$5F,$03
-        #MUSIC_PATCH $D2,a9BFE,$5F,$01
-        #MUSIC_PATCH $D2,a9BFE,$5F,$01
-        #MUSIC_PATCH $D2,a9C19,$5F,$01
-        #MUSIC_PATCH $D2,a9BFE,$5F,$02
-        #MUSIC_PATCH $D2,a9C19,$5F,$02
-        #MUSIC_PATCH $D2,a9C19,$5F,$02
+        #MUSIC_NOTE $D2,a9BFE,$5F,$02
+        #MUSIC_NOTE $D2,a9BFE,$5F,$02
+        #MUSIC_NOTE $D2,a9C19,$5F,$03
+        #MUSIC_NOTE $D2,a9BFE,$5F,$01
+        #MUSIC_NOTE $D2,a9BFE,$5F,$01
+        #MUSIC_NOTE $D2,a9C19,$5F,$01
+        #MUSIC_NOTE $D2,a9BFE,$5F,$02
+        #MUSIC_NOTE $D2,a9C19,$5F,$02
+        #MUSIC_NOTE $D2,a9C19,$5F,$02
         .BYTE $C0
 
-        #MUSIC_PATCH $D2,a9BFE,$5F,$04
-        #MUSIC_PATCH $D2,a9C19,$5F,$02
-        #MUSIC_PATCH $D2,a9BFE,$5F,$02
-        #MUSIC_PATCH $D2,a9BFE,$5F,$02
-        #MUSIC_PATCH $D2,a9BFE,$5F,$02
-        #MUSIC_PATCH $D2,a9C19,$5F,$02
-        #MUSIC_PATCH $D2,a9C34,$5F,$01
-        #MUSIC_PATCH $D2,a9C34,$5F,$01
+        #MUSIC_NOTE $D2,a9BFE,$5F,$04
+        #MUSIC_NOTE $D2,a9C19,$5F,$02
+        #MUSIC_NOTE $D2,a9BFE,$5F,$02
+        #MUSIC_NOTE $D2,a9BFE,$5F,$02
+        #MUSIC_NOTE $D2,a9BFE,$5F,$02
+        #MUSIC_NOTE $D2,a9C19,$5F,$02
+        #MUSIC_NOTE $D2,a9C34,$5F,$01
+        #MUSIC_NOTE $D2,a9C34,$5F,$01
         .BYTE $C0
 
-        #MUSIC_PATCH $D2,a9BFE,$5F,$02
-        #MUSIC_PATCH $D2,a9BFE,$5F,$02
-        #MUSIC_PATCH $D2,a9C19,$5F,$01
-        #MUSIC_PATCH $D2,a9BFE,$5F,$03
-        #MUSIC_PATCH $D2,a9BFE,$5F,$02
-        #MUSIC_PATCH $D2,a9C31,$5F,$02
-        #MUSIC_PATCH $D2,a9C34,$5F,$01
-        #MUSIC_PATCH $D2,a9C34,$5F,$01
-        #MUSIC_PATCH $D2,a9C37,$5F,$01
-        #MUSIC_PATCH $D2,a9C37,$5F,$01
+        #MUSIC_NOTE $D2,a9BFE,$5F,$02
+        #MUSIC_NOTE $D2,a9BFE,$5F,$02
+        #MUSIC_NOTE $D2,a9C19,$5F,$01
+        #MUSIC_NOTE $D2,a9BFE,$5F,$03
+        #MUSIC_NOTE $D2,a9BFE,$5F,$02
+        #MUSIC_NOTE $D2,a9C31,$5F,$02
+        #MUSIC_NOTE $D2,a9C34,$5F,$01
+        #MUSIC_NOTE $D2,a9C34,$5F,$01
+        #MUSIC_NOTE $D2,a9C37,$5F,$01
+        #MUSIC_NOTE $D2,a9C37,$5F,$01
         .BYTE $C0
 
         .BYTE $06,$0C,$12,$18,$1E
