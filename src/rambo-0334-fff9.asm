@@ -248,7 +248,8 @@ GET_SCORE_BCD_DIGIT_BIS
 
         JMP GAME_INIT
 
-j0361   JMP j0D24
+GAME_MAYBE_PLAY_SFX_BIS
+        JMP GAME_MAYBE_PLAY_SFX
 
 s0364   JMP j07D5
 
@@ -965,26 +966,30 @@ b0A15   LDA $EE70,Y
         BPL b0A15
         RTS
 
-s0A1F   LDA #%00111111                  ;Stop key: Row=7, Col=7
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+GAME_MAYBE_TOGGLE_PAUSE
+        LDA #%00111111                  ;Stop key: Row=7, Col=7
         JSR IS_KEY_PRESSED
-        BCC b0A39                       ;Not pressed
+        BCC _L00                        ;Not pressed
 
-        ; Set pause
-        LDA a0A3F
-        BNE b0A38
-        LDA a0A40
-        EOR #$01     ;#%00000001
-        STA a0A40
-        LDA #$01     ;#%00000001
-        STA a0A3F
-b0A38   RTS
+        ; Toggle pause
+        LDA _ALREADY_PRESSED
+        BNE _EXIT
+        LDA IS_GAME_PAUSED
+        EOR #$01
+        STA IS_GAME_PAUSED
+        LDA #$01
+        STA _ALREADY_PRESSED
+_EXIT   RTS
 
-b0A39   LDA #$00     ;#%00000000
-        STA a0A3F
+_L00    LDA #$00
+        STA _ALREADY_PRESSED
         RTS
 
-a0A3F   .BYTE $00
-a0A40   .BYTE $00
+_ALREADY_PRESSED        .BYTE $00
+IS_GAME_PAUSED          .BYTE $00
+
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 s0A41   LDA a51
         CMP #$0A     ;#%00001010
         BNE b0A48
@@ -1028,7 +1033,7 @@ b0A74   LDX a0BE0
         LDA #$03                        ;Set 3000 points
         STA LOCAL_POINTS+2
         LDA #$1E
-        JSR j0D24
+        JSR GAME_MAYBE_PLAY_SFX
         JMP j0BC9
 
 b0A9F   LDA SELECTED_WEAPON             ;Weapon used
@@ -1040,7 +1045,7 @@ b0A9F   LDA SELECTED_WEAPON             ;Weapon used
         LDA #$05                        ;Set 5000 points
         STA LOCAL_POINTS+2
         LDA #$1E
-        JSR j0D24
+        JSR GAME_MAYBE_PLAY_SFX
         JMP j0BC9
 
 b0AB6   RTS
@@ -1280,7 +1285,7 @@ s0C5D   LDA f4A,X
         ADC #$06     ;#%00000110
         STA a0B
         LDA #$18     ;#%00011000
-        JSR j0D24
+        JSR GAME_MAYBE_PLAY_SFX
         JMP j25E4
 
 b0C9A   RTS
@@ -1340,51 +1345,55 @@ _L03    RTS
 a0CED   .BYTE $00
 f0CEE   .BYTE $80,$40,$20,$10,$08,$04,$02,$01
 
-j0CF6   LDA #%00001101                  ;'S' row=1,col=5
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+GAME_MAYBE_TOGGLE_MUSIC
+        LDA #%00001101                  ;'S' row=1,col=5
         JSR IS_KEY_PRESSED
-        BCC b0D1C                       ;Not pressed
+        BCC _L00                        ;Not pressed
 
         ; Toggle music/sfx
-        LDA a0D22
-        BNE b0D1B
-        INC a0D22
-        LDA a0D3B
-        EOR #$01     ;#%00000001
-        STA a0D3B
+        LDA _ALREADY_PRESSED
+        BNE _EXIT
+        INC _ALREADY_PRESSED
+        LDA IS_GAME_MUSIC_ENABLED
+        EOR #$01
+        STA IS_GAME_MUSIC_ENABLED
         LDA a0D23
-        EOR #$07     ;#%00000111
+        EOR #$07
         STA a0D23
-        TAX
+        TAX                             ;Music subfunction: 0 or 7
         LDA #26
         JMP MUSIC_FN
 
-b0D1B   RTS
+_EXIT   RTS
 
-b0D1C   LDA #$00
-        STA a0D22
+_L00    LDA #$00
+        STA _ALREADY_PRESSED
         RTS
 
-a0D22   .BYTE $00
+_ALREADY_PRESSED   .BYTE $00
 a0D23   .BYTE $00
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
-j0D24   STA a0D3C
+; Args: A=SFX to play
+GAME_MAYBE_PLAY_SFX
+        STA _SFX_TO_PLAY
         TXA
         PHA
         TYA
         PHA
-        LDA a0D3B
-        BNE b0D36
-        LDA a0D3C
+        LDA IS_GAME_MUSIC_ENABLED       ;Music enabled?
+        BNE _L00                        ; yes, jump
+        LDA _SFX_TO_PLAY                ; no, play SFX
         JSR MUSIC_FN
-b0D36   PLA
+_L00    PLA
         TAY
         PLA
         TAX
         RTS
 
-a0D3B   .BYTE $00
-a0D3C   .BYTE $00
+IS_GAME_MUSIC_ENABLED   .BYTE $00
+_SFX_TO_PLAY            .BYTE $00
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 j0D3D   LDA a1D8C
@@ -2453,7 +2462,7 @@ ONE_ENEMY_KILLED
         STA f0099,Y
         STA LOCAL_POINTS+3
         LDA #$12
-        JMP j0D24
+        JMP GAME_MAYBE_PLAY_SFX
 
 b15EA   DEY
         BPL b15EE
@@ -2614,7 +2623,7 @@ _L01    LDA f0BF1,X
         STA a0B29
         STA GAME_SMOOTH_X
         STA SELECTED_WEAPON
-        STA a0A40
+        STA IS_GAME_PAUSED
         STA $D015                       ;Sprite display Enable
         STA $D020                       ;Border Color
         STA $D021                       ;Background Color 0
@@ -2668,7 +2677,7 @@ _L01    LDA f0BF1,X
         STA $D01C                       ;Sprites Multi-Color Mode Select
         LDA #$01                        ;Color White
         STA $D025                       ;Sprite Multi-Color Register 0
-        STA a0D3B
+        STA IS_GAME_MUSIC_ENABLED
         LDA #$00                        ;Color Black
         STA $D026                       ;Sprite Multi-Color Register 1
         STA $D017                       ;Sprites Expand 2x Vertical (Y)
@@ -2841,7 +2850,7 @@ b18DA   INC f1955,X
         BNE j18A6
 s18E4   LDY f1965,X
         LDA f1927,Y
-        JSR j0D24
+        JSR GAME_MAYBE_PLAY_SFX
         JSR s1934
         TXA
         PHA
@@ -3027,7 +3036,7 @@ _L03    DEX
         BEQ _L02
         LDA #$0A     ;#%00001010
 _L04    STA a1A45
-        JMP j0CF6
+        JMP GAME_MAYBE_TOGGLE_MUSIC
 
 a1A45   .BYTE $00
 a1A46   .BYTE $00
@@ -3065,7 +3074,7 @@ b1A72   LDY SELECTED_WEAPON
 b1A81   LDA f1AFA,Y
         STA f1965,X
         LDA f1AF4,Y
-        JSR j0D24
+        JSR GAME_MAYBE_PLAY_SFX
         LDA f1B00,Y
         STA fA2,X
         LDA a8A
@@ -4163,7 +4172,7 @@ _L04    JSR s1312
         STA a31
         PLA
         STA a30
-        LDA a0A40
+        LDA IS_GAME_PAUSED
         BEQ _L05
         LDA #$00
         STA GAME_JOY_STATE
@@ -4188,7 +4197,7 @@ _L08    JSR s0EB4
         JSR s2436
         LDA a0A
         BNE _L09
-        JSR s0A1F
+        JSR GAME_MAYBE_TOGGLE_PAUSE
 _L09    PLA
         STA a2493
         JMP EXIT_IRQ
@@ -5336,7 +5345,7 @@ s316A   LDA #$41     ;#%01000001
         LDA #$02     ;#%00000010
         STA f319B,X
         LDA #$0E     ;#%00001110
-        JMP j0361
+        JMP GAME_MAYBE_PLAY_SFX_BIS
 
 s3181   LDA f319B,X
         BEQ b318A
