@@ -235,7 +235,8 @@ s0343   JMP j0D3D
 
         JMP j224E
 
-s034C   JMP j117F
+GAME_PLAY_MUSIC_BIS
+        JMP GAME_PLAY_MUSIC
 
 s034F   JMP j2506
 
@@ -301,7 +302,7 @@ j0393   JSR j07D5
 b03B4   JSR s040B
         JSR s12A7
         JSR s1985
-        JSR j117F
+        JSR GAME_PLAY_MUSIC
         JSR j1D2A
         JSR s14F0
         JSR j2506
@@ -354,6 +355,7 @@ b042B   RTS
 
 a042C   .BYTE $00
 
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 j042D   STA f2576,X
         RTS
 
@@ -380,6 +382,9 @@ j0444   JSR s044C
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 s044C   INC a0F
         JSR s046E
+
+        ; Fallthrough
+
 j0451   LDA #$03
         JMP s046E
 
@@ -440,7 +445,7 @@ b04C0   LDA $D012                       ;Raster Position
         CMP #$C8                        ;Wait until raster gets to $c8
         BNE b04C0
 
-        JSR j117F
+        JSR GAME_PLAY_MUSIC
 
         LDA #$02
         JSR MUSIC_FN
@@ -627,14 +632,17 @@ STR_CONGRATULATIONS_YOU_WON
         .TEXT "BY[ENEMY[FORCES<"                ; '<' is a period in small font
         #STR_CODE_END
 
-j07C9   LDA #$01     ;#%00000001
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+j07C9   LDA #$01
         STA a1D3E
         RTS
 
-j07CF   LDA #$00     ;#%00000000
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+j07CF   LDA #$00
         STA a1D3E
         RTS
 
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 j07D5   JSR j1DC2
         JSR j1D8F
         JMP j224E
@@ -1076,7 +1084,9 @@ b0ADC   JSR s0AB7
 
 a0B29   .BYTE $00
 a0B2A   .BYTE $00
-j0B2B   LDX #$03     ;#%00000011
+
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+j0B2B   LDX #$03
 j0B2D   LDA f0BED,X
         BNE b0B35
 b0B32   JMP j0BC6
@@ -1275,12 +1285,13 @@ b0C9E   LDA a4840,X
         STA a0CED
         RTS
 
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 j0CB3   LDA a0B
         BEQ b0CEC
         DEC a0B
         DEC a0CED
         BPL b0CC3
-        LDA #$01     ;#%00000001
+        LDA #$01
         STA a0F
         RTS
 
@@ -1337,6 +1348,7 @@ b0D1C   LDA #$00
 a0D22   .BYTE $00
 a0D23   .BYTE $00
 
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 j0D24   STA a0D3C
         TXA
         PHA
@@ -1355,11 +1367,12 @@ b0D36   PLA
 a0D3B   .BYTE $00
 a0D3C   .BYTE $00
 
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 j0D3D   LDA a1D8C
         BNE b0D43
         RTS
 
-b0D43   LDX #$00     ;#%00000000
+b0D43   LDX #$00
         STX a1D8C
         LSR A
         BCC b0D4E
@@ -1377,16 +1390,16 @@ b0D5A   JMP j274A
 
 s0D5D   LDY f0D88,X
         BPL b0D76
-        LDA #$01     ;#%00000001
+        LDA #$01
         STA f120B,X
-        LDA #$07     ;#%00000111
+        LDA #$07
         JSR s24D3
         TAY
         LDA f1231,Y
         STA f1210,X
         JMP j10BE
 
-b0D76   CPY #$02     ;#%00000010
+b0D76   CPY #$02
         BNE b0D7C
         INC f8B,X
 b0D7C   LDA f0D8A,Y
@@ -1399,6 +1412,7 @@ b0D7C   LDA f0D8A,Y
 f0D88   .BYTE $04,$00
 f0D8A   .BYTE $00,$00,$00,$04,$03,$02,$02,$02
         .BYTE $01,$01,$00,$00,$00,$FF,$FF
+
 s0D99   LDA a0967
         BEQ b0D9F
         RTS
@@ -1892,9 +1906,12 @@ f1165   .BYTE $00,$00,$00,$00,$01,$01,$01,$00
 f1172   .BYTE $00,$01,$FF,$00,$00,$01,$FF,$00
         .BYTE $00,$01,$FF,$00,$00
 
-j117F   LDA #$00
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+GAME_PLAY_MUSIC
+        LDA #$00
         JMP MUSIC_FN
 
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 j1184   LDA f45,X
         CMP #$C5     ;#%11000101
         BCS j1191
@@ -1974,28 +1991,30 @@ f1223   .BYTE $32,$32,$1D,$C4,$32,$C4,$32
 f122A   .BYTE $8C,$8C,$00,$00,$00,$00,$00
 f1231   .BYTE $04,$08,$01,$06,$05,$0A,$09,$02
         .BYTE $00
-j123A   LDX #$06     ;#%00000110
-b123C   LDA f1961,X
-        BEQ b1254
+
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+j123A   LDX #$06
+_L00    LDA f1961,X
+        BEQ _L01
         LDA f4A,X
         CLC
         ADC a0D
         STA f4A,X
         LDA a1266
-        BNE b1254
+        BNE _L01
         LDA f82,X
         CLC
         ADC a0C
         STA f82,X
-b1254   DEX
-        BPL b123C
+_L01    DEX
+        BPL _L00
         LDA a0C
-        BEQ b1265
+        BEQ _L02
         DEC a1266
-        BPL b1265
+        BPL _L02
         LDA #$01     ;#%00000001
         STA a1266
-b1265   RTS
+_L02    RTS
 
 a1266   .BYTE $00
 f1267   .BYTE $09,$01,$02,$03,$0B,$0D,$0F,$11
@@ -2008,6 +2027,7 @@ f1267   .BYTE $09,$01,$02,$03,$0B,$0D,$0F,$11
 a1299   .BYTE $32,$33,$34,$35,$36,$37,$38,$39
         .BYTE $3A,$3B,$3C,$3D,$3E,$3F
 
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 s12A7   LDA GAME_JOY_STATE
         AND #$0F                        ;Just the direction bits
         BEQ b12BB
@@ -2447,6 +2467,8 @@ f1628   .BYTE $40,$28,$40,$50,$40,$78,$40,$A0
         .BYTE $42,$A8,$42,$D0,$42,$F8,$42,$20
         .BYTE $43,$48,$43,$70,$43,$98,$43,$C0
         .BYTE $43
+
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 j1659   LDA aE4
         CLC
         ADC #$16     ;#%00010110
@@ -3341,14 +3363,15 @@ GAME_JOY_STATE          .BYTE $00
 a1D63                   .BYTE $00
 a1D64                   .BYTE $00       ;Unused?
 a1D65                   .BYTE $00       ;Unused?
-GAME_JOY_STATE_COPY                   .BYTE $00
+GAME_JOY_STATE_COPY     .BYTE $00
 GAME_JOY_DIR_STATE      .BYTE $00
 
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 j1D68   LDA a0A
         STA a1D8C
         BEQ b1D76
         JSR s1D77
-        LDA #$00     ;#%00000000
+        LDA #$00
         STA a0A
 b1D76   RTS
 
@@ -3871,10 +3894,11 @@ b2220   LDA f42D0,X
         BPL b2220
         RTS
 
-j224E   LDA #$00     ;#%00000000
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+j224E   LDA #$00
         STA a055A
-b2253   LDA a2482
-        BEQ b2253
+_L00    LDA a2482
+        BEQ _L00
         DEC a2482
         RTS
 
@@ -4150,7 +4174,7 @@ a2493   .BYTE $00
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 s2494   LDY #$0D
-_L00 	TYA
+_L00    TYA
         STA f00B5,Y
         LDA #$00
         STA fC3,X
@@ -4160,8 +4184,8 @@ _L00 	TYA
         DEY
         BPL _L00
 
-        LDA #$FF 			;All sprites
-        STA $D015    			;Sprite display Enable
+        LDA #$FF                        ;All sprites
+        STA $D015                       ;Sprite display Enable
         JSR j28FF
         JMP j1D8F
 
@@ -4203,6 +4227,7 @@ a24F6   .BYTE $1B
 a24F7   .BYTE $34,$00,$00,$00,$00,$00,$00,$00
         .BYTE $00,$00,$00,$00,$00,$00,$00
 
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 j2506   LDA a1D8C
         BEQ b250C
         RTS
@@ -4242,20 +4267,21 @@ j2537   LDA f3980,X
         BNE j2537
         RTS
 
-j2549   LDX #$05     ;#%00000101
-b254B   LDA PLYR_SCORE,X
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+j2549   LDX #$05
+_L00    LDA PLYR_SCORE,X
         STA PLYR_SCORE_DUP,X
         CLC
         ADC f2576,X
-        CMP #$0A     ;#%00001010
-        BCC b255E
-        SBC #$0A     ;#%00001010
+        CMP #$0A
+        BCC _L01
+        SBC #$0A
         INC PLYR_SCORE_DUP+5,X
-b255E   STA PLYR_SCORE,X
-        LDA #$00     ;#%00000000
+_L01    STA PLYR_SCORE,X
+        LDA #$00
         STA f2576,X
         DEX
-        BPL b254B
+        BPL _L00
         RTS
 
 PLYR_SCORE
@@ -4756,9 +4782,9 @@ b28FB   RTS
         JMP MAIN_BIS
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
-j28FF   LDA #$00     ;#%00000000
+j28FF   LDA #$00
         STA a04
-        LDX #$01     ;#%00000001
+        LDX #$01
 b2905   LDY fB4,X
         LDA f0045,Y
         LDY fB5,X
@@ -5049,7 +5075,7 @@ s3006   JMP j36C6
 j3009   JSR s0364
         JSR s0343
         JSR s0340
-        JSR s034C
+        JSR GAME_PLAY_MUSIC_BIS
         JSR s3764
         JSR s356E
         JSR s3066
