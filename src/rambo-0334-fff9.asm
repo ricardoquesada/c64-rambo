@@ -540,7 +540,7 @@ f0566   .BYTE $00,$00,$00,$00,$00,$00,$00,$00
 a0586   #STR_CODE_CLR_SCREEN $20,$0D
         #STR_CODE_END
 
-        ;Music function to play for each text
+        ;Music song to play for each text
 IN_GAME_MSG_MUSIC_TBL
         .BYTE $0B,$0B
         .BYTE $06,$06
@@ -997,9 +997,9 @@ b0A48   STA a25C4
         STA a25C2
         LDA #$00     ;#%00000000
         STA a25C3
-        LDA #>p0C0A  ;#%00001100
+        LDA #$0C
         STA a25C7
-        LDA #<p0C0A  ;#%00001010
+        LDA #$0A
         STA a25C6
         JSR s257D
         BCS b0A74
@@ -1198,6 +1198,7 @@ a0BEC   .BYTE $01
 f0BED   .BYTE $10,$08,$FF,$20
 f0BF1   .BYTE $10,$08,$FF,$20
 f0BF5   .BYTE $23,$24,$D7,$B9
+
 s0BF9   LDX a0C0F
         LDA f120B,X
         CMP #$01     ;#%00000001
@@ -1205,7 +1206,6 @@ s0BF9   LDX a0C0F
         JSR s0C10
 b0C06   DEX
         BPL b0C0B
-p0C0A   =*+$01
         LDX #$03     ;#%00000011
 b0C0B   STX a0C0F
         RTS
@@ -1223,9 +1223,9 @@ s0C10   LDA f45,X
         STA a25C2
         LDA #$00     ;#%00000000
         STA a25C3
-        LDA #>p0C0A  ;#%00001100
+        LDA #$0C
         STA a25C7
-        LDA #<p0C0A  ;#%00001010
+        LDA #$0A
         STA a25C6
         JSR s257D
         BCC b0C48
@@ -1262,9 +1262,9 @@ s0C5D   LDA f4A,X
         STA a25C2
         LDA #$00     ;#%00000000
         STA a25C3
-        LDA #>p0C0A  ;#%00001100
+        LDA #$0C
         STA a25C7
-        LDA #<p0C0A  ;#%00001010
+        LDA #$0A
         STA a25C6
         JSR s257D
         BCC b0C9A
@@ -5328,9 +5328,9 @@ b31A5   LDA a4E
         STA a38DC
         LDA #$00     ;#%00000000
         STA a38DD
-        LDA #>p0C0A  ;#%00001100
+        LDA #$0C
         STA a38E1
-        LDA #<p0C0A  ;#%00001010
+        LDA #$0A
         STA a38E0
         JSR s3897
         BCC b31D7
@@ -5350,9 +5350,9 @@ b31D7   LDA a4E
         STA a38DC
         LDA #$00     ;#%00000000
         STA a38DD
-        LDA #>p0C0A  ;#%00001100
+        LDA #$0C
         STA a38E1
-        LDA #<p0C0A  ;#%00001010
+        LDA #$0A
         STA a38E0
         JSR s3897
         BCC b320F
