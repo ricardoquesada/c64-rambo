@@ -267,7 +267,8 @@ j0376   JMP j0451
 RESET_SCORE_BIS
         JMP RESET_SCORE
 
-s037C   JMP j042D
+SET_LOCAL_POINTS_BIS
+        JMP SET_LOCAL_POINTS
 
 j037F   JMP j0444
 
@@ -356,7 +357,10 @@ b042B   RTS
 a042C   .BYTE $00
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
-j042D   STA LOCAL_POINTS,X
+; Params: X: Digit to update
+;         A: Value to set
+SET_LOCAL_POINTS
+        STA LOCAL_POINTS,X
         RTS
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
@@ -709,24 +713,24 @@ b0839   DEC a083F
 
 a083F   .BYTE $00
 
-b0840   LDA #$32     ;#%00110010
+b0840   LDA #$32
         STA a083F
         LDA a0968
         STA f45,X
         LDA a0969
         STA f7D,X
-        LDA #$CF     ;#%11001111
+        LDA #$CF
         STA f8B,X
         LDA #$0C                        ;Color Gray 2
         STA GAME_SPRITE_COLOR_TBL,X
         DEC a086D
-        LDA #$14     ;#%00010100
+        LDA #$14
         STA f086E,X
-        LDA #$00     ;#%00000000
+        LDA #$00
         STA f61,X
-        LDA #$01     ;#%00000001
+        LDA #$01
         STA fC3,X
-        LDA #$02     ;#%00000010
+        LDA #$02                        ;Set 2000 points
         STA LOCAL_POINTS+2
         RTS
 
@@ -991,7 +995,7 @@ b0A48   STA a25C4
         STA a25C1
         LDA a8A
         STA a25C2
-        LDA #$00     ;#%00000000
+        LDA #$00
         STA a25C3
         LDA #$0C
         STA a25C7
@@ -1011,13 +1015,13 @@ b0A74   LDX a0BE0
         JSR s1985
         PLA
         TAX
-        CPX #$03     ;#%00000011
+        CPX #$03
         BEQ b0ADC
-        LDA #$00     ;#%00000000
+        LDA #$00
         STA f0BED,X
-        LDA #$03     ;#%00000011
+        LDA #$03                ;Set 3000 points
         STA LOCAL_POINTS+2
-        LDA #$1E     ;#%00011110
+        LDA #$1E
         JSR j0D24
         JMP j0BC9
 
@@ -1025,16 +1029,16 @@ b0A9F   LDA a0E
         BNE b0AB6
         STA f0BED,X
         INC a0B29
-        LDA #$05     ;#%00000101
+        LDA #$05                ;Set 5000 points
         STA LOCAL_POINTS+2
-        LDA #$1E     ;#%00011110
+        LDA #$1E
         JSR j0D24
         JMP j0BC9
 
 b0AB6   RTS
 
-s0AB7   LDX #$04     ;#%00000100
-b0AB9   LDA #$00     ;#%00000000
+s0AB7   LDX #$04
+b0AB9   LDA #$00
         STA f61,X
         STA fC8,X
         STA fCA,X
@@ -2428,10 +2432,10 @@ j15C6   LDA #$7E     ;#%01111110
         LDA #$04     ;#%00000100
         STA f120B,Y
         STA f1100,Y
-        LDA #$01     ;#%00000001
+        LDA #$01                        ;Set 100 points
         STA f0099,Y
         STA LOCAL_POINTS+3
-        LDA #$12     ;#%00010010
+        LDA #$12
         JMP j0D24
 
 b15EA   DEY
@@ -5242,11 +5246,12 @@ b30D2   LDA a4F
         STA a38E0
         JSR s3897
         BCC b3119
-        LDX #$01     ;#%00000001
+        LDX #$01
         JSR s316A
-        LDA #$02     ;#%00000010
-        LDX #$02     ;#%00000010
-        JSR s037C
+
+        LDA #$02                        ;Set 002.000 points
+        LDX #$02
+        JSR SET_LOCAL_POINTS_BIS
         JMP j311A
 
 b3119   RTS
@@ -5824,9 +5829,10 @@ b357E   LDX #$0C     ;#%00001100
         LDA a336D
         CMP #$2A     ;#%00101010
         BNE b35B6
-        LDA #$01     ;#%00000001
-        LDX #$00     ;#%00000000
-        JSR s037C
+
+        LDA #$01                        ;100.000 Points
+        LDX #$00
+        JSR SET_LOCAL_POINTS_BIS
         JSR s0352
         SEI
         PLA
