@@ -48,11 +48,11 @@ a05 = $05
 GAME_SPRITE_Y_TBL = $06
 a09 = $09
 a0A = $0A
-a0B = $0B
+GAME_ENERGY_TO_DECREASE = $0B           ;Ammount of energy to decrease to the player
 a0C = $0C
 a0D = $0D
 SELECTED_WEAPON = $0E
-a0F = $0F
+IS_GAME_OVER = $0F
 a20 = $20
 a21 = $21
 a22 = $22
@@ -254,7 +254,8 @@ s0352   JMP GAME_UPDATE_SCORE_FROM_POINTS
 
         JMP j123A
 
-s0358   JMP j0CB3
+GAME_UPDATE_SPRITE_ENERGY_BIS
+        JMP GAME_UPDATE_SPRITE_ENERGY
 
 GET_SCORE_BCD_DIGIT_BIS
         JMP GET_SCORE_BCD_DIGIT
@@ -334,7 +335,7 @@ _L00    JSR s040B
         JSR s0A41
         JSR s0D99
         JSR GAME_MAYBE_SELECT_NEXT_WEAPON
-        JSR j0CB3
+        JSR GAME_UPDATE_SPRITE_ENERGY
         JSR s0900
         JSR s043F
 _L01    JSR j28FF
@@ -389,17 +390,17 @@ _L00    STA LOCAL_POINTS,X
         RTS
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
-s043F   LDA a0F
+s043F   LDA IS_GAME_OVER
         BNE j0451
         RTS
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 j0444   JSR s044C
-        DEC a0F
+        DEC IS_GAME_OVER
         JMP GAME_INIT
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
-s044C   INC a0F
+s044C   INC IS_GAME_OVER
         JSR s046E
 
         ; Fallthrough
@@ -415,7 +416,7 @@ s0456   LDA a0B29
         LDX a0912
         BNE b046A
         LDA #$03
-        STA a0F
+        STA IS_GAME_OVER
         BNE s046E
 b046A   CLC
         ADC a0912
@@ -495,7 +496,7 @@ b04FE   LDA f0566,Y
         STA f00E0,Y
         DEY
         BPL b04FE
-        LDA a0F
+        LDA IS_GAME_OVER
         BNE b0510
         JSR s0513
         CLI
@@ -531,7 +532,7 @@ b052D   LDA #$08     ;#%00001000
         JMP j1DD5
 
 b054E   LDA #$01     ;#%00000001
-        STA a0F
+        STA IS_GAME_OVER
         PLA
         PLA
         PLA
@@ -1082,28 +1083,28 @@ b0AB9   LDA #$00
         RTS
 
 b0ADC   JSR s0AB7
-        LDA #$00     ;#%00000000
+        LDA #$00
         STA aD0
-        STA a0B
+        STA GAME_ENERGY_TO_DECREASE
         JSR s0456
-        LDA #$01     ;#%00000001
+        LDA #$01
         STA a2480
         STA a0967
         STA a0B2A
         JSR RESET_ENERGY_SPRITE
         LDA a0912
         JSR s3003
-        LDA #$00     ;#%00000000
+        LDA #$00
         STA a2480
-        STA a0B
+        STA GAME_ENERGY_TO_DECREASE
         STA a0967
         INC aD0
-        LDA #$B2     ;#%10110010
+        LDA #$B2
         STA a0BE8
-        LDA #$00     ;#%00000000
+        LDA #$00
         STA a0BEC
         STA a6E
-        LDA #$4F     ;#%01001111
+        LDA #$4F
         STA a0BE4
         STX a8A
         STY a52
@@ -1237,6 +1238,7 @@ b0C0B   STX a0C0F
         RTS
 
 a0C0F   .BYTE $00
+
 s0C10   LDA f45,X
         STA a25C4
         LDA a52
@@ -1255,9 +1257,9 @@ s0C10   LDA f45,X
         STA a25C6
         JSR s257D
         BCC b0C48
-        LDA a0B
-        ADC #$03     ;#%00000011
-        STA a0B
+        LDA GAME_ENERGY_TO_DECREASE
+        ADC #$03
+        STA GAME_ENERGY_TO_DECREASE
         TXA
         TAY
         JMP ONE_ENEMY_KILLED
@@ -1294,10 +1296,10 @@ s0C5D   LDA f4A,X
         STA a25C6
         JSR s257D
         BCC b0C9A
-        LDA a0B
-        ADC #$06     ;#%00000110
-        STA a0B
-        LDA #$18     ;#%00011000
+        LDA GAME_ENERGY_TO_DECREASE
+        ADC #$06
+        STA GAME_ENERGY_TO_DECREASE
+        LDA #24
         JSR GAME_MAYBE_PLAY_SFX
         JMP j25E4
 
@@ -1316,20 +1318,22 @@ _L00    LDA $4000+64*33,X               ;Original energy: left
         BPL _L00
 
         LDA #$30
-        STA a0CED
+        STA PLYR_ENERGY
         RTS
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
-j0CB3   LDA a0B
-        BEQ _L03
-        DEC a0B
-        DEC a0CED
+GAME_UPDATE_SPRITE_ENERGY
+        LDA GAME_ENERGY_TO_DECREASE
+        BEQ _EXIT
+        DEC GAME_ENERGY_TO_DECREASE
+        DEC PLYR_ENERGY
         BPL _L00
+
         LDA #$01
-        STA a0F
+        STA IS_GAME_OVER
         RTS
 
-_L00    LDA a0CED
+_L00    LDA PLYR_ENERGY
         PHA
         LSR A
         LSR A
@@ -1353,10 +1357,10 @@ _L02    LDA $4000+64*16,X               ;Spr frame #16: Energy
         INX
         DEC a2493
         BPL _L02
-_L03    RTS
+_EXIT   RTS
 
-a0CED   .BYTE $00
-f0CEE   .BYTE $80,$40,$20,$10,$08,$04,$02,$01
+PLYR_ENERGY     .BYTE $00
+f0CEE           .BYTE $80,$40,$20,$10,$08,$04,$02,$01
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 GAME_MAYBE_TOGGLE_MUSIC
@@ -2641,10 +2645,10 @@ _L01    LDA f0BF1,X
         STA $D020                       ;Border Color
         STA $D021                       ;Background Color 0
         STA a2482
-        STA a0F
+        STA IS_GAME_OVER
         STA a101E
         STA aE6
-        STA a0B
+        STA GAME_ENERGY_TO_DECREASE
         LDA #$07
         STA a1A47
 
@@ -2988,7 +2992,7 @@ _L00    LDA f242E,X
 s19D1   LDX SELECTED_WEAPON
         LDY a1B70
         LDA f1B71,Y
-        LDY a0CED
+        LDY PLYR_ENERGY
         CPY #$0A
         BCC _L00
         LDY #$07
@@ -5199,8 +5203,8 @@ j3009   JSR s0364
         JSR s0337
         JMP j3009
 
-s303F   JSR s0358
-        LDA a0F
+s303F   JSR GAME_UPDATE_SPRITE_ENERGY_BIS
+        LDA IS_GAME_OVER
         BNE b3047
         RTS
 
@@ -5218,7 +5222,7 @@ s304E   LDA a3063
 b3057   LDX a3825
         LDA f3064,X
         STA a3063
-        INC a0B
+        INC GAME_ENERGY_TO_DECREASE
         RTS
 
 a3063   .BYTE $00
@@ -5411,12 +5415,12 @@ b31D7   LDA a4E
         LDA a86
         ASL A
         STA a38DA
-        LDA #$00     ;#%00000000
+        LDA #$00
         ROL A
         STA a38DB
         LDA a81
         STA a38DC
-        LDA #$00     ;#%00000000
+        LDA #$00
         STA a38DD
         LDA #$0C
         STA a38E1
@@ -5424,9 +5428,9 @@ b31D7   LDA a4E
         STA a38E0
         JSR s3897
         BCC b320F
-j3206   LDA #$05     ;#%00000101
-        STA a0B
-        LDX #$00     ;#%00000000
+j3206   LDA #$05
+        STA GAME_ENERGY_TO_DECREASE
+        LDX #$00
         JSR s316A
 b320F   RTS
 
@@ -6506,6 +6510,7 @@ GAME_SPR_FRAME_02_TBL   .BYTE $14,$4B,$3D,$6D,$68,$3C
         .BINARY "rambo-game-7800-charset.bin"
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+; Unused?
 f8000   .BYTE $00,$00,$00,$01,$01,$02,$03,$04
         .BYTE $05,$07,$08,$0A,$0C,$0D,$0F,$11
         .BYTE $13,$15,$18,$1A,$1C,$1F,$21,$24
@@ -6540,6 +6545,15 @@ f8000   .BYTE $00,$00,$00,$01,$01,$02,$03,$04
         .BYTE $FF,$FF,$00,$00,$FF,$FF,$00,$00
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+;
+; MUSIC FUNCTIONS
+;
+; Until music is fully analyzed, let's force it to start at $8100.
+; Otherwise music will break since the "notes" contain addresses to
+; other notes
+;
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+        * = $8100
 ; $8100
 ; Args: A
 MUSIC_FN
