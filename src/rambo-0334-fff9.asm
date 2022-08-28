@@ -9,16 +9,11 @@ f2A = $2A
 f2D = $2D
 GAME_SPRITE_Y_TBL = $37                 ;14 entries ($37-$44)
 GAME_SPRITE_Y_COPY_TBL = $45            ;14 entries ($45-$52)
-f4A = $4A
-f4C = $4C
-f4E = $4E
 f53 = $53
 f58 = $58
 f61 = $61
 GAME_SPRITE_X_TBL = $6F                 ;14 entries ($6f-$7c)
-f74 = $74
 GAME_SPRITE_X_COPY_TBL = $7D            ;14 entries ($7d-$8a)
-f82 = $82
 f86 = $86
 f8B = $8B
 f90 = $90
@@ -1070,8 +1065,9 @@ b0A9F   LDA SELECTED_WEAPON             ;Weapon used
 
 b0AB6   RTS
 
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 s0AB7   LDX #$04
-b0AB9   LDA #$00
+_L00    LDA #$00
         STA f61,X
         STA fC8,X
         STA fCA,X
@@ -1082,12 +1078,13 @@ b0AB9   LDA #$00
         STA a101E
         STA a101D
         STA GAME_SPRITE_Y_COPY_TBL,X
-        STA f4A,X
-        STA f4C,X
+        STA GAME_SPRITE_Y_COPY_TBL+5,X
+        STA GAME_SPRITE_Y_COPY_TBL+7,X          ;Overwrites previous value
         DEX
-        BPL b0AB9
+        BPL _L00
         RTS
 
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 b0ADC   JSR s0AB7
         LDA #$00
         STA aD0
@@ -1282,11 +1279,11 @@ b0C54   DEX
 b0C59   STX a0C9B
         RTS
 
-s0C5D   LDA f4A,X
+s0C5D   LDA GAME_SPRITE_Y_COPY_TBL+5,X
         STA a25C4
         LDA a52
         STA a25C5
-        LDA f82,X
+        LDA GAME_SPRITE_X_COPY_TBL+5,X
         ASL A
         STA a25C0
         LDA #$00
@@ -2057,16 +2054,16 @@ f1231   .BYTE $04,$08,$01,$06,$05,$0A,$09,$02
 j123A   LDX #$06
 _L00    LDA f1961,X
         BEQ _L01
-        LDA f4A,X
+        LDA GAME_SPRITE_Y_COPY_TBL+5,X
         CLC
         ADC a0D
-        STA f4A,X
+        STA GAME_SPRITE_Y_COPY_TBL+5,X
         LDA a1266
         BNE _L01
-        LDA f82,X
+        LDA GAME_SPRITE_X_COPY_TBL+5,X
         CLC
         ADC a0C
-        STA f82,X
+        STA GAME_SPRITE_X_COPY_TBL+5,X
 _L01    DEX
         BPL _L00
         LDA a0C
@@ -2449,7 +2446,7 @@ j1564   STY TMP_2493
         BEQ b15EA
         CMP #$04
         BEQ b15EA
-        LDA f4E,X
+        LDA GAME_SPRITE_Y_COPY_TBL+9,X
         STA a25C4
         LDA f0045,Y
         STA a25C5
@@ -2786,13 +2783,13 @@ s1827   CMP #$09     ;#%00001001
         JMP j1885
 
 b182E   STA TMP_2493
-        LDA f4E,X
+        LDA GAME_SPRITE_Y_COPY_TBL+9,X
         CMP #$0A     ;#%00001010
         BCS b1843
 s1837   LDA #$00     ;#%00000000
         STA f1965,X
         LDA #$00     ;#%00000000
-        STA f4E,X
+        STA GAME_SPRITE_Y_COPY_TBL+9,X
         DEC fCC,X
         RTS
 
@@ -2812,10 +2809,10 @@ b1853   CMP #$AC     ;#%10101100
         BNE b1861
         JMP j1968
 
-b1861   LDA f4E,X
+b1861   LDA GAME_SPRITE_Y_COPY_TBL+9,X
         CLC
         ADC f1B56,X
-        STA f4E,X
+        STA GAME_SPRITE_Y_COPY_TBL+9,X
         LDA f86,X
         CLC
         ADC f1B53,X
@@ -2861,7 +2858,7 @@ j18A6   AND #$7F     ;#%01111111
         BCS s18E4
         CMP #$14     ;#%00010100
         BCC s18E4
-        STA f4E,X
+        STA GAME_SPRITE_Y_COPY_TBL+9,X
         LDA f86,X
         CLC
         ADC f1952,X
@@ -2902,7 +2899,7 @@ s18E4   LDY f1965,X
 
 b1908   TXA
         PHA
-        LDA f4E,X
+        LDA GAME_SPRITE_Y_COPY_TBL+9,X
         CLC
         ADC #$08     ;#%00001000
         STA a1931
@@ -3116,7 +3113,7 @@ b1A81   LDA f1AFA,Y
         LDA a52
         SEC
         SBC #$05     ;#%00000101
-        STA f4E,X
+        STA GAME_SPRITE_Y_COPY_TBL+9,X
         INC fCC,X
         LDY GAME_JOY_DIR_STATE
         LDA SELECTED_WEAPON
@@ -3138,7 +3135,7 @@ b1AC0   CMP #$03     ;#%00000011
         BNE b1AD6
         LDA #$9A     ;#%10011010
         STA f1955,X
-        LDA f4E,X
+        LDA GAME_SPRITE_Y_COPY_TBL+9,X
         SEC
         SBC #$2A     ;#%00101010
         STA f1958,X
@@ -3508,9 +3505,9 @@ _L01    LDA GAME_SPRITE_X_COPY_TBL,X
         STA a7B
 
         LDX #$06
-_L02    LDA f82,X
+_L02    LDA GAME_SPRITE_X_COPY_TBL+5,X
         ASL A
-        STA f74,X
+        STA GAME_SPRITE_X_TBL+5,X
         ROL f58,X
         DEX
         BPL _L02
@@ -4517,13 +4514,13 @@ _L02    DEX
 a25DD   .BYTE $03
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
-s25DE   LDA f4A,X
+s25DE   LDA GAME_SPRITE_Y_COPY_TBL+5,X
         CMP #$0A     ;#%00001010
         BCS b25F0
 j25E4   LDA #$00     ;#%00000000
         STA f1961,X
         LDA #$00     ;#%00000000
-        STA f4A,X
+        STA GAME_SPRITE_Y_COPY_TBL+5,X
         DEC fC8,X
         RTS
 
@@ -4531,7 +4528,7 @@ b25F0   CMP #$C5     ;#%11000101
         BCC b25F7
         JMP j25E4
 
-b25F7   LDA f82,X
+b25F7   LDA GAME_SPRITE_X_COPY_TBL+5,X
         CMP #$04     ;#%00000100
         BCS b2600
         JMP j25E4
@@ -4550,19 +4547,19 @@ b2600   CMP #$AC     ;#%10101100
         LDA f055B,X
         AND #$01     ;#%00000001
         BEQ b2624
-        INC f4A,X
-        INC f4A,X
+        INC GAME_SPRITE_Y_COPY_TBL+5,X
+        INC GAME_SPRITE_Y_COPY_TBL+5,X
         JMP b2628
 
-b2624   DEC f4A,X
-        DEC f4A,X
+b2624   DEC GAME_SPRITE_Y_COPY_TBL+5,X
+        DEC GAME_SPRITE_Y_COPY_TBL+5,X
 b2628   LDA f055B,X
         AND #$02     ;#%00000010
         BEQ b2632
-        INC f82,X
+        INC GAME_SPRITE_X_COPY_TBL+5,X
         RTS
 
-b2632   DEC f82,X
+b2632   DEC GAME_SPRITE_X_COPY_TBL+5,X
         RTS
 
 b2635   LDA fDA,X
@@ -4575,19 +4572,19 @@ b2635   LDA fDA,X
         LDA f055B,X
         AND #$02     ;#%00000010
         BEQ b264E
-        INC f82,X
+        INC GAME_SPRITE_X_COPY_TBL+5,X
         JMP b2650
 
-b264E   DEC f82,X
+b264E   DEC GAME_SPRITE_X_COPY_TBL+5,X
 b2650   LDA f055B,X
         AND #$01     ;#%00000001
         BEQ b265C
-        INC f4A,X
-        INC f4A,X
+        INC GAME_SPRITE_Y_COPY_TBL+5,X
+        INC GAME_SPRITE_Y_COPY_TBL+5,X
         RTS
 
-b265C   DEC f4A,X
-        DEC f4A,X
+b265C   DEC GAME_SPRITE_Y_COPY_TBL+5,X
+        DEC GAME_SPRITE_Y_COPY_TBL+5,X
         RTS
 
 s2661   LDA #$05     ;#%00000101
@@ -4632,10 +4629,10 @@ b2696   INC f1961,X
         LSR A
         LDA f007D,Y
         ROR A
-        STA f82,X
+        STA GAME_SPRITE_X_COPY_TBL+5,X
         STA TMP_2493
         LDA f0045,Y
-        STA f4A,X
+        STA GAME_SPRITE_Y_COPY_TBL+5,X
         LSR A
         STA a2745
         LDA a8A
@@ -5573,14 +5570,14 @@ s3288   LDY a324C,X
         CLC
         ADC a32D5
         STA f86,X
-        LDA f4E,X
+        LDA GAME_SPRITE_Y_COPY_TBL+9,X
         CLC
         ADC a32D4
         CMP #$14     ;#%00010100
         BCC j32C8
         CMP #$C0     ;#%11000000
         BCS j32C8
-        STA f4E,X
+        STA GAME_SPRITE_Y_COPY_TBL+9,X
         LDA f86,X
         CMP #$AC     ;#%10101100
         BCS j32C8
@@ -5590,7 +5587,7 @@ j32C8   LDA #$00     ;#%00000000
         STA f32D6,X
         DEC fCC,X
         LDA #$0A     ;#%00001010
-        STA f4E,X
+        STA GAME_SPRITE_Y_COPY_TBL+9,X
         RTS
 
 a32D4   .BYTE $00
@@ -5605,12 +5602,12 @@ s32D9   LDY #$01     ;#%00000001
 s32DE   LDX #$03     ;#%00000011
         LDA #$00     ;#%00000000
         STA a3315
-b32E5   LDA f82,X
+b32E5   LDA GAME_SPRITE_X_COPY_TBL+5,X
         CMP #$AD     ;#%10101101
         BCC b32EE
         JMP j3308
 
-b32EE   LDA f4A,X
+b32EE   LDA GAME_SPRITE_Y_COPY_TBL+5,X
         CMP #$14     ;#%00010100
         BCC j3308
         CMP #$C0     ;#%11000000
@@ -6216,7 +6213,7 @@ b37FF   STA $D000,X  ;Sprite 0 X Pos
         BPL b37FF
         LDX #$03     ;#%00000011
 b3807   LDA #$C3     ;#%11000011
-        STA f82,X
+        STA GAME_SPRITE_X_COPY_TBL+5,X
         LDA #$00     ;#%00000000
         STA fC8,X
         DEX
