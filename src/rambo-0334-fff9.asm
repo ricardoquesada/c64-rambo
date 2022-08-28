@@ -1357,7 +1357,7 @@ _L01    TAX                             ;X = ptr to the byte to modify
         STA TMP_2493
 
 _L02    LDA $4000+64*16,X               ;Spr frame #16: Energy
-        EOR f0CEE,Y                     ; Invert bar
+        EOR ENERGY_BAR_INVERT_MASK,Y    ; Invert bar
         STA $4000+64*16,X               ; according to life
         INX                             ;Skip to the next row
         INX
@@ -1366,8 +1366,8 @@ _L02    LDA $4000+64*16,X               ;Spr frame #16: Energy
         BPL _L02                        ; No, jump
 _EXIT   RTS
 
-PLYR_ENERGY     .BYTE $00
-f0CEE           .BYTE $80,$40,$20,$10,$08,$04,$02,$01
+PLYR_ENERGY             .BYTE $00
+ENERGY_BAR_INVERT_MASK  .BYTE $80,$40,$20,$10,$08,$04,$02,$01
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 GAME_MAYBE_TOGGLE_MUSIC
@@ -1421,27 +1421,28 @@ _SFX_TO_PLAY            .BYTE $00
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 j0D3D   LDA a1D8C
-        BNE b0D43
+        BNE _L00
         RTS
 
-b0D43   LDX #$00
+_L00    LDX #$00
         STX a1D8C
         LSR A
-        BCC b0D4E
+        BCC _L01
         JMP j2867
 
-b0D4E   LSR A
-        BCC b0D54
+_L01    LSR A
+        BCC _L02
         JMP j2832
 
-b0D54   LSR A
-        BCC b0D5A
+_L02    LSR A
+        BCC _L03
         JMP j277A
 
-b0D5A   JMP j274A
+_L03    JMP j274A
 
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 s0D5D   LDY f0D88,X
-        BPL b0D76
+        BPL _L00
         LDA #$01
         STA f120B,X
         LDA #$07
@@ -1451,10 +1452,10 @@ s0D5D   LDY f0D88,X
         STA f1210,X
         JMP j10BE
 
-b0D76   CPY #$02
-        BNE b0D7C
+_L00    CPY #$02
+        BNE _L01
         INC f8B,X
-b0D7C   LDA f0D8A,Y
+_L01    LDA f0D8A,Y
         CLC
         ADC f45,X
         STA f45,X
@@ -1465,90 +1466,92 @@ f0D88   .BYTE $04,$00
 f0D8A   .BYTE $00,$00,$00,$04,$03,$02,$02,$02
         .BYTE $01,$01,$00,$00,$00,$FF,$FF
 
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 s0D99   LDA a0967
-        BEQ b0D9F
+        BEQ _L00
         RTS
 
-b0D9F   LDX #$07     ;#%00000111
+_L00    LDX #$07
         LDY a0E59
-        BPL b0DCA
-        LDY #$1F     ;#%00011111
+        BPL _L01
+        LDY #$1F
         STY a0E59
         LDA a32
         CLC
-        ADC #$28     ;#%00101000
+        ADC #$28
         STA a32
         LDA a33
-        ADC #$00     ;#%00000000
+        ADC #$00
         STA a33
         DEC a0E5A
-        BPL b0DCA
+        BPL _L01
         LDA #<$4000+40*1+4
         STA a32
         LDA #>$4000+40*1+4
         STA a33
-        LDA #$11     ;#%00010001
+        LDA #$11
         STA a0E5A
-b0DCA   LDA (p32),Y
-        CMP #$93     ;#%10010011
-        BNE b0DD9
+_L01    LDA (p32),Y
+        CMP #$93
+        BNE _L02
         STY TMP_2493
         JSR s0DE1
         LDY TMP_2493
-b0DD9   DEY
+_L02    DEY
         DEX
-        BPL b0DCA
+        BPL _L01
         STY a0E59
         RTS
 
-s0DE1   LDA #$04     ;#%00000100
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+s0DE1   LDA #$04
         JSR s24D3
         TAY
         LDA f120B,Y
-        BEQ b0DED
+        BEQ _L00
         RTS
 
-b0DED   LDA #$0E     ;#%00001110
+_L00    LDA #$0E
         STA f0D88,Y
-        LDA #$05     ;#%00000101
+        LDA #$05
         STA f120B,Y
-        LDA #$09     ;#%00001001
+        LDA #$09
         STA f0099,Y
         STA f00C3,Y
-        LDA #$00     ;#%00000000
+        LDA #$00
         STA f106C,Y
         STY a2745
         LDA TMP_2493
         CLC
-        ADC #$28     ;#%00101000
+        ADC #$28
         TAY
         LDA (p32),Y
         LDY a2745
-        CMP #$67     ;#%01100111
-        BNE b0E21
-        LDA #$0B     ;#%00001011
+        CMP #$67
+        BNE _L01
+        LDA #$0B
         STA f1210,Y
-        LDA #$76     ;#%01110110
-        JMP j0E28
+        LDA #$76
+        JMP _L02
 
-b0E21   LDA #$0C     ;#%00001100
+_L01    LDA #$0C
         STA f1210,Y
-        LDA #$78     ;#%01111000
-j0E28   STA a8B,Y
-        LDA #$0E     ;#%00001110
+        LDA #$78
+_L02    STA a8B,Y
+        LDA #$0E
         SEC
         SBC a0E5A
         ASL A
         ASL A
         ASL A
         CLC
-        ADC #$48     ;#%01001000
+        ADC #$48
         ADC GAME_SMOOTH_Y
         STA f0045,Y
         LDA GAME_SMOOTH_X
         LSR A
         CLC
-        ADC #$18     ;#%00011000
+        ADC #$18
         STA a2745
         LDA TMP_2493
         ASL A
@@ -1557,18 +1560,20 @@ j0E28   STA a8B,Y
         ADC a2745
         ASL A
         STA f007D,Y
-        LDA #$00     ;#%00000000
+        LDA #$00
         ROL A
         STA f0061,Y
         RTS
 
 a0E59   .BYTE $FF
 a0E5A   .BYTE $00
+
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 s0E5B   LDA a0967
-        BEQ b0E61
+        BEQ _L00
         RTS
 
-b0E61   LDX a0EB3
+_L00    LDX a0EB3
         BPL b0E67
         RTS
 
