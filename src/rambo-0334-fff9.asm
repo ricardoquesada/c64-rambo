@@ -2491,6 +2491,7 @@ b15EA   DEY
 
 b15EE   JMP j1564
 
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 s15F1   LDX #$0D
         JSR j1659
         LDX #$03
@@ -2986,7 +2987,7 @@ f19BE   .BYTE $22,$15,$16,$17,$18,$19,$1A
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 GAME_RESTORE_DASHBOARD_COLORS
-        LDX #$07                        ;6 sprites are used, but this table contains 8 entries
+        LDX #$07                        ;8 sprites for dashboard
 _L00    LDA GAME_DASHBOARD_COLOR_REF_TBL,X
         STA GAME_DASHBOARD_SPR_COLOR_TBL,X
         DEX
@@ -3012,12 +3013,12 @@ _L01    CPX #$04                        ;Weapon: Machine gun
         STA GAME_DASHBOARD_SPR_COLOR_TBL,X
         RTS
 
-_L02    STA a242A                       ;Machine gun
-        STA a242B
+_L02    STA GAME_DASHBOARD_SPR_COLOR_TBL+4      ;Machine gun
+        STA GAME_DASHBOARD_SPR_COLOR_TBL+5
         RTS
 
-_L03    STA a242C                       ;Helicoper gun
-        STA a242D
+_L03    STA GAME_DASHBOARD_SPR_COLOR_TBL+6      ;Helicoper gun
+        STA GAME_DASHBOARD_SPR_COLOR_TBL+7
         RTS
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
@@ -3266,8 +3267,12 @@ b1C0E   ROR TMP_2493
 
 a1C27   .BYTE $00
 a1C28   .BYTE $00
-s1C29   LDA GAME_SMOOTH_X
+
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+s1C29
+        LDA GAME_SMOOTH_X
         STA a1CC0
+
         LDA GAME_JOY_STATE
         TAX
         AND #$03                        ;Up or Down?
@@ -3278,26 +3283,27 @@ s1C29   LDA GAME_SMOOTH_X
         TXA
         AND #$06                        ;Down and Left?
         CMP #$06
-        BEQ b1C49                       ; No
+        BEQ _L00                        ; No
         TXA
         AND #$09                        ;Up and Right?
         CMP #$09
-        BNE b1C51                       ; Yes
+        BNE _L01                        ; Yes
 
-b1C49   LDA a1CC0
-        EOR #$07                        ;#%00000111
+_L00    LDA a1CC0
+        EOR #%00000111
         STA a1CC0
-b1C51   LDA GAME_SMOOTH_Y
+
+_L01    LDA GAME_SMOOTH_Y
         SEC
         SBC a1CC0
-        BPL b1C5E
+        BPL _L02
         EOR #$FF
         CLC
         ADC #$01
-b1C5E   CMP #$04
+_L02    CMP #$04
         BEQ b1C6B
         LDA GAME_JOY_STATE
-        AND #$13                        ;Up, Down, Fire
+        AND #%00010011                  ;Up, Down, Fire
         STA a1D63
         RTS
 
@@ -3305,12 +3311,17 @@ b1C6B   TXA
         STA a1D63
 b1C6F   RTS
 
-s1C70   LDA a1D3E
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+; Similar to s1C29 but for double-speed?
+s1C70
+        LDA a1D3E
         BNE b1C6F
+
         LDA GAME_SMOOTH_X
-        AND #$FE                        ;#%11111110
+        AND #%11111110
         STA GAME_SMOOTH_X
         STA a1CC0
+
         LDA GAME_JOY_STATE
         TAX
         AND #$03                        ;Up or Down?
@@ -3321,75 +3332,80 @@ s1C70   LDA a1D3E
         TXA
         AND #$06                        ;Down and Left?
         CMP #$06
-        BEQ b1C99                       ; No
+        BEQ _L00                        ; No
         TXA
         AND #$09                        ;Up and Right?
         CMP #$09
-        BNE b1CA1                       ; Yes
+        BNE _L01                        ; Yes
 
-b1C99   LDA a1CC0
-        EOR #$06                        ;#%00000110
+_L00    LDA a1CC0
+        EOR #%00000110
         STA a1CC0
-b1CA1   LDA GAME_SMOOTH_Y
+
+_L01    LDA GAME_SMOOTH_Y
         SEC
         SBC a1CC0
-        BPL b1CAE
+        BPL _L02
         EOR #$FF
         CLC
         ADC #$01
-b1CAE   CMP #$04
-        BEQ b1CBB
+_L02    CMP #$04
+        BEQ _L03
         LDA GAME_JOY_STATE
-        AND #$13                        ;Up, Down, Fire
+        AND #%00010011                  ;Up, Down, Fire
         STA a1D63
         RTS
 
-b1CBB   TXA
+_L03    TXA
         STA a1D63
         RTS
 
 a1CC0   .BYTE $00
 
-s1CC1   LDA #$00
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+GAME_SMOOTH_SCROLL_BY_1
+        LDA #$00
         STA a0C
         STA a0D
         STA a0A
         LSR a1D63
-        BCC b1CD1
-        JSR s1F91
-b1CD1   LSR a1D63
-        BCC b1CD9
-        JSR s216D
-b1CD9   LSR a1D63
-        BCC b1CE1
-        JSR s1DCB
-b1CE1   LSR a1D63
-        BCC b1CE9
-        JSR s1EB1
-b1CE9   LDY GAME_JOY_STATE
+        BCC _L00
+        JSR GAME_SMOOTH_SCROLL_Y_INC_BY_1
+_L00    LSR a1D63
+        BCC _L01
+        JSR GAME_SMOOTH_SCROLL_Y_DEC_BY_1
+_L01    LSR a1D63
+        BCC _L02
+        JSR GAME_SMOOTH_SCROLL_X_INC_BY_1
+_L02    LSR a1D63
+        BCC _L03
+        JSR GAME_SMOOTH_SCROLL_X_DEC_BY_1
+_L03    LDY GAME_JOY_STATE
         LDA a0A
         BNE b1CF2
         LDY #$FF
 b1CF2   STY a12F1
         RTS
 
-s1CF6   LDA #$00
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+GAME_SMOOTH_SCROLL_BY_2
+        LDA #$00
         STA a0C
         STA a0D
         STA a0A
         LSR a1D63
-        BCC b1D06
-        JSR s1FB3
-b1D06   LSR a1D63
-        BCC b1D0E
-        JSR s2185
-b1D0E   LSR a1D63
-        BCC b1D16
-        JSR s1DED
-b1D16   LSR a1D63
-        BCC b1D1E
-        JSR s1EC9
-b1D1E   LDY GAME_JOY_STATE
+        BCC _L00
+        JSR GAME_SMOOTH_SCROLL_Y_INC_BY_2
+_L00    LSR a1D63
+        BCC _L01
+        JSR GAME_SMOOTH_SCROLL_Y_DEC_BY_2
+_L01    LSR a1D63
+        BCC _L02
+        JSR GAME_SMOOTH_SCROLL_X_INC_BY_2
+_L02    LSR a1D63
+        BCC _L03
+        JSR GAME_SMOOTH_SCROLL_X_DEC_BY_2
+_L03    LDY GAME_JOY_STATE
         LDA a0A
         BNE b1CF2
         LDY #$FF
@@ -3499,7 +3515,9 @@ j1DC2   LDA a2305
         DEC a2305
         RTS
 
-s1DCB   INC a0C
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+GAME_SMOOTH_SCROLL_X_INC_BY_1
+        INC a0C
         LDA GAME_SMOOTH_X
         CMP #$07
         BEQ b1DE0
@@ -3518,10 +3536,11 @@ b1DE0   LDA #$00
         STA a0A
         JMP j1DD5
 
-        ; Soft Scroll right (two pixels)
-s1DED   INC a0C
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+GAME_SMOOTH_SCROLL_X_INC_BY_2
+        INC a0C
         LDA GAME_SMOOTH_X
-        CMP #$06                        ;#%00000110
+        CMP #$06
         BEQ _L00
         INC GAME_SMOOTH_X
         INC GAME_SMOOTH_X
@@ -3530,7 +3549,7 @@ s1DED   INC a0C
 _L00    LDA #$00
         STA GAME_SMOOTH_X
         LDA a0A
-        ORA #$04                        ;#%00000100
+        ORA #$04
         STA a0A
         JMP j1DD5
 
@@ -3603,30 +3622,33 @@ _L02    LDA $4000+40*18,X
         RTS
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
-s1EB1   DEC a0C
+GAME_SMOOTH_SCROLL_X_DEC_BY_1
+        DEC a0C
         LDA GAME_SMOOTH_X
-        BEQ b1EBC
+        BEQ _L00
         DEC GAME_SMOOTH_X
         JMP j1DD5
 
-b1EBC   LDA #$07     ;#%00000111
+_L00    LDA #$07
         STA GAME_SMOOTH_X
         LDA a0A
-        ORA #$08     ;#%00001000
+        ORA #$08
         STA a0A
         JMP j1DD5
 
-s1EC9   DEC a0C
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+GAME_SMOOTH_SCROLL_X_DEC_BY_2
+        DEC a0C
         LDA GAME_SMOOTH_X
-        BEQ b1ED6
+        BEQ _L00
         DEC GAME_SMOOTH_X
         DEC GAME_SMOOTH_X
         JMP j1DD5
 
-b1ED6   LDA #$06     ;#%00000110
+_L00    LDA #$06
         STA GAME_SMOOTH_X
         LDA a0A
-        ORA #$08     ;#%00001000
+        ORA #$08
         STA a0A
         JMP j1DD5
 
@@ -3701,7 +3723,8 @@ _L02
         RTS
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
-s1F91   INC a0D
+GAME_SMOOTH_SCROLL_Y_INC_BY_1
+        INC a0D
         LDA GAME_SMOOTH_Y
         CMP #$07
         BCS b1FA6
@@ -3720,15 +3743,17 @@ b1FA6   LDA #$00
         STA a0A
         JMP s1F9B
 
-s1FB3   INC a0D
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+GAME_SMOOTH_SCROLL_Y_INC_BY_2
+        INC a0D
         LDA GAME_SMOOTH_Y
         CMP #$06
-        BCS b1FC2
+        BCS _L00
         INC GAME_SMOOTH_Y
         INC GAME_SMOOTH_Y
         JMP s1F9B
 
-b1FC2   LDA #$00
+_L00    LDA #$00
         STA GAME_SMOOTH_Y
         LDA a0A
         ORA #$01
@@ -3882,28 +3907,32 @@ f2159   .BYTE $00,$00,$00,$00,$00,$00,$00,$00
         .BYTE $00,$00,$00,$00,$00,$00,$00,$00
         .BYTE $00,$00,$00,$00
 
-s216D   DEC a0D
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+GAME_SMOOTH_SCROLL_Y_DEC_BY_1
+        DEC a0D
         LDA GAME_SMOOTH_Y
-        BEQ b2178
+        BEQ _L00
         DEC GAME_SMOOTH_Y
         JMP s1F9B
 
-b2178   LDA #$07
+_L00    LDA #$07
         STA GAME_SMOOTH_Y
         LDA a0A
         ORA #$02
         STA a0A
         JMP s1F9B
 
-s2185   DEC a0D
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+GAME_SMOOTH_SCROLL_Y_DEC_BY_2
+        DEC a0D
         LDA GAME_SMOOTH_Y
         CMP #$02
-        BCC b2194
+        BCC _L00
         DEC GAME_SMOOTH_Y
         DEC GAME_SMOOTH_Y
         JMP s1F9B
 
-b2194   LDA #$06
+_L00    LDA #$06
         STA GAME_SMOOTH_Y
         LDA a0A
         ORA #$02
@@ -4180,6 +4209,7 @@ _L02    LDA #$0D                        ;Color Light Green
         STA $D027                       ;Sprite 0 Color
         STA $D028                       ;Sprite 1 Color
         JSR s1B5A
+
         LDA a2480
         BEQ _L03
         JSR s1C70
@@ -4187,7 +4217,7 @@ _L02    LDA #$0D                        ;Color Light Green
 
 _L03    JSR s1C29
 _L04    JSR s1312
-        LDA a242C
+        LDA GAME_DASHBOARD_SPR_COLOR_TBL+6
         STA $D02D                       ;Sprite 6 Color
         STA $D02E                       ;Sprite 7 Color
         PLA
@@ -4236,37 +4266,38 @@ a2424   .BYTE $1A                       ;GatlingGun/Missile right
 a2425   .BYTE $00
 
 GAME_DASHBOARD_SPR_COLOR_TBL
-        .BYTE $00,$00,$00,$00
-a242A   .BYTE $00
-a242B   .BYTE $00
-a242C   .BYTE $00
-a242D   .BYTE $00
+        .BYTE $00,$00,$00,$00,$00,$00,$00,$00
 
 GAME_DASHBOARD_COLOR_REF_TBL
         .BYTE $0B,$04,$05,$05,$09,$0C,$09,$06
 
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 s2436   LDA #$00
         STA $D012                       ;Raster Position
         JSR s19D1
-        LDA a2480
-        BEQ b2449
-        JSR s1CF6
-        JMP j244C
+        LDA a2480                       ;Color of sprite determines scroll speed
+        BEQ _L00
+        JSR GAME_SMOOTH_SCROLL_BY_2
+        JMP _L01
 
-b2449   JSR s1CC1
-j244C   LDA a44
+_L00    JSR GAME_SMOOTH_SCROLL_BY_1
+
+_L01    LDA a44
         STA $D001                       ;Sprite 0 Y Pos
         LDA a7C
         STA $D000                       ;Sprite 0 X Pos
+
         LDA $D010                       ;Sprites 0-7 MSB of X coordinate
-        AND #$FE                        ;#%11111110
+        AND #%11111110
         STA $D010                       ;Sprites 0-7 MSB of X coordinate
         LSR a60
-        BCC b246A
+        BCC _L02
+
         LDA $D010                       ;Sprites 0-7 MSB of X coordinate
         ORA #$01
         STA $D010                       ;Sprites 0-7 MSB of X coordinate
-b246A   LDA a2480
+
+_L02    LDA a2480
         STA $D027                       ;Sprite 0 Color
         LDA #$00
         STA $D01D                       ;Sprites Expand 2x Horizontal (X)
@@ -6027,7 +6058,8 @@ f36C2   .BYTE $01,$01
 f36C4   .BYTE $02
 a36C5   .BYTE $00
 
-j36C6   LDY #$00     ;#%00000000
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+j36C6   LDY #$00
         JSR j36CE
         JMP j373F
 
@@ -6035,7 +6067,7 @@ j36CE   LDA f3771,Y
         CMP f375C,Y
         BEQ b370F
         STA f375C,Y
-        CMP #$00     ;#%00000000
+        CMP #$00
         BEQ b370F
         LDX f375A,Y
         AND f3748,X
