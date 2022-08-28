@@ -130,7 +130,9 @@ aFA = $FA
 NEXT_RASTER_IRQ_POS = $FB               ;In game, it is used as next raster position
 aFB = $FB                               ; but in Title, it is used as a pointer
                                         ; so keeping both references
-aFC = $FC
+GAME_SPRITE_IDX_TO_PROCESS = $FC        ;In game, saves the next sprite index to process
+aFC = $FC                               ; but in Title is used as a pointer
+                                        ; so keeping both references
 aFD = $FD
 aFE = $FE
 aFF = $FF
@@ -337,7 +339,7 @@ _L00    LDX GAME_SPRITE_ORDER_COPY_TBL,Y
         DEY
         BPL _L00
         INY
-_L01    STY aFC
+_L01    STY GAME_SPRITE_IDX_TO_PROCESS
         RTS
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
@@ -4067,7 +4069,7 @@ GAME_IRQ_HANDLER_RASTER_VAR
         STA NEXT_RASTER_IRQ_POS
 
         CLI
-_L00    LDY aFC
+_L00    LDY GAME_SPRITE_IDX_TO_PROCESS
         LDX GAME_SPRITE_ORDER_TBL,Y
         LDA GAME_SPRITE_Y_TBL,X
         CMP NEXT_RASTER_IRQ_POS
@@ -4093,7 +4095,7 @@ _L01    ROL GAME_SPRITE_X_MSB_TBL,X     ;Restore bit
         STA $D001,Y                     ;Sprite 0 Y Pos
         LDA GAME_SPRITE_X_TBL,X
         STA $D000,Y                     ;Sprite 0 X Pos
-        DEC aFC
+        DEC GAME_SPRITE_IDX_TO_PROCESS
         BMI _L02
         DEC a09
         BNE _L00
