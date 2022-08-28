@@ -14,10 +14,9 @@ GAME_SPRITE_X_MSB_COPY_TBL = $61        ;14 entries ($61-$6e)
 GAME_SPRITE_X_TBL = $6F                 ;14 entries ($6f-$7c)
 GAME_SPRITE_X_COPY_TBL = $7D            ;14 entries ($7d-$8a)
 GAME_SPRITE_FRAME_TBL = $8B             ;14 entries ($8b-$98)
-GAME_SPRITE_COLOR_TBL = $99             ;14 entires ($99-$a6)
-fA7 = $A7
-fB4 = $B4
-fB5 = $B5
+GAME_SPRITE_COLOR_TBL = $99             ;14 entries ($99-$a6)
+GAME_SPRITE_ORDER_TBL = $A7             ;14 entries ($a7-$b4)
+GAME_SPRITE_ORDER_COPY_TBL = $B5        ;14 entries ($b5-$c2)
 fC3 = $C3
 fC8 = $C8
 fCA = $CA
@@ -332,7 +331,7 @@ _L01    JSR j28FF
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 s03FC   LDY #13
-_L00    LDX fB5,Y
+_L00    LDX GAME_SPRITE_ORDER_COPY_TBL,Y
         LDA GAME_SPRITE_Y_COPY_TBL,X
         BNE _L01
         DEY
@@ -3481,8 +3480,8 @@ _L00    LDA GAME_SPRITE_Y_COPY_TBL,X
         STA GAME_SPRITE_Y_TBL,X
         LDA GAME_SPRITE_X_MSB_COPY_TBL,X
         STA GAME_SPRITE_X_MSB_TBL,X
-        LDA fB5,X
-        STA fA7,X
+        LDA GAME_SPRITE_ORDER_COPY_TBL,X
+        STA GAME_SPRITE_ORDER_TBL,X
         DEX
         BPL _L00
 
@@ -4069,7 +4068,7 @@ GAME_IRQ_HANDLER_RASTER_VAR
 
         CLI
 _L00    LDY aFC
-        LDX fA7,Y
+        LDX GAME_SPRITE_ORDER_TBL,Y
         LDA GAME_SPRITE_Y_TBL,X
         CMP NEXT_RASTER_IRQ_POS
         BCS b2306
@@ -4955,9 +4954,9 @@ b28FB   RTS
 j28FF   LDA #$00
         STA a04
         LDX #$01
-b2905   LDY fB4,X
+b2905   LDY GAME_SPRITE_ORDER_TBL+13,X
         LDA f0045,Y
-        LDY fB5,X
+        LDY GAME_SPRITE_ORDER_COPY_TBL,X
         CMP f0045,Y
         BCS b293B
         LDA f0045,Y
@@ -4966,7 +4965,7 @@ b2905   LDY fB4,X
         DEX
 b2919   DEX
         BMI b2925
-        LDY fB5,X
+        LDY GAME_SPRITE_ORDER_COPY_TBL,X
         CMP f0045,Y
         BEQ b2925
         BCS b2919
@@ -4974,13 +4973,13 @@ b2925   INX
         INC a04
         STX a05
         LDX aD4
-b292C   LDA fB4,X
-        STA fB5,X
+b292C   LDA GAME_SPRITE_ORDER_TBL+13,X
+        STA GAME_SPRITE_ORDER_COPY_TBL,X
         DEX
         CPX a05
         BNE b292C
         LDA aD3
-        STA fB5,X
+        STA GAME_SPRITE_ORDER_COPY_TBL,X
         LDX aD4
 b293B   INX
         CPX #$0E     ;#%00001110
