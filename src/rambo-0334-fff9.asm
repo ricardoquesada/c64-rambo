@@ -556,7 +556,8 @@ f0566   .BYTE $00,$00,$00,$00,$00,$00,$00,$00
 a0586   #STR_CODE_CLR_SCREEN $20,$0D
         #STR_CODE_END
 
-        ;Music song to play for each text
+        ; Music song to play for each text
+        ; They are duplicated to simplify code
 IN_GAME_MSG_MUSIC_TBL
         .BYTE $0B,$0B
         .BYTE $06,$06
@@ -888,17 +889,19 @@ a0967   .BYTE $00
 a0968   .BYTE $00
 a0969   .BYTE $00
 
-s096A   LDX #$04     ;#%00000100
-        LDA #$00     ;#%00000000
-b096E   STA f120B,X
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+s096A   LDX #$04
+        LDA #$00
+_L00    STA f120B,X
         STA f45,X
         DEX
-        BPL b096E
-        LDX #$06     ;#%00000110
-b0978   STA f1961,X
+        BPL _L00
+
+        LDX #$06
+_L01    STA f1961,X
         STA f4A,X
         DEX
-        BPL b0978
+        BPL _L01
         RTS
 
 a0981   .BYTE $00
@@ -908,8 +911,8 @@ a0982   .BYTE $00
 s0983   LDA #$00
         JSR SWAP_CHARSETS_BIS
 
-        LDA #$01
-        STA a1093
+        LDA #$01                        ;Color White
+        STA GAME_SCREEN_CLEAR_COLOR
         LDA #$1A
         LDX #$07
         JSR MUSIC_FN
@@ -949,8 +952,8 @@ s09CA   JSR j1D2A
 b09E0   RTS
 
 b09E1   JSR VIC_SCREEN_DISABLE
-        LDA #$0D                        ;Color
-        STA a1093
+        LDA #$0D                        ;Color Light Green
+        STA GAME_SCREEN_CLEAR_COLOR
 
         JSR PRINT_EXT_STR_BIS
         .ADDR STR_CLEAR_SCREEN_BIS
@@ -1849,18 +1852,19 @@ f1071   .BYTE $00,$79,$29,$01,$52,$7A,$2A,$00
         .BYTE $50,$79,$29
 
 STR_READY
-        .BYTE $FF,$03,$20,$01
-        .BYTE $FF,$04
-        .BYTE $FF,$01,$0F,$0B
-        .BYTE $FF,$02,$01
+        #STR_CODE_CLR_SCREEN $20,$01
+        #STR_CODE_FONT_BIG
+        #STR_CODE_SET_COORDS $0F,$0B
+        #STR_CODE_SET_COLOR $01         ;White color
         .TEXT "READY"
         #STR_CODE_END
 
-a1093   = *+3                           ;Points to the color of screen
+GAME_SCREEN_CLEAR_COLOR = *+3           ;Points to the color of screen
 STR_CLEAR_SCREEN_BIS
         #STR_CODE_CLR_SCREEN $20,$01
         #STR_CODE_END
 
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 j1096   LDA f106C,X
         BEQ j109C
         RTS
