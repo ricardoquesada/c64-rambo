@@ -240,7 +240,7 @@ s0340   JMP j1D68
 
 s0343   JMP j0D3D
 
-        JMP j1DC2
+        JMP GAME_WAIT_RASTER_TICK
 
         JMP j224E
 
@@ -666,7 +666,7 @@ j07CF   LDA #$00
         RTS
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
-j07D5   JSR j1DC2
+j07D5   JSR GAME_WAIT_RASTER_TICK
         JSR j1D8F
         JMP j224E
 
@@ -2623,7 +2623,7 @@ _L00    STA f02,X
         JSR s2494
 
         LDA #$00
-        STA a2305
+        STA GAME_RASTER_TICK
         STA a6E
 
         JSR s03FC
@@ -2658,7 +2658,7 @@ _L01    LDA f0BF1,X
         STA $D015                       ;Sprite display Enable
         STA $D020                       ;Border Color
         STA $D021                       ;Background Color 0
-        STA a2482
+        STA GAME_ANOTHER_RASTER_TICK
         STA IS_GAME_OVER
         STA a101E
         STA aE6
@@ -3519,9 +3519,11 @@ _L02    LDA f82,X
         RTS
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
-j1DC2   LDA a2305
-        BEQ j1DC2
-        DEC a2305
+GAME_WAIT_RASTER_TICK
+_L00
+        LDA GAME_RASTER_TICK
+        BEQ _L00
+        DEC GAME_RASTER_TICK
         RTS
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
@@ -4023,9 +4025,9 @@ _L02    LDA $4000+40*18+0,X
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 j224E   LDA #$00
         STA a055A
-_L00    LDA a2482
+_L00    LDA GAME_ANOTHER_RASTER_TICK
         BEQ _L00
-        DEC a2482
+        DEC GAME_ANOTHER_RASTER_TICK
         RTS
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
@@ -4113,7 +4115,7 @@ _L02    LDA #$07
         STA $FFFE                       ;IRQ
         LDA #>GAME_IRQ_HANDLER_RASTER_DB
         STA $FFFF                       ;IRQ
-        INC a2305
+        INC GAME_RASTER_TICK
         LDA #$DB
         STA $D012                       ;Raster Position
 
@@ -4127,7 +4129,7 @@ EXIT_IRQ
 
         RTS
 
-a2305   .BYTE $00
+GAME_RASTER_TICK   .BYTE $00
 
 b2306   SBC #$0E
         CMP $D012                       ;Raster Position
@@ -4235,6 +4237,7 @@ _L04    JSR s1312
         STA a30
         LDA IS_GAME_PAUSED
         BEQ _L05
+
         LDA #$00
         STA GAME_JOY_STATE
         STA a1D63
@@ -4243,11 +4246,12 @@ _L04    JSR s1312
         LDA #$00
         STA $D418                       ;Select Filter Mode and Volume
         JSR s03FC
-        DEC a2305
+        DEC GAME_RASTER_TICK            ;In pause mode "untick" the "tick"
         JMP _L06
 
-_L05    INC a2482
+_L05    INC GAME_ANOTHER_RASTER_TICK
         JSR s03FC
+
 _L06    LDA a2480
         BEQ _L07
         JSR s3000
@@ -4316,11 +4320,11 @@ _L02    LDA a2480
         STA GAME_SPR_FRAME_00
         RTS
 
-a2480           .BYTE $00,$00
-a2482           .BYTE $00
-f2483           .BYTE $FE,$FD,$FB,$F7,$EF,$DF,$BF,$7F
-f248B           .BYTE $01,$02,$04,$08,$10,$20,$40,$80
-TMP_2493        .BYTE $00
+a2480                           .BYTE $00,$00
+GAME_ANOTHER_RASTER_TICK        .BYTE $00
+f2483                           .BYTE $FE,$FD,$FB,$F7,$EF,$DF,$BF,$7F
+f248B                           .BYTE $01,$02,$04,$08,$10,$20,$40,$80
+TMP_2493                        .BYTE $00
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 s2494   LDY #$0D
@@ -4359,15 +4363,15 @@ s24D3   STA a2746
         JSR s24B4
         STA a2745
         STX a195B
-        LDX #$08     ;#%00001000
-        LDA #$00     ;#%00000000
-b24E3   LSR a2745
-        BCC b24EC
+        LDX #$08
+        LDA #$00
+_L00    LSR a2745
+        BCC _L01
         CLC
         ADC a2746
-b24EC   ROR A
+_L01    ROR A
         DEX
-        BNE b24E3
+        BNE _L00
         LDX a195B
         RTS
 
@@ -4431,7 +4435,7 @@ _L00    LDA PLYR_SCORE,X
         BCC _L01
 
         SBC #10
-        INC LOCAL_POINTS-1,X                   ;Bug? when x==0, it changes PLYR_SCORE_IN_SPRITE
+        INC LOCAL_POINTS-1,X            ;Bug? when x==0, it changes PLYR_SCORE_IN_SPRITE
 _L01    STA PLYR_SCORE,X
         LDA #$00
         STA LOCAL_POINTS,X
@@ -4447,16 +4451,17 @@ LOCAL_POINTS
         .BYTE $00,$00,$00,$00,$00,$00
         .BYTE $00
 
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 s257D   LDA a25C4
         SEC
         SBC a25C7
         CMP a25C5
-        BCS b25BE
+        BCS _L00
         ASL a25C7
         CLC
         ADC a25C7
         CMP a25C5
-        BCC b25BE
+        BCC _L00
         LSR a25C1
         ROR a25C0
         LSR a25C3
@@ -4466,16 +4471,16 @@ s257D   LDA a25C4
         SEC
         SBC a25C6
         CMP a25C2
-        BCS b25BE
+        BCS _L00
         ASL a25C6
         CLC
         ADC a25C6
         CMP a25C2
-        BCC b25BE
+        BCC _L00
         SEC
         RTS
 
-b25BE   CLC
+_L00    CLC
         RTS
 
 a25C0   .BYTE $00
@@ -4487,19 +4492,21 @@ a25C5   .BYTE $00
 a25C6   .BYTE $00
 a25C7   .BYTE $00
 
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 s25C8   LDX a25DD
-b25CB   LDA f1961,X
-        BEQ b25D6
+_L00    LDA f1961,X
+        BEQ _L01
         JSR s25DE
-        JMP j25D9
+        JMP _L02
 
-b25D6   JSR s2661
-j25D9   DEX
-        BPL b25CB
+_L01    JSR s2661
+_L02    DEX
+        BPL _L00
         RTS
 
 a25DD   .BYTE $03
 
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 s25DE   LDA f4A,X
         CMP #$0A     ;#%00001010
         BCS b25F0
