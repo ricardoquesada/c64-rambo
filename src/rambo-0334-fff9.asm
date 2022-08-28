@@ -141,7 +141,9 @@ aF6 = $F6
 aF7 = $F7
 aF8 = $F8
 aFA = $FA
-aFB = $FB
+NEXT_RASTER_IRQ_POS = $FB               ;In game, it is used as next raster position
+aFB = $FB                               ; but in Title, it is used as a pointer
+                                        ; so keeping both references
 aFC = $FC
 aFD = $FD
 aFE = $FE
@@ -242,7 +244,7 @@ s0343   JMP j0D3D
 
         JMP GAME_WAIT_RASTER_TICK_VAR
 
-        JMP GAME_WAIT_RASTER_TICK_FB
+        JMP GAME_WAIT_RASTER_TICK_DB
 
 GAME_PLAY_MUSIC_BIS
         JMP GAME_PLAY_MUSIC
@@ -668,7 +670,7 @@ j07CF   LDA #$00
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 j07D5   JSR GAME_WAIT_RASTER_TICK_VAR
         JSR j1D8F
-        JMP GAME_WAIT_RASTER_TICK_FB
+        JMP GAME_WAIT_RASTER_TICK_DB
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 ; Game uses one byte to store one digit.
@@ -2658,7 +2660,7 @@ _L01    LDA f0BF1,X
         STA $D015                       ;Sprite display Enable
         STA $D020                       ;Border Color
         STA $D021                       ;Background Color 0
-        STA GAME_RASTER_TICK_FB
+        STA GAME_RASTER_TICK_DB
         STA IS_GAME_OVER
         STA a101E
         STA aE6
@@ -4025,12 +4027,12 @@ _L02    LDA $4000+40*18+0,X
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 ; Waits until rasters gets to #$FB
-GAME_WAIT_RASTER_TICK_FB
+GAME_WAIT_RASTER_TICK_DB
         LDA #$00
         STA a055A
-_L00    LDA GAME_RASTER_TICK_FB
+_L00    LDA GAME_RASTER_TICK_DB
         BEQ _L00
-        DEC GAME_RASTER_TICK_FB
+        DEC GAME_RASTER_TICK_DB
         RTS
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
@@ -4041,11 +4043,11 @@ GAME_SETUP_IRQ
         LDA #>GAME_IRQ_HANDLER_RASTER_VAR
         STA $FFFF                       ;IRQ
 
-        LDA #$00
-        STA $D011                       ;VIC Control Register 1
-        LDA #$01
-        STA $D01A                       ;VIC Interrupt Mask Register (IMR)
-        STA $DC0D                       ;CIA1: CIA Interrupt Control Register
+        LDA #$00                        ;raster 8bit=0, y-smooth=0, 24-rows
+        STA $D011                       ; VIC Control Register 1
+        LDA #$01                        ;Enable Raster IRQ, and Timer A IRQ
+        STA $D01A                       ; VIC Interrupt Mask Register (IMR)
+        STA $DC0D                       ; CIA1: CIA Interrupt Control Register
         LDA $DC0D                       ;CIA1: CIA Interrupt Control Register
         LDA #$01
         STA a02
@@ -4054,13 +4056,14 @@ GAME_SETUP_IRQ
         LDA #$07
         STA a09
         LDA #$32
-        STA aFB
+        STA NEXT_RASTER_IRQ_POS
         STA $D012                       ;Raster Position
         RTS
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 ; IRQ Handler
-GAME_IRQ_HANDLER_RASTER_VAR   PHA
+GAME_IRQ_HANDLER_RASTER_VAR
+        PHA
         TYA
         PHA
         TXA
@@ -4070,16 +4073,16 @@ GAME_IRQ_HANDLER_RASTER_VAR   PHA
         STA $D019                       ;ACK all interrupts
 
         CLD
-        LDA aFB
+        LDA NEXT_RASTER_IRQ_POS
         CLC
         ADC #$0E
-        STA aFB
+        STA NEXT_RASTER_IRQ_POS
 
         CLI
 _L00    LDY aFC
         LDX fA7,Y
         LDA f37,X
-        CMP aFB
+        CMP NEXT_RASTER_IRQ_POS
         BCS b2306
 
         STA GAME_SPRITE_Y_TBL
@@ -4113,7 +4116,7 @@ _L01    ROL f53,X
 _L02    LDA #$07
         STA a09
         LDA #$32
-        STA aFB
+        STA NEXT_RASTER_IRQ_POS
 
         LDA #<GAME_IRQ_HANDLER_RASTER_DB
         STA $FFFE                       ;IRQ
@@ -4143,7 +4146,7 @@ b2306   SBC #$0E
         ADC #$02
 _L00    ADC #$00
         STA $D012                       ;Raster Position
-        STA aFB
+        STA NEXT_RASTER_IRQ_POS
 
         PLA
         TAX
@@ -4161,9 +4164,11 @@ GAME_IRQ_HANDLER_RASTER_DB
         PHA
         TXA
         PHA
+
         LDA #$01
         STA $D019                       ;ACK Raster interrupt
         CLD
+
         SEI
         LDA #<GAME_IRQ_HANDLER_RASTER_VAR
         STA $FFFE                       ;IRQ
@@ -4255,7 +4260,7 @@ _L04    JSR s1312
         DEC GAME_RASTER_TICK_VAR        ;In pause mode "untick" the "tick"
         JMP _L06
 
-_L05    INC GAME_RASTER_TICK_FB
+_L05    INC GAME_RASTER_TICK_DB
         JSR s03FC
 
 _L06    LDA a2480
@@ -4327,7 +4332,7 @@ _L02    LDA a2480
         RTS
 
 a2480                           .BYTE $00,$00
-GAME_RASTER_TICK_FB             .BYTE $00
+GAME_RASTER_TICK_DB             .BYTE $00
 f2483                           .BYTE $FE,$FD,$FB,$F7,$EF,$DF,$BF,$7F
 f248B                           .BYTE $01,$02,$04,$08,$10,$20,$40,$80
 TMP_2493                        .BYTE $00
@@ -6087,34 +6092,34 @@ j36C6   LDY #$00
 
 j36CE   LDA f3771,Y
         CMP f375C,Y
-        BEQ b370F
+        BEQ _L02
         STA f375C,Y
         CMP #$00
-        BEQ b370F
+        BEQ _L02
         LDX f375A,Y
         AND f3748,X
-        BEQ b36EB
+        BEQ _L00
         STA f375A,Y
-        JMP b370F
+        JMP _L02
 
-b36EB   LDA f375A,Y
+_L00    LDA f375A,Y
         AND #$0C     ;#%00001100
-        BEQ b3702
+        BEQ _L01
         LDA f375C,Y
         AND #$0C     ;#%00001100
-        BNE b370F
+        BNE _L02
         LDA f375C,Y
         STA f375A,Y
-        JMP b370F
+        JMP _L02
 
-b3702   LDA f375C,Y
+_L01    LDA f375C,Y
         AND #$03     ;#%00000011
-        BNE b370F
+        BNE _L02
         LDA f375C,Y
         STA f375A,Y
-b370F   LDA f375A,Y
+_L02    LDA f375A,Y
         AND #$0C     ;#%00001100
-        BNE b3729
+        BNE _L03
         LDX f375A,Y
         LDA f3751,X
         STA f375E,Y
@@ -6122,14 +6127,14 @@ b370F   LDA f375A,Y
         AND #$0C     ;#%00001100
         LSR A
         LSR A
-        JMP j3737
+        JMP _L04
 
-b3729   LDX f375A,Y
+_L03    LDX f375A,Y
         LDA f3751,X
         STA f375E,Y
         LDA f3771,Y
         AND #$03     ;#%00000011
-j3737   CLC
+_L04    CLC
         ADC f375E,Y
         STA a3773,Y
         RTS
@@ -10625,7 +10630,7 @@ PRINT_EXT_STR
         LDA aFA
         CLC
         ADC #$02                        ;Re-write stack so that the ret address points to
-        STA TMP_C19C                       ; to where it should return: callee + 2
+        STA TMP_C19C                    ; to where it should return: callee + 2
         LDA aFB
         ADC #$00
         PHA
