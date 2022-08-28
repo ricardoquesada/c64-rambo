@@ -13,7 +13,7 @@ GAME_SPRITE_X_MSB_TBL = $53             ;14 entries ($53-$60)
 GAME_SPRITE_X_MSB_COPY_TBL = $61        ;14 entries ($61-$6e)
 GAME_SPRITE_X_TBL = $6F                 ;14 entries ($6f-$7c)
 GAME_SPRITE_X_COPY_TBL = $7D            ;14 entries ($7d-$8a)
-GAME_SPRITE_FRAME_TBL = $8B             ;14 entries ($8b-$98)
+GAME_SPRITE_FRAME_TBL = $8B             ;14 entries ($8B-$98)
 GAME_SPRITE_COLOR_TBL = $99             ;14 entries ($99-$a6)
 GAME_SPRITE_ORDER_TBL = $A7             ;14 entries ($a7-$b4)
 GAME_SPRITE_ORDER_COPY_TBL = $B5        ;14 entries ($b5-$c2)
@@ -84,8 +84,6 @@ a85 = $85
 a86 = $86
 a87 = $87
 a89 = $89
-a8A = $8A
-a8B = $8B
 a8F = $8F
 a90 = $90
 a91 = $91
@@ -757,21 +755,21 @@ b0879   INC GAME_SPRITE_X_COPY_TBL,X
 b0881   JSR s08BE
         BCC b0893
         LDA GAME_SPRITE_FRAME_TBL,X
-        CMP #$D6
+        CMP #214                        ;Frame: enemy facing right (last frame)
         BNE b088E
-        LDA #$D2
+        LDA #211-1                      ;Frame: enemy facing right (first frame)
 b088E   CLC
-        ADC #$01     ;#%00000001
+        ADC #$01
         STA GAME_SPRITE_FRAME_TBL,X
 b0893   LDA GAME_SPRITE_X_MSB_COPY_TBL,X
         LSR A
         LDA GAME_SPRITE_X_COPY_TBL,X
         ROR A
-        CMP #$AA     ;#%10101010
+        CMP #170
         BEQ b089E
 b089D   RTS
 
-b089E   LDA #$00     ;#%00000000
+b089E   LDA #$00
         STA f086E,X
         DEC fC3,X
         RTS
@@ -781,17 +779,17 @@ j08A6   INC GAME_SPRITE_Y_COPY_TBL,X
         JSR s08BE
         BCC b089D
         LDA GAME_SPRITE_FRAME_TBL,X
-        CMP #$D2     ;#%11010010
+        CMP #210                        ;Frame: enemy facing down
         BNE b08B8
-        LDA #$CE     ;#%11001110
+        LDA #207-1                      ;Frame: enemy facing down (1st frame)
 b08B8   CLC
-        ADC #$01     ;#%00000001
+        ADC #$01
         STA GAME_SPRITE_FRAME_TBL,X
         RTS
 
 s08BE   LDA f08CF,X
         BNE b08CA
-        LDA #$02     ;#%00000010
+        LDA #$02
         STA f08CF,X
         SEC
         RTS
@@ -848,7 +846,7 @@ _L03    LDA a0966
         STA a1299
         LDA a52
         STA a1931
-        LDA a8A
+        LDA GAME_SPRITE_X_COPY_TBL+13
         STA a1932
         LDA #$0A     ;#%00001010
         STA a086D
@@ -1011,7 +1009,7 @@ b0A48   STA a25C4
         STA a25C0
         LDA a6D
         STA a25C1
-        LDA a8A
+        LDA GAME_SPRITE_X_COPY_TBL+13
         STA a25C2
         LDA #$00
         STA a25C3
@@ -1103,7 +1101,7 @@ b0ADC   JSR s0AB7
         STA a6E
         LDA #$4F
         STA a0BE4
-        STX a8A
+        STX GAME_SPRITE_X_COPY_TBL+13
         STY a52
         JSR s1F9B
         JSR j1DD5
@@ -1244,7 +1242,7 @@ s0C10   LDA GAME_SPRITE_Y_COPY_TBL,X
         STA a25C0
         LDA GAME_SPRITE_X_MSB_COPY_TBL,X
         STA a25C1
-        LDA a8A
+        LDA GAME_SPRITE_X_COPY_TBL+13
         STA a25C2
         LDA #$00
         STA a25C3
@@ -1283,7 +1281,7 @@ s0C5D   LDA GAME_SPRITE_Y_COPY_TBL+5,X
         LDA #$00
         ROL A
         STA a25C1
-        LDA a8A
+        LDA GAME_SPRITE_X_COPY_TBL+13
         STA a25C2
         LDA #$00
         STA a25C3
@@ -1528,8 +1526,8 @@ _L00    LDA #$0E
 
 _L01    LDA #$0C
         STA f1210,Y
-        LDA #$78
-_L02    STA a8B,Y
+        LDA #120                        ;Frame: enemy jump from tower (??)
+_L02    STA GAME_SPRITE_FRAME_TBL,Y
         LDA #$0E
         SEC
         SBC a0E5A
@@ -1750,7 +1748,7 @@ b0F9A   CMP #$04     ;#%00000100
 b0FAA   LDA #$04     ;#%00000100
         STA f1100,X
         LDA GAME_SPRITE_FRAME_TBL,X
-        CMP #$82     ;#%10000010
+        CMP #130                        ;Frame: Enemy killed (last frame)
         BEQ b0FB8
         INC GAME_SPRITE_FRAME_TBL,X
         RTS
@@ -1896,6 +1894,7 @@ b10D1   INC f10FB,X
 
 f10D7   .BYTE $14,$00,$05,$00,$0F,$00,$05,$00
         .BYTE $0A,$00,$05
+        ; Sprite frame animation
 f10E2   .BYTE $6A,$6B,$6C,$6D,$00,$66,$67,$68
         .BYTE $69,$00,$72,$73,$74,$75,$00,$6E
         .BYTE $6F,$70,$71,$00,$7A,$7B,$7C,$7B
@@ -2471,8 +2470,8 @@ b15C3   JSR s1934
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 ; Args: Y (enemy that was killed)
 ONE_ENEMY_KILLED
-        LDA #$7E
-        STA a8B,Y
+        LDA #126                        ;Frame: Enemy killed anim (1st frame)
+        STA GAME_SPRITE_FRAME_TBL,Y
         LDA #$01
         STA f106C,Y
         LDA #$00
@@ -2675,7 +2674,7 @@ _L01    LDA f0BF1,X
         LDA #$01
         JSR MUSIC_FN
         LDA #$AC
-        STA a8A
+        STA GAME_SPRITE_X_COPY_TBL+13
         LDA #$96
         STA a52
         JSR s1BD4
@@ -2817,7 +2816,7 @@ b1861   LDA GAME_SPRITE_Y_COPY_TBL+9,X
         RTS
 
 b1879   LDA GAME_SPRITE_FRAME_TBL+9,X
-        CMP #$40     ;#%01000000
+        CMP #64                         ;Frame: Knife anim (1st frame) (??)
         BEQ b1882
         INC GAME_SPRITE_FRAME_TBL+9,X
         RTS
@@ -2916,7 +2915,7 @@ a1931   .BYTE $00
 a1932   .BYTE $00
 a1933   .BYTE $00
 
-s1934   LDA #$41     ;#%01000001
+s1934   LDA #65
         STA GAME_SPRITE_FRAME_TBL+9,X
         LDA #$0A     ;#%00001010
         STA f1965,X
@@ -3101,7 +3100,7 @@ b1A81   LDA f1AFA,Y
         JSR GAME_MAYBE_PLAY_SFX
         LDA f1B00,Y
         STA GAME_SPRITE_COLOR_TBL+9,X
-        LDA a8A
+        LDA GAME_SPRITE_X_COPY_TBL+13
         LSR A
         STA GAME_SPRITE_X_COPY_TBL+9,X
         LDA a52
@@ -3204,19 +3203,19 @@ b1B96   RTS
 s1B97   LDA TMP_2493
         SEC
         BNE b1BA5
-        LDA a8A
+        LDA GAME_SPRITE_X_COPY_TBL+13
         CMP #$DE     ;#%11011110
         BCS b1BA5
-        INC a8A
+        INC GAME_SPRITE_X_COPY_TBL+13
 b1BA5   RTS
 
 s1BA6   LDA TMP_2493
         SEC
         BNE b1BB4
         LDA #$7A     ;#%01111010
-        CMP a8A
+        CMP GAME_SPRITE_X_COPY_TBL+13
         BCS b1BB4
-        DEC a8A
+        DEC GAME_SPRITE_X_COPY_TBL+13
 b1BB4   RTS
 
 s1BB5   LDA GAME_JOY_STATE
@@ -3224,13 +3223,13 @@ s1BB5   LDA GAME_JOY_STATE
         CLC
         BEQ b1BC1                       ; No
         LDA #$7A     ;#%01111010
-        CMP a8A
+        CMP GAME_SPRITE_X_COPY_TBL+13
 b1BC1   ROL a1C28
         LDA GAME_JOY_STATE
         AND #$08                        ;Right pressed?
         CLC
         BEQ b1BD0                       ; No
-        LDA a8A
+        LDA GAME_SPRITE_X_COPY_TBL+13
         CMP #$DE     ;#%11011110
 b1BD0   ROL a1C28
         RTS
@@ -3493,7 +3492,7 @@ _L01    LDA GAME_SPRITE_X_COPY_TBL,X
         DEX
         BPL _L01
 
-        LDA a8A
+        LDA GAME_SPRITE_X_COPY_TBL+13
         STA a7C
         LDA a89
         STA a7B
@@ -4629,7 +4628,7 @@ b2696   INC f1961,X
         STA GAME_SPRITE_Y_COPY_TBL+5,X
         LSR A
         STA a2745
-        LDA a8A
+        LDA GAME_SPRITE_X_COPY_TBL+13
         LSR A
         SEC
         SBC TMP_2493
@@ -6243,7 +6242,7 @@ j384C   LDA a3889
         CLC
         ADC f388E,X
         ASL A
-        STA a8A
+        STA GAME_SPRITE_X_COPY_TBL+13
         STA a7C
         ROL A
         STA a6E
