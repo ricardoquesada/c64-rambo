@@ -240,9 +240,9 @@ s0340   JMP j1D68
 
 s0343   JMP j0D3D
 
-        JMP GAME_WAIT_RASTER_TICK
+        JMP GAME_WAIT_RASTER_TICK_VAR
 
-        JMP j224E
+        JMP GAME_WAIT_RASTER_TICK_FB
 
 GAME_PLAY_MUSIC_BIS
         JMP GAME_PLAY_MUSIC
@@ -666,9 +666,9 @@ j07CF   LDA #$00
         RTS
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
-j07D5   JSR GAME_WAIT_RASTER_TICK
+j07D5   JSR GAME_WAIT_RASTER_TICK_VAR
         JSR j1D8F
-        JMP j224E
+        JMP GAME_WAIT_RASTER_TICK_FB
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 ; Game uses one byte to store one digit.
@@ -2623,7 +2623,7 @@ _L00    STA f02,X
         JSR s2494
 
         LDA #$00
-        STA GAME_RASTER_TICK
+        STA GAME_RASTER_TICK_VAR
         STA a6E
 
         JSR s03FC
@@ -2658,7 +2658,7 @@ _L01    LDA f0BF1,X
         STA $D015                       ;Sprite display Enable
         STA $D020                       ;Border Color
         STA $D021                       ;Background Color 0
-        STA GAME_ANOTHER_RASTER_TICK
+        STA GAME_RASTER_TICK_FB
         STA IS_GAME_OVER
         STA a101E
         STA aE6
@@ -3519,11 +3519,12 @@ _L02    LDA f82,X
         RTS
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
-GAME_WAIT_RASTER_TICK
+; Wait until raster gets triggered in the variable IRQ handler
+GAME_WAIT_RASTER_TICK_VAR
 _L00
-        LDA GAME_RASTER_TICK
+        LDA GAME_RASTER_TICK_VAR
         BEQ _L00
-        DEC GAME_RASTER_TICK
+        DEC GAME_RASTER_TICK_VAR
         RTS
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
@@ -4023,19 +4024,21 @@ _L02    LDA $4000+40*18+0,X
         RTS
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
-j224E   LDA #$00
+; Waits until rasters gets to #$FB
+GAME_WAIT_RASTER_TICK_FB
+        LDA #$00
         STA a055A
-_L00    LDA GAME_ANOTHER_RASTER_TICK
+_L00    LDA GAME_RASTER_TICK_FB
         BEQ _L00
-        DEC GAME_ANOTHER_RASTER_TICK
+        DEC GAME_RASTER_TICK_FB
         RTS
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 GAME_SETUP_IRQ
         SEI
-        LDA #<a228b
+        LDA #<GAME_IRQ_HANDLER_RASTER_VAR
         STA $FFFE                       ;IRQ
-        LDA #>a228b
+        LDA #>GAME_IRQ_HANDLER_RASTER_VAR
         STA $FFFF                       ;IRQ
 
         LDA #$00
@@ -4057,7 +4060,7 @@ GAME_SETUP_IRQ
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 ; IRQ Handler
-a228b   PHA
+GAME_IRQ_HANDLER_RASTER_VAR   PHA
         TYA
         PHA
         TXA
@@ -4065,6 +4068,7 @@ a228b   PHA
 
         LDA #$FF
         STA $D019                       ;ACK all interrupts
+
         CLD
         LDA aFB
         CLC
@@ -4115,7 +4119,7 @@ _L02    LDA #$07
         STA $FFFE                       ;IRQ
         LDA #>GAME_IRQ_HANDLER_RASTER_DB
         STA $FFFF                       ;IRQ
-        INC GAME_RASTER_TICK
+        INC GAME_RASTER_TICK_VAR
         LDA #$DB
         STA $D012                       ;Raster Position
 
@@ -4129,14 +4133,15 @@ EXIT_IRQ
 
         RTS
 
-GAME_RASTER_TICK   .BYTE $00
+GAME_RASTER_TICK_VAR    .BYTE $00
 
 b2306   SBC #$0E
         CMP $D012                       ;Raster Position
-        BCS b2312
+        BCS _L00
+
         LDA $D012                       ;Raster Position
         ADC #$02
-b2312   ADC #$00
+_L00    ADC #$00
         STA $D012                       ;Raster Position
         STA aFB
 
@@ -4149,6 +4154,7 @@ b2312   ADC #$00
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 ; IRQ Handler
+; IRQ that gets triggered when raster is at $DB
 GAME_IRQ_HANDLER_RASTER_DB
         PHA
         TYA
@@ -4159,9 +4165,9 @@ GAME_IRQ_HANDLER_RASTER_DB
         STA $D019                       ;ACK Raster interrupt
         CLD
         SEI
-        LDA #<a228b
+        LDA #<GAME_IRQ_HANDLER_RASTER_VAR
         STA $FFFE                       ;IRQ
-        LDA #>a228b
+        LDA #>GAME_IRQ_HANDLER_RASTER_VAR
         STA $FFFF                       ;IRQ
         LDA #%11000000                  ;Sprite 6 and 7 with MSB on
         STA $D010                       ;Sprites 0-7 MSB of X coordinate
@@ -4246,10 +4252,10 @@ _L04    JSR s1312
         LDA #$00
         STA $D418                       ;Select Filter Mode and Volume
         JSR s03FC
-        DEC GAME_RASTER_TICK            ;In pause mode "untick" the "tick"
+        DEC GAME_RASTER_TICK_VAR        ;In pause mode "untick" the "tick"
         JMP _L06
 
-_L05    INC GAME_ANOTHER_RASTER_TICK
+_L05    INC GAME_RASTER_TICK_FB
         JSR s03FC
 
 _L06    LDA a2480
@@ -4321,7 +4327,7 @@ _L02    LDA a2480
         RTS
 
 a2480                           .BYTE $00,$00
-GAME_ANOTHER_RASTER_TICK        .BYTE $00
+GAME_RASTER_TICK_FB             .BYTE $00
 f2483                           .BYTE $FE,$FD,$FB,$F7,$EF,$DF,$BF,$7F
 f248B                           .BYTE $01,$02,$04,$08,$10,$20,$40,$80
 TMP_2493                        .BYTE $00
@@ -4354,7 +4360,7 @@ s24B4   LDA a24F4
         ROL a24F5
         ROL a24F4
         LDA a24F4
-        EOR $DC04    ;CIA1: Timer A: Low-Byte
+        EOR $DC04                       ;CIA1: Timer A: Low-Byte
         STA a24F4
         RTS
 
