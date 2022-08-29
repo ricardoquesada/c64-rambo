@@ -60,7 +60,8 @@ a30 = $30
 a31 = $31
 a32 = $32
 a33 = $33
-a9D = $9D
+a97 = $97
+a98 = $98
 a9E = $9E
 a9F = $9F
 aA0 = $A0
@@ -1133,8 +1134,8 @@ b0B35   LDA f0BE1,X
         CPX #$03     ;#%00000011
         BNE b0BBD
         LDA #$0E     ;#%00001110
-        STA aA5
-        STA a9D
+        STA GAME_SPRITE_COLOR_TBL+12
+        STA GAME_SPRITE_COLOR_TBL+4
         LDA GAME_SPRITE_FRAME_TBL+12
         CLC
         ADC #$01     ;#%00000001
@@ -1155,7 +1156,7 @@ b0BB6   STA GAME_SPRITE_X_MSB_COPY_TBL+4
 
 b0BBD   LDY a1B70
         LDA f1B71,Y
-        STA aA5
+        STA GAME_SPRITE_COLOR_TBL+12
         RTS
 
 j0BC6   DEX
@@ -1566,7 +1567,7 @@ b0E78   LDA GAME_SMOOTH_X
         LDA #$00     ;#%00000000
         STA a1214
         LDA #$0B     ;#%00001011
-        STA a9D
+        STA GAME_SPRITE_COLOR_TBL+4
         INC aC7
         LDX #$04     ;#%00000100
         JMP j10BE
@@ -1662,7 +1663,7 @@ j0F48   LDA #$01     ;#%00000001
         LDA #$00     ;#%00000000
         STA a1214
         LDA #$0B     ;#%00001011
-        STA a9D
+        STA GAME_SPRITE_COLOR_TBL+4
         TXA
         PHA
         TYA
@@ -2673,7 +2674,7 @@ _L01    LDA f0BF1,X
         LDA #$3C
         STA aF8
         LDA #$0A
-        STA aA6
+        STA GAME_SPRITE_COLOR_TBL+13
 
         LDX #$07
         LDA #$00
@@ -5488,7 +5489,7 @@ b3225   LDA a362F
         LDX a3774
         STX a324C
         LDA #$0E     ;#%00001110
-        STA aA2
+        STA GAME_SPRITE_COLOR_TBL+9
         LDA a362E
         STA GAME_SPRITE_X_COPY_TBL+9
         LDA a362F
@@ -5994,10 +5995,10 @@ j35C3   LDX a3774
         INY
         STY GAME_SPRITE_FRAME_TBL+8
         LDA #$0F
-        STA a9E
-        STA a9F
-        STA aA0
-        STA aA1
+        STA GAME_SPRITE_COLOR_TBL+5
+        STA GAME_SPRITE_COLOR_TBL+6
+        STA GAME_SPRITE_COLOR_TBL+7
+        STA GAME_SPRITE_COLOR_TBL+8
         JSR s32DE
         LDX a3315
         LDA f362C,X
