@@ -60,7 +60,6 @@ a30 = $30
 a31 = $31
 a32 = $32
 a33 = $33
-a43 = $43
 a49 = $49
 a4A = $4A
 a4B = $4B
@@ -68,8 +67,6 @@ a4C = $4C
 a4D = $4D
 a4E = $4E
 a4F = $4F
-a51 = $51
-a52 = $52
 a60 = $60
 a65 = $65
 a6D = $6D
@@ -838,7 +835,7 @@ _L03    LDA a0966
         STA a0966
         LDA #$33     ;#%00110011
         STA a1299
-        LDA a52
+        LDA GAME_SPRITE_Y_COPY_TBL+13
         STA a1931
         LDA GAME_SPRITE_X_COPY_TBL+13
         STA a1932
@@ -991,13 +988,13 @@ _ALREADY_PRESSED        .BYTE $00
 IS_GAME_PAUSED          .BYTE $00
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
-s0A41   LDA a51
-        CMP #$0A     ;#%00001010
-        BNE b0A48
+s0A41   LDA GAME_SPRITE_Y_COPY_TBL+12
+        CMP #$0A
+        BNE _L00
         RTS
 
-b0A48   STA a25C4
-        LDA a52
+_L00    STA a25C4
+        LDA GAME_SPRITE_Y_COPY_TBL+13
         STA a25C5
         LDA a89
         STA a25C0
@@ -1012,12 +1009,12 @@ b0A48   STA a25C4
         LDA #$0A
         STA a25C6
         JSR s257D
-        BCS b0A74
+        BCS _L01
         RTS
 
-b0A74   LDX a0BE0
+_L01    LDX a0BE0
         LDA f0BED,X
-        BMI b0A9F
+        BMI _L02
 
         ; Weapon picked up
         ORA a1A47
@@ -1037,8 +1034,8 @@ b0A74   LDX a0BE0
         JSR GAME_MAYBE_PLAY_SFX
         JMP j0BC9
 
-b0A9F   LDA SELECTED_WEAPON             ;Weapon used
-        BNE b0AB6                       ; Knife? No
+_L02    LDA SELECTED_WEAPON             ;Weapon used
+        BNE _EXIT                       ; Knife? No
 
         ; First prisoner rescued
         STA f0BED,X
@@ -1049,7 +1046,7 @@ b0A9F   LDA SELECTED_WEAPON             ;Weapon used
         JSR GAME_MAYBE_PLAY_SFX
         JMP j0BC9
 
-b0AB6   RTS
+_EXIT   RTS
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 s0AB7   LDX #$04
@@ -1096,7 +1093,7 @@ b0ADC   JSR s0AB7
         LDA #$4F
         STA a0BE4
         STX GAME_SPRITE_X_COPY_TBL+13
-        STY a52
+        STY GAME_SPRITE_Y_COPY_TBL+13
         JSR s1F9B
         JSR j1DD5
         JSR RESET_ENERGY_SPRITE
@@ -1143,7 +1140,7 @@ b0B35   LDA f0BE1,X
         ADC GAME_SMOOTH_Y
         CLC
         ADC #$1F     ;#%00011111
-        STA a51
+        STA GAME_SPRITE_Y_COPY_TBL+12
         TYA
         ASL A
         ASL A
@@ -1170,7 +1167,7 @@ b0B35   LDA f0BE1,X
         CLC
         ADC #$01     ;#%00000001
         STA a8F
-        LDA a51
+        LDA GAME_SPRITE_Y_COPY_TBL+12
         STA a49
 a0BA9   LDA a89
         SEC
@@ -1194,7 +1191,7 @@ j0BC6   DEX
 j0BC9   LDA #$00     ;#%00000000
         STA aCF
         LDA #$00     ;#%00000000
-        STA a51
+        STA GAME_SPRITE_Y_COPY_TBL+12
         LDA a120F
         BNE b0BDC
         STA a49
@@ -1230,7 +1227,7 @@ a0C0F   .BYTE $00
 
 s0C10   LDA GAME_SPRITE_Y_COPY_TBL,X
         STA a25C4
-        LDA a52
+        LDA GAME_SPRITE_Y_COPY_TBL+13
         STA a25C5
         LDA GAME_SPRITE_X_COPY_TBL,X
         STA a25C0
@@ -1267,7 +1264,7 @@ b0C59   STX a0C9B
 
 s0C5D   LDA GAME_SPRITE_Y_COPY_TBL+5,X
         STA a25C4
-        LDA a52
+        LDA GAME_SPRITE_Y_COPY_TBL+13
         STA a25C5
         LDA GAME_SPRITE_X_COPY_TBL+5,X
         ASL A
@@ -2670,7 +2667,7 @@ _L01    LDA f0BF1,X
         LDA #$AC
         STA GAME_SPRITE_X_COPY_TBL+13
         LDA #$96
-        STA a52
+        STA GAME_SPRITE_Y_COPY_TBL+13
         JSR s1BD4
         JSR s12A7
 
@@ -2954,25 +2951,30 @@ b1971   LDA #$02
 f197F   .BYTE $00,$00,$00
 b1982   JMP s1837
 
-s1985   LDA #$14     ;#%00010100
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+s1985   LDA #20                         ;Frame: Grenade Dashboard
         STA GAME_DASHBOARD_SPR_FRAME_TBL
-        LDA #$13     ;#%00010011
+        LDA #$13
         STA a2422
-        LDA a1A47
-        AND #$01     ;#%00000001
-        BNE b199B
-        LDA #$22     ;#%00100010
+
+        LDA a1A47                       ;Weapons grabbed (?)
+        AND #$01
+        BNE _L00
+
+        LDA #34                         ;Frame: Empty
         STA GAME_DASHBOARD_SPR_FRAME_TBL
-b199B   LDA a1A47
-        AND #$08     ;#%00001000
-        BNE b19A7
-        LDA #$22     ;#%00100010
+
+_L00    LDA a1A47
+        AND #$08
+        BNE _L01
+
+        LDA #$22
         STA a2422
-b19A7   LDA a1A47
+_L01    LDA a1A47
         LSR A
         LSR A
         LSR A
-        AND #$06     ;#%00000110
+        AND #$06
         TAX
         LDA f19BD,X
         STA a2423
@@ -3055,7 +3057,7 @@ _L03    DEX
         LDA a1A47
         AND f1A48,X
         BEQ _L02
-        LDA #$0A     ;#%00001010
+        LDA #$0A
 _L04    STA a1A45
         JMP GAME_MAYBE_TOGGLE_MUSIC
 
@@ -3101,7 +3103,7 @@ b1A81   LDA f1AFA,Y
         LDA GAME_SPRITE_X_COPY_TBL+13
         LSR A
         STA GAME_SPRITE_X_COPY_TBL+9,X
-        LDA a52
+        LDA GAME_SPRITE_Y_COPY_TBL+13
         SEC
         SBC #$05     ;#%00000101
         STA GAME_SPRITE_Y_COPY_TBL+9,X
@@ -3183,19 +3185,19 @@ f1B71   .BYTE $00,$0B,$0C,$0F,$01,$0F,$0C,$0B
 s1B79   LDA a1C28
         SEC
         BNE b1B87
-        LDA a52
+        LDA GAME_SPRITE_Y_COPY_TBL+13
         CMP #$AF     ;#%10101111
         BCS b1B87
-        INC a52
+        INC GAME_SPRITE_Y_COPY_TBL+13
 b1B87   RTS
 
 s1B88   LDA a1C28
         SEC
         BNE b1B96
         LDA #$7D     ;#%01111101
-        CMP a52
+        CMP GAME_SPRITE_Y_COPY_TBL+13
         BCS b1B96
-        DEC a52
+        DEC GAME_SPRITE_Y_COPY_TBL+13
 b1B96   RTS
 
 s1B97   LDA TMP_2493
@@ -4635,7 +4637,7 @@ b2696   INC f1961,X
         ADC #$01     ;#%00000001
 b26CE   ROL f055B,X
         STA fD6,X
-        LDA a52
+        LDA GAME_SPRITE_Y_COPY_TBL+13
         LSR A
         SEC
         SBC a2745
@@ -5404,7 +5406,7 @@ b3155   INC a32D7
         LDA a89
         LSR A
         STA a87
-        LDA a51
+        LDA GAME_SPRITE_Y_COPY_TBL+12
         STA a4F
         INC aCD
         LDA a3773
@@ -5445,7 +5447,7 @@ s319D   LDA f32D6
 
 b31A5   LDA a4E
         STA a38DE
-        LDA a51
+        LDA GAME_SPRITE_Y_COPY_TBL+12
         STA a38DF
         LDA a86
         ASL A
@@ -5969,7 +5971,7 @@ b357E   LDX #$0C     ;#%00001100
         JMP j037F
 
 b35B6   INC aE6
-        LDA a51
+        LDA GAME_SPRITE_Y_COPY_TBL+12
         CLC
         ADC #$1E     ;#%00011110
         TAY
@@ -6151,7 +6153,7 @@ j3775   LDX a3773
         CLC
         ADC f3793,X
         STA a81
-        LDA a51
+        LDA GAME_SPRITE_Y_COPY_TBL+12
         CLC
         ADC f379F,X
         STA a49
@@ -6181,8 +6183,8 @@ j37B7   STA a3825
         LDA #$AC     ;#%10101100
         STA a89
         LDA #$8C     ;#%10001100
-        STA a51
-        STA a43
+        STA GAME_SPRITE_Y_COPY_TBL+12
+        STA GAME_SPRITE_Y_TBL+12
         LDA #$01     ;#%00000001
         STA aCF
         STA aC7
@@ -6223,7 +6225,7 @@ a3826   .BYTE $00
 
 s3827   LDA a3826
         BEQ b383D
-        LDA a51
+        LDA GAME_SPRITE_Y_COPY_TBL+12
         STA a3888
         LDA a89
         LSR A
@@ -6255,7 +6257,7 @@ b3867   LDA a3888
         CMP #$C0     ;#%11000000
         BCC b3874
 b3872   LDA #$00     ;#%00000000
-b3874   STA a52
+b3874   STA GAME_SPRITE_Y_COPY_TBL+13
         STA GAME_SPRITE_Y_TBL+13
         LDA f3892,X
         STA aD1
