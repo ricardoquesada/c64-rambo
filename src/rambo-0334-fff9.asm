@@ -60,10 +60,6 @@ a30 = $30
 a31 = $31
 a32 = $32
 a33 = $33
-a60 = $60
-a65 = $65
-a6D = $6D
-a6E = $6E
 a7B = $7B
 a7C = $7C
 a81 = $81
@@ -991,7 +987,7 @@ _L00    STA a25C4
         STA a25C5
         LDA a89
         STA a25C0
-        LDA a6D
+        LDA GAME_SPRITE_X_MSB_COPY_TBL+12
         STA a25C1
         LDA GAME_SPRITE_X_COPY_TBL+13
         STA a25C2
@@ -1082,7 +1078,7 @@ b0ADC   JSR s0AB7
         STA a0BE8
         LDA #$00
         STA a0BEC
-        STA a6E
+        STA GAME_SPRITE_X_MSB_COPY_TBL+13
         LDA #$4F
         STA a0BE4
         STX GAME_SPRITE_X_COPY_TBL+13
@@ -1141,7 +1137,7 @@ b0B35   LDA f0BE1,X
         PHA
         LDA #$00     ;#%00000000
         ROL A
-        STA a6D
+        STA GAME_SPRITE_X_MSB_COPY_TBL+12
         PLA
         CLC
         ADC GAME_SMOOTH_X
@@ -1166,10 +1162,10 @@ a0BA9   LDA a89
         SEC
         SBC #$18     ;#%00011000
         STA a81
-        LDA a6D
+        LDA GAME_SPRITE_X_MSB_COPY_TBL+12
         BCS b0BB6
         EOR #$01     ;#%00000001
-b0BB6   STA a65
+b0BB6   STA GAME_SPRITE_X_MSB_COPY_TBL+4
         LDA #$01     ;#%00000001
         STA aC7
         RTS
@@ -1572,7 +1568,7 @@ b0E78   LDA GAME_SMOOTH_X
         CLC
         ADC TMP_2493
         ASL A
-        ROL a65
+        ROL GAME_SPRITE_X_MSB_COPY_TBL+4
         STA a81
         LDA #$BC     ;#%10111100
         CLC
@@ -1636,7 +1632,7 @@ b0EF6   LDA #$00     ;#%00000000
 j0F00   LDA TMP_2493
         STA a81
         LDA a2745
-        STA a65
+        STA GAME_SPRITE_X_MSB_COPY_TBL+4
         TXA
         ASL A
         ASL A
@@ -1660,21 +1656,21 @@ b0F20   LDA a28E6
         STA GAME_SPRITE_Y_COPY_TBL+4
         LDA GAME_SMOOTH_X
         CLC
-        ADC #$01     ;#%00000001
+        ADC #$01
         LSR A
         STA TMP_2493
         LDA a2747
         CLC
-        ADC #$02     ;#%00000010
+        ADC #$02
         ASL A
         ASL A
         CLC
         ADC TMP_2493
         ASL A
         STA a81
-        LDA #$00     ;#%00000000
+        LDA #$00
         ROL A
-        STA a65
+        STA GAME_SPRITE_X_MSB_COPY_TBL+4
 j0F48   LDA #$01     ;#%00000001
         STA a1070
         STA aC7
@@ -2599,7 +2595,7 @@ _L00    STA f02,X
 
         LDA #$00
         STA GAME_RASTER_TICK_VAR
-        STA a6E
+        STA GAME_SPRITE_X_MSB_COPY_TBL+13
 
         JSR s03FC
         JSR GAME_SETUP_IRQ
@@ -4296,7 +4292,7 @@ _L01    LDA GAME_SPRITE_Y_TBL+13
         LDA $D010                       ;Sprites 0-7 MSB of X coordinate
         AND #%11111110
         STA $D010                       ;Sprites 0-7 MSB of X coordinate
-        LSR a60
+        LSR GAME_SPRITE_X_MSB_TBL+13
         BCC _L02
 
         LDA $D010                       ;Sprites 0-7 MSB of X coordinate
@@ -6238,8 +6234,8 @@ j384C   LDA a3889
         STA GAME_SPRITE_X_COPY_TBL+13
         STA a7C
         ROL A
-        STA a6E
-        STA a60
+        STA GAME_SPRITE_X_MSB_COPY_TBL+13
+        STA GAME_SPRITE_X_MSB_TBL+13
         LDA a3826
         BNE b3867
         LDA a3825
@@ -6249,14 +6245,14 @@ b3867   LDA a3888
         ADC f388A,X
         CMP #$C0     ;#%11000000
         BCC b3874
-b3872   LDA #$00     ;#%00000000
+b3872   LDA #$00
 b3874   STA GAME_SPRITE_Y_COPY_TBL+13
         STA GAME_SPRITE_Y_TBL+13
         LDA f3892,X
         STA aD1
         STA aD2
         LDA a3826
-        EOR #$01     ;#%00000001
+        EOR #$01
         STA a3826
         RTS
 
