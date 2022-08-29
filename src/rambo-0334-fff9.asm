@@ -60,13 +60,6 @@ a30 = $30
 a31 = $31
 a32 = $32
 a33 = $33
-a49 = $49
-a4A = $4A
-a4B = $4B
-a4C = $4C
-a4D = $4D
-a4E = $4E
-a4F = $4F
 a60 = $60
 a65 = $65
 a6D = $6D
@@ -1168,7 +1161,7 @@ b0B35   LDA f0BE1,X
         ADC #$01     ;#%00000001
         STA a8F
         LDA GAME_SPRITE_Y_COPY_TBL+12
-        STA a49
+        STA GAME_SPRITE_Y_COPY_TBL+4
 a0BA9   LDA a89
         SEC
         SBC #$18     ;#%00011000
@@ -1194,7 +1187,7 @@ j0BC9   LDA #$00     ;#%00000000
         STA GAME_SPRITE_Y_COPY_TBL+12
         LDA a120F
         BNE b0BDC
-        STA a49
+        STA GAME_SPRITE_Y_COPY_TBL+4
         LDA #$00     ;#%00000000
         STA aC7
 b0BDC   RTS
@@ -1584,7 +1577,7 @@ b0E78   LDA GAME_SMOOTH_X
         LDA #$BC     ;#%10111100
         CLC
         ADC GAME_SMOOTH_Y
-        STA a49
+        STA GAME_SPRITE_Y_COPY_TBL+4
         LDA #$FF     ;#%11111111
         STA a0EB3
         LDA #$01     ;#%00000001
@@ -1651,7 +1644,7 @@ j0F00   LDA TMP_2493
         CLC
         ADC GAME_SMOOTH_Y
         ADC #$2C     ;#%00101100
-        STA a49
+        STA GAME_SPRITE_Y_COPY_TBL+4
         JMP j0F48
 
 s0F18   PHA
@@ -1664,7 +1657,7 @@ b0F20   LDA a28E6
         CMP #$C0     ;#%11000000
         BEQ b0F6A
         LDA #$2B     ;#%00101011
-        STA a49
+        STA GAME_SPRITE_Y_COPY_TBL+4
         LDA GAME_SMOOTH_X
         CLC
         ADC #$01     ;#%00000001
@@ -1780,8 +1773,8 @@ b0FF0   LDA a101D
         TAY
         LDA f1012,Y
         CLC
-        ADC a49
-        STA a49
+        ADC GAME_SPRITE_Y_COPY_TBL+4
+        STA GAME_SPRITE_Y_COPY_TBL+4
         LDA a101D
         SEC
         SBC f1012,Y
@@ -5341,7 +5334,7 @@ b30CC   LDA a3315
         BNE b30D2
         RTS
 
-b30D2   LDA a4F
+b30D2   LDA GAME_SPRITE_Y_COPY_TBL+10
         STA a38DE
         LDA a362F
         STA a38DF
@@ -5407,7 +5400,7 @@ b3155   INC a32D7
         LSR A
         STA a87
         LDA GAME_SPRITE_Y_COPY_TBL+12
-        STA a4F
+        STA GAME_SPRITE_Y_COPY_TBL+10
         INC aCD
         LDA a3773
         STA a324D
@@ -5445,7 +5438,7 @@ s319D   LDA f32D6
         BEQ b31A5
         RTS
 
-b31A5   LDA a4E
+b31A5   LDA GAME_SPRITE_Y_COPY_TBL+9
         STA a38DE
         LDA GAME_SPRITE_Y_COPY_TBL+12
         STA a38DF
@@ -5467,9 +5460,9 @@ b31A5   LDA a4E
         BCC b31D7
         JMP j3206
 
-b31D7   LDA a4E
+b31D7   LDA GAME_SPRITE_Y_COPY_TBL+9
         STA a38DE
-        LDA a49
+        LDA GAME_SPRITE_Y_COPY_TBL+4
         STA a38DF
         LDA a86
         ASL A
@@ -5520,7 +5513,7 @@ b3225   LDA a362F
         LDA a362E
         STA a86
         LDA a362F
-        STA a4E
+        STA GAME_SPRITE_Y_COPY_TBL+9
         INC aCC
 b324B   RTS
 
@@ -5988,31 +5981,31 @@ j35C3   LDX a3774
         LDA a362F
         CLC
         ADC f3690,X
-        STA a4A
+        STA GAME_SPRITE_Y_COPY_TBL+5
         LDA a82
         CLC
         ADC f363C,X
         STA a83
-        LDA a4A
+        LDA GAME_SPRITE_Y_COPY_TBL+5
         CLC
         ADC f3648,X
-        STA a4B
+        STA GAME_SPRITE_Y_COPY_TBL+6
         LDA a82
         CLC
         ADC f3654,X
         STA a84
-        LDA a4A
+        LDA GAME_SPRITE_Y_COPY_TBL+5
         CLC
         ADC f3660,X
-        STA a4C
+        STA GAME_SPRITE_Y_COPY_TBL+7
         LDA a82
         CLC
         ADC f366C,X
         STA a85
-        LDA a4A
+        LDA GAME_SPRITE_Y_COPY_TBL+5
         CLC
         ADC f3678,X
-        STA a4D
+        STA GAME_SPRITE_Y_COPY_TBL+8
         LDY f3630,X
         STY a90
         INY
@@ -6156,7 +6149,7 @@ j3775   LDX a3773
         LDA GAME_SPRITE_Y_COPY_TBL+12
         CLC
         ADC f379F,X
-        STA a49
+        STA GAME_SPRITE_Y_COPY_TBL+4
         LDA f37AB,X
         STA a8F
         SEC
