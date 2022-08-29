@@ -60,13 +60,6 @@ a30 = $30
 a31 = $31
 a32 = $32
 a33 = $33
-a8F = $8F
-a90 = $90
-a91 = $91
-a92 = $92
-a93 = $93
-a97 = $97
-a98 = $98
 a9D = $9D
 a9E = $9E
 a9F = $9F
@@ -1133,7 +1126,7 @@ b0B35   LDA f0BE1,X
         ADC GAME_SMOOTH_X
         STA GAME_SPRITE_X_COPY_TBL+12
         LDA f0BF5,X
-        STA a97
+        STA GAME_SPRITE_FRAME_TBL+12
         STX a0BE0
         LDA #$01     ;#%00000001
         STA aCF
@@ -1142,10 +1135,10 @@ b0B35   LDA f0BE1,X
         LDA #$0E     ;#%00001110
         STA aA5
         STA a9D
-        LDA a97
+        LDA GAME_SPRITE_FRAME_TBL+12
         CLC
         ADC #$01     ;#%00000001
-        STA a8F
+        STA GAME_SPRITE_FRAME_TBL+4
         LDA GAME_SPRITE_Y_COPY_TBL+12
         STA GAME_SPRITE_Y_COPY_TBL+4
 a0BA9   LDA GAME_SPRITE_X_COPY_TBL+12
@@ -1735,7 +1728,7 @@ b0FBB   CMP #$02     ;#%00000010
         INC a120F
         JSR j1184
         LDA #$7D     ;#%01111101
-        STA a8F
+        STA GAME_SPRITE_FRAME_TBL+4
         RTS
 
 b0FD7   JSR j1184
@@ -2064,15 +2057,15 @@ b12BC   STA a12F0
         STA a12F2
         JMP j12DF
 
-b12C7   LDA #$03     ;#%00000011
+b12C7   LDA #$03
         STA a12F2
 j12CC   LDX a12EF
         LDA f12FE,X
         BEQ j12DF
         STA aD1
         CLC
-        ADC #$04     ;#%00000100
-        STA a98
+        ADC #$04
+        STA GAME_SPRITE_FRAME_TBL+13
         INC a12EF
         RTS
 
@@ -5993,14 +5986,14 @@ j35C3   LDX a3774
         ADC f3678,X
         STA GAME_SPRITE_Y_COPY_TBL+8
         LDY f3630,X
-        STY a90
+        STY GAME_SPRITE_FRAME_TBL+5
         INY
-        STY a91
+        STY GAME_SPRITE_FRAME_TBL+6
         INY
-        STY a92
+        STY GAME_SPRITE_FRAME_TBL+7
         INY
-        STY a93
-        LDA #$0F     ;#%00001111
+        STY GAME_SPRITE_FRAME_TBL+8
+        LDA #$0F
         STA a9E
         STA a9F
         STA aA0
@@ -6137,10 +6130,10 @@ j3775   LDX a3773
         ADC f379F,X
         STA GAME_SPRITE_Y_COPY_TBL+4
         LDA f37AB,X
-        STA a8F
+        STA GAME_SPRITE_FRAME_TBL+4
         SEC
         SBC #$01     ;#%00000001
-        STA a97
+        STA GAME_SPRITE_FRAME_TBL+12
         RTS
 
 f3793   .BYTE $00,$00,$00,$18,$18,$18,$00,$00
