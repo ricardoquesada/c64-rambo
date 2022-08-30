@@ -348,30 +348,34 @@ j0444   JSR s044C
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 s044C   INC IS_GAME_OVER
-        JSR s046E
+        JSR GAME_PRINT_STRING
 
         ; Fallthrough
 
 GAME_PRINT_GAME_OVER
         LDA #$03                        ;Message to print "GAME OVER"
-        JMP s046E
+        JMP GAME_PRINT_STRING
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 s0456   LDA a0B29
-        BEQ s046E
+        BEQ GAME_PRINT_STRING
         LDX aE6
         BEQ b046A
         LDX a0912
         BNE b046A
         LDA #$03
         STA IS_GAME_OVER
-        BNE s046E
+        BNE GAME_PRINT_STRING
 b046A   CLC
         ADC a0912
 
-s046E   PHA
+        ; Fallthrough
+
+GAME_PRINT_STRING
+        PHA                             ;A = String to print
         STA a0558
 
+        ; Setup screen to print message
         SEI
         LDA #$00
         STA $D015                       ;Sprite display Enable
@@ -384,10 +388,10 @@ s046E   PHA
         JSR MUSIC_FN
 
         LDY #$1F
-b048C   LDA f00E0,Y
-        STA f0566,Y
+_L00    LDA f00E0,Y                     ;Backup $E0-$FF
+        STA BACKUP_E0_FF,Y
         DEY
-        BPL b048C
+        BPL _L00
 
         JSR PRINT_EXT_STR_BIS
         .ADDR STR_CLEAR_SCREEN_BIS
@@ -404,30 +408,32 @@ b048C   LDA f00E0,Y
         ASL A
         TAX
         LDA IN_GAME_MSG_STR_TBL,X
-        STA a04BE
+        STA _STR_ADDR                   ;LSB
         LDA IN_GAME_MSG_STR_TBL+1,X
-        STA a04BE+1
+        STA _STR_ADDR+1                 ;MSB
         LDA IN_GAME_MSG_MUSIC_TBL,X
         JSR MUSIC_FN
 
         JSR PRINT_EXT_STR_BIS
-a04BE   .ADDR IN_GAME_MSG_STR_TBL       ;This address is changed in runtime
+_STR_ADDR
+        .ADDR IN_GAME_MSG_STR_TBL       ;This address is changed in runtime
 
-b04C0   LDA $D012                       ;Raster Position
+_L01    LDA $D012                       ;Raster Position
         CMP #$C8                        ;Wait until raster gets to $c8
-        BNE b04C0
+        BNE _L01
 
         JSR GAME_PLAY_MUSIC
 
         LDA #$02
-        JSR MUSIC_FN
-        BEQ b04D3
-        BNE b04C0
-b04D3   JSR VIC_SCREEN_DISABLE
-        LDA #$01
+        JSR MUSIC_FN                    ;Music finished?
+        BEQ _L02                        ; Yes, exit loop
+        BNE _L01                        ; No, keep playing it
+
+_L02    JSR VIC_SCREEN_DISABLE
+        LDA #$01                        ;Turn off music
         JSR MUSIC_FN
 
-        LDA #$00
+        LDA #$00                        ;Use "map" charset
         JSR SWAP_CHARSETS_BIS
 
         LDA #$FF
@@ -443,21 +449,23 @@ b04D3   JSR VIC_SCREEN_DISABLE
         JSR PRINT_EXT_STR_BIS
         .ADDR a0586
 
-        LDY #$1F     ;#%00011111
-b04FE   LDA f0566,Y
+        LDY #$1F                        ;Restore $E0-$FF values
+_L03    LDA BACKUP_E0_FF,Y
         STA f00E0,Y
         DEY
-        BPL b04FE
+        BPL _L03
+
         LDA IS_GAME_OVER
-        BNE b0510
+        BNE _L04
         JSR s0513
         CLI
         RTS
 
-b0510   PLA
+_L04    PLA                             ;On game over, skip on caller
         PLA
         RTS
 
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 s0513   LDX a0558
         BEQ b054E
         DEX
@@ -467,7 +475,7 @@ s0513   LDX a0558
         STA aFF
         LDA f0563,X
         STA aF8
-        LDA #$28     ;#%00101000
+        LDA #$28
         STA a0565
 b052D   LDA #$08                        ;Scroll left
         STA GAME_HARD_SCROLL_DIR
@@ -500,7 +508,10 @@ f055F   .BYTE $4A,$BF
 f0561   .BYTE $01,$00
 f0563   .BYTE $05,$13
 a0565   .BYTE $00
-f0566   .BYTE $00,$00,$00,$00,$00,$00,$00,$00
+
+        ;32 bytes to backup values from $E0 to $FF
+BACKUP_E0_FF
+        .BYTE $00,$00,$00,$00,$00,$00,$00,$00
         .BYTE $00,$00,$00,$00,$00,$00,$00,$00
         .BYTE $00,$00,$00,$00,$00,$00,$00,$00
         .BYTE $00,$00,$00,$00,$00,$00,$00,$00
