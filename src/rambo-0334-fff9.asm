@@ -223,7 +223,8 @@ s036A   JMP j1659
 
         JMP j07CF
 
-j0376   JMP j0451
+GAME_PRINT_GAME_OVER_BIS
+        JMP GAME_PRINT_GAME_OVER
 
 RESET_SCORE_BIS
         JMP RESET_SCORE
@@ -282,7 +283,7 @@ _L00    JSR s040B
         JSR GAME_MAYBE_SELECT_NEXT_WEAPON
         JSR GAME_UPDATE_SPRITE_ENERGY
         JSR s0900
-        JSR s043F
+        JSR GAME_MAYBE_PRINT_GAME_OVER
 _L01    JSR j28FF
         JMP _GAME_MAIN_LOOP
 
@@ -335,8 +336,9 @@ _L00    STA LOCAL_POINTS,X
         RTS
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
-s043F   LDA IS_GAME_OVER
-        BNE j0451
+GAME_MAYBE_PRINT_GAME_OVER
+        LDA IS_GAME_OVER
+        BNE GAME_PRINT_GAME_OVER
         RTS
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
@@ -350,7 +352,8 @@ s044C   INC IS_GAME_OVER
 
         ; Fallthrough
 
-j0451   LDA #$03
+GAME_PRINT_GAME_OVER
+        LDA #$03                        ;Message to print "GAME OVER"
         JMP s046E
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
@@ -365,8 +368,10 @@ s0456   LDA a0B29
         BNE s046E
 b046A   CLC
         ADC a0912
+
 s046E   PHA
         STA a0558
+
         SEI
         LDA #$00
         STA $D015                       ;Sprite display Enable
@@ -377,6 +382,7 @@ s046E   PHA
         STA $D011                       ;VIC Control Register 1
         LDA #$01
         JSR MUSIC_FN
+
         LDY #$1F
 b048C   LDA f00E0,Y
         STA f0566,Y
@@ -393,7 +399,8 @@ b048C   LDA f00E0,Y
         LDA #26
         JSR MUSIC_FN
 
-        PLA
+        PLA                             ;The message to print
+
         ASL A
         TAX
         LDA IN_GAME_MSG_STR_TBL,X
@@ -5267,24 +5274,27 @@ GAME_COPTER_MAIN_LOOP
         JSR s3272
         JSR GAME_MAYBE_SELECT_NEXT_WEAPON_BIS
         JSR s319D
-        JSR s303F
+        JSR GAME_UPDATE_ENERGY_AND_CHECK_GAME_OVER
         JSR s304E
         JSR GAME_UPDATE_SPRITE_SCORE_BIS
         JSR s0352
         JSR s0337
         JMP GAME_COPTER_MAIN_LOOP
 
-s303F   JSR GAME_UPDATE_SPRITE_ENERGY_BIS
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+GAME_UPDATE_ENERGY_AND_CHECK_GAME_OVER
+        JSR GAME_UPDATE_SPRITE_ENERGY_BIS
         LDA IS_GAME_OVER
-        BNE b3047
+        BNE _L00
         RTS
 
-b3047   PLA
+_L00    PLA
         PLA
         PLA
         PLA
-        JMP j0376
+        JMP GAME_PRINT_GAME_OVER_BIS
 
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 s304E   LDA a3063
         BEQ b3057
         DEC a3063
