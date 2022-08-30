@@ -1704,51 +1704,52 @@ b0F6A   PLA
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 s0F6C   LDA a0967
-        BEQ b0F72
+        BEQ _L00
         RTS
 
-b0F72   LDX #$04     ;#%00000100
-b0F74   LDA f120B,X
-        BEQ b0F7F
+_L00 	LDX #$04
+_L01 	LDA f120B,X
+        BEQ _L02
         JSR s0F90
-        JMP j0F82
+        JMP _L03
 
-b0F7F   JSR s11B1
-j0F82   DEX
-        BPL b0F74
+_L02 	JSR s11B1
+_L03 	DEX
+        BPL _L01
+
         JSR s2961
-        CMP #$00     ;#%00000000
-        BNE b0F8F
+        CMP #$00
+        BNE _EXIT
         INC a11C1
-b0F8F   RTS
+_EXIT 	RTS
 
-s0F90   CMP #$05     ;#%00000101
-        BNE b0F9A
+s0F90   CMP #$05
+        BNE _L00
         JSR s0D5D
         JMP j1184
 
-b0F9A   CMP #$04     ;#%00000100
-        BNE b0FBB
+_L00 	CMP #$04
+        BNE _L03
         JSR j1184
         LDA f1100,X
-        BEQ b0FAA
+        BEQ _L01
         DEC f1100,X
         RTS
 
-b0FAA   LDA #$04     ;#%00000100
+_L01 	LDA #$04
         STA f1100,X
         LDA GAME_SPRITE_FRAME_TBL,X
         CMP #130                        ;Frame: Enemy killed (last frame)
-        BEQ b0FB8
+        BEQ _L02
         INC GAME_SPRITE_FRAME_TBL,X
         RTS
 
-b0FB8   JMP j1191
+_L02 	JMP j1191
 
-b0FBB   CMP #$02     ;#%00000010
-        BNE b0FDD
+_L03 	CMP #$02     ;#%00000010
+        BNE _L05
         LDA a101E
-        BEQ b0FD7
+        BEQ _L04
         DEC a101E
         LDA #$28     ;#%00101000
         STA a101D
@@ -1758,13 +1759,13 @@ b0FBB   CMP #$02     ;#%00000010
         STA GAME_SPRITE_FRAME_TBL+4
         RTS
 
-b0FD7   JSR j1184
+_L04 	JSR j1184
         JMP j109C
 
-b0FDD   CMP #$03     ;#%00000011
+_L05 	CMP #$03     ;#%00000011
         BNE b101F
         LDA a101D
-        BNE b0FF0
+        BNE _L06
         TYA
         PHA
         LDY #$04
@@ -1773,7 +1774,7 @@ b0FDD   CMP #$03     ;#%00000011
         TAY
         RTS
 
-b0FF0   LDA a101D
+_L06 	LDA a101D
         LSR A
         LSR A
         TAY
@@ -1785,10 +1786,10 @@ b0FF0   LDA a101D
         SEC
         SBC f1012,Y
         STA a101D
-        BCS b100F
+        BCS _L07
         LDA #$00     ;#%00000000
         STA a101D
-b100F   JMP j1184
+_L07 	JMP j1184
 
 f1012   .BYTE $01,$FD,$03,$03,$03,$02,$02,$02
         .BYTE $01,$01,$01
