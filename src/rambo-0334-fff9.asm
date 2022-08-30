@@ -173,7 +173,8 @@ MUSIC_PATCH             .MACRO x, note_list_addr
 
 s0337   JMP j28FF
 
-s033A   JMP j1D2A
+GAME_READ_JOYSTICK_XXX_BIS   
+	JMP GAME_READ_JOYSTICK_XXX
 
 GAME_MAYBE_SELECT_NEXT_WEAPON_BIS
         JMP GAME_MAYBE_SELECT_NEXT_WEAPON
@@ -266,7 +267,7 @@ _L00    JSR s040B
         JSR s12A7
         JSR s1985
         JSR GAME_PLAY_MUSIC
-        JSR j1D2A
+        JSR GAME_READ_JOYSTICK_XXX
         JSR s14F0
         JSR GAME_UPDATE_SPRITE_SCORE
         JSR GAME_UPDATE_SCORE_FROM_POINTS
@@ -359,14 +360,18 @@ GAME_PRINT_GAME_OVER
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 s0456   LDA a0B29
         BEQ GAME_PRINT_STRING
+
         LDX aE6
-        BEQ b046A
+        BEQ _L00
+
         LDX a0912
-        BNE b046A
-        LDA #$03
+        BNE _L00
+
+        LDA #$03 			;Message to print: "GAME OVER"
         STA IS_GAME_OVER
         BNE GAME_PRINT_STRING
-b046A   CLC
+
+_L00 	CLC
         ADC a0912
 
         ; Fallthrough
@@ -880,11 +885,12 @@ s0983   LDA #$00
         LDA #$1A
         LDX #$07
         JSR MUSIC_FN
-        LDA #$01
+        LDA #$01 			;Stop music (?)
         JSR MUSIC_FN
         LDA #$09
         JSR MUSIC_FN
-        JSR j1D2A
+
+        JSR GAME_READ_JOYSTICK_XXX
         LDA GAME_JOY_STATE
         STA a0981
 
@@ -905,7 +911,7 @@ b09AF   LDA $D012                       ;Raster Position
         JMP b09E1
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
-s09CA   JSR j1D2A
+s09CA   JSR GAME_READ_JOYSTICK_XXX
         LDA GAME_JOY_STATE
         STA a0982
         CMP a0981
@@ -1035,6 +1041,7 @@ _L02    LDA SELECTED_WEAPON             ;Weapon used
 _EXIT   RTS
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+; Reset sprites 0-11 positions (?)
 s0AB7   LDX #$04
 _L00    LDA #$00
         STA GAME_SPRITE_X_MSB_COPY_TBL,X
@@ -2699,7 +2706,7 @@ _L01    LDA f0BF1,X
         LDX #$07
         LDA #$00
         STX a0D23
-_L02    STA $7FF8,X                     ;Bug? Clear char 255 to
+_L02    STA $7FF8,X                     ;Bug? Clear char 255
         DEX
         BPL _L02
 
@@ -2707,11 +2714,12 @@ _L02    STA $7FF8,X                     ;Bug? Clear char 255 to
         LDA #26
         JSR MUSIC_FN
 
-        LDX #$19
+	;Scroll down 25 rows
+        LDX #25
 _L03    TXA
         PHA
         JSR GAME_HARD_SCROLL_DOWN
-        LDA #$01
+        LDA #$01 			;Down
         STA GAME_HARD_SCROLL_DIR_COPY
         JSR GAME_MAP_PAINT
         PLA
@@ -3413,7 +3421,8 @@ _L03    LDY GAME_JOY_STATE
         JMP b1CF2
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
-j1D2A   LDA a1D3E
+GAME_READ_JOYSTICK_XXX   
+	LDA a1D3E
         BEQ _L00
 
         LDA #$00
@@ -6223,7 +6232,7 @@ f375C   .BYTE $00,$00
 f375E   .BYTE $00,$00,$CE,$73,$37,$60
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
-s3764   JSR s033A
+s3764   JSR GAME_READ_JOYSTICK_XXX_BIS
         STA a3770
         AND #$0F
         STA f3771
