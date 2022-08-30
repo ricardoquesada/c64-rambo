@@ -989,6 +989,7 @@ _L01    LDX a0BE0
         TAX
         CPX #$03
         BEQ b0ADC
+
         LDA #$00
         STA f0BED,X
         LDA #$03                        ;Set 3000 points
@@ -1031,6 +1032,7 @@ _L00    LDA #$00
         RTS
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+; Copter sequence starts here
 b0ADC   JSR s0AB7
         LDA #$00
         STA aD0
@@ -5210,6 +5212,8 @@ s3003   JMP j37B7
 
 s3006   JMP j36C6
 
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+; Helicopter anim
 j3009   JSR s0364
         JSR s0343
         JSR s0340
@@ -5595,6 +5599,7 @@ _L01    LDA GAME_SPRITE_Y_COPY_TBL+5,X
         STA a3315
 _L02    DEX
         BPL _L00
+
         RTS
 
 _L03    LDA #$00
@@ -6063,21 +6068,23 @@ ENEMY_COPTER_Y_OFFSET_SPR5_TBL
         .BYTE $F3,$F3,$F3,$00,$00,$00,$0D,$0D
         .BYTE $0D,$00,$00,$00
 
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+; Part of the copter part
 s369C   LDX #$01
-b369E   LDA f36C0,X
-        BEQ b36A9
+_L00    LDA f36C0,X
+        BEQ _L01
         DEC f36C0,X
-        JMP j36BC
+        JMP _L03
 
-b36A9   LDA f36C2,X
+_L01    LDA f36C2,X
         STA f36C0,X
         LDA f36C4,X
-        BNE b36B9
-        LDA #$04     ;#%00000100
+        BNE _L02
+        LDA #$04
         STA f36C4,X
-b36B9   DEC f36C4,X
-j36BC   DEX
-        BPL b369E
+_L02    DEC f36C4,X
+_L03    DEX
+        BPL _L00
         RTS
 
 f36C0   .BYTE $00,$00
@@ -6090,6 +6097,8 @@ j36C6   LDY #$00
         JSR j36CE
         JMP j373F
 
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+; Args: Y
 j36CE   LDA f3771,Y
         CMP f375C,Y
         BEQ _L02
@@ -6184,6 +6193,7 @@ f37AB   .BYTE 180,190,188,184,196,198,182,194
         .BYTE 192,186,200,202
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+; Args: A
 j37B7   STA a3825
         JSR s0364
         SEI
@@ -6235,6 +6245,7 @@ _L01    LDA #195
         JSR MUSIC_FN
 
         CLI
+
         JMP j3009
 
 a3825   .BYTE $00
