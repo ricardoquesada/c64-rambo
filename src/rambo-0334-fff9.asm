@@ -1037,14 +1037,14 @@ b0ADC   JSR s0AB7
         STA GAME_ENERGY_TO_DECREASE
         JSR s0456
         LDA #$01
-        STA a2480
+        STA COPTER_MODE_ENABLED
         STA a0967
         STA a0B2A
         JSR RESET_ENERGY_SPRITE
         LDA a0912
         JSR s3003
         LDA #$00
-        STA a2480
+        STA COPTER_MODE_ENABLED
         STA GAME_ENERGY_TO_DECREASE
         STA a0967
         INC aD0
@@ -2594,7 +2594,7 @@ _L01    LDA f0BF1,X
         STA aD0
         LDA #$00
         STA a0912
-        STA a2480
+        STA COPTER_MODE_ENABLED
         STA a0967
         STA a0B29
         STA GAME_SMOOTH_X
@@ -4173,7 +4173,7 @@ _L00    LDA #225                        ;Same Y for all weapons
         PHA
         LDA a31
         PHA
-        LDA a2480
+        LDA COPTER_MODE_ENABLED
         BNE _L01
         JSR s15F1
         JMP _L02
@@ -4184,7 +4184,7 @@ _L02    LDA #$0D                        ;Color Light Green
         STA $D028                       ;Sprite 1 Color
         JSR s1B5A
 
-        LDA a2480
+        LDA COPTER_MODE_ENABLED
         BEQ _L03
         JSR s1C70
         JMP _L04
@@ -4215,9 +4215,9 @@ _L04    JSR s1312
 _L05    INC GAME_RASTER_TICK_DB
         JSR s03FC
 
-_L06    LDA a2480
+_L06    LDA COPTER_MODE_ENABLED
         BEQ _L07
-        JSR HERO_CHOP_ANIM_BIS
+        JSR HERO_COPTER_ANIM_BIS
         JMP _L08
 
 _L07    JSR s1BD4
@@ -4251,7 +4251,7 @@ GAME_DASHBOARD_COLOR_REF_TBL
 s2436   LDA #$00
         STA $D012                       ;Raster Position
         JSR s19D1
-        LDA a2480                       ;Color of sprite determines scroll speed
+        LDA COPTER_MODE_ENABLED
         BEQ _L00
         JSR GAME_SMOOTH_SCROLL_BY_2
         JMP _L01
@@ -4273,7 +4273,7 @@ _L01    LDA GAME_SPRITE_Y_TBL+13
         ORA #$01
         STA $D010                       ;Sprites 0-7 MSB of X coordinate
 
-_L02    LDA a2480
+_L02    LDA COPTER_MODE_ENABLED         ;Use sprite color from Copter mode as well
         STA $D027                       ;Sprite 0 Color
         LDA #$00
         STA $D01D                       ;Sprites Expand 2x Horizontal (X)
@@ -4283,7 +4283,8 @@ _L02    LDA a2480
         STA GAME_SPR_FRAME_00
         RTS
 
-a2480                           .BYTE $00,$00
+COPTER_MODE_ENABLED             .BYTE $00
+                                .BYTE $00
 GAME_RASTER_TICK_DB             .BYTE $00
 f2483                           .BYTE $FE,$FD,$FB,$F7,$EF,$DF,$BF,$7F
 f248B                           .BYTE $01,$02,$04,$08,$10,$20,$40,$80
@@ -5201,8 +5202,8 @@ f29A8   .BYTE $01,$04,$05,$06,$02,$02,$03,$01
         .BYTE $00,$00,$FF,$FF,$00,$00,$FF,$FF
         .BYTE $00,$00,$FF,$FF,$00,$00,$FF,$FF
 
-HERO_CHOP_ANIM_BIS
-        JMP HERO_CHOP_ANIM
+HERO_COPTER_ANIM_BIS
+        JMP HERO_COPTER_ANIM
 
 s3003   JMP j37B7
 
@@ -5265,7 +5266,7 @@ b306E   JSR s3484
 j307D   JSR s34F1
         JSR s34F1
         JSR s34F1
-        JSR HERO_CHOP_ANIM_NEXT
+        JSR HERO_COPTER_ANIM_NEXT
         JSR s3316
         LDA a3315
         BEQ b3092
@@ -5287,15 +5288,15 @@ b309C   STA a3567
         RTS
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
-HERO_CHOP_ANIM_NEXT
-        LDA HERO_CHOP_ANIM_IDX
+HERO_COPTER_ANIM_NEXT
+        LDA HERO_COPTER_ANIM_IDX
         CMP #$0B                        ;Last frame to animate?
         BEQ _L00                        ; Yes, jump
-        INC HERO_CHOP_ANIM_IDX
+        INC HERO_COPTER_ANIM_IDX
         RTS
 
 _L00    LDA #$00                        ;Reset animation idx
-        STA HERO_CHOP_ANIM_IDX
+        STA HERO_COPTER_ANIM_IDX
         RTS
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
@@ -5327,7 +5328,7 @@ _L01    LDA GAME_SPRITE_Y_COPY_TBL+10
         LDA #$00
         ROL A
         STA a38DD
-        LDX HERO_CHOP_ANIM_IDX
+        LDX HERO_COPTER_ANIM_IDX
         LDA f3128,X
         STA a38E1
         LDA f3134,X
@@ -5490,7 +5491,7 @@ _L02    LDA a362F
         CMP #$14     ;#%00010100
         BCC b324B
         INC f32D6
-        LDX HERO_CHOP_ANIM_IDX
+        LDX HERO_COPTER_ANIM_IDX
         STX a324C
         LDA #$0E     ;#%00001110
         STA GAME_SPRITE_COLOR_TBL+9
@@ -5964,50 +5965,50 @@ b35B6   INC aE6
 b35C2   RTS
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
-HERO_CHOP_ANIM
-        LDX HERO_CHOP_ANIM_IDX
+HERO_COPTER_ANIM
+        LDX HERO_COPTER_ANIM_IDX
 
         LDA a362E
         CLC
-        ADC HERO_CHOP_X_OFFSET_SPR5_TBL,X
+        ADC HERO_COPTER_X_OFFSET_SPR5_TBL,X
         STA GAME_SPRITE_X_COPY_TBL+5
 
         LDA a362F
         CLC
-        ADC HERO_CHOP_Y_OFFSET_SPR5_TBL,X
+        ADC HERO_COPTER_Y_OFFSET_SPR5_TBL,X
         STA GAME_SPRITE_Y_COPY_TBL+5
 
         LDA GAME_SPRITE_X_COPY_TBL+5
         CLC
-        ADC HERO_CHOP_X_OFFSET_SPR6_TBL,X
+        ADC HERO_COPTER_X_OFFSET_SPR6_TBL,X
         STA GAME_SPRITE_X_COPY_TBL+6
 
         LDA GAME_SPRITE_Y_COPY_TBL+5
         CLC
-        ADC HERO_CHOP_Y_OFFSET_SPR6_TBL,X
+        ADC HERO_COPTER_Y_OFFSET_SPR6_TBL,X
         STA GAME_SPRITE_Y_COPY_TBL+6
 
         LDA GAME_SPRITE_X_COPY_TBL+5
         CLC
-        ADC HERO_CHOP_X_OFFSET_SPR7_TBL,X
+        ADC HERO_COPTER_X_OFFSET_SPR7_TBL,X
         STA GAME_SPRITE_X_COPY_TBL+7
 
         LDA GAME_SPRITE_Y_COPY_TBL+5
         CLC
-        ADC HERO_CHOP_Y_OFFSET_SPR7_TBL,X
+        ADC HERO_COPTER_Y_OFFSET_SPR7_TBL,X
         STA GAME_SPRITE_Y_COPY_TBL+7
 
         LDA GAME_SPRITE_X_COPY_TBL+5
         CLC
-        ADC HERO_CHOP_X_OFFSET_SPR8_TBL,X
+        ADC HERO_COPTER_X_OFFSET_SPR8_TBL,X
         STA GAME_SPRITE_X_COPY_TBL+8
 
         LDA GAME_SPRITE_Y_COPY_TBL+5
         CLC
-        ADC HERO_CHOP_Y_OFFSET_SPR8_TBL,X
+        ADC HERO_COPTER_Y_OFFSET_SPR8_TBL,X
         STA GAME_SPRITE_Y_COPY_TBL+8
 
-        LDY HERO_CHOP_FRAME_TBL,X
+        LDY HERO_COPTER_FRAME_TBL,X
         STY GAME_SPRITE_FRAME_TBL+5
         INY
         STY GAME_SPRITE_FRAME_TBL+6
@@ -6033,31 +6034,31 @@ a362E   .BYTE $82
 a362F   .BYTE $64
 
         ;In total 12 animation frames for the hero helicopter
-HERO_CHOP_FRAME_TBL
+HERO_COPTER_FRAME_TBL
         .BYTE $83,$97,$93,$8B,$A3,$A7,$87,$9F
         .BYTE $9B,$8F,$AB,$AF
-HERO_CHOP_X_OFFSET_SPR6_TBL
+HERO_COPTER_X_OFFSET_SPR6_TBL
         .BYTE $FA,$FA,$FA,$0A,$0A,$0A,$06,$06
         .BYTE $06,$F6,$F6,$F6
-HERO_CHOP_Y_OFFSET_SPR6_TBL
+HERO_COPTER_Y_OFFSET_SPR6_TBL
         .BYTE $15,$15,$15,$0A,$0A,$0A,$EB,$EB
         .BYTE $EB,$F6,$F6,$F6
-HERO_CHOP_X_OFFSET_SPR7_TBL
+HERO_COPTER_X_OFFSET_SPR7_TBL
         .BYTE $06,$06,$06,$0A,$0A,$0A,$FA,$FA
         .BYTE $FA,$F6,$F6,$F6
-HERO_CHOP_Y_OFFSET_SPR7_TBL
+HERO_COPTER_Y_OFFSET_SPR7_TBL
         .BYTE $15,$15,$15,$F6,$F6,$F6,$EB,$EB
         .BYTE $EB,$0A,$0A,$0A
-HERO_CHOP_X_OFFSET_SPR8_TBL
+HERO_COPTER_X_OFFSET_SPR8_TBL
         .BYTE $00,$00,$00,$15,$15,$15,$00,$00
         .BYTE $00,$EB,$EB,$EB
-HERO_CHOP_Y_OFFSET_SPR8_TBL
+HERO_COPTER_Y_OFFSET_SPR8_TBL
         .BYTE $2A,$2A,$2A,$00,$00,$00,$D6,$D6
         .BYTE $D6,$00,$00,$00
-HERO_CHOP_X_OFFSET_SPR5_TBL
+HERO_COPTER_X_OFFSET_SPR5_TBL
         .BYTE $00,$00,$00,$FA,$FA,$FA,$00,$00
         .BYTE $00,$06,$06,$06
-HERO_CHOP_Y_OFFSET_SPR5_TBL
+HERO_COPTER_Y_OFFSET_SPR5_TBL
         .BYTE $F3,$F3,$F3,$00,$00,$00,$0D,$0D
         .BYTE $0D,$00,$00,$00
 
@@ -6154,7 +6155,7 @@ a3770   .BYTE $00
 f3771   .BYTE $00
 a3772   .BYTE $00
 a3773   .BYTE $00
-HERO_CHOP_ANIM_IDX
+HERO_COPTER_ANIM_IDX
         .BYTE $00
 
 j3775   LDX a3773
