@@ -771,7 +771,7 @@ j08D4   LDX #$00
 b08EB   STX GAME_JOY_STATE
         STX GAME_JOY_DIR_STATE
         STX GAME_JOY_STATE_COPY
-        STX a1D63
+        STX GAME_JOY_STATE_COPY2
         STX a1D64
         STX a1D65
         JMP j07FB
@@ -1677,6 +1677,7 @@ j0F48   LDA #$01     ;#%00000001
 b0F6A   PLA
         RTS
 
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 s0F6C   LDA a0967
         BEQ b0F72
         RTS
@@ -2045,13 +2046,13 @@ a1299   .BYTE $32,$33,$34,$35,$36,$37,$38,$39
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 s12A7   LDA GAME_JOY_STATE
         AND #$0F                        ;Just the direction bits
-        BEQ b12BB
+        BEQ _EXIT
         CMP a12F0
         BNE b12BC
         LDA a12F2
         BEQ b12C7
         DEC a12F2
-b12BB   RTS
+_EXIT   RTS
 
 b12BC   STA a12F0
         LDA #$00
@@ -2089,10 +2090,10 @@ f12FE   .BYTE $46,$47,$48,$49,$00,$4E,$4F,$50
         .BYTE $51,$00,$56,$57,$58,$59,$00,$5E
         .BYTE $5F,$60,$61,$00
 
-s1312   LDA a1D63
+s1312   LDA GAME_JOY_STATE_COPY2
         AND a12F1
-        STA a1D63
-        LDA #$FF     ;#%11111111
+        STA GAME_JOY_STATE_COPY2
+        LDA #$FF
         STA a12F1
         LDA aF8
         BEQ b135B
@@ -2112,24 +2113,24 @@ b1337   LDA aFE
         BCC b1347
         RTS
 
-b133E   LDA a1D63
-        AND #$1E     ;#%00011110
-        STA a1D63
+b133E   LDA GAME_JOY_STATE_COPY2
+        AND #%00011110                  ;Up masked
+        STA GAME_JOY_STATE_COPY2
         RTS
 
-b1347   LDA a1D63
-        AND #$1D     ;#%00011101
-        STA a1D63
+b1347   LDA GAME_JOY_STATE_COPY2
+        AND #%00011101                  ;Down masked
+        STA GAME_JOY_STATE_COPY2
         RTS
 
-b1350   LDA a1D63
-        AND #$17     ;#%00010111
-        STA a1D63
+b1350   LDA GAME_JOY_STATE_COPY2
+        AND #%00010111                  ;Right masked
+        STA GAME_JOY_STATE_COPY2
         JMP j1328
 
-b135B   LDA a1D63
-        AND #$1B     ;#%00011011
-        STA a1D63
+b135B   LDA GAME_JOY_STATE_COPY2
+        AND #%00011011                  ;Left masked
+        STA GAME_JOY_STATE_COPY2
         JMP j1328
 
 s1366   LDA GAME_SMOOTH_X
@@ -3234,9 +3235,9 @@ b1C0E   ROR TMP_2493
         ROR TMP_2493
         ROR TMP_2493
         ROR TMP_2493
-        LDA a1D63
+        LDA GAME_JOY_STATE_COPY2
         AND TMP_2493
-        STA a1D63
+        STA GAME_JOY_STATE_COPY2
         RTS
 
 a1C27   .BYTE $00
@@ -3277,12 +3278,12 @@ _L01    LDA GAME_SMOOTH_Y
 _L02    CMP #$04
         BEQ b1C6B
         LDA GAME_JOY_STATE
-        AND #%00010011                  ;Up, Down, Fire
-        STA a1D63
+        AND #%00010011                  ;Left & Right masked
+        STA GAME_JOY_STATE_COPY2
         RTS
 
 b1C6B   TXA
-        STA a1D63
+        STA GAME_JOY_STATE_COPY2
 b1C6F   RTS
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
@@ -3326,12 +3327,12 @@ _L01    LDA GAME_SMOOTH_Y
 _L02    CMP #$04
         BEQ _L03
         LDA GAME_JOY_STATE
-        AND #%00010011                  ;Up, Down, Fire
-        STA a1D63
+        AND #%00010011                  ;Left & Right masked
+        STA GAME_JOY_STATE_COPY2
         RTS
 
 _L03    TXA
-        STA a1D63
+        STA GAME_JOY_STATE_COPY2
         RTS
 
 a1CC0   .BYTE $00
@@ -3342,18 +3343,22 @@ GAME_SMOOTH_SCROLL_BY_1
         STA a0C
         STA a0D
         STA GAME_HARD_SCROLL_DIR
-        LSR a1D63
+        LSR GAME_JOY_STATE_COPY2
         BCC _L00
-        JSR GAME_SMOOTH_SCROLL_Y_INC_BY_1
-_L00    LSR a1D63
+        JSR GAME_SMOOTH_SCROLL_Y_INC_BY_1       ;Up
+
+_L00    LSR GAME_JOY_STATE_COPY2
         BCC _L01
-        JSR GAME_SMOOTH_SCROLL_Y_DEC_BY_1
-_L01    LSR a1D63
+        JSR GAME_SMOOTH_SCROLL_Y_DEC_BY_1       ;Down
+
+_L01    LSR GAME_JOY_STATE_COPY2
         BCC _L02
-        JSR GAME_SMOOTH_SCROLL_X_INC_BY_1
-_L02    LSR a1D63
+        JSR GAME_SMOOTH_SCROLL_X_INC_BY_1       ;Left
+
+_L02    LSR GAME_JOY_STATE_COPY2
         BCC _L03
-        JSR GAME_SMOOTH_SCROLL_X_DEC_BY_1
+        JSR GAME_SMOOTH_SCROLL_X_DEC_BY_1       ;Right
+
 _L03    LDY GAME_JOY_STATE
         LDA GAME_HARD_SCROLL_DIR
         BNE b1CF2
@@ -3367,18 +3372,22 @@ GAME_SMOOTH_SCROLL_BY_2
         STA a0C
         STA a0D
         STA GAME_HARD_SCROLL_DIR
-        LSR a1D63
+        LSR GAME_JOY_STATE_COPY2
         BCC _L00
-        JSR GAME_SMOOTH_SCROLL_Y_INC_BY_2
-_L00    LSR a1D63
+        JSR GAME_SMOOTH_SCROLL_Y_INC_BY_2       ;Up
+
+_L00    LSR GAME_JOY_STATE_COPY2
         BCC _L01
-        JSR GAME_SMOOTH_SCROLL_Y_DEC_BY_2
-_L01    LSR a1D63
+        JSR GAME_SMOOTH_SCROLL_Y_DEC_BY_2       ;Down
+
+_L01    LSR GAME_JOY_STATE_COPY2
         BCC _L02
-        JSR GAME_SMOOTH_SCROLL_X_INC_BY_2
-_L02    LSR a1D63
+        JSR GAME_SMOOTH_SCROLL_X_INC_BY_2       ;Left
+
+_L02    LSR GAME_JOY_STATE_COPY2
         BCC _L03
-        JSR GAME_SMOOTH_SCROLL_X_DEC_BY_2
+        JSR GAME_SMOOTH_SCROLL_X_DEC_BY_2       ;Right
+
 _L03    LDY GAME_JOY_STATE
         LDA GAME_HARD_SCROLL_DIR
         BNE b1CF2
@@ -3393,7 +3402,7 @@ j1D2A   LDA a1D3E
         STA GAME_JOY_STATE
         STA GAME_JOY_STATE_COPY
         STA GAME_JOY_DIR_STATE
-        STA a1D63
+        STA GAME_JOY_STATE_COPY2
         RTS
 
 a1D3E   .BYTE $00
@@ -3409,18 +3418,18 @@ _L01    LDA $DC01                       ;Read Joy port #2
         STA GAME_JOY_STATE              ; Save the state
         STA GAME_JOY_STATE_COPY         ; twice
 
-        AND #$0F                        ;Mask direction
+        AND #$0F                        ;Only select direction movements
         BEQ _L02                        ; Joy movement? No
         STA GAME_JOY_DIR_STATE          ;Save joy movement
 _L02    LDA GAME_JOY_STATE              ;Load full joy state
         RTS
 
 GAME_JOY_STATE          .BYTE $00
-a1D63                   .BYTE $00
+GAME_JOY_STATE_COPY2    .BYTE $00
 a1D64                   .BYTE $00       ;Unused?
 a1D65                   .BYTE $00       ;Unused?
-GAME_JOY_STATE_COPY     .BYTE $00
-GAME_JOY_DIR_STATE      .BYTE $00
+GAME_JOY_STATE_COPY     .BYTE $00       ;The joystick state: up,down,left,right,fire
+GAME_JOY_DIR_STATE      .BYTE $00       ;Like state, but with "fire" masked
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 ; GAME_HARD_SCROLL_DIR:
@@ -4228,7 +4237,7 @@ _L04    JSR s1312
 
         LDA #$00
         STA GAME_JOY_STATE
-        STA a1D63
+        STA GAME_JOY_STATE_COPY2
         STA GAME_JOY_STATE_COPY
 
         LDA #$00
@@ -4763,7 +4772,7 @@ j27A6   LDA aE0
         ADC aF1
         STA aF5
 j27C1   LDY aF2
-        LDA #$00     ;#%00000000
+        LDA #$00
         STA aF0
         LDA (pF4),Y
         LSR A
