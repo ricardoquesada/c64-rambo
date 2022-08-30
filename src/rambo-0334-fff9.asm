@@ -34,7 +34,7 @@ a04 = $04
 a05 = $05
 TMP_06 = $06
 a09 = $09
-a0A = $0A
+GAME_HARD_SCROLL_DIR = $0A
 GAME_ENERGY_TO_DECREASE = $0B           ;Ammount of energy to decrease to the player
 a0C = $0C
 a0D = $0D
@@ -169,18 +169,20 @@ MUSIC_PATCH             .MACRO x, note_list_addr
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
         * = $0334
 
-        JMP j1D8F
+        JMP GAME_SPRITE_SYNC_PROPERTIES
 
 s0337   JMP j28FF
 
-        JMP j1D2A
+s033A   JMP j1D2A
 
 GAME_MAYBE_SELECT_NEXT_WEAPON_BIS
         JMP GAME_MAYBE_SELECT_NEXT_WEAPON
 
-s0340   JMP j1D68
+GAME_DO_HARD_SCROLL_BIS
+        JMP GAME_DO_HARD_SCROLL
 
-s0343   JMP j0D3D
+GAME_MAP_PAINT_BIS
+        JMP GAME_MAP_PAINT
 
         JMP GAME_WAIT_RASTER_TICK_VAR
 
@@ -207,7 +209,8 @@ GET_SCORE_BCD_DIGIT_BIS
 GAME_MAYBE_PLAY_SFX_BIS
         JMP GAME_MAYBE_PLAY_SFX
 
-s0364   JMP j07D5
+GAME_SPRITE_SYNC_PROPERTEIS_AFTER_RASTER_BIS
+        JMP GAME_SPRITE_SYNC_PROPERTIES_AFTER_RASTER
 
 GAME_INIT_BIS
         JMP GAME_INIT
@@ -243,9 +246,9 @@ GAME_INIT
         CLI
 
 _GAME_MAIN_LOOP
-        JSR j07D5
-        JSR j0D3D
-        JSR j1D68
+        JSR GAME_SPRITE_SYNC_PROPERTIES_AFTER_RASTER
+        JSR GAME_MAP_PAINT
+        JSR GAME_DO_HARD_SCROLL
         JSR j0B2B
         JSR s0F6C
 
@@ -459,21 +462,21 @@ s0513   LDX a0558
         STA aF8
         LDA #$28     ;#%00101000
         STA a0565
-b052D   LDA #$08     ;#%00001000
-        STA a0A
-        JSR j1D68
-        JSR j0D3D
+b052D   LDA #$08                        ;Scroll left
+        STA GAME_HARD_SCROLL_DIR
+        JSR GAME_DO_HARD_SCROLL
+        JSR GAME_MAP_PAINT
         DEC a0565
         BNE b052D
-        LDA #$00     ;#%00000000
-        STA a0A
-        LDA #$10     ;#%00010000
-        STA $D016    ;VIC Control Register 2
+        LDA #$00
+        STA GAME_HARD_SCROLL_DIR
+        LDA #$10                        ;Smooth-x = 0
+        STA $D016                       ;VIC Control Register 2
         JSR VIC_SCREEN_ENABLE
         JSR s1F9B
         JMP j1DD5
 
-b054E   LDA #$01     ;#%00000001
+b054E   LDA #$01
         STA IS_GAME_OVER
         PLA
         PLA
@@ -608,8 +611,9 @@ j07CF   LDA #$00
         RTS
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
-j07D5   JSR GAME_WAIT_RASTER_TICK_VAR
-        JSR j1D8F
+GAME_SPRITE_SYNC_PROPERTIES_AFTER_RASTER
+        JSR GAME_WAIT_RASTER_TICK_VAR
+        JSR GAME_SPRITE_SYNC_PROPERTIES
         JMP GAME_WAIT_RASTER_TICK_DB
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
@@ -1366,25 +1370,29 @@ IS_GAME_MUSIC_ENABLED   .BYTE $00
 _SFX_TO_PLAY            .BYTE $00
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
-j0D3D   LDA a1D8C
+; Paints the map
+; $0D3D
+GAME_MAP_PAINT
+        LDA GAME_HARD_SCROLL_DIR_COPY
         BNE _L00
         RTS
 
 _L00    LDX #$00
-        STX a1D8C
+        STX GAME_HARD_SCROLL_DIR_COPY
+
         LSR A
         BCC _L01
-        JMP j2867
+        JMP GAME_MAP_PAINT_DOWN         ;Down
 
 _L01    LSR A
         BCC _L02
-        JMP j2832
+        JMP GAME_MAP_PAINT_UP           ;Up
 
 _L02    LSR A
         BCC _L03
-        JMP j277A
+        JMP GAME_MAP_PAINT_RIGHT        ;Right
 
-_L03    JMP j274A
+_L03    JMP GAME_MAP_PAINT_LEFT         ;Left
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 s0D5D   LDY f0D88,X
@@ -1615,7 +1623,7 @@ j0F00   LDA TMP_2493
         ASL A
         CLC
         ADC GAME_SMOOTH_Y
-        ADC #$2C     ;#%00101100
+        ADC #44
         STA GAME_SPRITE_Y_COPY_TBL+4
         JMP j0F48
 
@@ -1626,9 +1634,9 @@ s0F18   PHA
         RTS
 
 b0F20   LDA a28E6
-        CMP #$C0     ;#%11000000
+        CMP #$C0                        ;LSB address
         BEQ b0F6A
-        LDA #$2B     ;#%00101011
+        LDA #$2B
         STA GAME_SPRITE_Y_COPY_TBL+4
         LDA GAME_SMOOTH_X
         CLC
@@ -2323,7 +2331,8 @@ a14ED   .BYTE $00
 a14EE   .BYTE $00
 a14EF   .BYTE $00
 
-s14F0   LDA a1D8C
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+s14F0   LDA GAME_HARD_SCROLL_DIR_COPY
         BEQ b14F6
         RTS
 
@@ -2684,8 +2693,8 @@ _L03    TXA
         PHA
         JSR GAME_HARD_SCROLL_DOWN
         LDA #$01
-        STA a1D8C
-        JSR j0D3D
+        STA GAME_HARD_SCROLL_DIR_COPY
+        JSR GAME_MAP_PAINT
         PLA
         TAX
         DEX
@@ -2697,7 +2706,7 @@ _L03    TXA
         JSR GAME_UPDATE_SPRITE_SCORE
         JSR GAME_UPDATE_SCORE_FROM_POINTS
         JSR GAME_UPDATE_SPRITE_SCORE
-        JSR j1D8F
+        JSR GAME_SPRITE_SYNC_PROPERTIES
         JSR j28FF
         JSR VIC_SCREEN_ENABLE
         JSR s1F9B
@@ -3332,7 +3341,7 @@ GAME_SMOOTH_SCROLL_BY_1
         LDA #$00
         STA a0C
         STA a0D
-        STA a0A
+        STA GAME_HARD_SCROLL_DIR
         LSR a1D63
         BCC _L00
         JSR GAME_SMOOTH_SCROLL_Y_INC_BY_1
@@ -3346,7 +3355,7 @@ _L02    LSR a1D63
         BCC _L03
         JSR GAME_SMOOTH_SCROLL_X_DEC_BY_1
 _L03    LDY GAME_JOY_STATE
-        LDA a0A
+        LDA GAME_HARD_SCROLL_DIR
         BNE b1CF2
         LDY #$FF
 b1CF2   STY a12F1
@@ -3357,7 +3366,7 @@ GAME_SMOOTH_SCROLL_BY_2
         LDA #$00
         STA a0C
         STA a0D
-        STA a0A
+        STA GAME_HARD_SCROLL_DIR
         LSR a1D63
         BCC _L00
         JSR GAME_SMOOTH_SCROLL_Y_INC_BY_2
@@ -3371,7 +3380,7 @@ _L02    LSR a1D63
         BCC _L03
         JSR GAME_SMOOTH_SCROLL_X_DEC_BY_2
 _L03    LDY GAME_JOY_STATE
-        LDA a0A
+        LDA GAME_HARD_SCROLL_DIR
         BNE b1CF2
         LDY #$FF
         JMP b1CF2
@@ -3414,33 +3423,45 @@ GAME_JOY_STATE_COPY     .BYTE $00
 GAME_JOY_DIR_STATE      .BYTE $00
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
-j1D68   LDA a0A
-        STA a1D8C
-        BEQ b1D76
-        JSR s1D77
-        LDA #$00
-        STA a0A
-b1D76   RTS
+; GAME_HARD_SCROLL_DIR:
+;       1: Scroll down
+;       2: Scroll up
+;       4: Scroll right
+;    rest: Scroll left
+GAME_DO_HARD_SCROLL
+        LDA GAME_HARD_SCROLL_DIR
+        STA GAME_HARD_SCROLL_DIR_COPY
+        BEQ _EXIT
 
-s1D77   LSR A
-        BCC b1D7D
+        JSR _DO_HARD_SCROLL
+
+        LDA #$00
+        STA GAME_HARD_SCROLL_DIR
+_EXIT   RTS
+
+_DO_HARD_SCROLL
+        LSR A
+        BCC _L00
         JMP GAME_HARD_SCROLL_DOWN
 
-b1D7D   LSR A
-        BCC b1D83
+_L00    LSR A
+        BCC _L01
         JMP GAME_HARD_SCROLL_UP
 
-b1D83   LSR A
-        BCC b1D89
+_L01    LSR A
+        BCC _L02
         JMP GAME_HARD_SCROLL_RIGHT
 
-b1D89   JMP GAME_HARD_SCROLL_LEFT
+_L02    JMP GAME_HARD_SCROLL_LEFT
 
-a1D8C   .BYTE $00,$00
-a1D8E   .BYTE $00
+GAME_HARD_SCROLL_DIR_COPY       .BYTE $00
+                                .BYTE $00
+a1D8E                           .BYTE $00
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
-j1D8F
+; Copies the "copy" properties into the "non-copy" properties
+; And for sprites 5-11, "sprite.x = sprite_copy.x * 2"
+GAME_SPRITE_SYNC_PROPERTIES
         LDX #13
 _L00    LDA GAME_SPRITE_Y_COPY_TBL,X
         STA GAME_SPRITE_Y_TBL,X
@@ -3462,6 +3483,7 @@ _L01    LDA GAME_SPRITE_X_COPY_TBL,X
         LDA GAME_SPRITE_X_COPY_TBL+12
         STA GAME_SPRITE_X_TBL+12
 
+        ; Sprites 5-11 use X *= 2
         LDX #$06
 _L02    LDA GAME_SPRITE_X_COPY_TBL+5,X
         ASL A
@@ -3499,9 +3521,9 @@ j1DD5   LDA $D016                       ;VIC Control Register 2
 
 b1DE0   LDA #$00
         STA GAME_SMOOTH_X
-        LDA a0A
-        ORA #$04
-        STA a0A
+        LDA GAME_HARD_SCROLL_DIR
+        ORA #$04                        ;Hard Scroll right
+        STA GAME_HARD_SCROLL_DIR
         JMP j1DD5
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
@@ -3516,9 +3538,9 @@ GAME_SMOOTH_SCROLL_X_INC_BY_2
 
 _L00    LDA #$00
         STA GAME_SMOOTH_X
-        LDA a0A
-        ORA #$04
-        STA a0A
+        LDA GAME_HARD_SCROLL_DIR
+        ORA #$04                        ;Hard Scroll right
+        STA GAME_HARD_SCROLL_DIR
         JMP j1DD5
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
@@ -3599,9 +3621,9 @@ GAME_SMOOTH_SCROLL_X_DEC_BY_1
 
 _L00    LDA #$07
         STA GAME_SMOOTH_X
-        LDA a0A
-        ORA #$08
-        STA a0A
+        LDA GAME_HARD_SCROLL_DIR
+        ORA #$08                        ;Hard scroll left
+        STA GAME_HARD_SCROLL_DIR
         JMP j1DD5
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
@@ -3615,9 +3637,9 @@ GAME_SMOOTH_SCROLL_X_DEC_BY_2
 
 _L00    LDA #$06
         STA GAME_SMOOTH_X
-        LDA a0A
-        ORA #$08
-        STA a0A
+        LDA GAME_HARD_SCROLL_DIR
+        ORA #$08                        ;Hard scroll left
+        STA GAME_HARD_SCROLL_DIR
         JMP j1DD5
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
@@ -3706,9 +3728,9 @@ s1F9B   LDA $D011                       ;VIC Control Register 1
 
 b1FA6   LDA #$00
         STA GAME_SMOOTH_Y
-        LDA a0A
-        ORA #$01
-        STA a0A
+        LDA GAME_HARD_SCROLL_DIR
+        ORA #$01                        ;Hard scroll down
+        STA GAME_HARD_SCROLL_DIR
         JMP s1F9B
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
@@ -3723,9 +3745,9 @@ GAME_SMOOTH_SCROLL_Y_INC_BY_2
 
 _L00    LDA #$00
         STA GAME_SMOOTH_Y
-        LDA a0A
-        ORA #$01
-        STA a0A
+        LDA GAME_HARD_SCROLL_DIR
+        ORA #$01                        ;Hard scroll down
+        STA GAME_HARD_SCROLL_DIR
         JMP s1F9B
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
@@ -3885,9 +3907,9 @@ GAME_SMOOTH_SCROLL_Y_DEC_BY_1
 
 _L00    LDA #$07
         STA GAME_SMOOTH_Y
-        LDA a0A
-        ORA #$02
-        STA a0A
+        LDA GAME_HARD_SCROLL_DIR
+        ORA #$02                        ;Hard scroll up
+        STA GAME_HARD_SCROLL_DIR
         JMP s1F9B
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
@@ -3902,9 +3924,9 @@ GAME_SMOOTH_SCROLL_Y_DEC_BY_2
 
 _L00    LDA #$06
         STA GAME_SMOOTH_Y
-        LDA a0A
-        ORA #$02
-        STA a0A
+        LDA GAME_HARD_SCROLL_DIR
+        ORA #$02                        ;Hard scroll up
+        STA GAME_HARD_SCROLL_DIR
         JMP s1F9B
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
@@ -4226,7 +4248,7 @@ _L06    LDA COPTER_MODE_ENABLED
 _L07    JSR s1BD4
 _L08    JSR s0EB4
         JSR s2436
-        LDA a0A
+        LDA GAME_HARD_SCROLL_DIR
         BNE _L09
         JSR GAME_MAYBE_TOGGLE_PAUSE
 _L09    PLA
@@ -4308,7 +4330,7 @@ _L00    TYA
         LDA #$FF                        ;All sprites
         STA $D015                       ;Sprite display Enable
         JSR j28FF
-        JMP j1D8F
+        JMP GAME_SPRITE_SYNC_PROPERTIES
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 s24B4   LDA a24F4
@@ -4349,8 +4371,9 @@ a24F7   .BYTE $34,$00,$00,$00,$00,$00,$00,$00
         .BYTE $00,$00,$00,$00,$00,$00,$00
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+; Why only update the score is there is no scrolling?
 GAME_UPDATE_SPRITE_SCORE
-        LDA a1D8C
+        LDA GAME_HARD_SCROLL_DIR_COPY
         BEQ _L00
         RTS
 
@@ -4672,11 +4695,12 @@ a2746   .BYTE $00
 a2747   .BYTE $E2,$00,$00
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
-j274A   LDA #$27     ;#%00100111
+GAME_MAP_PAINT_LEFT
+        LDA #$27     ;#%00100111
         STA a27EF
         STA TMP_2493
-        LDX #$00     ;#%00000000
-        LDA #$40     ;#%01000000
+        LDX #$00
+        LDA #$40                        ;MSB address
         STA a27F0
         LDA aFF
         STA aE1
@@ -4698,20 +4722,22 @@ j274A   LDA #$27     ;#%00100111
         LDA aF8
         JMP j27A6
 
-j277A   LDX #$00
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+GAME_MAP_PAINT_RIGHT
+        LDX #$00
         STX a27EF
         STX TMP_2493
-        LDA #$40     ;#%01000000
+        LDA #$40                        ;MSB address
         STA a27F0
         LDA aFF
         STA aE1
         LDA aFE
         STA aE0
-        AND #$07     ;#%00000111
+        AND #$07
         STA aF3
         LDA aF8
         TAY
-        AND #$07     ;#%00000111
+        AND #$07
         STA aF7
         TYA
         LSR A
@@ -4719,20 +4745,21 @@ j277A   LDX #$00
         LSR A
         STA aF2
         LDA aF8
-        AND #$7F     ;#%01111111
+        AND #$7F
         STA aF8
+
 j27A6   LDA aE0
-        AND #$F8     ;#%11111000
+        AND #$F8
         STA aF0
         LDA aE1
         STA aF1
         ASL aF0
         ROL aF1
-        LDA #$00     ;#%00000000
+        LDA #$00
         CLC
         ADC aF0
         STA aF4
-        LDA #$E0     ;#%11100000
+        LDA #$E0
         ADC aF1
         STA aF5
 j27C1   LDY aF2
@@ -4759,13 +4786,13 @@ j27DC   LDA aF3
         ADC aF7
         TAY
         LDA (pF0),Y
-        CMP #$FD     ;#%11111101
+        CMP #$FD
         BNE b27EE
         JSR s0EDC
 
 a27EF   =*+$01
 a27F0   =*+$02
-b27EE   STA $4000
+b27EE   STA $4000                       ;Address modified in runtime
         LDA a27EF
         CLC
         ADC #$28     ;#%00101000
@@ -4803,7 +4830,9 @@ b2821   INX
         STA aF5
         JMP j27C1
 
-j2832   LDA #$05     ;#%00000101
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+GAME_MAP_PAINT_UP
+        LDA #$05     ;#%00000101
         STA aF6
         LDA #$00     ;#%00000000
         STA aF3
@@ -4821,24 +4850,26 @@ j2832   LDA #$05     ;#%00000101
         SEC
         SBC #$18     ;#%00011000
         STA aFE
-        BCS b285B
+        BCS _L00
         DEC aFF
-b285B   JSR s287D
+_L00    JSR s287D
         LDA aE0
         STA aFE
         LDA aE1
         STA aFF
         RTS
 
-j2867   LDA #$05     ;#%00000101
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+GAME_MAP_PAINT_DOWN
+        LDA #$05
         STA aF6
-        LDA #$00     ;#%00000000
+        LDA #$00
         STA aF3
         STA a28E6
         LDA aF8
-        AND #$07     ;#%00000111
+        AND #$07
         STA aF7
-        LDA #$40     ;#%01000000
+        LDA #$40                        ;MSB address
         STA a28E7
 s287D   LDA aF8
         LSR A
@@ -4890,14 +4921,14 @@ j28A5   LDY aF2
         TAY
         PLA
         CLC
-        ADC #$08     ;#%00001000
+        ADC #$08
         STA a28EB
 b28D5   LDA (pF0),Y
-        CMP #$FD     ;#%11111101
+        CMP #$FD
         BNE b28E1
         STX a2747
         JSR s0F18
-b28E1   CPX #$28     ;#%00101000
+b28E1   CPX #$28
         BCS b28FB
 a28E6   =*+$01
 a28E7   =*+$02
@@ -4905,12 +4936,12 @@ a28E7   =*+$02
         INY
         INX
 a28EB   =*+$01
-        CPY #$00     ;#%00000000
+        CPY #$00                        ;Address modified in runtime
         BCC b28D5
         INC aF2
         DEC aF6
         STX aF3
-        LDX #$00     ;#%00000000
+        LDX #$00
         STX aF7
         JMP j28A5
 
@@ -5214,9 +5245,10 @@ s3006   JMP j36C6
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 ; Helicopter anim
-j3009   JSR s0364
-        JSR s0343
-        JSR s0340
+GAME_COPTER_MAIN_LOOP
+        JSR GAME_SPRITE_SYNC_PROPERTEIS_AFTER_RASTER_BIS
+        JSR GAME_MAP_PAINT_BIS
+        JSR GAME_DO_HARD_SCROLL_BIS
         JSR GAME_PLAY_MUSIC_BIS
         JSR s3764
         JSR s356E
@@ -5231,7 +5263,7 @@ j3009   JSR s0364
         JSR GAME_UPDATE_SPRITE_SCORE_BIS
         JSR s0352
         JSR s0337
-        JMP j3009
+        JMP GAME_COPTER_MAIN_LOOP
 
 s303F   JSR GAME_UPDATE_SPRITE_ENERGY_BIS
         LDA IS_GAME_OVER
@@ -6159,11 +6191,17 @@ f3751   .BYTE $00,$00,$06,$00,$03,$00,$00,$00
 f375A   .BYTE $00,$00
 f375C   .BYTE $00,$00
 f375E   .BYTE $00,$00,$CE,$73,$37,$60
-s3764   .BYTE $20,$3A,$03,$8D,$70,$37,$29,$0F
-        .BYTE $8D,$71,$37,$60
-a3770   .BYTE $00
-f3771   .BYTE $00
-a3772   .BYTE $00
+
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+s3764   JSR s033A
+        STA a3770
+        AND #$0F
+        STA f3771
+        RTS
+
+a3770                   .BYTE $00
+f3771                   .BYTE $00
+a3772                   .BYTE $00
 HERO_COPTER_ANIM_IDX    .BYTE $00
 ENEMY_COPTER_ANIM_IDX   .BYTE $00
 
@@ -6195,7 +6233,7 @@ f37AB   .BYTE 180,190,188,184,196,198,182,194
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 ; Args: A
 j37B7   STA a3825
-        JSR s0364
+        JSR GAME_SPRITE_SYNC_PROPERTEIS_AFTER_RASTER_BIS
         SEI
         LDA #$00
         STA HERO_COPTER_ANIM_IDX
@@ -6246,7 +6284,7 @@ _L01    LDA #195
 
         CLI
 
-        JMP j3009
+        JMP GAME_COPTER_MAIN_LOOP
 
 a3825   .BYTE $00
 a3826   .BYTE $00
