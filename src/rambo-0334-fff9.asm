@@ -1119,28 +1119,28 @@ b0B35   LDA f0BE1,X
         LDA f0BF5,X
         STA GAME_SPRITE_FRAME_TBL+12
         STX a0BE0
-        LDA #$01     ;#%00000001
+        LDA #$01
         STA aCF
-        CPX #$03     ;#%00000011
+        CPX #$03
         BNE b0BBD
-        LDA #$0E     ;#%00001110
+        LDA #$0E                        ;Color Light Blue
         STA GAME_SPRITE_COLOR_TBL+12
         STA GAME_SPRITE_COLOR_TBL+4
         LDA GAME_SPRITE_FRAME_TBL+12
         CLC
-        ADC #$01     ;#%00000001
+        ADC #$01
         STA GAME_SPRITE_FRAME_TBL+4
         LDA GAME_SPRITE_Y_COPY_TBL+12
         STA GAME_SPRITE_Y_COPY_TBL+4
 a0BA9   LDA GAME_SPRITE_X_COPY_TBL+12
         SEC
-        SBC #$18     ;#%00011000
+        SBC #24
         STA GAME_SPRITE_X_COPY_TBL+4
         LDA GAME_SPRITE_X_MSB_COPY_TBL+12
         BCS b0BB6
-        EOR #$01     ;#%00000001
+        EOR #$01
 b0BB6   STA GAME_SPRITE_X_MSB_COPY_TBL+4
-        LDA #$01     ;#%00000001
+        LDA #$01
         STA aC7
         RTS
 
@@ -1151,14 +1151,14 @@ b0BBD   LDY a1B70
 
 j0BC6   DEX
         BPL b0BDD
-j0BC9   LDA #$00     ;#%00000000
+j0BC9   LDA #$00
         STA aCF
-        LDA #$00     ;#%00000000
+        LDA #$00
         STA GAME_SPRITE_Y_COPY_TBL+12
         LDA a120F
         BNE b0BDC
         STA GAME_SPRITE_Y_COPY_TBL+4
-        LDA #$00     ;#%00000000
+        LDA #$00
         STA aC7
 b0BDC   RTS
 
@@ -1718,7 +1718,7 @@ b0FBB   CMP #$02     ;#%00000010
         STA a101D
         INC a120F
         JSR j1184
-        LDA #$7D     ;#%01111101
+        LDA #125                        ;Frame: Enemy flipped vertically
         STA GAME_SPRITE_FRAME_TBL+4
         RTS
 
@@ -4217,7 +4217,7 @@ _L05    INC GAME_RASTER_TICK_DB
 
 _L06    LDA a2480
         BEQ _L07
-        JSR s3000
+        JSR HERO_CHOP_ANIM_BIS
         JMP _L08
 
 _L07    JSR s1BD4
@@ -5200,7 +5200,9 @@ f29A8   .BYTE $01,$04,$05,$06,$02,$02,$03,$01
         .BYTE $00,$00,$FF,$FF,$00,$00,$FF,$FF
         .BYTE $00,$00,$FF,$FF,$00,$00,$FF,$FF
         .BYTE $00,$00,$FF,$FF,$00,$00,$FF,$FF
-s3000   JMP j35C3
+
+HERO_CHOP_ANIM_BIS
+        JMP HERO_CHOP_ANIM
 
 s3003   JMP j37B7
 
@@ -5263,7 +5265,7 @@ b306E   JSR s3484
 j307D   JSR s34F1
         JSR s34F1
         JSR s34F1
-        JSR s30B2
+        JSR HERO_CHOP_ANIM_NEXT
         JSR s3316
         LDA a3315
         BEQ b3092
@@ -5271,78 +5273,83 @@ j307D   JSR s34F1
 
 b3092   LDA a3567
         SEC
-        SBC #$03     ;#%00000011
+        SBC #$03
         BCS b309C
-        LDA #$00     ;#%00000000
+        LDA #$00
 b309C   STA a3567
-        LDA #$F0     ;#%11110000
+        LDA #$F0
         STA a3564
-        LDA #$00     ;#%00000000
+        LDA #$00
         STA a30C3
         STA a3565
-        LDA #$04     ;#%00000100
+        LDA #$04
         STA a3127
         RTS
 
-s30B2   LDA a3774
-        CMP #$0B     ;#%00001011
-        BEQ b30BD
-        INC a3774
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+HERO_CHOP_ANIM_NEXT
+        LDA HERO_CHOP_ANIM_IDX
+        CMP #$0B                        ;Last frame to animate?
+        BEQ _L00                        ; Yes, jump
+        INC HERO_CHOP_ANIM_IDX
         RTS
 
-b30BD   LDA #$00     ;#%00000000
-        STA a3774
+_L00    LDA #$00                        ;Reset animation idx
+        STA HERO_CHOP_ANIM_IDX
         RTS
+
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 
 a30C3   .BYTE $00
+
 j30C4   LDA a32D7
-        CMP #$01     ;#%00000001
-        BEQ b30CC
+        CMP #$01
+        BEQ _L00
         RTS
 
-b30CC   LDA a3315
-        BNE b30D2
+_L00    LDA a3315
+        BNE _L01
         RTS
 
-b30D2   LDA GAME_SPRITE_Y_COPY_TBL+10
+_L01    LDA GAME_SPRITE_Y_COPY_TBL+10
         STA a38DE
         LDA a362F
         STA a38DF
         LDA GAME_SPRITE_X_COPY_TBL+10
         ASL A
         STA a38DA
-        LDA #$00     ;#%00000000
+        LDA #$00
         ROL A
         STA a38DB
         LDA a362E
         ASL A
         STA a38DC
-        LDA #$00     ;#%00000000
+        LDA #$00
         ROL A
         STA a38DD
-        LDX a3774
+        LDX HERO_CHOP_ANIM_IDX
         LDA f3128,X
         STA a38E1
         LDA f3134,X
         STA a38E0
         JSR s3897
-        BCC b3119
+        BCC _EXIT
         LDX #$01
         JSR s316A
 
         LDA #$02                        ;Set 002.000 points
         LDX #$02
         JSR SET_LOCAL_POINTS_BIS
-        JMP j311A
+        JMP _L02
 
-b3119   RTS
+_EXIT   RTS
 
-j311A   LDA a3127
-        BEQ b3123
+_L02    LDA a3127
+        BEQ _L03
         DEC a3127
         RTS
 
-b3123   INC a30C3
+_L03    INC a30C3
         RTS
 
 a3127   .BYTE $04
@@ -5351,21 +5358,22 @@ f3128   .BYTE $1F,$1F,$1F,$09,$09,$09,$1F,$1F
 f3134   .BYTE $0A,$0A,$0A,$22,$22,$22,$0A,$0A
         .BYTE $0A,$22,$22,$22
 
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 s3140   LDA SELECTED_WEAPON
-        CMP #$05
-        BEQ b3147
+        CMP #$05                        ;Missile
+        BEQ _L00
         RTS
 
-b3147   LDA a3770
-        AND #$10     ;#%00010000
-        BNE b314F
+_L00    LDA a3770
+        AND #$10
+        BNE _L01
         RTS
 
-b314F   LDA a32D7
-        BEQ b3155
+_L01    LDA a32D7
+        BEQ _L02
         RTS
 
-b3155   INC a32D7
+_L02    INC a32D7
         LDA GAME_SPRITE_X_COPY_TBL+12
         LSR A
         STA GAME_SPRITE_X_COPY_TBL+10
@@ -5376,6 +5384,7 @@ b3155   INC a32D7
         STA a324D
         RTS
 
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 s316A   LDA #65                         ;Frame: Explosion #00
         STA GAME_SPRITE_FRAME_TBL+9,X
         LDA #$02
@@ -5387,50 +5396,53 @@ s316A   LDA #65                         ;Frame: Explosion #00
         LDA #$0E                        ;SFX to play
         JMP GAME_MAYBE_PLAY_SFX_BIS
 
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 s3181   LDA f319B,X
-        BEQ b318A
+        BEQ _L00
         DEC f319B,X
         RTS
 
-b318A   LDA #$02
+_L00    LDA #$02
         STA f319B,X
         LDA GAME_SPRITE_FRAME_TBL+9,X
         CMP #69                         ;Frame: Explosion #04 (last frame)
-        BNE b3198
+        BNE _L01
         JMP j32C8
 
-b3198   INC GAME_SPRITE_FRAME_TBL+9,X
+_L01    INC GAME_SPRITE_FRAME_TBL+9,X
         RTS
 
 f319B   .BYTE $00,$00
+
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 s319D   LDA f32D6
-        CMP #$01     ;#%00000001
-        BEQ b31A5
+        CMP #$01
+        BEQ _L00
         RTS
 
-b31A5   LDA GAME_SPRITE_Y_COPY_TBL+9
+_L00    LDA GAME_SPRITE_Y_COPY_TBL+9
         STA a38DE
         LDA GAME_SPRITE_Y_COPY_TBL+12
         STA a38DF
         LDA GAME_SPRITE_X_COPY_TBL+9
         ASL A
         STA a38DA
-        LDA #$00     ;#%00000000
+        LDA #$00
         ROL A
         STA a38DB
         LDA GAME_SPRITE_X_COPY_TBL+12
         STA a38DC
-        LDA #$00     ;#%00000000
+        LDA #$00
         STA a38DD
         LDA #$0C
         STA a38E1
         LDA #$0A
         STA a38E0
         JSR s3897
-        BCC b31D7
-        JMP j3206
+        BCC _L01
+        JMP _L02
 
-b31D7   LDA GAME_SPRITE_Y_COPY_TBL+9
+_L01    LDA GAME_SPRITE_Y_COPY_TBL+9
         STA a38DE
         LDA GAME_SPRITE_Y_COPY_TBL+4
         STA a38DF
@@ -5449,34 +5461,36 @@ b31D7   LDA GAME_SPRITE_Y_COPY_TBL+9
         LDA #$0A
         STA a38E0
         JSR s3897
-        BCC b320F
-j3206   LDA #$05
+        BCC _EXIT
+
+_L02    LDA #$05
         STA GAME_ENERGY_TO_DECREASE
         LDX #$00
         JSR s316A
-b320F   RTS
+_EXIT   RTS
 
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 s3210   LDA a32D8
-        BNE b3216
+        BNE _L00
         RTS
 
-b3216   DEC a32D8
+_L00    DEC a32D8
         LDA a3825
-        BNE b321F
+        BNE _L01
         RTS
 
-b321F   LDA f32D6
-        BEQ b3225
+_L01    LDA f32D6
+        BEQ _L02
         RTS
 
-b3225   LDA a362F
+_L02    LDA a362F
         CMP #$C0     ;#%11000000
         BCS b324B
         LDA #$14     ;#%00010100
         CMP #$14     ;#%00010100
         BCC b324B
         INC f32D6
-        LDX a3774
+        LDX HERO_CHOP_ANIM_IDX
         STX a324C
         LDA #$0E     ;#%00001110
         STA GAME_SPRITE_COLOR_TBL+9
@@ -5496,18 +5510,20 @@ f325A   .BYTE $00,$00,$00,$FD,$FD,$FD,$00,$00
 f3266   .BYTE $2E,$2E,$2E,$30,$30,$30,$2F,$2F
         .BYTE $2F,$31,$31,$31
 
-s3272   LDX #$01     ;#%00000001
-b3274   LDA f32D6,X
-        CMP #$02     ;#%00000010
-        BEQ b3281
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+s3272   LDX #$01
+_L00    LDA f32D6,X
+        CMP #$02
+        BEQ _L01
         JSR s3288
-        JMP j3284
+        JMP _L02
 
-b3281   JSR s3181
-j3284   DEX
-        BPL b3274
+_L01    JSR s3181
+_L02    DEX
+        BPL _L00
         RTS
 
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 s3288   LDY a324C,X
         LDA f325A,Y
         CLC
@@ -5552,39 +5568,43 @@ f32D6   .BYTE $00
 a32D7   .BYTE $00
 a32D8   .BYTE $00
 
-s32D9   LDY #$01     ;#%00000001
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+s32D9   LDY #$01
         JMP j36CE
 
-s32DE   LDX #$03     ;#%00000011
-        LDA #$00     ;#%00000000
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+s32DE   LDX #$03
+        LDA #$00
         STA a3315
-b32E5   LDA GAME_SPRITE_X_COPY_TBL+5,X
-        CMP #$AD     ;#%10101101
-        BCC b32EE
-        JMP j3308
+_L00    LDA GAME_SPRITE_X_COPY_TBL+5,X
+        CMP #173
+        BCC _L01
+        JMP _L03
 
-b32EE   LDA GAME_SPRITE_Y_COPY_TBL+5,X
-        CMP #$14     ;#%00010100
-        BCC j3308
-        CMP #$C0     ;#%11000000
-        BCS j3308
+_L01    LDA GAME_SPRITE_Y_COPY_TBL+5,X
+        CMP #20
+        BCC _L03
+        CMP #192
+        BCS _L03
         LDA a3825
-        BEQ j3308
-        LDA #$01     ;#%00000001
+        BEQ _L03
+        LDA #$01
         STA fC8,X
         STA a3315
-j3304   DEX
-        BPL b32E5
+_L02    DEX
+        BPL _L00
         RTS
 
-j3308   LDA #$00
+_L03    LDA #$00
         STA fC8,X
         LDA #20
         STA GAME_SPRITE_Y_COPY_TBL+5,X
         STA GAME_SPRITE_Y_TBL+5,X
-        JMP j3304
+        JMP _L02
 
 a3315   .BYTE $00
+
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 s3316   LDA a3568
         SEC
         SBC aF8
@@ -5943,40 +5963,51 @@ b35B6   INC aE6
         PLA
 b35C2   RTS
 
-j35C3   LDX a3774
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+HERO_CHOP_ANIM
+        LDX HERO_CHOP_ANIM_IDX
+
         LDA a362E
         CLC
-        ADC f3684,X
+        ADC HERO_CHOP_X_OFFSET_SPR5_TBL,X
         STA GAME_SPRITE_X_COPY_TBL+5
+
         LDA a362F
         CLC
-        ADC f3690,X
+        ADC HERO_CHOP_Y_OFFSET_SPR5_TBL,X
         STA GAME_SPRITE_Y_COPY_TBL+5
+
         LDA GAME_SPRITE_X_COPY_TBL+5
         CLC
-        ADC f363C,X
+        ADC HERO_CHOP_X_OFFSET_SPR6_TBL,X
         STA GAME_SPRITE_X_COPY_TBL+6
+
         LDA GAME_SPRITE_Y_COPY_TBL+5
         CLC
-        ADC f3648,X
+        ADC HERO_CHOP_Y_OFFSET_SPR6_TBL,X
         STA GAME_SPRITE_Y_COPY_TBL+6
+
         LDA GAME_SPRITE_X_COPY_TBL+5
         CLC
-        ADC f3654,X
+        ADC HERO_CHOP_X_OFFSET_SPR7_TBL,X
         STA GAME_SPRITE_X_COPY_TBL+7
+
         LDA GAME_SPRITE_Y_COPY_TBL+5
         CLC
-        ADC f3660,X
+        ADC HERO_CHOP_Y_OFFSET_SPR7_TBL,X
         STA GAME_SPRITE_Y_COPY_TBL+7
+
         LDA GAME_SPRITE_X_COPY_TBL+5
         CLC
-        ADC f366C,X
+        ADC HERO_CHOP_X_OFFSET_SPR8_TBL,X
         STA GAME_SPRITE_X_COPY_TBL+8
+
         LDA GAME_SPRITE_Y_COPY_TBL+5
         CLC
-        ADC f3678,X
+        ADC HERO_CHOP_Y_OFFSET_SPR8_TBL,X
         STA GAME_SPRITE_Y_COPY_TBL+8
-        LDY f3630,X
+
+        LDY HERO_CHOP_FRAME_TBL,X
         STY GAME_SPRITE_FRAME_TBL+5
         INY
         STY GAME_SPRITE_FRAME_TBL+6
@@ -5984,36 +6015,50 @@ j35C3   LDX a3774
         STY GAME_SPRITE_FRAME_TBL+7
         INY
         STY GAME_SPRITE_FRAME_TBL+8
-        LDA #$0F
+
+        LDA #$0F                        ;Color Light Grey
         STA GAME_SPRITE_COLOR_TBL+5
         STA GAME_SPRITE_COLOR_TBL+6
         STA GAME_SPRITE_COLOR_TBL+7
         STA GAME_SPRITE_COLOR_TBL+8
+
         JSR s32DE
+
         LDX a3315
-        LDA f362C,X
+        LDA f362C,X                     ;SFX to play for chopper
         JMP MUSIC_FN
 
 f362C   .BYTE $08,$16
 a362E   .BYTE $82
 a362F   .BYTE $64
-f3630   .BYTE $83,$97,$93,$8B,$A3,$A7,$87,$9F
+
+        ;In total 12 animation frames for the hero helicopter
+HERO_CHOP_FRAME_TBL
+        .BYTE $83,$97,$93,$8B,$A3,$A7,$87,$9F
         .BYTE $9B,$8F,$AB,$AF
-f363C   .BYTE $FA,$FA,$FA,$0A,$0A,$0A,$06,$06
+HERO_CHOP_X_OFFSET_SPR6_TBL
+        .BYTE $FA,$FA,$FA,$0A,$0A,$0A,$06,$06
         .BYTE $06,$F6,$F6,$F6
-f3648   .BYTE $15,$15,$15,$0A,$0A,$0A,$EB,$EB
+HERO_CHOP_Y_OFFSET_SPR6_TBL
+        .BYTE $15,$15,$15,$0A,$0A,$0A,$EB,$EB
         .BYTE $EB,$F6,$F6,$F6
-f3654   .BYTE $06,$06,$06,$0A,$0A,$0A,$FA,$FA
+HERO_CHOP_X_OFFSET_SPR7_TBL
+        .BYTE $06,$06,$06,$0A,$0A,$0A,$FA,$FA
         .BYTE $FA,$F6,$F6,$F6
-f3660   .BYTE $15,$15,$15,$F6,$F6,$F6,$EB,$EB
+HERO_CHOP_Y_OFFSET_SPR7_TBL
+        .BYTE $15,$15,$15,$F6,$F6,$F6,$EB,$EB
         .BYTE $EB,$0A,$0A,$0A
-f366C   .BYTE $00,$00,$00,$15,$15,$15,$00,$00
+HERO_CHOP_X_OFFSET_SPR8_TBL
+        .BYTE $00,$00,$00,$15,$15,$15,$00,$00
         .BYTE $00,$EB,$EB,$EB
-f3678   .BYTE $2A,$2A,$2A,$00,$00,$00,$D6,$D6
+HERO_CHOP_Y_OFFSET_SPR8_TBL
+        .BYTE $2A,$2A,$2A,$00,$00,$00,$D6,$D6
         .BYTE $D6,$00,$00,$00
-f3684   .BYTE $00,$00,$00,$FA,$FA,$FA,$00,$00
+HERO_CHOP_X_OFFSET_SPR5_TBL
+        .BYTE $00,$00,$00,$FA,$FA,$FA,$00,$00
         .BYTE $00,$06,$06,$06
-f3690   .BYTE $F3,$F3,$F3,$00,$00,$00,$0D,$0D
+HERO_CHOP_Y_OFFSET_SPR5_TBL
+        .BYTE $F3,$F3,$F3,$00,$00,$00,$0D,$0D
         .BYTE $0D,$00,$00,$00
 
 s369C   LDX #$01
@@ -6109,7 +6154,8 @@ a3770   .BYTE $00
 f3771   .BYTE $00
 a3772   .BYTE $00
 a3773   .BYTE $00
-a3774   .BYTE $00
+HERO_CHOP_ANIM_IDX
+        .BYTE $00
 
 j3775   LDX a3773
         LDA GAME_SPRITE_X_COPY_TBL+12
@@ -6123,7 +6169,7 @@ j3775   LDX a3773
         LDA f37AB,X
         STA GAME_SPRITE_FRAME_TBL+4
         SEC
-        SBC #$01     ;#%00000001
+        SBC #$01
         STA GAME_SPRITE_FRAME_TBL+12
         RTS
 
@@ -6160,13 +6206,14 @@ j37B7   STA a3825
         LDA #$32
         STA a3566
         JSR j3775
-        LDX #$0F     ;#%00001111
-        LDA #$00     ;#%00000000
+        LDX #$0F
+        LDA #$00
         STA a362E
         STA a362F
 b37FF   STA $D000,X  ;Sprite 0 X Pos
         DEX
         BPL b37FF
+
         LDX #$03     ;#%00000011
 b3807   LDA #$C3     ;#%11000011
         STA GAME_SPRITE_X_COPY_TBL+5,X
