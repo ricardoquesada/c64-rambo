@@ -225,7 +225,7 @@ SET_LOCAL_POINTS_BIS
         JMP SET_LOCAL_POINTS
 
 GAME_PRINT_MSG_AND_THEN_GAME_OVER_BIS
-        JMP GAME_CONTRATULATIONS_YOU_WON
+        JMP GAME_PRINT_MSG_AND_THEN_GAME_OVER
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 ; $0382
@@ -337,7 +337,7 @@ GAME_MAYBE_PRINT_GAME_OVER
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 ; A=Message to print
 ; Called with "4" all the time
-GAME_CONTRATULATIONS_YOU_WON
+GAME_PRINT_MSG_AND_THEN_GAME_OVER
         JSR _PRINT_MESSAGES
         DEC IS_GAME_OVER
         JMP GAME_INIT
