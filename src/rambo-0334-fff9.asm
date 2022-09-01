@@ -675,7 +675,7 @@ _L02    DEX
         BNE _EXIT
         LDA a0827
         BPL _EXIT
-        LDA #$00     ;#%00000000
+        LDA #$00
         STA a0966
         STA a0967
         STA a0B2A
@@ -684,7 +684,7 @@ _EXIT   RTS
 a0827   .BYTE $00
 
 _L03    LDA a0966
-        CMP #$01     ;#%00000001
+        CMP #$01
         BEQ _L04
         RTS
 
@@ -730,56 +730,56 @@ POWS_TO_RESCUE
 f086E   .BYTE $00,$00,$00,$00
 
 s0872   CMP #$01
-        BEQ b0879
-        JMP j08A6
+        BEQ _L00
+        JMP _L05
 
-b0879   INC GAME_SPRITE_X_COPY_TBL,X
-        BNE b0881
+_L00 	INC GAME_SPRITE_X_COPY_TBL,X
+        BNE _L01
         LDA #$01
         STA GAME_SPRITE_X_MSB_COPY_TBL,X
-b0881   JSR s08BE
-        BCC b0893
+_L01 	JSR _L07
+        BCC _L03
         LDA GAME_SPRITE_FRAME_TBL,X
         CMP #214                        ;Frame: POW facing right (last frame)
-        BNE b088E
+        BNE _L02
         LDA #211-1                      ;Frame: POW facing right (first frame)
-b088E   CLC
+_L02 	CLC
         ADC #$01
         STA GAME_SPRITE_FRAME_TBL,X
-b0893   LDA GAME_SPRITE_X_MSB_COPY_TBL,X
+_L03 	LDA GAME_SPRITE_X_MSB_COPY_TBL,X
         LSR A
         LDA GAME_SPRITE_X_COPY_TBL,X
         ROR A
         CMP #170
-        BEQ b089E
-b089D   RTS
+        BEQ _L04
+_EXIT 	RTS
 
-b089E   LDA #$00
+_L04 	LDA #$00
         STA f086E,X
         DEC GAME_SPRITE_STATE_TBL,X
         RTS
 
-j08A6   INC GAME_SPRITE_Y_COPY_TBL,X
+_L05 	INC GAME_SPRITE_Y_COPY_TBL,X
         DEC f086E,X
-        JSR s08BE
-        BCC b089D
+        JSR _L07
+        BCC _EXIT
         LDA GAME_SPRITE_FRAME_TBL,X
         CMP #210                        ;Frame: POW facing down (last frame)
-        BNE b08B8
+        BNE _L06
         LDA #207-1                      ;Frame: POW facing down (1st frame)
-b08B8   CLC
+_L06 	CLC
         ADC #$01
         STA GAME_SPRITE_FRAME_TBL,X
         RTS
 
-s08BE   LDA f08CF,X
-        BNE b08CA
+_L07 	LDA f08CF,X
+        BNE _L08
         LDA #$02
         STA f08CF,X
         SEC
         RTS
 
-b08CA   DEC f08CF,X
+_L08 	DEC f08CF,X
         CLC
         RTS
 
