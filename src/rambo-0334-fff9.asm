@@ -232,7 +232,7 @@ GAME_PRINT_MSG_AND_THEN_GAME_OVER_BIS
 ; Game init (not main menu)
 GAME_INIT
         JSR s16DA
-        JSR s09F3
+        JSR GAME_COPY_ORIG_MAP
         LDA #12
         JSR MUSIC_FN
         LDA #$FF                        ;Select all sprites
@@ -785,6 +785,7 @@ _L08 	DEC f08CF,X
 
 f08CF   .BYTE $00,$00,$00,$00,$00
 
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 j08D4   LDX #$00
         LDA a0968
         CLC
@@ -792,10 +793,10 @@ j08D4   LDX #$00
         STA a0968
         LDA a0966
         CMP #$01
-        BEQ b08EB
+        BEQ _L00
         DEC a0966
         LDX #$02
-b08EB   STX GAME_JOY_STATE
+_L00 	STX GAME_JOY_STATE
         STX GAME_JOY_DIR_STATE
         STX GAME_JOY_STATE_COPY
         STX GAME_JOY_STATE_COPY2
@@ -902,30 +903,33 @@ s0983   LDA #$00
         .ADDR STR_READY
 
         JSR VIC_SCREEN_ENABLE
-b09AF   LDA $D012                       ;Raster Position
+
+_L00 	LDA $D012                       ;Raster Position
         CMP #$64
-        BNE b09AF
-        LDA #$00
+        BNE _L00
+
+        LDA #$00 			;Play music
         JSR MUSIC_FN
         LDA #$02
         JSR MUSIC_FN
-        BEQ b09E1
-        JSR s09CA
-        BEQ b09AF
-        JMP b09E1
+
+        BEQ _L02
+        JSR _L01
+        BEQ _L00
+        JMP _L02
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
-s09CA   JSR GAME_READ_JOYSTICK_XXX
+_L01 	JSR GAME_READ_JOYSTICK_XXX
         LDA GAME_JOY_STATE
         STA a0982
         CMP a0981
-        BEQ b09E0
+        BEQ _EXIT
         STA a0981
         LDA a0982
-        AND #$10     ;#%00010000
-b09E0   RTS
+        AND #$10
+_EXIT 	RTS
 
-b09E1   JSR VIC_SCREEN_DISABLE
+_L02 	JSR VIC_SCREEN_DISABLE
         LDA #$0D                        ;Color Light Green
         STA GAME_SCREEN_CLEAR_COLOR
 
@@ -934,29 +938,36 @@ b09E1   JSR VIC_SCREEN_DISABLE
 
         LDA #$00
         JSR SWAP_CHARSETS_BIS
-
-s09F3   LDA #$E0
-        STA a0A06
-        LDA #$E7
-        STA a0A03
+	
+	; Fallthrough
+	
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+; Copy $E000-$EEE0 to $E000
+; Copies the original copy of the map to $E000 since the map can be modified
+; in runtime: trees, buildings, etc can get destroyed with the bazooka
+GAME_COPY_ORIG_MAP   
+	LDA #>MAP_TILES
+        STA _MAP_MSB_DST
+        LDA #>MAP_TILES_ORIG
+        STA _MAP_MSB_SRC
         LDX #$06
         LDY #$00
-a0A03   =*+$02
-b0A01   LDA $E770,Y                     ;Modified in runtime
-a0A06   =*+$02
-        STA $E000,Y                     ;Modified in runtime
+_MAP_MSB_SRC = *+$02
+_L00 	LDA MAP_TILES_ORIG,Y 		;Modified in runtime
+_MAP_MSB_DST = *+$02
+        STA MAP_TILES,Y   		;Modified in runtime
         DEY
-        BNE b0A01
-        INC a0A03
-        INC a0A06
+        BNE _L00
+        INC _MAP_MSB_SRC
+        INC _MAP_MSB_DST
         DEX
-        BPL b0A01
+        BPL _L00
 
-        LDY #$6F     ;#%01101111
-b0A15   LDA $EE70,Y
-        STA $E700,Y
+        LDY #$6F
+_L01 	LDA MAP_TILES_ORIG + $0700,Y
+        STA MAP_TILES + $0700,Y
         DEY
-        BPL b0A15
+        BPL _L01
         RTS
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
@@ -12754,7 +12765,11 @@ aCFFF   .BYTE $00
         .BYTE $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
         .BYTE $FF,$CA,$FF,$FF,$FF,$FF,$CA,$FF
         .BYTE $FF,$FF,$00,$00,$F7,$FF,$FF,$FF
-        .BYTE $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+	.BYTE $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+; $E000
+MAP_TILES
         .BYTE $02,$01,$02,$02,$15,$02,$01,$15
         .BYTE $02,$01,$02,$02,$02,$18,$02,$02
         .BYTE $02,$02,$02,$02,$02,$01,$02,$15
@@ -12993,6 +13008,10 @@ aCFFF   .BYTE $00
         .BYTE $02,$02,$02,$3C,$02,$02,$02,$02
         .BYTE $40,$40,$40,$40,$40,$40,$40,$40
         .BYTE $40,$40,$40,$3F,$40,$40,$40,$40
+
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+; $E770
+MAP_TILES_ORIG
         .BYTE $02,$01,$02,$02,$15,$02,$01,$15
         .BYTE $02,$01,$02,$02,$02,$18,$02,$02
         .BYTE $02,$02,$02,$02,$02,$01,$02,$15
