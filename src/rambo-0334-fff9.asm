@@ -942,7 +942,7 @@ _L02    JSR VIC_SCREEN_DISABLE
         ; Fallthrough
         
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
-; Copy $E000-$EEE0 to $E000
+; Copy $E770-$EEE0 to $E000
 ; Copies the original copy of the map to $E000 since the map can be modified
 ; in runtime: trees, buildings, etc can get destroyed with the bazooka
 GAME_COPY_ORIG_MAP   
@@ -13250,6 +13250,9 @@ MAP_TILES_ORIG
         .BYTE $02,$02,$02,$3E,$02,$02,$02,$02
         .BYTE $1C,$1C,$1C,$1C,$1C,$1C,$1C,$1C
         .BYTE $1C,$1C,$1C,$1E,$1C,$1C,$1C,$1C
+
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+; $EEE0
         .BYTE $55,$40,$55,$40,$55,$40,$55,$40
         .BYTE $55,$40,$55,$40,$55,$40,$55,$40
         .BYTE $55,$40,$55,$40,$55,$40,$55,$40
