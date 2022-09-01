@@ -4829,7 +4829,7 @@ j27A6   LDA aE0
 j27C1   LDY aF2
         LDA #$00
         STA aF0
-        LDA (pF4),Y
+        LDA (pF4),Y                     ;Points to MAP_TILES
         LSR A
         ROR aF0
         LSR A
