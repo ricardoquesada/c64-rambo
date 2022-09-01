@@ -165,7 +165,7 @@ MUSIC_PATCH             .MACRO x, note_list_addr
 s0337   JMP j28FF
 
 GAME_READ_JOYSTICK_XXX_BIS
-	JMP GAME_READ_JOYSTICK_XXX
+        JMP GAME_READ_JOYSTICK_XXX
 
 GAME_MAYBE_SELECT_NEXT_WEAPON_BIS
         JMP GAME_MAYBE_SELECT_NEXT_WEAPON
@@ -362,11 +362,11 @@ s0456   LDA a0B29
         LDX a0912
         BNE _L00
 
-        LDA #$03 			;Message to print: "GAME OVER"
+        LDA #$03                        ;Message to print: "GAME OVER"
         STA IS_GAME_OVER
         BNE GAME_PRINT_STRING
 
-_L00 	CLC
+_L00    CLC
         ADC a0912
 
         ; Fallthrough
@@ -733,33 +733,33 @@ s0872   CMP #$01
         BEQ _L00
         JMP _L05
 
-_L00 	INC GAME_SPRITE_X_COPY_TBL,X
+_L00    INC GAME_SPRITE_X_COPY_TBL,X
         BNE _L01
         LDA #$01
         STA GAME_SPRITE_X_MSB_COPY_TBL,X
-_L01 	JSR _L07
+_L01    JSR _L07
         BCC _L03
         LDA GAME_SPRITE_FRAME_TBL,X
         CMP #214                        ;Frame: POW facing right (last frame)
         BNE _L02
         LDA #211-1                      ;Frame: POW facing right (first frame)
-_L02 	CLC
+_L02    CLC
         ADC #$01
         STA GAME_SPRITE_FRAME_TBL,X
-_L03 	LDA GAME_SPRITE_X_MSB_COPY_TBL,X
+_L03    LDA GAME_SPRITE_X_MSB_COPY_TBL,X
         LSR A
         LDA GAME_SPRITE_X_COPY_TBL,X
         ROR A
         CMP #170
         BEQ _L04
-_EXIT 	RTS
+_EXIT   RTS
 
-_L04 	LDA #$00
+_L04    LDA #$00
         STA f086E,X
         DEC GAME_SPRITE_STATE_TBL,X
         RTS
 
-_L05 	INC GAME_SPRITE_Y_COPY_TBL,X
+_L05    INC GAME_SPRITE_Y_COPY_TBL,X
         DEC f086E,X
         JSR _L07
         BCC _EXIT
@@ -767,19 +767,19 @@ _L05 	INC GAME_SPRITE_Y_COPY_TBL,X
         CMP #210                        ;Frame: POW facing down (last frame)
         BNE _L06
         LDA #207-1                      ;Frame: POW facing down (1st frame)
-_L06 	CLC
+_L06    CLC
         ADC #$01
         STA GAME_SPRITE_FRAME_TBL,X
         RTS
 
-_L07 	LDA f08CF,X
+_L07    LDA f08CF,X
         BNE _L08
         LDA #$02
         STA f08CF,X
         SEC
         RTS
 
-_L08 	DEC f08CF,X
+_L08    DEC f08CF,X
         CLC
         RTS
 
@@ -796,7 +796,7 @@ j08D4   LDX #$00
         BEQ _L00
         DEC a0966
         LDX #$02
-_L00 	STX GAME_JOY_STATE
+_L00    STX GAME_JOY_STATE
         STX GAME_JOY_DIR_STATE
         STX GAME_JOY_STATE_COPY
         STX GAME_JOY_STATE_COPY2
@@ -890,7 +890,7 @@ s0983   LDA #$00
         LDA #$1A
         LDX #$07
         JSR MUSIC_FN
-        LDA #$01 			;Stop music (?)
+        LDA #$01                        ;Stop music (?)
         JSR MUSIC_FN
         LDA #$09
         JSR MUSIC_FN
@@ -904,11 +904,11 @@ s0983   LDA #$00
 
         JSR VIC_SCREEN_ENABLE
 
-_L00 	LDA $D012                       ;Raster Position
+_L00    LDA $D012                       ;Raster Position
         CMP #$64
         BNE _L00
 
-        LDA #$00 			;Play music
+        LDA #$00                        ;Play music
         JSR MUSIC_FN
         LDA #$02
         JSR MUSIC_FN
@@ -919,7 +919,7 @@ _L00 	LDA $D012                       ;Raster Position
         JMP _L02
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
-_L01 	JSR GAME_READ_JOYSTICK_XXX
+_L01    JSR GAME_READ_JOYSTICK_XXX
         LDA GAME_JOY_STATE
         STA a0982
         CMP a0981
@@ -927,9 +927,9 @@ _L01 	JSR GAME_READ_JOYSTICK_XXX
         STA a0981
         LDA a0982
         AND #$10
-_EXIT 	RTS
+_EXIT   RTS
 
-_L02 	JSR VIC_SCREEN_DISABLE
+_L02    JSR VIC_SCREEN_DISABLE
         LDA #$0D                        ;Color Light Green
         STA GAME_SCREEN_CLEAR_COLOR
 
@@ -938,24 +938,24 @@ _L02 	JSR VIC_SCREEN_DISABLE
 
         LDA #$00
         JSR SWAP_CHARSETS_BIS
-	
-	; Fallthrough
-	
+        
+        ; Fallthrough
+        
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 ; Copy $E000-$EEE0 to $E000
 ; Copies the original copy of the map to $E000 since the map can be modified
 ; in runtime: trees, buildings, etc can get destroyed with the bazooka
 GAME_COPY_ORIG_MAP   
-	LDA #>MAP_TILES
+        LDA #>MAP_TILES
         STA _MAP_MSB_DST
         LDA #>MAP_TILES_ORIG
         STA _MAP_MSB_SRC
         LDX #$06
         LDY #$00
 _MAP_MSB_SRC = *+$02
-_L00 	LDA MAP_TILES_ORIG,Y 		;Modified in runtime
+_L00    LDA MAP_TILES_ORIG,Y            ;Modified in runtime
 _MAP_MSB_DST = *+$02
-        STA MAP_TILES,Y   		;Modified in runtime
+        STA MAP_TILES,Y                 ;Modified in runtime
         DEY
         BNE _L00
         INC _MAP_MSB_SRC
@@ -964,7 +964,7 @@ _MAP_MSB_DST = *+$02
         BPL _L00
 
         LDY #$6F
-_L01 	LDA MAP_TILES_ORIG + $0700,Y
+_L01    LDA MAP_TILES_ORIG + $0700,Y
         STA MAP_TILES + $0700,Y
         DEY
         BPL _L01
@@ -1235,10 +1235,10 @@ s0BF9   LDX a0C0F
         CMP #$01
         BNE _L00
         JSR s0C10
-_L00 	DEX
+_L00    DEX
         BPL _L01
         LDX #$03
-_L01 	STX a0C0F
+_L01    STX a0C0F
         RTS
 
 a0C0F   .BYTE $00
@@ -1275,10 +1275,10 @@ s0C49   LDX a0C9B
         LDA f1961,X
         BEQ _L00
         JSR s0C5D
-_L00 	DEX
+_L00    DEX
         BPL _L01
         LDX #$03
-_L01 	STX a0C9B
+_L01    STX a0C9B
         RTS
 
 s0C5D   LDA GAME_SPRITE_Y_COPY_TBL+5,X
@@ -1308,7 +1308,7 @@ s0C5D   LDA GAME_SPRITE_Y_COPY_TBL+5,X
         JSR GAME_MAYBE_PLAY_SFX
         JMP j25E4
 
-_EXIT 	RTS
+_EXIT   RTS
 
 a0C9B   .BYTE $00
 
@@ -1581,8 +1581,8 @@ _L00    LDX a0EB3
         BPL _L01
         RTS
 
-_L01 	LDY #$07
-_L02 	LDA $4000+40*18,X
+_L01    LDY #$07
+_L02    LDA $4000+40*18,X
         CMP #$FD
         BEQ _L03
         DEX
@@ -1591,7 +1591,7 @@ _L02 	LDA $4000+40*18,X
         STX a0EB3
         RTS
 
-_L03 	LDA GAME_SMOOTH_X
+_L03    LDA GAME_SMOOTH_X
         CLC
         ADC #$11
         LSR A
@@ -1732,28 +1732,28 @@ s0F6C   LDA a0967
         BEQ _L00
         RTS
 
-_L00 	LDX #$04
-_L01 	LDA f120B,X
+_L00    LDX #$04
+_L01    LDA f120B,X
         BEQ _L02
         JSR s0F90
         JMP _L03
 
-_L02 	JSR s11B1
-_L03 	DEX
+_L02    JSR s11B1
+_L03    DEX
         BPL _L01
 
         JSR s2961
         CMP #$00
         BNE _EXIT
         INC a11C1
-_EXIT 	RTS
+_EXIT   RTS
 
 s0F90   CMP #$05
         BNE _L00
         JSR s0D5D
         JMP j1184
 
-_L00 	CMP #$04
+_L00    CMP #$04
         BNE _L03
         JSR j1184
         LDA f1100,X
@@ -1761,7 +1761,7 @@ _L00 	CMP #$04
         DEC f1100,X
         RTS
 
-_L01 	LDA #$04
+_L01    LDA #$04
         STA f1100,X
         LDA GAME_SPRITE_FRAME_TBL,X
         CMP #130                        ;Frame: Enemy killed (last frame)
@@ -1769,9 +1769,9 @@ _L01 	LDA #$04
         INC GAME_SPRITE_FRAME_TBL,X
         RTS
 
-_L02 	JMP j1191
+_L02    JMP j1191
 
-_L03 	CMP #$02     ;#%00000010
+_L03    CMP #$02     ;#%00000010
         BNE _L05
         LDA a101E
         BEQ _L04
@@ -1784,10 +1784,10 @@ _L03 	CMP #$02     ;#%00000010
         STA GAME_SPRITE_FRAME_TBL+4
         RTS
 
-_L04 	JSR j1184
+_L04    JSR j1184
         JMP j109C
 
-_L05 	CMP #$03     ;#%00000011
+_L05    CMP #$03     ;#%00000011
         BNE b101F
         LDA a101D
         BNE _L06
@@ -1799,7 +1799,7 @@ _L05 	CMP #$03     ;#%00000011
         TAY
         RTS
 
-_L06 	LDA a101D
+_L06    LDA a101D
         LSR A
         LSR A
         TAY
@@ -1814,7 +1814,7 @@ _L06 	LDA a101D
         BCS _L07
         LDA #$00     ;#%00000000
         STA a101D
-_L07 	JMP j1184
+_L07    JMP j1184
 
 f1012   .BYTE $01,$FD,$03,$03,$03,$02,$02,$02
         .BYTE $01,$01,$01
@@ -2432,9 +2432,9 @@ s152E   LDX a154E
         BMI _L01
         RTS
 
-_L00 	DEC a154E
+_L00    DEC a154E
         BPL s152E
-_L01 	LDA #$02
+_L01    LDA #$02
         STA a154E
         RTS
 
@@ -2742,12 +2742,12 @@ _L02    STA $7FF8,X                     ;Bug? Clear char 255
         LDA #26
         JSR MUSIC_FN
 
-	;Scroll down 25 rows
+        ;Scroll down 25 rows
         LDX #25
 _L03    TXA
         PHA
         JSR GAME_HARD_SCROLL_DOWN
-        LDA #$01 			;Down
+        LDA #$01                        ;Down
         STA GAME_HARD_SCROLL_DIR_COPY
         JSR GAME_MAP_PAINT
         PLA
@@ -2795,7 +2795,7 @@ s1827   CMP #$09     ;#%00001001
         BNE _L00
         JMP j1885
 
-_L00 	STA TMP_2493
+_L00    STA TMP_2493
         LDA GAME_SPRITE_Y_COPY_TBL+9,X
         CMP #$0A     ;#%00001010
         BCS b1843
@@ -5017,7 +5017,7 @@ b28FB   RTS
 j28FF   LDA #$00
         STA a04
         LDX #$01
-_L00 	LDY GAME_SPRITE_ORDER_TBL+13,X
+_L00    LDY GAME_SPRITE_ORDER_TBL+13,X
         LDA GAME_SPRITE_Y_COPY_TBL,Y
         LDY GAME_SPRITE_ORDER_COPY_TBL,X
         CMP GAME_SPRITE_Y_COPY_TBL,Y
@@ -5026,17 +5026,17 @@ _L00 	LDY GAME_SPRITE_ORDER_TBL+13,X
         STY aD3
         STX aD4
         DEX
-_L01 	DEX
+_L01    DEX
         BMI _L02
         LDY GAME_SPRITE_ORDER_COPY_TBL,X
         CMP GAME_SPRITE_Y_COPY_TBL,Y
         BEQ _L02
         BCS _L01
-_L02 	INX
+_L02    INX
         INC a04
         STX a05
         LDX aD4
-_L03 	LDA GAME_SPRITE_ORDER_TBL+13,X
+_L03    LDA GAME_SPRITE_ORDER_TBL+13,X
         STA GAME_SPRITE_ORDER_COPY_TBL,X
         DEX
         CPX a05
@@ -5044,7 +5044,7 @@ _L03 	LDA GAME_SPRITE_ORDER_TBL+13,X
         LDA aD3
         STA GAME_SPRITE_ORDER_COPY_TBL,X
         LDX aD4
-_L04 	INX
+_L04    INX
         CPX #14
         BNE _L00
         RTS
@@ -12765,7 +12765,7 @@ aCFFF   .BYTE $00
         .BYTE $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
         .BYTE $FF,$CA,$FF,$FF,$FF,$FF,$CA,$FF
         .BYTE $FF,$FF,$00,$00,$F7,$FF,$FF,$FF
-	.BYTE $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+        .BYTE $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 ; $E000
