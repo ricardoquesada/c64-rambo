@@ -2429,11 +2429,11 @@ s14F0   LDA GAME_HARD_SCROLL_DIR_COPY
         RTS
 
 b14F6   LDX a152D
-        LDA f1965,X
-        CMP #$05
-        BEQ b1507
-        CMP #$08
-        BEQ b1507
+        LDA SPRITE_BULLET_ID_TBL,X
+        CMP #$05                        ;Bazooka?
+        BEQ b1507                       ; Yes, jump
+        CMP #$08                        ;Missile
+        BEQ b1507                       ; Yes, jump
         JMP j1524
 
 b1507   TXA
@@ -2463,10 +2463,11 @@ a152D   .BYTE $00
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 s152E   LDX a154E
-        LDA f1965,X
-        BEQ _L00
-        CMP #$09
-        BEQ _L00
+        LDA SPRITE_BULLET_ID_TBL,X      ;Type of bullet
+        BEQ _L00                        ; None, jump
+        CMP #$09                        ;Is it grenade?
+        BEQ _L00                        ; yes, jump
+
         JSR s155F
         DEC a154E
         BMI _L01
@@ -2824,7 +2825,7 @@ VIC_SCREEN_ENABLE
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 s1819
         LDX #$02
-_L00    LDA f1965,X
+_L00    LDA SPRITE_BULLET_ID_TBL,X
         BEQ _L01
         JSR s1827
 _L01    DEX
@@ -2840,7 +2841,7 @@ _L00    STA TMP_2493
         CMP #$0A
         BCS b1843
 s1837   LDA #$00
-        STA f1965,X
+        STA SPRITE_BULLET_ID_TBL,X
         LDA #$00
         STA ZP_GAME_SPRITE_Y_COPY_TBL+9,X
         DEC ZP_GAME_SPRITE_STATE_TBL+9,X
@@ -2903,10 +2904,12 @@ b189C   LDA f1955,X
         BPL b18D2
 j18A6   AND #$7F     ;#%01111111
         TAY
+
         LDA f1958,X
         CLC
         ADC f194F,X
         STA f1958,X
+
         CLC
         ADC f8000,Y
         CMP #$C0     ;#%11000000
@@ -2914,6 +2917,7 @@ j18A6   AND #$7F     ;#%01111111
         CMP #$14     ;#%00010100
         BCC s18E4
         STA ZP_GAME_SPRITE_Y_COPY_TBL+9,X
+
         LDA ZP_GAME_SPRITE_X_COPY_TBL+9,X
         CLC
         ADC f1952,X
@@ -2922,6 +2926,7 @@ j18A6   AND #$7F     ;#%01111111
         CMP #$0C     ;#%00001100
         BCC s18E4
         STA ZP_GAME_SPRITE_X_COPY_TBL+9,X
+
         RTS
 
 b18D2   LDA #$00     ;#%00000000
@@ -2932,7 +2937,7 @@ b18DA   INC f1955,X
         LDA f1955,X
         CMP #$1A     ;#%00011010
         BNE j18A6
-s18E4   LDY f1965,X
+s18E4   LDY SPRITE_BULLET_ID_TBL,X
         LDA f1927,Y
         JSR GAME_MAYBE_PLAY_SFX
         JSR s1934
@@ -2980,7 +2985,7 @@ a1933   .BYTE $00
 s1934   LDA #65                         ;Frame: Explosion #00
         STA ZP_GAME_SPRITE_FRAME_TBL+9,X
         LDA #$0A
-        STA f1965,X
+        STA SPRITE_BULLET_ID_TBL,X
         LDA a11C1
         ADC #$05
         STA a11C1
@@ -3003,7 +3008,8 @@ j195C   LDA #57                         ;Frame: Knife #00
 
 f1961   .BYTE $00,$00
 f1963   .BYTE $00,$00
-f1965   .BYTE $00,$00,$00
+SPRITE_BULLET_ID_TBL
+        .BYTE $00,$00,$00
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 j1968   LDA f197F,X
@@ -3157,7 +3163,7 @@ _L00    LDA #$00
 _L01    STA HERO_FIRE_ALREADY_PRESSED
 
         LDX #$02                        ;Max number of bullets: 3
-_L02    LDA f1965,X                     ;Find the one that is empty
+_L02    LDA SPRITE_BULLET_ID_TBL,X                     ;Find the one that is empty
         BEQ _L03
         DEX
         BPL _L02
@@ -3175,12 +3181,13 @@ _L03    LDY ZP_SELECTED_WEAPON
 
         ; Y = selected weapon
         ; X = index of the "bullet" to use
-_L04    LDA f1AFA,Y
-        STA f1965,X
+_L04    LDA _WEAPON_ID_TBL,Y
+        STA SPRITE_BULLET_ID_TBL,X
+
         LDA _WEAPON_SFX_TBL,Y
         JSR GAME_MAYBE_PLAY_SFX
 
-        LDA WEAPON_COLOR_TBL,Y
+        LDA _WEAPON_COLOR_TBL,Y
         STA ZP_GAME_SPRITE_COLOR_TBL+9,X
 
         ; Position the bullet relative to the Hero
@@ -3207,13 +3214,13 @@ _L04    LDA f1AFA,Y
 _L05    CMP #$03                        ;Weapon is Grenade, Gatling Gun or Missile?
         BCS _L06                        ; Yes, jump
 
-        LDA SPRITE_FRAME_BAZOOKA_TBL,Y  ;Weapon is Bazooka or Arrow
+        LDA _SPRITE_FRAME_BAZOOKA_TBL,Y  ;Weapon is Bazooka or Arrow
         JMP _L09                        ; They share the same sprite frames
 
 _L06    CMP #$05                        ;Weapon is Missle?
         BNE _L07                        ; No, jump
 
-        LDA SPRITE_FRAME_MISSILE_TBL,Y  ;Weapon is missile
+        LDA _SPRITE_FRAME_MISSILE_TBL,Y  ;Weapon is missile
         JMP _L09
 
 _L07    CMP #$03                        ;Weapon is Grenade?
@@ -3228,15 +3235,15 @@ _L07    CMP #$03                        ;Weapon is Grenade?
         LDA #54                         ;Grenade sprite frame
         JMP _L09
 
-_L08    LDA SPRITE_FRAME_GATLING_GUN_TBL,Y      ;Weapon is Gatling Gun
+_L08    LDA _SPRITE_FRAME_GATLING_GUN_TBL,Y      ;Weapon is Gatling Gun
 
-        ; Y = selected weapon
+        ; Y = Joystick direction
         ; X = index of the "bullet" to use
 _L09    STA ZP_GAME_SPRITE_FRAME_TBL+9,X
 
-        LDA WEAPON_BULLET_SPEED_X_TBL,Y
+        LDA _WEAPON_BULLET_SPEED_X_TBL,Y
         STA SPRITE_BULLET_SPEED_X_TBL,X
-        LDA WEAPON_BULLET_SPEED_Y_TBL,Y
+        LDA _WEAPON_BULLET_SPEED_Y_TBL,Y
         STA SPRITE_BULLET_SPEED_Y_TBL,X
         LDA f1B48,Y
         STA f194F,X
@@ -3246,22 +3253,23 @@ _L09    STA ZP_GAME_SPRITE_FRAME_TBL+9,X
 
 _WEAPON_SFX_TBL
         .BYTE $00,$11,$11,$13,$17,$10
-f1AFA   .BYTE $04,$05,$06,$09,$03,$08
-WEAPON_COLOR_TBL
+_WEAPON_ID_TBL                          ;XXX: Not sure the purpose of this one
+        .BYTE $04,$05,$06,$09,$03,$08
+_WEAPON_COLOR_TBL
         .BYTE $0B,$04,$03,$05,$00,$0E
-SPRITE_FRAME_GATLING_GUN_TBL
+_SPRITE_FRAME_GATLING_GUN_TBL
         .BYTE $1D,$1D,$1D,$00,$1E,$1F,$20,$00
         .BYTE $1E,$20,$1F
-SPRITE_FRAME_BAZOOKA_TBL                ;Shared with Arrow
+_SPRITE_FRAME_BAZOOKA_TBL               ;Shared with Arrow
         .BYTE $26,$26,$27,$00,$29,$2C,$2D,$00
         .BYTE $28,$2A,$2B
-SPRITE_FRAME_MISSILE_TBL
+_SPRITE_FRAME_MISSILE_TBL
         .BYTE $2E,$2E,$2F,$00,$30,$34,$35,$00
         .BYTE $31,$32,$33
-WEAPON_BULLET_SPEED_X_TBL
+_WEAPON_BULLET_SPEED_X_TBL
         .BYTE $00,$00,$00,$00,$FE,$FE,$FE,$00
         .BYTE $02,$02,$02
-WEAPON_BULLET_SPEED_Y_TBL
+_WEAPON_BULLET_SPEED_Y_TBL
         .BYTE $FC,$FC,$04,$00,$00,$FC,$04,$00
         .BYTE $00,$FC,$04
 f1B3D   .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$00
