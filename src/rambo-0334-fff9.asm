@@ -66,8 +66,8 @@ a30 = $30
 a31 = $31
 a32 = $32
 a33 = $33
-aD1 = $D1
-aD2 = $D2
+aD1 = $D1                               ;Used for SPRITE FRAME 0 (?)
+aD2 = $D2                               ; ditto above
 aD3 = $D3
 aD4 = $D4
 aD5 = $D5
@@ -1057,8 +1057,8 @@ _L01    LDX a0BE0
         BMI _L02
 
         ; Weapon picked up
-        ORA a1A47
-        STA a1A47
+        ORA WEAPONS_PICKED_UP
+        STA WEAPONS_PICKED_UP
         TXA
         PHA
         JSR s1985
@@ -2763,8 +2763,8 @@ _L01    LDA f0BF1,X
         STA a101E
         STA aE6
         STA ZP_GAME_ENERGY_TO_DECREASE
-        LDA #$07
-        STA a1A47
+        LDA #$07                        ;Knife,Bazooka,Arrow
+        STA WEAPONS_PICKED_UP
 
         LDA #$96                        ;#%10010110
         STA $DD00                       ; Use VIC bank 1 ($4000-$7FFF)
@@ -3085,38 +3085,45 @@ f197F   .BYTE $00,$00,$00
 b1982   JMP s1837
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
-s1985   LDA #20                         ;Frame: Grenade Dashboard
+s1985   LDA #20                         ;Frame: Knife Dashboard
         STA GAME_DASHBOARD_SPR_FRAME_TBL
-        LDA #$13
-        STA a2422
+        LDA #19
+        STA GAME_DASHBOARD_SPR_FRAME_TBL+3
 
-        LDA a1A47                       ;Weapons grabbed (?)
+        LDA WEAPONS_PICKED_UP                       ;Weapons grabbed (?)
         AND #$01
         BNE _L00
 
         LDA #34                         ;Frame: Empty
         STA GAME_DASHBOARD_SPR_FRAME_TBL
 
-_L00    LDA a1A47
+_L00    LDA WEAPONS_PICKED_UP
         AND #$08
         BNE _L01
 
-        LDA #$22
-        STA a2422
-_L01    LDA a1A47
+        LDA #34                         ;Frame: Emtpy
+        STA GAME_DASHBOARD_SPR_FRAME_TBL+3
+
+_L01    LDA WEAPONS_PICKED_UP
         LSR A
         LSR A
         LSR A
         AND #$06
         TAX
-        LDA f19BD,X
-        STA a2423
-        LDA f19BE,X
-        STA a2424
+        LDA _DASHBOARD_SPR_FRAME_TBL,X
+        STA GAME_DASHBOARD_SPR_FRAME_TBL+4
+        LDA _DASHBOARD_SPR_FRAME_TBL+1,X
+        STA GAME_DASHBOARD_SPR_FRAME_TBL+5
         RTS
 
-f19BD   .BYTE $22
-f19BE   .BYTE $22,$15,$16,$17,$18,$19,$1A
+_DASHBOARD_SPR_FRAME_TBL
+        .BYTE 34,34                     ;Empty frame
+        .BYTE 21                        ;Gatling gun left
+        .BYTE 22                        ;Gatling gun right
+        .BYTE 23                        ;Missle left
+        .BYTE 24                        ;Missle right
+        .BYTE 25                        ;Gatling & Missile left
+        .BYTE 26                        ;Gatling & Missile right
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 GAME_RESTORE_DASHBOARD_COLORS
@@ -3187,7 +3194,7 @@ _L02    LDX ZP_SELECTED_WEAPON          ;Weapon used
 _L03    DEX
         STX ZP_SELECTED_WEAPON
 
-        LDA a1A47
+        LDA WEAPONS_PICKED_UP
         AND f1A48,X
         BEQ _L02
         LDA #$0A
@@ -3196,7 +3203,8 @@ _L04    STA a1A45
 
 a1A45   .BYTE $00
 a1A46   .BYTE $00
-a1A47   .BYTE $07
+WEAPONS_PICKED_UP
+        .BYTE $07
 f1A48   .BYTE $01
 f1A49   .BYTE $02,$04,$08,$10,$20,$40,$80
 a1A50   .BYTE $00
@@ -4484,9 +4492,9 @@ GAME_DASHBOARD_SPR_X_TBL
         .BYTE $AA,$C8,$E0,$FC,$1C,$34
 GAME_DASHBOARD_SPR_FRAME_TBL
         .BYTE 20,27,28                  ;Sprite frames: Knife, Main Weapon Left, Main Weapon right
-a2422   .BYTE 19                        ;Grenade
-a2423   .BYTE 25                        ;Gatling Gun/Missile left
-a2424   .BYTE 26                        ;Gatling Gun/Missile right
+        .BYTE 19                        ;Grenade
+        .BYTE 25                        ;Gatling Gun/Missile left
+        .BYTE 26                        ;Gatling Gun/Missile right
 
 a2425   .BYTE $00
 
@@ -4922,11 +4930,11 @@ a2747   .BYTE $E2,$00,$00
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 GAME_MAP_PAINT_LEFT
-        LDA #$27     ;#%00100111
+        LDA #$27
         STA a27EF
         STA TMP_2493
         LDX #$00
-        LDA #$40                        ;MSB address
+        LDA #>$4000                     ;MSB address
         STA a27F0
         LDA ZP_MAP_OFFSET_Y_MSB
         STA aE1
@@ -4953,7 +4961,7 @@ GAME_MAP_PAINT_RIGHT
         LDX #$00
         STX a27EF
         STX TMP_2493
-        LDA #$40                        ;MSB address
+        LDA #>$4000                     ;MSB address
         STA a27F0
         LDA ZP_MAP_OFFSET_Y_MSB
         STA aE1
@@ -6577,7 +6585,7 @@ b3867   LDA a3888
 b3872   LDA #$00
 b3874   STA ZP_GAME_SPRITE_Y_COPY_TBL+13
         STA ZP_GAME_SPRITE_Y_TBL+13
-        LDA f3892,X
+        LDA COPTER_BLADE_SPRITE_FRAME_TBL,X
         STA aD1
         STA aD2
         LDA a3826
@@ -6589,7 +6597,10 @@ a3888   .BYTE $00
 a3889   .BYTE $00
 f388A   .BYTE $F6,$00,$0A,$00
 f388E   .BYTE $00,$FB,$00,$05
-f3892   .BYTE $CD,$CC,$CB,$CE,$60
+COPTER_BLADE_SPRITE_FRAME_TBL
+        .BYTE 205,204,203,206           ;Copter blades
+
+        .BYTE $60                       ;Garbage (?)
 
 s3897   LDA a38DE
         SEC
