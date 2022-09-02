@@ -307,23 +307,24 @@ _L01    STY ZP_GAME_SPRITE_IDX_TO_PROCESS
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 ; Play the "base discovered" SFX if hero is at correct Y position
+; Bug: this SFX might be played multiple times per game
 GAME_MAYBE_PLAY_BASE_DISCOVERED_SFX
-        LDA ZP_MAP_OFFSET_Y_MSB
-        BNE _L00
-        LDA ZP_MAP_OFFSET_Y_LSB
-        CMP #$88
-        BCC _L00
+        LDA ZP_MAP_OFFSET_Y_MSB         ;MSB out of range?
+        BNE _L00                        ; yes, jump
 
+        LDA ZP_MAP_OFFSET_Y_LSB         ;LSB out of range?
+        CMP #$88
+        BCC _L00                        ; yes, jump
         CMP #$F0
-        BCS _L00
+        BCS _L00                        ; yes, jump
 
         LDX _SFX_ALREADY_PLAYED
         BNE _EXIT
 
         INC _SFX_ALREADY_PLAYED
 
-        LDA #$04
-        JMP MUSIC_FN
+        LDA #$04                        ;Play SFX
+        JMP MUSIC_FN                    ; and return
 
 _L00    LDX #$00
         STX _SFX_ALREADY_PLAYED
