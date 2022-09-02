@@ -36,7 +36,7 @@ ZP_GAME_HARD_SCROLL_DIR = $0A
 ZP_GAME_ENERGY_TO_DECREASE = $0B        ;Ammount of energy to decrease to the player
 ZP_DELTA_X = $0C
 ZP_DELTA_Y = $0D
-ZP_SELECTED_WEAPON = $0E                ;0 = Knife, 1=Bazooka, 2=Arrow, 3=  4=Missile, 5=Helicopter
+ZP_SELECTED_WEAPON = $0E                ;0=Knife, 1=Bazooka, 2=Arrow, 3=Grenade, 4=Gatling gun, 5=Missile
 ZP_IS_GAME_OVER = $0F
 a20 = $20
 a21 = $21
@@ -264,7 +264,7 @@ _L00    JSR s040B
         JSR s14F0
         JSR GAME_UPDATE_SPRITE_SCORE
         JSR GAME_UPDATE_SCORE_FROM_POINTS
-        JSR s1A51
+        JSR GAME_CHECK_HERO_FIRE_BULLET
         JSR j123A
         JSR s1819
         JSR s25C8
@@ -2430,9 +2430,9 @@ s14F0   LDA GAME_HARD_SCROLL_DIR_COPY
 
 b14F6   LDX a152D
         LDA f1965,X
-        CMP #$05     ;#%00000101
+        CMP #$05
         BEQ b1507
-        CMP #$08     ;#%00001000
+        CMP #$08
         BEQ b1507
         JMP j1524
 
@@ -2831,31 +2831,31 @@ _L01    DEX
         BPL _L00
         RTS
 
-s1827   CMP #$09     ;#%00001001
+s1827   CMP #$09
         BNE _L00
         JMP j1885
 
 _L00    STA TMP_2493
         LDA ZP_GAME_SPRITE_Y_COPY_TBL+9,X
-        CMP #$0A     ;#%00001010
+        CMP #$0A
         BCS b1843
-s1837   LDA #$00     ;#%00000000
+s1837   LDA #$00
         STA f1965,X
-        LDA #$00     ;#%00000000
+        LDA #$00
         STA ZP_GAME_SPRITE_Y_COPY_TBL+9,X
         DEC ZP_GAME_SPRITE_STATE_TBL+9,X
         RTS
 
-b1843   CMP #$C4     ;#%11000100
+b1843   CMP #$C4
         BCC b184A
         JMP s1837
 
 b184A   LDA ZP_GAME_SPRITE_X_COPY_TBL+9,X
-        CMP #$04     ;#%00000100
+        CMP #$04
         BCS b1853
         JMP s1837
 
-b1853   CMP #$AC     ;#%10101100
+b1853   CMP #$AC
         BCS s1837
         LDA TMP_2493
         CMP #$0A     ;#%00001010
@@ -2864,12 +2864,14 @@ b1853   CMP #$AC     ;#%10101100
 
 b1861   LDA ZP_GAME_SPRITE_Y_COPY_TBL+9,X
         CLC
-        ADC f1B56,X
+        ADC SPRITE_BULLET_SPEED_Y_TBL,X
         STA ZP_GAME_SPRITE_Y_COPY_TBL+9,X
+
         LDA ZP_GAME_SPRITE_X_COPY_TBL+9,X
         CLC
-        ADC f1B53,X
+        ADC SPRITE_BULLET_SPEED_X_TBL,X
         STA ZP_GAME_SPRITE_X_COPY_TBL+9,X
+
         LDA TMP_2493
         CMP #$04     ;#%00000100
         BEQ b1879
@@ -3137,105 +3139,141 @@ f1A48   .BYTE $01
 f1A49   .BYTE $02,$04,$08,$10,$20,$40,$80
 a1A50   .BYTE $00
 
-s1A51   LDA GAME_JOY_STATE
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+GAME_CHECK_HERO_FIRE_BULLET
+        LDA GAME_JOY_STATE
         AND #$10                        ;Fire pressed?
-        BEQ b1A5E                       ; No
-        CMP a1B59
-        BNE b1A64
+        BEQ _L00                        ; No
+
+        CMP HERO_FIRE_ALREADY_PRESSED   ;Already fired bullet?
+        BNE _L01                        ; Yes, jump
+                                        ; This prevents "auto-fire"
         RTS
 
-b1A5E   LDA #$00     ;#%00000000
-        STA a1B59
+_L00    LDA #$00
+        STA HERO_FIRE_ALREADY_PRESSED
         RTS
 
-b1A64   STA a1B59
-        LDX #$02     ;#%00000010
-b1A69   LDA f1965,X
-        BEQ b1A72
+_L01    STA HERO_FIRE_ALREADY_PRESSED
+
+        LDX #$02                        ;Max number of bullets: 3
+_L02    LDA f1965,X                     ;Find the one that is empty
+        BEQ _L03
         DEX
-        BPL b1A69
+        BPL _L02
         RTS
 
-b1A72   LDY ZP_SELECTED_WEAPON
-        CPY #$04                        ;Machine gun?
-        BNE b1A81
-        LDA a11C1
+_L03    LDY ZP_SELECTED_WEAPON
+        CPY #$04                        ;Gatling gun?
+        BNE _L04                        ; No, jump
+
+        LDA a11C1                       ;Weapon is Gatling gun
         CLC
-        ADC #$05     ;#%00000101
+        ADC #$05
         STA a11C1
-b1A81   LDA f1AFA,Y
+
+
+        ; Y = selected weapon
+        ; X = index of the "bullet" to use
+_L04    LDA f1AFA,Y
         STA f1965,X
-        LDA f1AF4,Y
+        LDA _WEAPON_SFX_TBL,Y
         JSR GAME_MAYBE_PLAY_SFX
-        LDA f1B00,Y
+
+        LDA WEAPON_COLOR_TBL,Y
         STA ZP_GAME_SPRITE_COLOR_TBL+9,X
+
+        ; Position the bullet relative to the Hero
         LDA ZP_GAME_SPRITE_X_COPY_TBL+13
         LSR A
         STA ZP_GAME_SPRITE_X_COPY_TBL+9,X
+
         LDA ZP_GAME_SPRITE_Y_COPY_TBL+13
         SEC
-        SBC #$05     ;#%00000101
+        SBC #$05
         STA ZP_GAME_SPRITE_Y_COPY_TBL+9,X
+
         INC ZP_GAME_SPRITE_STATE_TBL+9,X
-        LDY GAME_JOY_DIR_STATE
-        LDA ZP_SELECTED_WEAPON
-        BNE b1AAC
-        LDA #$39     ;#%00111001
-        JMP j1AD9
 
-b1AAC   CMP #$03     ;#%00000011
-        BCS b1AB6
-        LDA f1B11,Y
-        JMP j1AD9
+        LDY GAME_JOY_DIR_STATE          ;Y = joystick direction
+                                        ; Used to index the sprite frame
 
-b1AB6   CMP #$05     ;#%00000101
-        BNE b1AC0
-        LDA f1B1C,Y
-        JMP j1AD9
+        LDA ZP_SELECTED_WEAPON          ;Knife?
+        BNE _L05                        ; No, jump
 
-b1AC0   CMP #$03     ;#%00000011
-        BNE b1AD6
-        LDA #$9A     ;#%10011010
+        LDA #57                         ;Knife sprite frame
+        JMP _L09
+
+_L05    CMP #$03                        ;Weapon is Grenade, Gatling Gun or Missile?
+        BCS _L06                        ; Yes, jump
+
+        LDA SPRITE_FRAME_BAZOOKA_TBL,Y  ;Weapon is Bazooka or Arrow
+        JMP _L09                        ; They share the same sprite frames
+
+_L06    CMP #$05                        ;Weapon is Missle?
+        BNE _L07                        ; No, jump
+
+        LDA SPRITE_FRAME_MISSILE_TBL,Y  ;Weapon is missile
+        JMP _L09
+
+_L07    CMP #$03                        ;Weapon is Grenade?
+        BNE _L08                        ; No, jump
+
+        LDA #$9A                        ;Weapon is Grenade
         STA f1955,X
         LDA ZP_GAME_SPRITE_Y_COPY_TBL+9,X
         SEC
-        SBC #$2A     ;#%00101010
+        SBC #42
         STA f1958,X
-        LDA #$36     ;#%00110110
-        JMP j1AD9
+        LDA #54                         ;Grenade sprite frame
+        JMP _L09
 
-b1AD6   LDA f1B06,Y
-j1AD9   STA ZP_GAME_SPRITE_FRAME_TBL+9,X
-        LDA f1B27,Y
-        STA f1B53,X
-        LDA f1B32,Y
-        STA f1B56,X
+_L08    LDA SPRITE_FRAME_GATLING_GUN_TBL,Y      ;Weapon is Gatling Gun
+
+        ; Y = selected weapon
+        ; X = index of the "bullet" to use
+_L09    STA ZP_GAME_SPRITE_FRAME_TBL+9,X
+
+        LDA WEAPON_BULLET_SPEED_X_TBL,Y
+        STA SPRITE_BULLET_SPEED_X_TBL,X
+        LDA WEAPON_BULLET_SPEED_Y_TBL,Y
+        STA SPRITE_BULLET_SPEED_Y_TBL,X
         LDA f1B48,Y
         STA f194F,X
         LDA f1B3D,Y
         STA f1952,X
         RTS
 
-f1AF4   .BYTE $00,$11,$11,$13,$17,$10
+_WEAPON_SFX_TBL
+        .BYTE $00,$11,$11,$13,$17,$10
 f1AFA   .BYTE $04,$05,$06,$09,$03,$08
-f1B00   .BYTE $0B,$04,$03,$05,$00,$0E
-f1B06   .BYTE $1D,$1D,$1D,$00,$1E,$1F,$20,$00
+WEAPON_COLOR_TBL
+        .BYTE $0B,$04,$03,$05,$00,$0E
+SPRITE_FRAME_GATLING_GUN_TBL
+        .BYTE $1D,$1D,$1D,$00,$1E,$1F,$20,$00
         .BYTE $1E,$20,$1F
-f1B11   .BYTE $26,$26,$27,$00,$29,$2C,$2D,$00
+SPRITE_FRAME_BAZOOKA_TBL                ;Shared with Arrow
+        .BYTE $26,$26,$27,$00,$29,$2C,$2D,$00
         .BYTE $28,$2A,$2B
-f1B1C   .BYTE $2E,$2E,$2F,$00,$30,$34,$35,$00
+SPRITE_FRAME_MISSILE_TBL
+        .BYTE $2E,$2E,$2F,$00,$30,$34,$35,$00
         .BYTE $31,$32,$33
-f1B27   .BYTE $00,$00,$00,$00,$FE,$FE,$FE,$00
+WEAPON_BULLET_SPEED_X_TBL
+        .BYTE $00,$00,$00,$00,$FE,$FE,$FE,$00
         .BYTE $02,$02,$02
-f1B32   .BYTE $FC,$FC,$04,$00,$00,$FC,$04,$00
+WEAPON_BULLET_SPEED_Y_TBL
+        .BYTE $FC,$FC,$04,$00,$00,$FC,$04,$00
         .BYTE $00,$FC,$04
 f1B3D   .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$00
         .BYTE $01,$01,$01
 f1B48   .BYTE $FF,$FF,$01,$00,$00,$FF,$01,$00
         .BYTE $00,$FF,$01
-f1B53   .BYTE $00,$00,$00
-f1B56   .BYTE $00,$00,$00
-a1B59   .BYTE $00
+SPRITE_BULLET_SPEED_X_TBL
+        .BYTE $00,$00,$00
+SPRITE_BULLET_SPEED_Y_TBL
+        .BYTE $00,$00,$00
+HERO_FIRE_ALREADY_PRESSED
+        .BYTE $00
 
 s1B5A   DEC a1B6F
         BPL b1B6E
@@ -4365,8 +4403,8 @@ GAME_DASHBOARD_SPR_X_TBL
 GAME_DASHBOARD_SPR_FRAME_TBL
         .BYTE 20,27,28                  ;Sprite frames: Knife, Main Weapon Left, Main Weapon right
 a2422   .BYTE 19                        ;Grenade
-a2423   .BYTE 25                        ;GatlingGun/Missile left
-a2424   .BYTE $1A                       ;GatlingGun/Missile right
+a2423   .BYTE 25                        ;Gatling Gun/Missile left
+a2424   .BYTE 26                        ;Gatling Gun/Missile right
 
 a2425   .BYTE $00
 
