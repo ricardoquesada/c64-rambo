@@ -4290,7 +4290,7 @@ _L00    LDY ZP_GAME_SPRITE_IDX_TO_PROCESS
         LDA ZP_GAME_SPRITE_COLOR_TBL,X
         STA $D027,Y                     ;Sprite 0 Color
         LDA ZP_GAME_SPRITE_FRAME_TBL,X
-        STA GAME_SPR_FRAME_00,Y
+        STA GAME_SPR_FRAME_TBL,Y
         LDA $D010                       ;Sprites 0-7 MSB of X coordinate
         AND f2483,Y
         LSR ZP_GAME_SPRITE_X_MSB_TBL,X  ;Test whether it has X MSB on
@@ -4391,9 +4391,9 @@ GAME_IRQ_HANDLER_RASTER_DB
         STA $D002                       ;Sprite 1 X Pos
 
         LDA #16                         ;Energy/Score sprite frame (left)
-        STA GAME_SPR_FRAME_00
+        STA GAME_SPR_FRAME_TBL
         LDA #17                         ;Energy/Score sprite frame (right)
-        STA GAME_SPR_FRAME_01
+        STA GAME_SPR_FRAME_TBL+1
         LDA a2425
         STA $D027                       ;Sprite 0 Color: White ($11 = $01)
         STA $D028                       ;Sprite 1 Color: Whtie ($11 = $01)
@@ -4405,7 +4405,7 @@ _L00    LDA #225                        ;Same Y for all weapons
         LDA GAME_DASHBOARD_SPR_X_TBL,X
         STA $D004,Y                     ;Sprite 2 X Pos
         LDA GAME_DASHBOARD_SPR_FRAME_TBL,X
-        STA GAME_SPR_FRAME_02_TBL,X
+        STA GAME_SPR_FRAME_TBL+2,X
         LDA GAME_DASHBOARD_SPR_COLOR_TBL,X
         STA $D029,X                     ;Sprite 2 Color
         DEY
@@ -4529,7 +4529,7 @@ _L02    LDA COPTER_MODE_ENABLED         ;Use sprite color from Copter mode as we
         LDA #%11111110
         STA $D01C                       ;Sprites Multi-Color Mode Select
         LDA aD2
-        STA GAME_SPR_FRAME_00
+        STA GAME_SPR_FRAME_TBL
         RTS
 
 COPTER_MODE_ENABLED             .BYTE $00
@@ -6873,9 +6873,9 @@ CHARSET_DIGITS_0_9
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 ; Sprite frames
         * = $43F8
-GAME_SPR_FRAME_00       .BYTE 71                ;Sprite Frame Rambo MC
-GAME_SPR_FRAME_01       .BYTE 17                ;Sprite Frame Energy/Score right
-GAME_SPR_FRAME_02_TBL   .BYTE $14,$4B,$3D,$6D,$68,$3C
+GAME_SPR_FRAME_TBL      .BYTE 71                ;Sprite Frame Rambo MC
+                        .BYTE 17                ;Sprite Frame Energy/Score right
+                        .BYTE $14,$4B,$3D,$6D,$68,$3C
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 ; $4400 sprites
@@ -11737,7 +11737,7 @@ fC551                   .BYTE $00,$06,$0E,$03,$01,$03,$0E,$06
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 PRINT_TROOPER_ENTER_YOUR_NAME
         LDA #$01                        ;Bug? Sprite Frame: Garbage
-        STA GAME_SPR_FRAME_01
+        STA GAME_SPR_FRAME_TBL+1
 
         JSR PRINT_EXT_STR
         .ADDR STR_TROOPER_ENTER_YOUR_NAME
@@ -11807,7 +11807,7 @@ TROOPER_UPDATE_MINI_CURSOR_POS
         LDA TROOPER_MINI_CURSOR_POS_X_MSB
         STA $D010                       ;Sprites 0-7 MSB of X coordinate
         LDA #223                        ;Mini cursor sprite frame
-        STA GAME_SPR_FRAME_00
+        STA GAME_SPR_FRAME_TBL
 
         ; Blink "ENTER YOUR NAME" and the Mini cursor
         LDX TROOPER_COLOR_IDX
