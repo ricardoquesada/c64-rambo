@@ -24,7 +24,7 @@ ZP_GAME_SPRITE_X_COPY_TBL = $7D         ;14 entries ($7d-$8a)
                                         ; Contains X divided by 2 in Hero only (???)
 ZP_GAME_SPRITE_FRAME_TBL = $8B          ;14 entries ($8B-$98)
 ZP_GAME_SPRITE_COLOR_TBL = $99          ;14 entries ($99-$a6)
-ZP_GAME_SPRITE_ODDER_TBL = $A7          ;14 entries ($a7-$b4)
+ZP_GAME_SPRITE_ORDER_TBL = $A7          ;14 entries ($a7-$b4)
 ZP_GAME_SPRITE_ORDER_COPY_TBL = $B5     ;14 entries ($b5-$c2)
 ZP_GAME_SPRITE_STATE_TBL = $C3          ;14 entries ($c3-$d0)
 fD6 = $D6
@@ -93,8 +93,11 @@ ZP_GAME_SPRITE_IDX_TO_PROCESS = $FC     ;In game, saves the next sprite index to
 aFC = $FC                               ; but in Title is used as a pointer
                                         ; so keeping both references
 aFD = $FD
-aFE = $FE
+ZP_MAP_OFFSET_Y_LSB = $FE               ;Game: Map offset Y LSB
+ZP_MAP_OFFSET_Y_MSB = $FF               ;Game: Map offset Y MSB
+aFE = $FE                               ;Menu: Something else
 aFF = $FF
+
 ;
 ; **** ZP POINTERS ****
 ;
@@ -171,7 +174,8 @@ MUSIC_PATCH             .MACRO x, note_list_addr
 
         JMP GAME_SPRITE_SYNC_PROPERTIES
 
-s0337   JMP j28FF
+GAME_SPRITE_SORT_BIS
+        JMP GAME_SPRITE_SORT
 
 GAME_READ_JOYSTICK_XXX_BIS
         JMP GAME_READ_JOYSTICK_XXX
@@ -255,8 +259,8 @@ _GAME_MAIN_LOOP
         JSR j0B2B
         JSR s0F6C
 
-        INC a0559
-        LDA a0559
+        INC a0559                       ;Not clear why this check is
+        LDA a0559                       ; To reduce the speed?
         CMP #$06
         BCC _L00
 
@@ -264,7 +268,7 @@ _GAME_MAIN_LOOP
         STA a0559
         JMP _L01
 
-_L00    JSR s040B
+_L00    JSR GAME_MAYBE_PLAY_BASE_DISCOVERED_SFX
         JSR s12A7
         JSR s1985
         JSR GAME_PLAY_MUSIC
@@ -286,7 +290,8 @@ _L00    JSR s040B
         JSR GAME_UPDATE_SPRITE_ENERGY
         JSR s0900
         JSR GAME_MAYBE_PRINT_GAME_OVER
-_L01    JSR j28FF
+
+_L01    JSR GAME_SPRITE_SORT
         JMP _GAME_MAIN_LOOP
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
@@ -301,24 +306,32 @@ _L01    STY ZP_GAME_SPRITE_IDX_TO_PROCESS
         RTS
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
-s040B   LDA aFF
-        BNE b0426
-        LDA aFE
-a0411   CMP #$88
-        BCC b0426
+; Play the "base discovered" SFX if hero is at correct Y position
+GAME_MAYBE_PLAY_BASE_DISCOVERED_SFX
+        LDA ZP_MAP_OFFSET_Y_MSB
+        BNE _L00
+        LDA ZP_MAP_OFFSET_Y_LSB
+        CMP #$88
+        BCC _L00
+
         CMP #$F0
-        BCS b0426
-        LDX a042C
-        BNE b042B
-        INC a042C
+        BCS _L00
+
+        LDX _SFX_ALREADY_PLAYED
+        BNE _EXIT
+
+        INC _SFX_ALREADY_PLAYED
+
         LDA #$04
         JMP MUSIC_FN
 
-b0426   LDX #$00
-        STX a042C
-b042B   RTS
+_L00    LDX #$00
+        STX _SFX_ALREADY_PLAYED
 
-a042C   .BYTE $00
+_EXIT   RTS
+
+_SFX_ALREADY_PLAYED
+        .BYTE $00
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 ; Params: X: Digit to update
@@ -479,9 +492,9 @@ s0513   LDX a0558
         BEQ b054E
         DEX
         LDA f055F,X
-        STA aFE
+        STA ZP_MAP_OFFSET_Y_LSB
         LDA f0561,X
-        STA aFF
+        STA ZP_MAP_OFFSET_Y_MSB
         LDA f0563,X
         STA aF8
         LDA #$28
@@ -1134,17 +1147,17 @@ _L01    LDA f0BE1,X
         CMP #$2D     ;#%00101101
         BCS _L00
         TAY
-        LDA aFF
+        LDA ZP_MAP_OFFSET_Y_MSB
         CMP f0BE9,X
         BCC _L00
-        LDA aFE
+        LDA ZP_MAP_OFFSET_Y_LSB
         CMP f0BE5,X
         BCC _L00
-        LDA aFE
+        LDA ZP_MAP_OFFSET_Y_LSB
         SEC
         SBC f0BE5,X
         STA a2745
-        LDA aFF
+        LDA ZP_MAP_OFFSET_Y_MSB
         SBC f0BE9,X
         STA a2746
         LDA a2746
@@ -2199,16 +2212,16 @@ s1312   LDA GAME_JOY_STATE_COPY2
         BEQ b135B
         CMP #$5A     ;#%01011010
         BEQ b1350
-j1328   LDA aFF
+j1328   LDA ZP_MAP_OFFSET_Y_MSB
         BEQ b1337
         CMP #$03     ;#%00000011
         BNE b1336
-        LDA aFE
+        LDA ZP_MAP_OFFSET_Y_LSB
         CMP #$B8     ;#%10111000
         BCS b133E
 b1336   RTS
 
-b1337   LDA aFE
+b1337   LDA ZP_MAP_OFFSET_Y_LSB
         CMP #$19     ;#%00011001
         BCC b1347
         RTS
@@ -2261,12 +2274,12 @@ j1382   LSR A
         LSR A
         LSR A
         STA a1A46
-        LDA aFE
+        LDA ZP_MAP_OFFSET_Y_LSB
         SEC
         SBC a1A46
         AND #$F8     ;#%11111000
         STA aF0
-        LDA aFF
+        LDA ZP_MAP_OFFSET_Y_MSB
         SBC #$00     ;#%00000000
         STA aF1
         LDA aF8
@@ -2321,7 +2334,7 @@ b13E1   STA (pF4),Y
         STA a14EA
         EOR #$07     ;#%00000111
         STA aF0
-        LDA aFE
+        LDA ZP_MAP_OFFSET_Y_LSB
         AND #$07     ;#%00000111
         STA TMP_2493
         STA a14ED
@@ -2774,8 +2787,8 @@ _L01    LDA f0BF1,X
         STA $D017                       ;Sprites Expand 2x Vertical (Y)
         STA $D01D                       ;Sprites Expand 2x Horizontal (X)
 
-        STA aFF
-        STA aFE
+        STA ZP_MAP_OFFSET_Y_MSB
+        STA ZP_MAP_OFFSET_Y_LSB
         LDA #$3C
         STA aF8
         LDA #$0A
@@ -2812,7 +2825,7 @@ _L03    TXA
         JSR GAME_UPDATE_SCORE_FROM_POINTS
         JSR GAME_UPDATE_SPRITE_SCORE
         JSR GAME_SPRITE_SYNC_PROPERTIES
-        JSR j28FF
+        JSR GAME_SPRITE_SORT
         JSR VIC_SCREEN_ENABLE
         JSR s1F9B
         JMP j1DD5
@@ -2942,12 +2955,12 @@ b18D2   LDA #$00
         STA f1955,X
         JMP j18A6
 
-        ; Bullet is out of range
 b18DA   INC f1955,X
         LDA f1955,X
         CMP #$1A
         BNE j18A6
 
+        ; Bullet is out of range (?)
 s18E4   LDY SPRITE_BULLET_ID_TBL,X
         LDA f1927,Y
         JSR GAME_MAYBE_PLAY_SFX
@@ -3648,7 +3661,7 @@ _L00    LDA ZP_GAME_SPRITE_Y_COPY_TBL,X
         LDA ZP_GAME_SPRITE_X_MSB_COPY_TBL,X
         STA ZP_GAME_SPRITE_X_MSB_TBL,X
         LDA ZP_GAME_SPRITE_ORDER_COPY_TBL,X
-        STA ZP_GAME_SPRITE_ODDER_TBL,X
+        STA ZP_GAME_SPRITE_ORDER_TBL,X
         DEX
         BPL _L00
 
@@ -3939,9 +3952,9 @@ _L00    LDA #$00
 ;   - But the scroll up routine doesn't do this
 GAME_HARD_SCROLL_DOWN
         LDX #19
-        INC aFE
+        INC ZP_MAP_OFFSET_Y_LSB
         BNE _L00
-        INC aFF
+        INC ZP_MAP_OFFSET_Y_MSB
 
 _L00    LDA $4000+40*9,X
         STA f211D,X
@@ -4115,11 +4128,11 @@ _L00    LDA #$06
 GAME_HARD_SCROLL_UP
         LDX #39
         STX a0EB3
-        DEC aFE
-        LDA aFE
+        DEC ZP_MAP_OFFSET_Y_LSB
+        LDA ZP_MAP_OFFSET_Y_LSB
         CMP #$FF
         BNE _L00
-        DEC aFF
+        DEC ZP_MAP_OFFSET_Y_MSB
 
 _L00    LDA $4000+40*1+0,X
         STA $4000+40*0+0,X
@@ -4236,7 +4249,7 @@ GAME_IRQ_HANDLER_RASTER_VAR
 
         CLI
 _L00    LDY ZP_GAME_SPRITE_IDX_TO_PROCESS
-        LDX ZP_GAME_SPRITE_ODDER_TBL,Y
+        LDX ZP_GAME_SPRITE_ORDER_TBL,Y
         LDA ZP_GAME_SPRITE_Y_TBL,X
         CMP ZP_NEXT_RASTER_IRQ_POS
         BCS b2306
@@ -4509,7 +4522,7 @@ _L00    TYA
 
         LDA #$FF                        ;All sprites
         STA $D015                       ;Sprite display Enable
-        JSR j28FF
+        JSR GAME_SPRITE_SORT
         JMP GAME_SPRITE_SYNC_PROPERTIES
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
@@ -4761,9 +4774,9 @@ s2661   LDA #$05
         BEQ _L00
         RTS
 
-_L00    LDA aFE
+_L00    LDA ZP_MAP_OFFSET_Y_LSB
         STA TMP_2493
-        LDA aFF
+        LDA ZP_MAP_OFFSET_Y_MSB
         LSR A
         ROR TMP_2493
         LSR A
@@ -4884,9 +4897,9 @@ GAME_MAP_PAINT_LEFT
         LDX #$00
         LDA #$40                        ;MSB address
         STA a27F0
-        LDA aFF
+        LDA ZP_MAP_OFFSET_Y_MSB
         STA aE1
-        LDA aFE
+        LDA ZP_MAP_OFFSET_Y_LSB
         STA aE0
         AND #$07     ;#%00000111
         STA aF3
@@ -4911,9 +4924,9 @@ GAME_MAP_PAINT_RIGHT
         STX TMP_2493
         LDA #$40                        ;MSB address
         STA a27F0
-        LDA aFF
+        LDA ZP_MAP_OFFSET_Y_MSB
         STA aE1
-        LDA aFE
+        LDA ZP_MAP_OFFSET_Y_LSB
         STA aE0
         AND #$07
         STA aF3
@@ -5025,20 +5038,20 @@ GAME_MAP_PAINT_UP
         STA a28E7
         LDA #<$4000+40*24
         STA a28E6
-        LDA aFF
+        LDA ZP_MAP_OFFSET_Y_MSB
         STA aE1
-        LDA aFE
+        LDA ZP_MAP_OFFSET_Y_LSB
         STA aE0
         SEC
         SBC #$18     ;#%00011000
-        STA aFE
+        STA ZP_MAP_OFFSET_Y_LSB
         BCS _L00
-        DEC aFF
+        DEC ZP_MAP_OFFSET_Y_MSB
 _L00    JSR s287D
         LDA aE0
-        STA aFE
+        STA ZP_MAP_OFFSET_Y_LSB
         LDA aE1
-        STA aFF
+        STA ZP_MAP_OFFSET_Y_MSB
         RTS
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
@@ -5061,10 +5074,10 @@ s287D   LDA aF8
         LDA aF8
         AND #$7F     ;#%01111111
         STA aF8
-        LDA aFE
+        LDA ZP_MAP_OFFSET_Y_LSB
         AND #$F8     ;#%11111000
         STA aF0
-        LDA aFF
+        LDA ZP_MAP_OFFSET_Y_MSB
         STA aF1
         ASL aF0
         ROL aF1
@@ -5092,7 +5105,7 @@ j28A5   LDY aF2
         ADC #$EF     ;#%11101111
         STA aF1
         LDX aF3
-        LDA aFE
+        LDA ZP_MAP_OFFSET_Y_LSB
         AND #$07     ;#%00000111
         ASL A
         ASL A
@@ -5132,10 +5145,12 @@ b28FB   RTS
         JMP MAIN_BIS
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
-j28FF   LDA #$00
+GAME_SPRITE_SORT
+        LDA #$00
         STA a04
+
         LDX #$01
-_L00    LDY ZP_GAME_SPRITE_ODDER_TBL+13,X
+_L00    LDY ZP_GAME_SPRITE_ORDER_TBL+13,X
         LDA ZP_GAME_SPRITE_Y_COPY_TBL,Y
         LDY ZP_GAME_SPRITE_ORDER_COPY_TBL,X
         CMP ZP_GAME_SPRITE_Y_COPY_TBL,Y
@@ -5146,25 +5161,31 @@ _L00    LDY ZP_GAME_SPRITE_ODDER_TBL+13,X
         DEX
 _L01    DEX
         BMI _L02
+
         LDY ZP_GAME_SPRITE_ORDER_COPY_TBL,X
         CMP ZP_GAME_SPRITE_Y_COPY_TBL,Y
         BEQ _L02
         BCS _L01
+
 _L02    INX
         INC a04
         STX a05
+
         LDX aD4
-_L03    LDA ZP_GAME_SPRITE_ODDER_TBL+13,X
+_L03    LDA ZP_GAME_SPRITE_ORDER_TBL+13,X
         STA ZP_GAME_SPRITE_ORDER_COPY_TBL,X
         DEX
         CPX a05
         BNE _L03
+
         LDA aD3
         STA ZP_GAME_SPRITE_ORDER_COPY_TBL,X
+
         LDX aD4
 _L04    INX
-        CPX #14
+        CPX #14                         ;Compare all sprites
         BNE _L00
+
         RTS
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
@@ -5445,7 +5466,8 @@ GAME_COPTER_MAIN_LOOP
         JSR s304E
         JSR GAME_UPDATE_SPRITE_SCORE_BIS
         JSR s0352
-        JSR s0337
+        JSR GAME_SPRITE_SORT_BIS
+
         JMP GAME_COPTER_MAIN_LOOP
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
@@ -5842,10 +5864,10 @@ b331F   CMP #$2E     ;#%00101110
 
 b3324   LDA a347F
         SEC
-        SBC aFE
+        SBC ZP_MAP_OFFSET_Y_LSB
         STA a336D
         LDA a3480
-        SBC aFF
+        SBC ZP_MAP_OFFSET_Y_MSB
         BEQ b3337
         JMP j3341
 
@@ -5869,7 +5891,7 @@ b3342   LDA ZP_GAME_SMOOTH_X
         SEC
         SBC a336D
         STA a362E
-        LDA aFE
+        LDA ZP_MAP_OFFSET_Y_LSB
         ASL A
         ASL A
         ASL A
@@ -5900,11 +5922,11 @@ b3386   LDA a3483
 
 b338E   JMP j33FB
 
-s3391   LDA aFE
+s3391   LDA ZP_MAP_OFFSET_Y_LSB
         CLC
         ADC #$0F     ;#%00001111
         STA a356A
-        LDA aFF
+        LDA ZP_MAP_OFFSET_Y_MSB
         ADC #$00     ;#%00000000
         STA a356B
         LDA a3566
@@ -6143,7 +6165,7 @@ s356E   LDA aE6
         BEQ b357E
         LDA #$2A     ;#%00101010
         STA a336D
-        LDA aFF
+        LDA ZP_MAP_OFFSET_Y_MSB
         CMP #$03     ;#%00000011
         BCS b357E
         RTS
@@ -9795,7 +9817,7 @@ sA548   LDA #$05                        ;Color Green
         STA $D020                       ;Border Color
         JSR s8D82
         LDA a820B
-        STA a0411
+        STA $0411
         LDA a820D
         STA $0412
         LDA a820C
