@@ -13,6 +13,7 @@ GAME_SPRITE_X_MSB_TBL = $53             ;14 entries ($53-$60)
 GAME_SPRITE_X_MSB_COPY_TBL = $61        ;14 entries ($61-$6e)
 GAME_SPRITE_X_TBL = $6F                 ;14 entries ($6f-$7c)
 GAME_SPRITE_X_COPY_TBL = $7D            ;14 entries ($7d-$8a)
+                                        ; Contains X divided by 2
 GAME_SPRITE_FRAME_TBL = $8B             ;14 entries ($8B-$98)
 GAME_SPRITE_COLOR_TBL = $99             ;14 entries ($99-$a6)
 GAME_SPRITE_ORDER_TBL = $A7             ;14 entries ($a7-$b4)
@@ -1114,22 +1115,22 @@ a0B2A   .BYTE $00
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 j0B2B   LDX #$03
 j0B2D   LDA f0BED,X
-        BNE b0B35
-b0B32   JMP j0BC6
+        BNE _L01
+_L00    JMP _L04
 
-b0B35   LDA f0BE1,X
+_L01    LDA f0BE1,X
         SEC
         SBC aF8
-        BCC b0B32
+        BCC _L00
         CMP #$2D     ;#%00101101
-        BCS b0B32
+        BCS _L00
         TAY
         LDA aFF
         CMP f0BE9,X
-        BCC b0B32
+        BCC _L00
         LDA aFE
         CMP f0BE5,X
-        BCC b0B32
+        BCC _L00
         LDA aFE
         SEC
         SBC f0BE5,X
@@ -1138,10 +1139,10 @@ b0B35   LDA f0BE1,X
         SBC f0BE9,X
         STA a2746
         LDA a2746
-        BNE b0B32
+        BNE _L00
         LDA a2745
         CMP #$15     ;#%00010101
-        BCS b0B32
+        BCS _L00
         ASL A
         ASL A
         ASL A
@@ -1169,7 +1170,7 @@ b0B35   LDA f0BE1,X
         LDA #$01
         STA GAME_SPRITE_STATE_TBL+12
         CPX #$03
-        BNE b0BBD
+        BNE _L03
 
         LDA #$0E                        ;Color Light Blue
         STA GAME_SPRITE_COLOR_TBL+12
@@ -1183,26 +1184,26 @@ b0B35   LDA f0BE1,X
         LDA GAME_SPRITE_Y_COPY_TBL+12
         STA GAME_SPRITE_Y_COPY_TBL+4
 
-a0BA9   LDA GAME_SPRITE_X_COPY_TBL+12
+        LDA GAME_SPRITE_X_COPY_TBL+12
         SEC
         SBC #24
         STA GAME_SPRITE_X_COPY_TBL+4
 
         LDA GAME_SPRITE_X_MSB_COPY_TBL+12
-        BCS b0BB6
+        BCS _L02
         EOR #$01
-b0BB6   STA GAME_SPRITE_X_MSB_COPY_TBL+4
+_L02    STA GAME_SPRITE_X_MSB_COPY_TBL+4
 
         LDA #$01
         STA GAME_SPRITE_STATE_TBL+4
         RTS
 
-b0BBD   LDY a1B70
+_L03    LDY a1B70
         LDA f1B71,Y
         STA GAME_SPRITE_COLOR_TBL+12
         RTS
 
-j0BC6   DEX
+_L04    DEX
         BPL b0BDD
 
 j0BC9   LDA #$00
@@ -1210,11 +1211,11 @@ j0BC9   LDA #$00
         LDA #$00
         STA GAME_SPRITE_Y_COPY_TBL+12
         LDA a120F
-        BNE b0BDC
+        BNE _EXIT
         STA GAME_SPRITE_Y_COPY_TBL+4
         LDA #$00
         STA GAME_SPRITE_STATE_TBL+4
-b0BDC   RTS
+_EXIT   RTS
 
 b0BDD   JMP j0B2D
 
@@ -1330,6 +1331,9 @@ _L00    LDA $4000+64*33,X               ;Original energy: left
 GAME_UPDATE_SPRITE_ENERGY
         LDA GAME_ENERGY_TO_DECREASE
         BEQ _EXIT
+
+        ; Rumble code should go here
+
         DEC GAME_ENERGY_TO_DECREASE
         DEC PLYR_ENERGY
         BPL _L00
@@ -1751,40 +1755,41 @@ _EXIT   RTS
 s0F90   CMP #$05
         BNE _L00
         JSR s0D5D
-        JMP j1184
+        JMP GAME_UPDATE_ENEMY_POS_IF_NEEDED
 
 _L00    CMP #$04
         BNE _L03
-        JSR j1184
-        LDA f1100,X
+        JSR GAME_UPDATE_ENEMY_POS_IF_NEEDED
+        LDA GAME_SPRITE_ENEMY_FRAME_DELAY_TBL,X
         BEQ _L01
-        DEC f1100,X
+        DEC GAME_SPRITE_ENEMY_FRAME_DELAY_TBL,X
         RTS
 
 _L01    LDA #$04
-        STA f1100,X
+        STA GAME_SPRITE_ENEMY_FRAME_DELAY_TBL,X
         LDA GAME_SPRITE_FRAME_TBL,X
         CMP #130                        ;Frame: Enemy killed (last frame)
         BEQ _L02
         INC GAME_SPRITE_FRAME_TBL,X
         RTS
 
-_L02    JMP j1191
+_L02    JMP GAME_SET_ENEMY_OUT_OF_BOUNDS
 
-_L03    CMP #$02     ;#%00000010
+_L03    CMP #$02
         BNE _L05
+
         LDA a101E
         BEQ _L04
         DEC a101E
-        LDA #$28     ;#%00101000
+        LDA #$28
         STA a101D
         INC a120F
-        JSR j1184
+        JSR GAME_UPDATE_ENEMY_POS_IF_NEEDED
         LDA #125                        ;Frame: Enemy flipped vertically
         STA GAME_SPRITE_FRAME_TBL+4
         RTS
 
-_L04    JSR j1184
+_L04    JSR GAME_UPDATE_ENEMY_POS_IF_NEEDED
         JMP j109C
 
 _L05    CMP #$03     ;#%00000011
@@ -1814,7 +1819,7 @@ _L06    LDA a101D
         BCS _L07
         LDA #$00     ;#%00000000
         STA a101D
-_L07    JMP j1184
+_L07    JMP GAME_UPDATE_ENEMY_POS_IF_NEEDED
 
 f1012   .BYTE $01,$FD,$03,$03,$03,$02,$02,$02
         .BYTE $01,$01,$01
@@ -1822,7 +1827,7 @@ a101D   .BYTE $00
 a101E   .BYTE $00
 
 b101F   JSR s1032
-        JSR j1184
+        JSR GAME_UPDATE_ENEMY_POS_IF_NEEDED
         LDA a24F4
         CMP #$0A     ;#%00001010
         BCS b102F
@@ -1849,7 +1854,7 @@ b1054   INC f106C,X
         LDA f106C,X
         CMP #$0A     ;#%00001010
         BCC s1061
-        JMP j1191
+        JMP GAME_SET_ENEMY_OUT_OF_BOUNDS
 
 s1061   JSR s2941
         TAY
@@ -1880,86 +1885,96 @@ j1096   LDA f106C,X
         BEQ j109C
         RTS
 
-j109C   LDA f1100,X
-        BEQ b10A5
-        DEC f1100,X
+j109C   LDA GAME_SPRITE_ENEMY_FRAME_DELAY_TBL,X
+        BEQ _L00
+        DEC GAME_SPRITE_ENEMY_FRAME_DELAY_TBL,X
         RTS
 
-b10A5   LDA #$02     ;#%00000010
-        STA f1100,X
+_L00    LDA #$02
+        STA GAME_SPRITE_ENEMY_FRAME_DELAY_TBL,X
         LDA f120B,X
-        CMP #$02     ;#%00000010
-        BNE b10B6
-        LDA #$14     ;#%00010100
-        STA f1100,X
-b10B6   LDY f10FB,X
-        LDA f10E2,Y
+        CMP #$02
+        BNE _L01
+
+        LDA #20
+        STA GAME_SPRITE_ENEMY_FRAME_DELAY_TBL,X
+
+_L01    LDY GAME_SPRITE_ENEMY_CURRENT_FRAME_TBL,X
+        LDA GAME_SPRITE_ENEMY_FRAME_TBL,Y
         BNE b10D1
+
 j10BE   LDY f1210,X
-        LDA f10D7,Y
+        LDA GAME_SPRITE_ENEMY_FRAME_OFFSET_TBL,Y
         TAY
-        STA f10FB,X
-        LDA f10E2,Y
+        STA GAME_SPRITE_ENEMY_CURRENT_FRAME_TBL,X
+        LDA GAME_SPRITE_ENEMY_FRAME_TBL,Y
         STA GAME_SPRITE_FRAME_TBL,X
-        INC f10FB,X
+        INC GAME_SPRITE_ENEMY_CURRENT_FRAME_TBL,X
         RTS
 
-b10D1   INC f10FB,X
+b10D1   INC GAME_SPRITE_ENEMY_CURRENT_FRAME_TBL,X                     ;Next frame
         STA GAME_SPRITE_FRAME_TBL,X
         RTS
 
-f10D7   .BYTE $14,$00,$05,$00,$0F,$00,$05,$00
-        .BYTE $0A,$00,$05
+GAME_SPRITE_ENEMY_FRAME_OFFSET_TBL
+        .BYTE 20,0,5,0,15,0,5,0,10,0,5  ;Offsets
         ; Sprite frame animation
-f10E2   .BYTE $6A,$6B,$6C,$6D,$00,$66,$67,$68
-        .BYTE $69,$00,$72,$73,$74,$75,$00,$6E
-        .BYTE $6F,$70,$71,$00,$7A,$7B,$7C,$7B
-        .BYTE $00
-f10FB   .BYTE $00,$00,$00,$00,$00
-f1100   .BYTE $00,$00,$00,$00,$00
+GAME_SPRITE_ENEMY_FRAME_TBL
+        .BYTE 106,107,108,109,0         ;Enemy going down  (offset 0)
+        .BYTE 102,103,104,105,0         ;Enemy going up    (offset 5)
+        .BYTE 114,115,116,117,0         ;Enemy going left  (offset 10)
+        .BYTE 110,111,112,113,0         ;Enemy going right (offset 15)
+        .BYTE 122,123,124,123,0         ;Enemy in tower    (offset 20)
+GAME_SPRITE_ENEMY_CURRENT_FRAME_TBL
+        .BYTE $00,$00,$00,$00,$00
+GAME_SPRITE_ENEMY_FRAME_DELAY_TBL   .BYTE $00,$00,$00,$00,$00
 
-j1105   LDY f1210,X
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+GAME_UPDATE_ENEMY_POS
+        LDY f1210,X
         LDA f106C,X
-        BEQ b1112
-        LDA #$00     ;#%00000000
-        JMP j1115
+        BEQ _L00
+        LDA #$00
+        JMP _L01
 
-b1112   LDA f1165,Y
-j1115   CLC
+_L00    LDA f1165,Y
+_L01    CLC
         ADC a0C
         STA a1163
         LDA f106C,X
-        BEQ b1125
-        LDA #$00     ;#%00000000
-        JMP j1128
+        BEQ _L02
+        LDA #$00
+        JMP _L03
 
-b1125   LDA f1172,Y
-j1128   CLC
+_L02    LDA f1172,Y
+_L03    CLC
         ADC a0D
         STA a1164
         LDA a1163
-        BMI b1144
+        BMI _L05
         LDA GAME_SPRITE_X_COPY_TBL,X
         CLC
         ADC a1163
         STA GAME_SPRITE_X_COPY_TBL,X
-        BCC b1141
-        LDA #$01     ;#%00000001
+        BCC _L04
+        LDA #$01
         STA GAME_SPRITE_X_MSB_COPY_TBL,X
-b1141   JMP j115A
+_L04    JMP _L06
 
-b1144   EOR #$FF     ;#%11111111
+_L05    EOR #$FF
         CLC
-        ADC #$01     ;#%00000001
+        ADC #$01
         STA TMP_2493
         LDA GAME_SPRITE_X_COPY_TBL,X
         SEC
         SBC TMP_2493
         STA GAME_SPRITE_X_COPY_TBL,X
-        BCS j115A
-        LDA #$00     ;#%00000000
+        BCS _L06
+
+        LDA #$00
         STA GAME_SPRITE_X_MSB_COPY_TBL,X
-j115A   LDA GAME_SPRITE_Y_COPY_TBL,X
+
+_L06    LDA GAME_SPRITE_Y_COPY_TBL,X
         CLC
         ADC a1164
         STA GAME_SPRITE_Y_COPY_TBL,X
@@ -1978,14 +1993,19 @@ GAME_PLAY_MUSIC
         JMP MUSIC_FN
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
-j1184   LDA GAME_SPRITE_Y_COPY_TBL,X
+; Sprite visible area is:
+; X = 4, 338 (?)
+; Y = 10, 197
+GAME_UPDATE_ENEMY_POS_IF_NEEDED
+        LDA GAME_SPRITE_Y_COPY_TBL,X
         CMP #197
-        BCS j1191
+        BCS GAME_SET_ENEMY_OUT_OF_BOUNDS
         CMP #10
-        BCC j1191
+        BCC GAME_SET_ENEMY_OUT_OF_BOUNDS
         JMP j11A0
 
-j1191   LDA #$00
+GAME_SET_ENEMY_OUT_OF_BOUNDS
+        LDA #$00
         STA f120B,X
         STA f106C,X
         LDA #$00
@@ -1997,13 +2017,15 @@ j11A0   LDA GAME_SPRITE_X_MSB_COPY_TBL,X
         LSR A
         LDA GAME_SPRITE_X_COPY_TBL,X
         ROR A
-        CMP #$A9     ;#%10101001
-        BCS j1191
-        CMP #$02     ;#%00000010
-        BCC j1191
-        JMP j1105
+        CMP #169
+        BCS GAME_SET_ENEMY_OUT_OF_BOUNDS
+        CMP #2
+        BCC GAME_SET_ENEMY_OUT_OF_BOUNDS
 
-s11B1   CPX #$04     ;#%00000100
+        JMP GAME_UPDATE_ENEMY_POS
+
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+s11B1   CPX #$04
         BNE b11B6
         RTS
 
@@ -2497,7 +2519,7 @@ ONE_ENEMY_KILLED
         STA f1210,Y
         LDA #$04
         STA f120B,Y
-        STA f1100,Y
+        STA GAME_SPRITE_ENEMY_FRAME_DELAY_TBL,Y
         LDA #$01
         STA GAME_SPRITE_COLOR_TBL,Y     ;Color White
         STA LOCAL_POINTS+3              ;Set 100 points
@@ -12769,11 +12791,13 @@ aCFFF   .BYTE $00
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 ; $E000
+        * = $E000
 MAP_TILES
         .BINARY "rambo-e000-e770-map.bin"
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 ; $E770
+        * = $E770
 MAP_TILES_ORIG
         .BINARY "rambo-e770-eee0-orig-map.bin"
 
