@@ -32,7 +32,7 @@ a04 = $04
 a05 = $05
 ZP_TMP_06 = $06
 a09 = $09
-GAME_HARD_SCROLL_DIR = $0A
+ZP_GAME_HARD_SCROLL_DIR = $0A
 ZP_GAME_ENERGY_TO_DECREASE = $0B        ;Ammount of energy to decrease to the player
 ZP_DELTA_X = $0C
 ZP_DELTA_Y = $0D
@@ -65,8 +65,8 @@ aD4 = $D4
 aD5 = $D5
 aE0 = $E0
 aE1 = $E1
-GAME_SMOOTH_Y = $E3
-GAME_SMOOTH_X = $E4
+ZP_GAME_SMOOTH_Y = $E3
+ZP_GAME_SMOOTH_X = $E4
 aE6 = $E6
 aF0 = $F0
 aF1 = $F1
@@ -78,10 +78,10 @@ aF6 = $F6
 aF7 = $F7
 aF8 = $F8
 aFA = $FA
-NEXT_RASTER_IRQ_POS = $FB               ;In game, it is used as next raster position
+ZP_NEXT_RASTER_IRQ_POS = $FB            ;In game, it is used as next raster position
 aFB = $FB                               ; but in Title, it is used as a pointer
                                         ; so keeping both references
-GAME_SPRITE_IDX_TO_PROCESS = $FC        ;In game, saves the next sprite index to process
+ZP_GAME_SPRITE_IDX_TO_PROCESS = $FC     ;In game, saves the next sprite index to process
 aFC = $FC                               ; but in Title is used as a pointer
                                         ; so keeping both references
 aFD = $FD
@@ -289,7 +289,7 @@ _L00    LDX ZP_GAME_SPRITE_ORDER_COPY_TBL,Y
         DEY
         BPL _L00
         INY
-_L01    STY GAME_SPRITE_IDX_TO_PROCESS
+_L01    STY ZP_GAME_SPRITE_IDX_TO_PROCESS
         RTS
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
@@ -479,13 +479,13 @@ s0513   LDX a0558
         LDA #$28
         STA a0565
 b052D   LDA #$08                        ;Scroll left
-        STA GAME_HARD_SCROLL_DIR
+        STA ZP_GAME_HARD_SCROLL_DIR
         JSR GAME_DO_HARD_SCROLL
         JSR GAME_MAP_PAINT
         DEC a0565
         BNE b052D
         LDA #$00
-        STA GAME_HARD_SCROLL_DIR
+        STA ZP_GAME_HARD_SCROLL_DIR
         LDA #$10                        ;Smooth-x = 0
         STA $D016                       ;VIC Control Register 2
         JSR VIC_SCREEN_ENABLE
@@ -846,13 +846,13 @@ _L03    LDA a0966
         ASL A
         CLC
         ADC #$1A     ;#%00011010
-        ADC GAME_SMOOTH_Y
+        ADC ZP_GAME_SMOOTH_Y
         STA a0968
         LDA aF3
         ASL A
         ASL A
         ASL A
-        ADC GAME_SMOOTH_X
+        ADC ZP_GAME_SMOOTH_X
         STA a0969
         JSR s0AB7
         LDA #27
@@ -1147,7 +1147,7 @@ _L01    LDA f0BE1,X
         ASL A
         ASL A
         CLC
-        ADC GAME_SMOOTH_Y
+        ADC ZP_GAME_SMOOTH_Y
         CLC
         ADC #31
         STA ZP_GAME_SPRITE_Y_COPY_TBL+12
@@ -1161,7 +1161,7 @@ _L01    LDA f0BE1,X
         STA ZP_GAME_SPRITE_X_MSB_COPY_TBL+12
         PLA
         CLC
-        ADC GAME_SMOOTH_X
+        ADC ZP_GAME_SMOOTH_X
         STA ZP_GAME_SPRITE_X_COPY_TBL+12
 
         LDA f0BF5,X
@@ -1554,9 +1554,9 @@ _L02    STA ZP_GAME_SPRITE_FRAME_TBL,Y
         ASL A
         CLC
         ADC #$48
-        ADC GAME_SMOOTH_Y
+        ADC ZP_GAME_SMOOTH_Y
         STA ZP_GAME_SPRITE_Y_COPY_TBL,Y
-        LDA GAME_SMOOTH_X
+        LDA ZP_GAME_SMOOTH_X
         LSR A
         CLC
         ADC #$18
@@ -1595,7 +1595,7 @@ _L02    LDA $4000+40*18,X
         STX a0EB3
         RTS
 
-_L03    LDA GAME_SMOOTH_X
+_L03    LDA ZP_GAME_SMOOTH_X
         CLC
         ADC #$11
         LSR A
@@ -1610,7 +1610,7 @@ _L03    LDA GAME_SMOOTH_X
         STA ZP_GAME_SPRITE_X_COPY_TBL+4
         LDA #$BC
         CLC
-        ADC GAME_SMOOTH_Y
+        ADC ZP_GAME_SMOOTH_Y
         STA ZP_GAME_SPRITE_Y_COPY_TBL+4
         LDA #$FF
         STA a0EB3
@@ -1676,7 +1676,7 @@ j0F00   LDA TMP_2493
         ASL A
         ASL A
         CLC
-        ADC GAME_SMOOTH_Y
+        ADC ZP_GAME_SMOOTH_Y
         ADC #44
         STA ZP_GAME_SPRITE_Y_COPY_TBL+4
         JMP j0F48
@@ -1692,7 +1692,7 @@ b0F20   LDA a28E6
         BEQ b0F6A
         LDA #$2B
         STA ZP_GAME_SPRITE_Y_COPY_TBL+4
-        LDA GAME_SMOOTH_X
+        LDA ZP_GAME_SMOOTH_X
         CLC
         ADC #$01
         LSR A
@@ -2224,7 +2224,7 @@ b135B   LDA GAME_JOY_STATE_COPY2
         STA GAME_JOY_STATE_COPY2
         JMP j1328
 
-s1366   LDA GAME_SMOOTH_X
+s1366   LDA ZP_GAME_SMOOTH_X
         CLC
         ADC #$16     ;#%00010110
         AND #$FE     ;#%11111110
@@ -2247,7 +2247,7 @@ j1382   LSR A
         LDA a1931
         SEC
         SBC #$2D     ;#%00101101
-        SBC GAME_SMOOTH_Y
+        SBC ZP_GAME_SMOOTH_Y
         LSR A
         LSR A
         LSR A
@@ -2586,7 +2586,7 @@ f1628   .BYTE $40,$28,$40,$50,$40,$78,$40,$A0
         .BYTE $43
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
-j1659   LDA GAME_SMOOTH_X
+j1659   LDA ZP_GAME_SMOOTH_X
         CLC
         ADC #$16     ;#%00010110
         LSR A
@@ -2602,7 +2602,7 @@ j1659   LDA GAME_SMOOTH_X
 b1670   LSR A
         LSR A
         STA a30
-        LDA GAME_SMOOTH_Y
+        LDA ZP_GAME_SMOOTH_Y
         CLC
         ADC #$2D     ;#%00101101
         STA TMP_2493
@@ -2626,7 +2626,7 @@ b1686   AND #$F8     ;#%11111000
 
         RTS
 
-s169C   LDA GAME_SMOOTH_X
+s169C   LDA ZP_GAME_SMOOTH_X
         CLC
         ADC #$16     ;#%00010110
         LSR A
@@ -2639,7 +2639,7 @@ s169C   LDA GAME_SMOOTH_X
 b16AF   LSR A
         LSR A
         STA a30
-        LDA GAME_SMOOTH_Y
+        LDA ZP_GAME_SMOOTH_Y
         CLC
         ADC #$2D     ;#%00101101
         STA TMP_2493
@@ -2694,7 +2694,7 @@ _L01    LDA f0BF1,X
         BPL _L01
 
         LDA #$04
-        STA GAME_SMOOTH_Y
+        STA ZP_GAME_SMOOTH_Y
         STA a11C1
         STA ZP_GAME_SPRITE_STATE_TBL+13
         LDA #$00
@@ -2702,7 +2702,7 @@ _L01    LDA f0BF1,X
         STA COPTER_MODE_ENABLED
         STA a0967
         STA a0B29
-        STA GAME_SMOOTH_X
+        STA ZP_GAME_SMOOTH_X
         STA ZP_SELECTED_WEAPON
         STA IS_GAME_PAUSED
         STA $D015                       ;Sprite display Enable
@@ -3339,7 +3339,7 @@ a1C28   .BYTE $00
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 s1C29
-        LDA GAME_SMOOTH_X
+        LDA ZP_GAME_SMOOTH_X
         STA a1CC0
 
         LDA GAME_JOY_STATE
@@ -3362,7 +3362,7 @@ _L00    LDA a1CC0
         EOR #%00000111
         STA a1CC0
 
-_L01    LDA GAME_SMOOTH_Y
+_L01    LDA ZP_GAME_SMOOTH_Y
         SEC
         SBC a1CC0
         BPL _L02
@@ -3386,9 +3386,9 @@ s1C70
         LDA a1D3E
         BNE b1C6F
 
-        LDA GAME_SMOOTH_X
+        LDA ZP_GAME_SMOOTH_X
         AND #%11111110
-        STA GAME_SMOOTH_X
+        STA ZP_GAME_SMOOTH_X
         STA a1CC0
 
         LDA GAME_JOY_STATE
@@ -3411,7 +3411,7 @@ _L00    LDA a1CC0
         EOR #%00000110
         STA a1CC0
 
-_L01    LDA GAME_SMOOTH_Y
+_L01    LDA ZP_GAME_SMOOTH_Y
         SEC
         SBC a1CC0
         BPL _L02
@@ -3436,7 +3436,7 @@ GAME_SMOOTH_SCROLL_BY_1
         LDA #$00
         STA ZP_DELTA_X
         STA ZP_DELTA_Y
-        STA GAME_HARD_SCROLL_DIR
+        STA ZP_GAME_HARD_SCROLL_DIR
         LSR GAME_JOY_STATE_COPY2
         BCC _L00
         JSR GAME_SMOOTH_SCROLL_Y_INC_BY_1       ;Up
@@ -3454,7 +3454,7 @@ _L02    LSR GAME_JOY_STATE_COPY2
         JSR GAME_SMOOTH_SCROLL_X_DEC_BY_1       ;Right
 
 _L03    LDY GAME_JOY_STATE
-        LDA GAME_HARD_SCROLL_DIR
+        LDA ZP_GAME_HARD_SCROLL_DIR
         BNE b1CF2
         LDY #$FF
 b1CF2   STY a12F1
@@ -3465,7 +3465,7 @@ GAME_SMOOTH_SCROLL_BY_2
         LDA #$00
         STA ZP_DELTA_X
         STA ZP_DELTA_Y
-        STA GAME_HARD_SCROLL_DIR
+        STA ZP_GAME_HARD_SCROLL_DIR
         LSR GAME_JOY_STATE_COPY2
         BCC _L00
         JSR GAME_SMOOTH_SCROLL_Y_INC_BY_2       ;Up
@@ -3483,7 +3483,7 @@ _L02    LSR GAME_JOY_STATE_COPY2
         JSR GAME_SMOOTH_SCROLL_X_DEC_BY_2       ;Right
 
 _L03    LDY GAME_JOY_STATE
-        LDA GAME_HARD_SCROLL_DIR
+        LDA ZP_GAME_HARD_SCROLL_DIR
         BNE b1CF2
         LDY #$FF
         JMP b1CF2
@@ -3527,20 +3527,20 @@ GAME_JOY_STATE_COPY     .BYTE $00       ;The joystick state: up,down,left,right,
 GAME_JOY_DIR_STATE      .BYTE $00       ;Like state, but with "fire" masked
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
-; GAME_HARD_SCROLL_DIR:
+; ZP_GAME_HARD_SCROLL_DIR:
 ;       1: Scroll down
 ;       2: Scroll up
 ;       4: Scroll right
 ;    rest: Scroll left
 GAME_DO_HARD_SCROLL
-        LDA GAME_HARD_SCROLL_DIR
+        LDA ZP_GAME_HARD_SCROLL_DIR
         STA GAME_HARD_SCROLL_DIR_COPY
         BEQ _EXIT
 
         JSR _DO_HARD_SCROLL
 
         LDA #$00
-        STA GAME_HARD_SCROLL_DIR
+        STA ZP_GAME_HARD_SCROLL_DIR
 _EXIT   RTS
 
 _DO_HARD_SCROLL
@@ -3612,39 +3612,39 @@ _L00
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 GAME_SMOOTH_SCROLL_X_INC_BY_1
         INC ZP_DELTA_X
-        LDA GAME_SMOOTH_X
+        LDA ZP_GAME_SMOOTH_X
         CMP #$07
         BEQ b1DE0
-        INC GAME_SMOOTH_X
+        INC ZP_GAME_SMOOTH_X
 
 j1DD5   LDA $D016                       ;VIC Control Register 2
         AND #$10                        ;Mask x-smooth scrolling
-        ORA GAME_SMOOTH_X               ;X-smooth scrolling
+        ORA ZP_GAME_SMOOTH_X               ;X-smooth scrolling
         STA $D016                       ;VIC Control Register 2
         RTS
 
 b1DE0   LDA #$00
-        STA GAME_SMOOTH_X
-        LDA GAME_HARD_SCROLL_DIR
+        STA ZP_GAME_SMOOTH_X
+        LDA ZP_GAME_HARD_SCROLL_DIR
         ORA #$04                        ;Hard Scroll right
-        STA GAME_HARD_SCROLL_DIR
+        STA ZP_GAME_HARD_SCROLL_DIR
         JMP j1DD5
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 GAME_SMOOTH_SCROLL_X_INC_BY_2
         INC ZP_DELTA_X
-        LDA GAME_SMOOTH_X
+        LDA ZP_GAME_SMOOTH_X
         CMP #$06
         BEQ _L00
-        INC GAME_SMOOTH_X
-        INC GAME_SMOOTH_X
+        INC ZP_GAME_SMOOTH_X
+        INC ZP_GAME_SMOOTH_X
         JMP j1DD5
 
 _L00    LDA #$00
-        STA GAME_SMOOTH_X
-        LDA GAME_HARD_SCROLL_DIR
+        STA ZP_GAME_SMOOTH_X
+        LDA ZP_GAME_HARD_SCROLL_DIR
         ORA #$04                        ;Hard Scroll right
-        STA GAME_HARD_SCROLL_DIR
+        STA ZP_GAME_HARD_SCROLL_DIR
         JMP j1DD5
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
@@ -3718,32 +3718,32 @@ _L02    LDA $4000+40*18,X
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 GAME_SMOOTH_SCROLL_X_DEC_BY_1
         DEC ZP_DELTA_X
-        LDA GAME_SMOOTH_X
+        LDA ZP_GAME_SMOOTH_X
         BEQ _L00
-        DEC GAME_SMOOTH_X
+        DEC ZP_GAME_SMOOTH_X
         JMP j1DD5
 
 _L00    LDA #$07
-        STA GAME_SMOOTH_X
-        LDA GAME_HARD_SCROLL_DIR
+        STA ZP_GAME_SMOOTH_X
+        LDA ZP_GAME_HARD_SCROLL_DIR
         ORA #$08                        ;Hard scroll left
-        STA GAME_HARD_SCROLL_DIR
+        STA ZP_GAME_HARD_SCROLL_DIR
         JMP j1DD5
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 GAME_SMOOTH_SCROLL_X_DEC_BY_2
         DEC ZP_DELTA_X
-        LDA GAME_SMOOTH_X
+        LDA ZP_GAME_SMOOTH_X
         BEQ _L00
-        DEC GAME_SMOOTH_X
-        DEC GAME_SMOOTH_X
+        DEC ZP_GAME_SMOOTH_X
+        DEC ZP_GAME_SMOOTH_X
         JMP j1DD5
 
 _L00    LDA #$06
-        STA GAME_SMOOTH_X
-        LDA GAME_HARD_SCROLL_DIR
+        STA ZP_GAME_SMOOTH_X
+        LDA ZP_GAME_HARD_SCROLL_DIR
         ORA #$08                        ;Hard scroll left
-        STA GAME_HARD_SCROLL_DIR
+        STA ZP_GAME_HARD_SCROLL_DIR
         JMP j1DD5
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
@@ -3819,39 +3819,39 @@ _L02
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 GAME_SMOOTH_SCROLL_Y_INC_BY_1
         INC ZP_DELTA_Y
-        LDA GAME_SMOOTH_Y
+        LDA ZP_GAME_SMOOTH_Y
         CMP #$07
         BCS b1FA6
-        INC GAME_SMOOTH_Y
+        INC ZP_GAME_SMOOTH_Y
 
 s1F9B   LDA $D011                       ;VIC Control Register 1
         AND #$70                        ;Mask y-smooth scrolling
-        ORA GAME_SMOOTH_Y               ;Y-smooth scrolling
+        ORA ZP_GAME_SMOOTH_Y               ;Y-smooth scrolling
         STA $D011                       ;VIC Control Register 1
         RTS
 
 b1FA6   LDA #$00
-        STA GAME_SMOOTH_Y
-        LDA GAME_HARD_SCROLL_DIR
+        STA ZP_GAME_SMOOTH_Y
+        LDA ZP_GAME_HARD_SCROLL_DIR
         ORA #$01                        ;Hard scroll down
-        STA GAME_HARD_SCROLL_DIR
+        STA ZP_GAME_HARD_SCROLL_DIR
         JMP s1F9B
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 GAME_SMOOTH_SCROLL_Y_INC_BY_2
         INC ZP_DELTA_Y
-        LDA GAME_SMOOTH_Y
+        LDA ZP_GAME_SMOOTH_Y
         CMP #$06
         BCS _L00
-        INC GAME_SMOOTH_Y
-        INC GAME_SMOOTH_Y
+        INC ZP_GAME_SMOOTH_Y
+        INC ZP_GAME_SMOOTH_Y
         JMP s1F9B
 
 _L00    LDA #$00
-        STA GAME_SMOOTH_Y
-        LDA GAME_HARD_SCROLL_DIR
+        STA ZP_GAME_SMOOTH_Y
+        LDA ZP_GAME_HARD_SCROLL_DIR
         ORA #$01                        ;Hard scroll down
-        STA GAME_HARD_SCROLL_DIR
+        STA ZP_GAME_HARD_SCROLL_DIR
         JMP s1F9B
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
@@ -4004,33 +4004,33 @@ f2159   .BYTE $00,$00,$00,$00,$00,$00,$00,$00
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 GAME_SMOOTH_SCROLL_Y_DEC_BY_1
         DEC ZP_DELTA_Y
-        LDA GAME_SMOOTH_Y
+        LDA ZP_GAME_SMOOTH_Y
         BEQ _L00
-        DEC GAME_SMOOTH_Y
+        DEC ZP_GAME_SMOOTH_Y
         JMP s1F9B
 
 _L00    LDA #$07
-        STA GAME_SMOOTH_Y
-        LDA GAME_HARD_SCROLL_DIR
+        STA ZP_GAME_SMOOTH_Y
+        LDA ZP_GAME_HARD_SCROLL_DIR
         ORA #$02                        ;Hard scroll up
-        STA GAME_HARD_SCROLL_DIR
+        STA ZP_GAME_HARD_SCROLL_DIR
         JMP s1F9B
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 GAME_SMOOTH_SCROLL_Y_DEC_BY_2
         DEC ZP_DELTA_Y
-        LDA GAME_SMOOTH_Y
+        LDA ZP_GAME_SMOOTH_Y
         CMP #$02
         BCC _L00
-        DEC GAME_SMOOTH_Y
-        DEC GAME_SMOOTH_Y
+        DEC ZP_GAME_SMOOTH_Y
+        DEC ZP_GAME_SMOOTH_Y
         JMP s1F9B
 
 _L00    LDA #$06
-        STA GAME_SMOOTH_Y
-        LDA GAME_HARD_SCROLL_DIR
+        STA ZP_GAME_SMOOTH_Y
+        LDA ZP_GAME_HARD_SCROLL_DIR
         ORA #$02                        ;Hard scroll up
-        STA GAME_HARD_SCROLL_DIR
+        STA ZP_GAME_HARD_SCROLL_DIR
         JMP s1F9B
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
@@ -4136,7 +4136,7 @@ GAME_SETUP_IRQ
         LDA #$07
         STA a09
         LDA #$32
-        STA NEXT_RASTER_IRQ_POS
+        STA ZP_NEXT_RASTER_IRQ_POS
         STA $D012                       ;Raster Position
         RTS
 
@@ -4153,16 +4153,16 @@ GAME_IRQ_HANDLER_RASTER_VAR
         STA $D019                       ;ACK all interrupts
 
         CLD
-        LDA NEXT_RASTER_IRQ_POS
+        LDA ZP_NEXT_RASTER_IRQ_POS
         CLC
         ADC #$0E
-        STA NEXT_RASTER_IRQ_POS
+        STA ZP_NEXT_RASTER_IRQ_POS
 
         CLI
-_L00    LDY GAME_SPRITE_IDX_TO_PROCESS
+_L00    LDY ZP_GAME_SPRITE_IDX_TO_PROCESS
         LDX ZP_GAME_SPRITE_ODDER_TBL,Y
         LDA ZP_GAME_SPRITE_Y_TBL,X
-        CMP NEXT_RASTER_IRQ_POS
+        CMP ZP_NEXT_RASTER_IRQ_POS
         BCS b2306
 
         STA ZP_TMP_06
@@ -4185,7 +4185,7 @@ _L01    ROL ZP_GAME_SPRITE_X_MSB_TBL,X  ;Restore bit
         STA $D001,Y                     ;Sprite 0 Y Pos
         LDA ZP_GAME_SPRITE_X_TBL,X
         STA $D000,Y                     ;Sprite 0 X Pos
-        DEC GAME_SPRITE_IDX_TO_PROCESS
+        DEC ZP_GAME_SPRITE_IDX_TO_PROCESS
         BMI _L02
         DEC a09
         BNE _L00
@@ -4196,7 +4196,7 @@ _L01    ROL ZP_GAME_SPRITE_X_MSB_TBL,X  ;Restore bit
 _L02    LDA #$07
         STA a09
         LDA #$32
-        STA NEXT_RASTER_IRQ_POS
+        STA ZP_NEXT_RASTER_IRQ_POS
 
         LDA #<GAME_IRQ_HANDLER_RASTER_DB
         STA $FFFE                       ;IRQ
@@ -4226,7 +4226,7 @@ b2306   SBC #$0E
         ADC #$02
 _L00    ADC #$00
         STA $D012                       ;Raster Position
-        STA NEXT_RASTER_IRQ_POS
+        STA ZP_NEXT_RASTER_IRQ_POS
 
         PLA
         TAX
@@ -4352,7 +4352,7 @@ _L06    LDA COPTER_MODE_ENABLED
 _L07    JSR s1BD4
 _L08    JSR s0EB4
         JSR s2436
-        LDA GAME_HARD_SCROLL_DIR
+        LDA ZP_GAME_HARD_SCROLL_DIR
         BNE _L09
         JSR GAME_MAYBE_TOGGLE_PAUSE
 _L09    PLA
@@ -5780,7 +5780,7 @@ b3337   LDA #$1E     ;#%00011110
         BCC b3342
 j3341   RTS
 
-b3342   LDA GAME_SMOOTH_X
+b3342   LDA ZP_GAME_SMOOTH_X
         LSR A
         STA a336E
         LDA aF8
@@ -5798,7 +5798,7 @@ b3342   LDA GAME_SMOOTH_X
         ASL A
         ASL A
         CLC
-        ADC GAME_SMOOTH_Y
+        ADC ZP_GAME_SMOOTH_Y
         SEC
         SBC a3566
         STA a362F
