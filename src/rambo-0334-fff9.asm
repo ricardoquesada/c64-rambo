@@ -273,7 +273,7 @@ _L00    JSR GAME_MAYBE_PLAY_BASE_DISCOVERED_SFX
         JSR s1985
         JSR GAME_PLAY_MUSIC
         JSR GAME_READ_JOYSTICK
-        JSR s14F0
+        JSR GAME_CHECK_DESTROY_TERRAIN
         JSR GAME_UPDATE_SPRITE_SCORE
         JSR GAME_UPDATE_SCORE_FROM_POINTS
         JSR GAME_CHECK_HERO_FIRE_BULLET
@@ -2467,19 +2467,20 @@ a14EE   .BYTE $00
 a14EF   .BYTE $00
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
-s14F0   LDA GAME_HARD_SCROLL_DIR_COPY
-        BEQ b14F6
+GAME_CHECK_DESTROY_TERRAIN
+        LDA GAME_HARD_SCROLL_DIR_COPY
+        BEQ _L00
         RTS
 
-b14F6   LDX a152D
+_L00    LDX a152D
         LDA SPRITE_BULLET_ID_TBL,X
         CMP #$05                        ;Bazooka?
-        BEQ b1507                       ; Yes, jump
+        BEQ _L01                        ; Yes, jump
         CMP #$08                        ;Missile
-        BEQ b1507                       ; Yes, jump
-        JMP j1524
+        BEQ _L01                        ; Yes, jump
+        JMP _L02
 
-b1507   TXA
+_L01    TXA
         PHA
         CLC
         ADC #$09
@@ -2494,14 +2495,15 @@ b1507   TXA
         BCC _COLLISION_WITH_CHAR
         CMP #42
         BCS _COLLISION_WITH_CHAR
-        JMP j1524
+        JMP _L02
 
 _COLLISION_WITH_CHAR
         JSR s18E4
-j1524   DEX
-        BPL b1529
-        LDX #$02     ;#%00000010
-b1529   STX a152D
+
+_L02    DEX
+        BPL _L03
+        LDX #$02
+_L03    STX a152D
         RTS
 
 a152D   .BYTE $00
@@ -2993,7 +2995,7 @@ s18E4   LDY SPRITE_BULLET_ID_TBL,X
         TXA
         PHA
         CLC
-        ADC #$09     ;#%00001001
+        ADC #$09
         TAX
         JSR s169C
         PLA
@@ -5235,6 +5237,7 @@ b295A   LDY #$00     ;#%00000000
 a295F   .BYTE $00
 a2960   .BYTE $00
 
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 s2961   STY a2960
         STX a295F
         LDY a2995
@@ -5253,10 +5256,10 @@ j296D   LDA f2997,Y
         LDX a295F
         RTS
 
-b298A   LDY #$00     ;#%00000000
+b298A   LDY #$00
         JMP j296D
 
-b298F   LDX #$00     ;#%00000000
+b298F   LDX #$00
         JMP j296D
 
 a2994   .BYTE $00
@@ -5469,6 +5472,7 @@ f29A8   .BYTE $01,$04,$05,$06,$02,$02,$03,$01
         .BYTE $00,$00,$FF,$FF,$00,$00,$FF,$FF
         .BYTE $00,$00,$FF,$FF,$00,$00,$FF,$FF
 
+        ; $3000
 ENEMY_COPTER_ANIM_BIS
         JMP ENEMY_COPTER_ANIM
 
@@ -6208,7 +6212,7 @@ _L00    LDX #$0C
         JSR s036A
 
         LDY #41
-        ; Checks for char between 27 and 39 (terrain with border)
+        ; Checks for char between 27 and 29 (terrain with border)
         ; these are the "helipad" chars
         LDA (p30),Y
         CMP #27
@@ -12948,13 +12952,11 @@ aCFFF   .BYTE $00
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 ; $E000
-        * = $E000
 MAP_TILES
         .BINARY "rambo-e000-e770-map.bin"
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 ; $E770
-        * = $E770
 MAP_TILES_ORIG
         .BINARY "rambo-e770-eee0-orig-map.bin"
 
