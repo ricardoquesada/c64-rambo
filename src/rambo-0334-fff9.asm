@@ -867,7 +867,7 @@ a0969   .BYTE $00
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 s096A   LDX #$04
         LDA #$00
-_L00    STA f120B,X
+_L00    STA GAME_CURRENT_ENEMY_STATE_TBL,X
         STA GAME_SPRITE_Y_COPY_TBL,X
         DEX
         BPL _L00
@@ -1066,7 +1066,7 @@ _L00    LDA #$00
         STA GAME_SPRITE_STATE_TBL,X
         STA f1961,X
         STA f1963,X
-        STA f120B,X
+        STA GAME_CURRENT_ENEMY_STATE_TBL,X
         STA a101E
         STA a101D
         STA GAME_SPRITE_Y_COPY_TBL,X
@@ -1232,7 +1232,7 @@ f0BF5   .BYTE $23,$24,$D7,$B9
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 s0BF9   LDX a0C0F
-        LDA f120B,X
+        LDA GAME_CURRENT_ENEMY_STATE_TBL,X
         CMP #$01
         BNE _L00
         JSR s0C10
@@ -1452,12 +1452,12 @@ _L03    JMP GAME_MAP_PAINT_LEFT         ;Left
 s0D5D   LDY f0D88,X
         BPL _L00
         LDA #$01
-        STA f120B,X
+        STA GAME_CURRENT_ENEMY_STATE_TBL,X
         LDA #$07
         JSR s24D3
         TAY
-        LDA f1231,Y
-        STA f1210,X
+        LDA GAME_ENEMY_ANIM_TYPE_TBL,Y
+        STA GAME_CURRENT_ENEMY_ANIM_TYPE_TBL,X
         JMP j10BE
 
 _L00    CPY #$02
@@ -1515,14 +1515,14 @@ _L02    DEY
 s0DE1   LDA #$04
         JSR s24D3
         TAY
-        LDA f120B,Y
+        LDA GAME_CURRENT_ENEMY_STATE_TBL,Y
         BEQ _L00
         RTS
 
 _L00    LDA #$0E
         STA f0D88,Y
         LDA #$05
-        STA f120B,Y
+        STA GAME_CURRENT_ENEMY_STATE_TBL,Y
         LDA #$09
         STA GAME_SPRITE_COLOR_TBL,Y     ;Color Brown
         STA GAME_SPRITE_STATE_TBL,Y
@@ -1538,12 +1538,12 @@ _L00    LDA #$0E
         CMP #$67
         BNE _L01
         LDA #$0B
-        STA f1210,Y
+        STA GAME_CURRENT_ENEMY_ANIM_TYPE_TBL,Y
         LDA #$76
         JMP _L02
 
 _L01    LDA #$0C
-        STA f1210,Y
+        STA GAME_CURRENT_ENEMY_ANIM_TYPE_TBL,Y
         LDA #120                        ;Frame: enemy jump from tower (??)
 _L02    STA GAME_SPRITE_FRAME_TBL,Y
         LDA #$0E
@@ -1737,7 +1737,7 @@ s0F6C   LDA a0967
         RTS
 
 _L00    LDX #$04
-_L01    LDA f120B,X
+_L01    LDA GAME_CURRENT_ENEMY_STATE_TBL,X
         BEQ _L02
         JSR s0F90
         JMP _L03
@@ -1792,7 +1792,7 @@ _L03    CMP #$02
 _L04    JSR GAME_UPDATE_ENEMY_POS_IF_NEEDED
         JMP j109C
 
-_L05    CMP #$03     ;#%00000011
+_L05    CMP #$03
         BNE b101F
         LDA a101D
         BNE _L06
@@ -1829,13 +1829,13 @@ a101E   .BYTE $00
 b101F   JSR s1032
         JSR GAME_UPDATE_ENEMY_POS_IF_NEEDED
         LDA a24F4
-        CMP #$0A     ;#%00001010
+        CMP #$0A
         BCS b102F
         JSR s1061
 b102F   JMP j1096
 
 s1032   JSR j1659
-        LDY f1210,X
+        LDY GAME_CURRENT_ENEMY_ANIM_TYPE_TBL,X
         LDA f1071,Y
         TAY
         LDA (p30),Y
@@ -1858,8 +1858,8 @@ b1054   INC f106C,X
 
 s1061   JSR s2941
         TAY
-        LDA f1231,Y
-        STA f1210,X
+        LDA GAME_ENEMY_ANIM_TYPE_TBL,Y
+        STA GAME_CURRENT_ENEMY_ANIM_TYPE_TBL,X
         RTS
 
 f106C   .BYTE $00,$00,$00,$00
@@ -1892,7 +1892,7 @@ j109C   LDA GAME_SPRITE_ENEMY_FRAME_DELAY_TBL,X
 
 _L00    LDA #$02
         STA GAME_SPRITE_ENEMY_FRAME_DELAY_TBL,X
-        LDA f120B,X
+        LDA GAME_CURRENT_ENEMY_STATE_TBL,X
         CMP #$02
         BNE _L01
 
@@ -1903,7 +1903,7 @@ _L01    LDY GAME_SPRITE_ENEMY_CURRENT_FRAME_TBL,X
         LDA GAME_SPRITE_ENEMY_FRAME_TBL,Y
         BNE b10D1
 
-j10BE   LDY f1210,X
+j10BE   LDY GAME_CURRENT_ENEMY_ANIM_TYPE_TBL,X
         LDA GAME_SPRITE_ENEMY_FRAME_OFFSET_TBL,Y
         TAY
         STA GAME_SPRITE_ENEMY_CURRENT_FRAME_TBL,X
@@ -1931,7 +1931,7 @@ GAME_SPRITE_ENEMY_FRAME_DELAY_TBL   .BYTE $00,$00,$00,$00,$00
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 GAME_UPDATE_ENEMY_POS
-        LDY f1210,X
+        LDY GAME_CURRENT_ENEMY_ANIM_TYPE_TBL,X
         LDA f106C,X
         BEQ _L00
         LDA #$00
@@ -2006,7 +2006,7 @@ GAME_UPDATE_ENEMY_POS_IF_NEEDED
 
 GAME_SET_ENEMY_OUT_OF_BOUNDS
         LDA #$00
-        STA f120B,X
+        STA GAME_CURRENT_ENEMY_STATE_TBL,X
         STA f106C,X
         LDA #$00
         STA GAME_SPRITE_Y_COPY_TBL,X
@@ -2038,7 +2038,8 @@ b11B6   LDA a0B29
 a11C1   .BYTE $00
 
 b11C2   DEC a11C1
-b11C5   LDA #$07     ;#%00000111
+
+b11C5   LDA #$07
         JSR s24D3
         TAY
         LDA f121C,Y
@@ -2053,32 +2054,42 @@ b11C5   LDA #$07     ;#%00000111
         CLC
         ADC f1223,Y
         STA GAME_SPRITE_Y_COPY_TBL,X
-        LDA f1231,Y
-        STA f1210,X
-        LDA #$01     ;#%00000001
-        STA f120B,X
+
+        LDA GAME_ENEMY_ANIM_TYPE_TBL,Y
+        STA GAME_CURRENT_ENEMY_ANIM_TYPE_TBL,X
+        LDA #$01
+        STA GAME_CURRENT_ENEMY_STATE_TBL,X
         STA GAME_SPRITE_STATE_TBL,X
-        LDA #$00     ;#%00000000
+        LDA #$00
         STA f106C,X
-        LDA #$04     ;#%00000100
+        LDA #$04
         JSR s24D3
         TAY
-        LDA f1207,Y
+        LDA GAME_CURRENT_ENEMY_COLOR_TBL,Y
         STA GAME_SPRITE_COLOR_TBL,X
         JMP j10BE
 
         RTS
 
-f1207   .BYTE $0B,$0F,$05,$09
-f120B   .BYTE $00,$00,$00,$00
+GAME_CURRENT_ENEMY_COLOR_TBL
+        .BYTE $0B,$0F,$05,$09
+GAME_CURRENT_ENEMY_STATE_TBL
+        .BYTE $00,$00,$00,$00
 a120F   .BYTE $00
-f1210   .BYTE $00,$00,$00,$00
+GAME_CURRENT_ENEMY_ANIM_TYPE_TBL
+        .BYTE $00,$00,$00,$00
 a1214   .BYTE $00
-f1215   .BYTE $04,$A6,$04,$04,$04,$A6,$A6
-f121C   .BYTE $00,$00,$8E,$00,$00,$00,$00
-f1223   .BYTE $32,$32,$1D,$C4,$32,$C4,$32
-f122A   .BYTE $8C,$8C,$00,$00,$00,$00,$00
-f1231   .BYTE $04,$08,$01,$06,$05,$0A,$09,$02
+        ; Where new sprites should appear
+f1215   .BYTE $04,$A6,$04,$04,$04,$A6,$A6       ;X
+f121C   .BYTE $00,$00,$8E,$00,$00,$00,$00       ;X
+f1223   .BYTE $32,$32,$1D,$C4,$32,$C4,$32       ;Y
+f122A   .BYTE $8C,$8C,$00,$00,$00,$00,$00       ;Y
+GAME_ENEMY_ANIM_TYPE_TBL
+        .BYTE $04,$08,$01,$06,$05,$0A,$09,$02   ;Bitwise:
+                                                ; $01 = Down
+                                                ; $02 = Up
+                                                ; $04 = Right
+                                                ; $08 = Left
         .BYTE $00
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
@@ -2101,7 +2112,7 @@ _L01    DEX
         BEQ _L02
         DEC a1266
         BPL _L02
-        LDA #$01     ;#%00000001
+        LDA #$01
         STA a1266
 _L02    RTS
 
@@ -2476,7 +2487,7 @@ j1564   STY TMP_2493
         LDA f1557,Y
         STA a25C7
         LDY TMP_2493
-        LDA f120B,Y
+        LDA GAME_CURRENT_ENEMY_STATE_TBL,Y
         BEQ b15EA
         CMP #$04
         BEQ b15EA
@@ -2515,10 +2526,10 @@ ONE_ENEMY_KILLED
         STA GAME_SPRITE_FRAME_TBL,Y
         LDA #$01
         STA f106C,Y
-        LDA #$00
-        STA f1210,Y
+        LDA #$00                        ;No animation type
+        STA GAME_CURRENT_ENEMY_ANIM_TYPE_TBL,Y
         LDA #$04
-        STA f120B,Y
+        STA GAME_CURRENT_ENEMY_STATE_TBL,Y
         STA GAME_SPRITE_ENEMY_FRAME_DELAY_TBL,Y
         LDA #$01
         STA GAME_SPRITE_COLOR_TBL,Y     ;Color White
@@ -4584,11 +4595,11 @@ a25DD   .BYTE $03
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 s25DE   LDA GAME_SPRITE_Y_COPY_TBL+5,X
-        CMP #$0A     ;#%00001010
+        CMP #10
         BCS b25F0
-j25E4   LDA #$00     ;#%00000000
+j25E4   LDA #$00
         STA f1961,X
-        LDA #$00     ;#%00000000
+        LDA #$00
         STA GAME_SPRITE_Y_COPY_TBL+5,X
         DEC GAME_SPRITE_STATE_TBL+5,X
         RTS
@@ -4656,17 +4667,18 @@ b265C   DEC GAME_SPRITE_Y_COPY_TBL+5,X
         DEC GAME_SPRITE_Y_COPY_TBL+5,X
         RTS
 
-s2661   LDA #$05     ;#%00000101
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+s2661   LDA #$05
         JSR s24D3
         TAY
-        LDA f120B,Y
-        CMP #$01     ;#%00000001
-        BEQ b2673
-        CMP #$04     ;#%00000100
-        BEQ b2673
+        LDA GAME_CURRENT_ENEMY_STATE_TBL,Y
+        CMP #$01                        ;Alive?
+        BEQ _L00
+        CMP #$04                        ;Dead?
+        BEQ _L00
         RTS
 
-b2673   LDA aFE
+_L00    LDA aFE
         STA TMP_2493
         LDA aFF
         LSR A
@@ -4681,11 +4693,12 @@ b2673   LDA aFE
         STX aD5
         JSR s2961
         LDX aD5
-        CMP #$01     ;#%00000001
-        BEQ b2696
+        CMP #$01
+        BEQ _FIRE_BULLET
         RTS
 
-b2696   INC f1961,X
+_FIRE_BULLET
+        INC f1961,X
         INC a11C1
         INC GAME_SPRITE_STATE_TBL+5,X
         LDA #18                         ;Frame: Bullet
@@ -4708,28 +4721,28 @@ b2696   INC f1961,X
         LSR A
         SEC
         SBC TMP_2493
-        BCS b26CE
-        EOR #$FF     ;#%11111111
-        ADC #$01     ;#%00000001
-b26CE   ROL f055B,X
+        BCS _L02
+        EOR #$FF
+        ADC #$01
+_L02    ROL f055B,X
         STA fD6,X
         LDA GAME_SPRITE_Y_COPY_TBL+13
         LSR A
         SEC
         SBC a2745
-        BCS b26E0
-        LDA #$FF     ;#%11111111
-        ADC #$01     ;#%00000001
-b26E0   ROL f055B,X
+        BCS _L03
+        LDA #$FF
+        ADC #$01
+_L03    ROL f055B,X
         CMP fD6,X
-        BCS b26F4
+        BCS _L04
         LDY fD6,X
         STA fD6,X
         LDA f055B,X
-        ORA #$80     ;#%10000000
+        ORA #$80
         STA f055B,X
         TYA
-b26F4   STA fDE,X
+_L04    STA fDE,X
         LSR A
         STA fDA,X
         RTS
