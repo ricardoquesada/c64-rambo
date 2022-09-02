@@ -1,4 +1,12 @@
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+;
+; Notes:
+; Supports up to 14 sprites:
+;  0-3: Enemy soldier (4)
+;  4-8: Enemy bullets (5)
+;  9-11: Hero bullets (3)
+;  12-13: Hero + Hero overlay (2)
+;
 
 ;
 ; **** ZP FIELDS ****
@@ -13,7 +21,7 @@ ZP_GAME_SPRITE_X_MSB_TBL = $53          ;14 entries ($53-$60)
 ZP_GAME_SPRITE_X_MSB_COPY_TBL = $61     ;14 entries ($61-$6e)
 ZP_GAME_SPRITE_X_TBL = $6F              ;14 entries ($6f-$7c)
 ZP_GAME_SPRITE_X_COPY_TBL = $7D         ;14 entries ($7d-$8a)
-                                        ; Contains X divided by 2
+                                        ; Contains X divided by 2 in Hero only (???)
 ZP_GAME_SPRITE_FRAME_TBL = $8B          ;14 entries ($8B-$98)
 ZP_GAME_SPRITE_COLOR_TBL = $99          ;14 entries ($99-$a6)
 ZP_GAME_SPRITE_ODDER_TBL = $A7          ;14 entries ($a7-$b4)
@@ -796,9 +804,10 @@ j08D4   LDX #$00
         CMP #$01
         BEQ _L00
         DEC a0966
-        LDX #$02
+
+        LDX #$02                        ;Down
 _L00    STX GAME_JOY_STATE
-        STX GAME_JOY_DIR_STATE
+        STX GAME_JOY_LATEST_MOVEMENT
         STX GAME_JOY_STATE_COPY
         STX GAME_JOY_STATE_COPY2
         STX a1D64
@@ -2905,38 +2914,40 @@ b189C   LDA f1955,X
 j18A6   AND #$7F     ;#%01111111
         TAY
 
+        ; Check whether bullet is within the screen range
         LDA f1958,X
         CLC
-        ADC f194F,X
+        ADC SPRITE_BULLET_DIR_Y_TBL,X
         STA f1958,X
-
         CLC
         ADC f8000,Y
-        CMP #$C0     ;#%11000000
+        CMP #192
         BCS s18E4
-        CMP #$14     ;#%00010100
+        CMP #20
         BCC s18E4
         STA ZP_GAME_SPRITE_Y_COPY_TBL+9,X
 
         LDA ZP_GAME_SPRITE_X_COPY_TBL+9,X
         CLC
-        ADC f1952,X
-        CMP #$A0     ;#%10100000
+        ADC SPRITE_BULLET_DIR_X_TBL,X
+        CMP #160
         BCS s18E4
-        CMP #$0C     ;#%00001100
+        CMP #12
         BCC s18E4
-        STA ZP_GAME_SPRITE_X_COPY_TBL+9,X
 
+        STA ZP_GAME_SPRITE_X_COPY_TBL+9,X
         RTS
 
-b18D2   LDA #$00     ;#%00000000
+b18D2   LDA #$00
         STA f1955,X
         JMP j18A6
 
+        ; Bullet is out of range
 b18DA   INC f1955,X
         LDA f1955,X
-        CMP #$1A     ;#%00011010
+        CMP #$1A
         BNE j18A6
+
 s18E4   LDY SPRITE_BULLET_ID_TBL,X
         LDA f1927,Y
         JSR GAME_MAYBE_PLAY_SFX
@@ -2976,6 +2987,7 @@ b1908   TXA
         TAX
         RTS
 
+        ;SFX to play based on weapon ID
 f1927   .BYTE $00,$00,$00,$00,$00,$0F,$00,$00
         .BYTE $0E,$0D
 a1931   .BYTE $00
@@ -2995,8 +3007,10 @@ s1934   LDA #65                         ;Frame: Explosion #00
         STA f197F,X
         RTS
 
-f194F   .BYTE $00,$00,$00
-f1952   .BYTE $00,$00,$00
+SPRITE_BULLET_DIR_Y_TBL
+        .BYTE $00,$00,$00
+SPRITE_BULLET_DIR_X_TBL
+        .BYTE $00,$00,$00
 f1955   .BYTE $00,$00,$00
 f1958   .BYTE $00,$00,$00
 a195B   .BYTE $00
@@ -3202,26 +3216,25 @@ _L04    LDA _WEAPON_ID_TBL,Y
 
         INC ZP_GAME_SPRITE_STATE_TBL+9,X
 
-        LDY GAME_JOY_DIR_STATE          ;Y = joystick direction
-                                        ; Used to index the sprite frame
+        LDY GAME_JOY_LATEST_MOVEMENT    ;Y = joystick direction
 
         LDA ZP_SELECTED_WEAPON          ;Knife?
         BNE _L05                        ; No, jump
 
         LDA #57                         ;Knife sprite frame
-        JMP _L09
+        JMP _SETUP_SPRITE_BULLET
 
 _L05    CMP #$03                        ;Weapon is Grenade, Gatling Gun or Missile?
         BCS _L06                        ; Yes, jump
 
-        LDA _SPRITE_FRAME_BAZOOKA_TBL,Y  ;Weapon is Bazooka or Arrow
-        JMP _L09                        ; They share the same sprite frames
+        LDA _SPRITE_FRAME_BAZOOKA_TBL,Y ;Weapon is Bazooka or Arrow
+        JMP _SETUP_SPRITE_BULLET                        ; They share the same sprite frames
 
 _L06    CMP #$05                        ;Weapon is Missle?
         BNE _L07                        ; No, jump
 
-        LDA _SPRITE_FRAME_MISSILE_TBL,Y  ;Weapon is missile
-        JMP _L09
+        LDA _SPRITE_FRAME_MISSILE_TBL,Y ;Weapon is missile
+        JMP _SETUP_SPRITE_BULLET
 
 _L07    CMP #$03                        ;Weapon is Grenade?
         BNE _L08                        ; No, jump
@@ -3233,48 +3246,64 @@ _L07    CMP #$03                        ;Weapon is Grenade?
         SBC #42
         STA f1958,X
         LDA #54                         ;Grenade sprite frame
-        JMP _L09
+        JMP _SETUP_SPRITE_BULLET
 
 _L08    LDA _SPRITE_FRAME_GATLING_GUN_TBL,Y      ;Weapon is Gatling Gun
 
         ; Y = Joystick direction
         ; X = index of the "bullet" to use
-_L09    STA ZP_GAME_SPRITE_FRAME_TBL+9,X
+_SETUP_SPRITE_BULLET
+        STA ZP_GAME_SPRITE_FRAME_TBL+9,X
 
         LDA _WEAPON_BULLET_SPEED_X_TBL,Y
         STA SPRITE_BULLET_SPEED_X_TBL,X
+
         LDA _WEAPON_BULLET_SPEED_Y_TBL,Y
         STA SPRITE_BULLET_SPEED_Y_TBL,X
-        LDA f1B48,Y
-        STA f194F,X
-        LDA f1B3D,Y
-        STA f1952,X
+
+        LDA _WEAPON_BULLET_DIR_Y_TBL,Y
+        STA SPRITE_BULLET_DIR_Y_TBL,X
+
+        LDA _WEAPON_BULLET_DIR_X_TBL,Y
+        STA SPRITE_BULLET_DIR_X_TBL,X
+
         RTS
 
 _WEAPON_SFX_TBL
         .BYTE $00,$11,$11,$13,$17,$10
-_WEAPON_ID_TBL                          ;XXX: Not sure the purpose of this one
+_WEAPON_ID_TBL
         .BYTE $04,$05,$06,$09,$03,$08
 _WEAPON_COLOR_TBL
         .BYTE $0B,$04,$03,$05,$00,$0E
 _SPRITE_FRAME_GATLING_GUN_TBL
         .BYTE $1D,$1D,$1D,$00,$1E,$1F,$20,$00
         .BYTE $1E,$20,$1F
+        ; 0, Up, Down, N/A
+        ; Left, Up+Left, Down+Left,N/A
+        ; Right, Up+Right, Up+Left
 _SPRITE_FRAME_BAZOOKA_TBL               ;Shared with Arrow
-        .BYTE $26,$26,$27,$00,$29,$2C,$2D,$00
+        .BYTE $26,$26,$27,$00
+        .BYTE $29,$2C,$2D,$00
         .BYTE $28,$2A,$2B
 _SPRITE_FRAME_MISSILE_TBL
-        .BYTE $2E,$2E,$2F,$00,$30,$34,$35,$00
+        .BYTE $2E,$2E,$2F,$00
+        .BYTE $30,$34,$35,$00
         .BYTE $31,$32,$33
 _WEAPON_BULLET_SPEED_X_TBL
-        .BYTE $00,$00,$00,$00,$FE,$FE,$FE,$00
+        .BYTE $00,$00,$00,$00
+        .BYTE $FE,$FE,$FE,$00
         .BYTE $02,$02,$02
 _WEAPON_BULLET_SPEED_Y_TBL
-        .BYTE $FC,$FC,$04,$00,$00,$FC,$04,$00
+        .BYTE $FC,$FC,$04,$00
+        .BYTE $00,$FC,$04,$00
         .BYTE $00,$FC,$04
-f1B3D   .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$00
+_WEAPON_BULLET_DIR_X_TBL
+        .BYTE $00,$00,$00,$00
+        .BYTE $FF,$FF,$FF,$00
         .BYTE $01,$01,$01
-f1B48   .BYTE $FF,$FF,$01,$00,$00,$FF,$01,$00
+_WEAPON_BULLET_DIR_Y_TBL
+        .BYTE $FF,$FF,$01,$00
+        .BYTE $00,$FF,$01,$00
         .BYTE $00,$FF,$01
 SPRITE_BULLET_SPEED_X_TBL
         .BYTE $00,$00,$00
@@ -3542,7 +3571,7 @@ GAME_READ_JOYSTICK_XXX
         LDA #$00
         STA GAME_JOY_STATE
         STA GAME_JOY_STATE_COPY
-        STA GAME_JOY_DIR_STATE
+        STA GAME_JOY_LATEST_MOVEMENT
         STA GAME_JOY_STATE_COPY2
         RTS
 
@@ -3557,11 +3586,11 @@ _L01    LDA $DC01                       ;Read Joy port #2
         EOR #$FF                        ; Flip bits since it is active low
         AND #$1F                        ; Mask direction+fire
         STA GAME_JOY_STATE              ; Save the state
-        STA GAME_JOY_STATE_COPY         ; twice
+        STA GAME_JOY_STATE_COPY         ; twice (XXX: why?)
 
         AND #$0F                        ;Only select direction movements
         BEQ _L02                        ; Joy movement? No
-        STA GAME_JOY_DIR_STATE          ;Save joy movement
+        STA GAME_JOY_LATEST_MOVEMENT    ;Save joy movement
 _L02    LDA GAME_JOY_STATE              ;Load full joy state
         RTS
 
@@ -3570,7 +3599,8 @@ GAME_JOY_STATE_COPY2    .BYTE $00
 a1D64                   .BYTE $00       ;Unused?
 a1D65                   .BYTE $00       ;Unused?
 GAME_JOY_STATE_COPY     .BYTE $00       ;The joystick state: up,down,left,right,fire
-GAME_JOY_DIR_STATE      .BYTE $00       ;Like state, but with "fire" masked
+GAME_JOY_LATEST_MOVEMENT
+                        .BYTE $00       ;Like state, but with "fire" masked
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 ; ZP_GAME_HARD_SCROLL_DIR:
