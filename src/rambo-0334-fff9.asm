@@ -105,7 +105,7 @@ p20 = $20
 p22 = $22
 p24 = $24
 p26 = $26
-p30 = $30
+p30 = $30                               ;Points to Screen RAM
 p32 = $32
 p60 = $60
 pC4 = $C4
@@ -177,8 +177,8 @@ MUSIC_PATCH             .MACRO x, note_list_addr
 GAME_SPRITE_SORT_BIS
         JMP GAME_SPRITE_SORT
 
-GAME_READ_JOYSTICK_XXX_BIS
-        JMP GAME_READ_JOYSTICK_XXX
+GAME_READ_JOYSTICK_BIS
+        JMP GAME_READ_JOYSTICK
 
 GAME_MAYBE_SELECT_NEXT_WEAPON_BIS
         JMP GAME_MAYBE_SELECT_NEXT_WEAPON
@@ -224,9 +224,9 @@ s036A   JMP j1659
 
         JMP j0B2B
 
-        JMP j07C9                       ;Unused
+        JMP GAME_DISABLE_JOYSTICK       ;Unused
 
-        JMP j07CF                       ;Unused
+        JMP GAME_ENABLE_JOYSTICK        ;Unused
 
 GAME_PRINT_GAME_OVER_BIS
         JMP GAME_PRINT_GAME_OVER
@@ -272,7 +272,7 @@ _L00    JSR GAME_MAYBE_PLAY_BASE_DISCOVERED_SFX
         JSR s12A7
         JSR s1985
         JSR GAME_PLAY_MUSIC
-        JSR GAME_READ_JOYSTICK_XXX
+        JSR GAME_READ_JOYSTICK
         JSR s14F0
         JSR GAME_UPDATE_SPRITE_SCORE
         JSR GAME_UPDATE_SCORE_FROM_POINTS
@@ -643,14 +643,16 @@ STR_CONGRATULATIONS_YOU_WON
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 ; Unused
-j07C9   LDA #$01
-        STA a1D3E
+GAME_DISABLE_JOYSTICK
+        LDA #$01
+        STA GAME_IS_JOYSTICK_DISABLED
         RTS
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 ; Unused
-j07CF   LDA #$00
-        STA a1D3E
+GAME_ENABLE_JOYSTICK
+        LDA #$00
+        STA GAME_IS_JOYSTICK_DISABLED
         RTS
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
@@ -814,6 +816,7 @@ j08D4   LDX #$00
         CLC
         ADC ZP_DELTA_Y
         STA a0968
+
         LDA a0966
         CMP #$01
         BEQ _L00
@@ -831,9 +834,11 @@ _L00    STX GAME_JOY_STATE
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 s0900   LDA ZP_SELECTED_WEAPON          ;Weapon used
         BNE _EXIT0                      ; Knife? No
+
         LDA a161E
         CMP #$E0
         BEQ _L01
+
 _EXIT0  RTS
 
 _L01    LDA a0912
@@ -848,11 +853,12 @@ _L02    LDA a0B2A
 
 _L03    LDA a0966
         BNE _EXIT1
+
         INC a0912
         INC a0967
-        LDA #$28     ;#%00101000
+        LDA #$28
         STA a0966
-        LDA #$33     ;#%00110011
+        LDA #$33
         STA a1299
         LDA ZP_GAME_SPRITE_Y_COPY_TBL+13
         STA a1931
@@ -862,13 +868,15 @@ _L03    LDA a0966
         STA POWS_TO_RESCUE
         LDA #$00
         STA a1933
+
         JSR s1366
+
         LDA a2747
         ASL A
         ASL A
         ASL A
         CLC
-        ADC #$1A     ;#%00011010
+        ADC #$1A
         ADC ZP_GAME_SMOOTH_Y
         STA a0968
         LDA aF3
@@ -877,7 +885,9 @@ _L03    LDA a0966
         ASL A
         ADC ZP_GAME_SMOOTH_X
         STA a0969
+
         JSR s0AB7
+
         LDA #27
         JMP MUSIC_FN
 _EXIT1  RTS
@@ -919,7 +929,7 @@ s0983   LDA #$00
         LDA #$09
         JSR MUSIC_FN
 
-        JSR GAME_READ_JOYSTICK_XXX
+        JSR GAME_READ_JOYSTICK
         LDA GAME_JOY_STATE
         STA a0981
 
@@ -943,7 +953,7 @@ _L00    LDA $D012                       ;Raster Position
         JMP _L02
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
-_L01    JSR GAME_READ_JOYSTICK_XXX
+_L01    JSR GAME_READ_JOYSTICK
         LDA GAME_JOY_STATE
         STA a0982
         CMP a0981
@@ -1081,7 +1091,8 @@ _EXIT   RTS
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 ; Reset sprites 0-11 positions (?)
-s0AB7   LDX #$04
+s0AB7
+        LDX #$04
 _L00    LDA #$00
         STA ZP_GAME_SPRITE_X_MSB_COPY_TBL,X
         STA ZP_GAME_SPRITE_STATE_TBL+5,X
@@ -1101,7 +1112,8 @@ _L00    LDA #$00
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 ; Copter sequence starts here
-b0ADC   JSR s0AB7
+b0ADC
+        JSR s0AB7
         LDA #$00
         STA ZP_GAME_SPRITE_STATE_TBL+13
         STA ZP_GAME_ENERGY_TO_DECREASE
@@ -1857,23 +1869,30 @@ b101F   JSR s1032
         JSR s1061
 b102F   JMP j1096
 
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 s1032   JSR j1659
         LDY GAME_CURRENT_ENEMY_ANIM_TYPE_TBL,X
         LDA f1071,Y
         TAY
-        LDA (p30),Y
-        CMP #$1B     ;#%00011011
-        BCC b1054
-        CMP #$2A     ;#%00101010
-        BCS b1054
-        LDA f106C,X
-        BEQ b1053
-        JSR j10BE
-        LDA #$00     ;#%00000000
-        STA f106C,X
-b1053   RTS
 
-b1054   INC f106C,X
+        ; Only chars between 27 and 41 don't generate collision
+        LDA (p30),Y
+        CMP #27                         ;Trees?
+        BCC _COLLISION_WITH_CHAR        ; yes, collision
+        CMP #42                         ;Something else
+        BCS _COLLISION_WITH_CHAR        ; yes, collision
+
+        LDA f106C,X
+        BEQ _EXIT
+
+        JSR j10BE
+
+        LDA #$00
+        STA f106C,X
+_EXIT   RTS
+
+_COLLISION_WITH_CHAR
+        INC f106C,X
         LDA f106C,X
         CMP #$0A     ;#%00001010
         BCC s1061
@@ -2247,6 +2266,7 @@ b135B   LDA GAME_JOY_STATE_COPY2
         STA GAME_JOY_STATE_COPY2
         JMP j1328
 
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 s1366   LDA ZP_GAME_SMOOTH_X
         CLC
         ADC #$16     ;#%00010110
@@ -2462,20 +2482,22 @@ b14F6   LDX a152D
 b1507   TXA
         PHA
         CLC
-        ADC #$09     ;#%00001001
+        ADC #$09
         TAX
         JSR s169C
         PLA
         TAX
-        LDY #$29     ;#%00101001
+        LDY #41
+        ; Chars that don't generate collision are between 27 and 41
         LDA (p30),Y
-        CMP #$1B     ;#%00011011
-        BCC b1521
-        CMP #$2A     ;#%00101010
-        BCS b1521
+        CMP #27
+        BCC _COLLISION_WITH_CHAR
+        CMP #42
+        BCS _COLLISION_WITH_CHAR
         JMP j1524
 
-b1521   JSR s18E4
+_COLLISION_WITH_CHAR
+        JSR s18E4
 j1524   DEX
         BPL b1529
         LDX #$02     ;#%00000010
@@ -2580,20 +2602,22 @@ s15F1   LDX #$0D
         LDX #$03
         LDA GAME_JOY_STATE
         STA TMP_2493
-b15FE   LDY f161F,X
+_L00    LDY f161F,X
+        ; Chars that don't generate collision are between 27 and 41
         LDA (p30),Y
         STA a161E
-        CMP #$1B
-        BCC b1611
-        CMP #$2A
-        BCS b1611
-        JMP j161A
+        CMP #27
+        BCC _COLLISION_WITH_CHAR
+        CMP #42
+        BCS _COLLISION_WITH_CHAR
+        JMP _L01
 
-b1611   LDA GAME_JOY_STATE
+_COLLISION_WITH_CHAR
+        LDA GAME_JOY_STATE
         AND f1623,X
         STA GAME_JOY_STATE
-j161A   DEX
-        BPL b15FE
+_L01    DEX
+        BPL _L00
         RTS
 
 a161E   .BYTE $00
@@ -2974,15 +2998,17 @@ s18E4   LDY SPRITE_BULLET_ID_TBL,X
         JSR s169C
         PLA
         TAX
-        LDY #$29     ;#%00101001
+        LDY #41
+        ; Chars that don't generate collision are between 27 and 41
         LDA (p30),Y
-        CMP #$1B     ;#%00011011
-        BCC b1908
-        CMP #$2A     ;#%00101010
-        BCS b1908
+        CMP #27
+        BCC _COLLISION_WITH_CHAR
+        CMP #42
+        BCS _COLLISION_WITH_CHAR
         RTS
 
-b1908   TXA
+_COLLISION_WITH_CHAR
+        TXA
         PHA
         LDA ZP_GAME_SPRITE_Y_COPY_TBL+9,X
         CLC
@@ -3472,8 +3498,8 @@ b1C6F   RTS
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 ; Similar to s1C29 but for double-speed?
 s1C70
-        LDA a1D3E
-        BNE b1C6F
+        LDA GAME_IS_JOYSTICK_DISABLED
+        BNE b1C6F                       ;Exit
 
         LDA ZP_GAME_SMOOTH_X
         AND #%11111110
@@ -3578,9 +3604,9 @@ _L03    LDY GAME_JOY_STATE
         JMP b1CF2
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
-GAME_READ_JOYSTICK_XXX
-        LDA a1D3E
-        BEQ _L00
+GAME_READ_JOYSTICK
+        LDA GAME_IS_JOYSTICK_DISABLED
+        BEQ GAME_READ_JOYSTICK_L0
 
         LDA #$00
         STA GAME_JOY_STATE
@@ -3589,9 +3615,11 @@ GAME_READ_JOYSTICK_XXX
         STA GAME_JOY_STATE_COPY2
         RTS
 
-a1D3E   .BYTE $00
+GAME_IS_JOYSTICK_DISABLED
+        .BYTE $00
 
-_L00    LDA a0966
+GAME_READ_JOYSTICK_L0
+        LDA a0966
         BEQ _L01
         JMP j08D4
 
@@ -5456,7 +5484,7 @@ GAME_COPTER_MAIN_LOOP
         JSR GAME_DO_HARD_SCROLL_BIS
         JSR GAME_PLAY_MUSIC_BIS
         JSR s3764
-        JSR s356E
+        JSR GAME_COPTER_CHECK_ARRIVE_AT_HELIPAD
         JSR s3066
         JSR s3210
         JSR s3140
@@ -6162,30 +6190,40 @@ a3569   .BYTE $00
 a356A   .BYTE $00
 a356B   .BYTE $00,$01,$FF
 
-s356E   LDA aE6
-        BEQ b357E
-        LDA #$2A     ;#%00101010
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+GAME_COPTER_CHECK_ARRIVE_AT_HELIPAD
+        LDA aE6
+        BEQ _L00
+
+        LDA #42
         STA a336D
-        LDA ZP_MAP_OFFSET_Y_MSB
-        CMP #$03     ;#%00000011
-        BCS b357E
+
+        LDA ZP_MAP_OFFSET_Y_MSB         ;Already in the upper part of the map
+        CMP #$03                        ; Helipad is in $03 MSB
+        BCS _L00                        ; yes, jump
+
         RTS
 
-b357E   LDX #$0C     ;#%00001100
+_L00    LDX #$0C
         JSR s036A
-        LDY #$29     ;#%00101001
+
+        LDY #41
+        ; Checks for char between 27 and 39 (terrain with border)
+        ; these are the "helipad" chars
         LDA (p30),Y
-        CMP #$1B     ;#%00011011
-        BCC b35C2
-        CMP #$1E     ;#%00011110
-        BCS b35C2
+        CMP #27
+        BCC _EXIT
+        CMP #30
+        BCS _EXIT
+
         LDA #$08
         JSR MUSIC_FN
         LDA #21
         JSR MUSIC_FN
+
         LDA a336D
-        CMP #$2A     ;#%00101010
-        BNE b35B6
+        CMP #42
+        BNE _L01
 
         LDA #$01                        ;100.000 Points
         LDX #$00
@@ -6201,15 +6239,15 @@ b357E   LDX #$0C     ;#%00001100
         LDA #$04                        ;"Congratulations you won" message
         JMP GAME_PRINT_MSG_AND_THEN_GAME_OVER_BIS
 
-b35B6   INC aE6
+_L01    INC aE6
         LDA ZP_GAME_SPRITE_Y_COPY_TBL+12
         CLC
-        ADC #$1E     ;#%00011110
+        ADC #$1E
         TAY
         LDX ZP_GAME_SPRITE_X_COPY_TBL+12
         PLA
         PLA
-b35C2   RTS
+_EXIT   RTS
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 ENEMY_COPTER_ANIM
@@ -6402,7 +6440,7 @@ f375C   .BYTE $00,$00
 f375E   .BYTE $00,$00,$CE,$73,$37,$60
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
-s3764   JSR GAME_READ_JOYSTICK_XXX_BIS
+s3764   JSR GAME_READ_JOYSTICK_BIS
         STA a3770
         AND #$0F
         STA f3771
