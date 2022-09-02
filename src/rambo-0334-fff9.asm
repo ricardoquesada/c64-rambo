@@ -84,7 +84,7 @@ aF4 = $F4
 aF5 = $F5
 aF6 = $F6
 aF7 = $F7
-aF8 = $F8
+ZP_GAME_MAP_OFFSET_X = $F8              ;Goes from $00 to $5a (90)
 aFA = $FA
 ZP_NEXT_RASTER_IRQ_POS = $FB            ;In game, it is used as next raster position
 aFB = $FB                               ; but in Title, it is used as a pointer
@@ -93,8 +93,8 @@ ZP_GAME_SPRITE_IDX_TO_PROCESS = $FC     ;In game, saves the next sprite index to
 aFC = $FC                               ; but in Title is used as a pointer
                                         ; so keeping both references
 aFD = $FD
-ZP_MAP_OFFSET_Y_LSB = $FE               ;Game: Map offset Y LSB
-ZP_MAP_OFFSET_Y_MSB = $FF               ;Game: Map offset Y MSB
+ZP_MAP_OFFSET_Y_LSB = $FE               ;Game: Map offset Y LSB (goes from $0018 to $03b8)
+ZP_MAP_OFFSET_Y_MSB = $FF               ;Game: Map offset Y MSB (             24 to 952)
 aFE = $FE                               ;Menu: Something else
 aFF = $FF
 
@@ -497,7 +497,7 @@ s0513   LDX a0558
         LDA f0561,X
         STA ZP_MAP_OFFSET_Y_MSB
         LDA f0563,X
-        STA aF8
+        STA ZP_GAME_MAP_OFFSET_X
         LDA #$28
         STA a0565
 b052D   LDA #$08                        ;Scroll left
@@ -1143,7 +1143,7 @@ _L00    JMP _L04
 
 _L01    LDA f0BE1,X
         SEC
-        SBC aF8
+        SBC ZP_GAME_MAP_OFFSET_X
         BCC _L00
         CMP #$2D     ;#%00101101
         BCS _L00
@@ -2209,7 +2209,7 @@ s1312   LDA GAME_JOY_STATE_COPY2
         STA GAME_JOY_STATE_COPY2
         LDA #$FF
         STA a12F1
-        LDA aF8
+        LDA ZP_GAME_MAP_OFFSET_X
         BEQ b135B
         CMP #$5A     ;#%01011010
         BEQ b1350
@@ -2283,7 +2283,7 @@ j1382   LSR A
         LDA ZP_MAP_OFFSET_Y_MSB
         SBC #$00     ;#%00000000
         STA aF1
-        LDA aF8
+        LDA ZP_GAME_MAP_OFFSET_X
         CLC
         ADC a1A50
         STA aF2
@@ -2330,7 +2330,7 @@ b13E1   STA (pF4),Y
         STA a14AF
         LDA #<$4000
         STA a14AE
-        LDA aF8
+        LDA ZP_GAME_MAP_OFFSET_X
         AND #$07     ;#%00000111
         STA a14EA
         EOR #$07     ;#%00000111
@@ -2791,7 +2791,7 @@ _L01    LDA f0BF1,X
         STA ZP_MAP_OFFSET_Y_MSB
         STA ZP_MAP_OFFSET_Y_LSB
         LDA #$3C
-        STA aF8
+        STA ZP_GAME_MAP_OFFSET_X
         LDA #$0A
         STA ZP_GAME_SPRITE_COLOR_TBL+13
 
@@ -3741,7 +3741,7 @@ _L00    LDA #$00
 ; $1E09
 ; Hard Scroll right (one character)
 GAME_HARD_SCROLL_RIGHT
-        DEC aF8
+        DEC ZP_GAME_MAP_OFFSET_X
         LDX #38
 _L00    LDA $4000,X
         STA $4000+1,X
@@ -3838,7 +3838,7 @@ _L00    LDA #$06
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 GAME_HARD_SCROLL_LEFT
-        INC aF8
+        INC ZP_GAME_MAP_OFFSET_X
         LDX #$00
 _L00    LDA $4000+40*0+1,X
         STA $4000+40*0+0,X
@@ -4904,7 +4904,7 @@ GAME_MAP_PAINT_LEFT
         STA aE0
         AND #$07     ;#%00000111
         STA aF3
-        LDA aF8
+        LDA ZP_GAME_MAP_OFFSET_X
         CLC
         ADC #$27     ;#%00100111
         TAY
@@ -4915,7 +4915,7 @@ GAME_MAP_PAINT_LEFT
         LSR A
         LSR A
         STA aF2
-        LDA aF8
+        LDA ZP_GAME_MAP_OFFSET_X
         JMP j27A6
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
@@ -4931,7 +4931,7 @@ GAME_MAP_PAINT_RIGHT
         STA aE0
         AND #$07
         STA aF3
-        LDA aF8
+        LDA ZP_GAME_MAP_OFFSET_X
         TAY
         AND #$07
         STA aF7
@@ -4940,9 +4940,9 @@ GAME_MAP_PAINT_RIGHT
         LSR A
         LSR A
         STA aF2
-        LDA aF8
+        LDA ZP_GAME_MAP_OFFSET_X
         AND #$7F
-        STA aF8
+        STA ZP_GAME_MAP_OFFSET_X
 
 j27A6   LDA aE0
         AND #$F8
@@ -5032,7 +5032,7 @@ GAME_MAP_PAINT_UP
         STA aF6
         LDA #$00     ;#%00000000
         STA aF3
-        LDA aF8
+        LDA ZP_GAME_MAP_OFFSET_X
         AND #$07     ;#%00000111
         STA aF7
         LDA #>$4000+40*24
@@ -5062,19 +5062,19 @@ GAME_MAP_PAINT_DOWN
         LDA #$00
         STA aF3
         STA a28E6
-        LDA aF8
+        LDA ZP_GAME_MAP_OFFSET_X
         AND #$07
         STA aF7
         LDA #$40                        ;MSB address
         STA a28E7
-s287D   LDA aF8
+s287D   LDA ZP_GAME_MAP_OFFSET_X
         LSR A
         LSR A
         LSR A
         STA aF2
-        LDA aF8
+        LDA ZP_GAME_MAP_OFFSET_X
         AND #$7F     ;#%01111111
-        STA aF8
+        STA ZP_GAME_MAP_OFFSET_X
         LDA ZP_MAP_OFFSET_Y_LSB
         AND #$F8     ;#%11111000
         STA aF0
@@ -5855,7 +5855,7 @@ a3315   .BYTE $00
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 s3316   LDA a3568
         SEC
-        SBC aF8
+        SBC ZP_GAME_MAP_OFFSET_X
         BCS b331F
         RTS
 
@@ -5882,7 +5882,7 @@ j3341   RTS
 b3342   LDA ZP_GAME_SMOOTH_X
         LSR A
         STA a336E
-        LDA aF8
+        LDA ZP_GAME_MAP_OFFSET_X
         ASL A
         ASL A
         SEC
@@ -6057,7 +6057,7 @@ b3497   LDA a3561
 
 b349F   JMP s34F1
 
-s34A2   LDA aF8
+s34A2   LDA ZP_GAME_MAP_OFFSET_X
         CLC
         ADC #$16     ;#%00010110
         STA a3569
