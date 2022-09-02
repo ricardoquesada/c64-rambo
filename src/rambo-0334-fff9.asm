@@ -1676,7 +1676,7 @@ s0EB4   LDX a0EDB
         AND #$07     ;#%00000111
         TAY
         LDA a7ED8,X
-        ORA f1A49,Y
+        ORA WEAPONS_PICKED_UP_MASK_TBL+1,Y
         STA a7ED8,X
         STX a0EDB
         STY a0EDA
@@ -3090,15 +3090,15 @@ s1985   LDA #20                         ;Frame: Knife Dashboard
         LDA #19
         STA GAME_DASHBOARD_SPR_FRAME_TBL+3
 
-        LDA WEAPONS_PICKED_UP                       ;Weapons grabbed (?)
-        AND #$01
-        BNE _L00
+        LDA WEAPONS_PICKED_UP           ;Weapons grabbed
+        AND #$01                        ; This is always true, since the knife
+        BNE _L00                        ; is always on
 
         LDA #34                         ;Frame: Empty
         STA GAME_DASHBOARD_SPR_FRAME_TBL
 
 _L00    LDA WEAPONS_PICKED_UP
-        AND #$08
+        AND #$08                        ;Grenade picked up?
         BNE _L01
 
         LDA #34                         ;Frame: Emtpy
@@ -3195,7 +3195,7 @@ _L03    DEX
         STX ZP_SELECTED_WEAPON
 
         LDA WEAPONS_PICKED_UP
-        AND f1A48,X
+        AND WEAPONS_PICKED_UP_MASK_TBL,X
         BEQ _L02
         LDA #$0A
 _L04    STA a1A45
@@ -3205,8 +3205,8 @@ a1A45   .BYTE $00
 a1A46   .BYTE $00
 WEAPONS_PICKED_UP
         .BYTE $07
-f1A48   .BYTE $01
-f1A49   .BYTE $02,$04,$08,$10,$20,$40,$80
+WEAPONS_PICKED_UP_MASK_TBL
+        .BYTE $01,$02,$04,$08,$10,$20,$40,$80
 a1A50   .BYTE $00
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
