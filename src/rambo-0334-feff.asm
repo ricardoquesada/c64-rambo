@@ -12,10 +12,12 @@ USE_RAMBO_LIA :?= 0
 .IF USE_RAMBO_LIA==1
         USE_NO_GARBAGE := 1
         USE_SINGLE_FILE := 1
+        USE_CORRECT_SPELLING := 1
 .ENDIF
 
 USE_NO_GARBAGE          :?= 0           ;Don't include garbage data
 USE_SINGLE_FILE         :?= 0           ;Single file instead of multi-file
+USE_CORRECT_SPELLING    :?= 0           ;Homel -> Homeland
 
 ;
 ; Notes:
@@ -661,9 +663,13 @@ STR_CONGRATULATIONS_YOU_WON
         #STR_CODE_SET_COORDS $07,$09
         .TEXT "BEEN[RETURNED"
         #STR_CODE_SET_COORDS $05,$0C
+.IF USE_CORRECT_SPELLING==1
+        .TEXT "TO[THE[HOMELAND."
+.ELSE
         .TEXT "TO[THE[HOMEL", $E8, "."          ;Bug: Should say HOMELAND.
                                                 ; Present in ThunderMontain version only
                                                 ; Ocean version doesn't have it.
+.ENDIF
         #STR_CODE_SET_COLOR $07
         #STR_CODE_SET_COORDS $02,$0F
         #STR_CODE_FONT_SMALL
