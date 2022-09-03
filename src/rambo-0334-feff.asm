@@ -13,7 +13,6 @@ USE_RAMBO_LIA :?= 0
         USE_NO_GARBAGE := 1
         USE_SINGLE_FILE := 1
         USE_CORRECT_SPELLING := 1
-        USE_CALL_DEBUG_MUSIC_CODE :=0
 .ENDIF
 
 USE_NO_GARBAGE          :?= 0           ;Don't include garbage data
@@ -9739,6 +9738,21 @@ _LOOP   SEI
 _L00    CMP $D012                       ;Wait for raster at position $64
         BNE _L00
 
+        ; A-Z plays the different songs.
+        ; Since A-Z doens't cover all songs,
+        ;  press '1' use the first "bank" of 26 songs
+        ;  press '2' to use the second "bank" of 26 songs
+        ;  press 'space' to restart
+        ;  press 'return' to filter voices
+        ; E.g:
+        ; A will play song 0
+        ; B will play song 1...
+        ; but if "2" is pressed, then:
+        ; A will play song 26
+        ; B will play song 27
+        ; etc.
+        ; There are only 31 defined songs (0-30)
+        ; Using 2nd bank and press any letter bigger than F, will crash it.
         JSR sA548
         JSR $EA87                       ;Scan keyboard
         JSR $F13E                       ;Get a byte
@@ -9751,15 +9765,15 @@ _L00    CMP $D012                       ;Wait for raster at position $64
 _L01    CMP #$32
         BNE _L02
 
-        LDA #$1A                        ;Key is $32 (2)
-        STA aA4C8
+        LDA #26                         ;Key is $32 (2)
+        STA MUSIC_DEBUG_BANK_OFFSET     ;Switch two "second" bank
         JMP _LOOP
 
 _L02    CMP #$31
         BNE _L03
 
         LDA #$00                        ;Key is $31 (1)
-        STA aA4C8
+        STA MUSIC_DEBUG_BANK_OFFSET     ;Switch to first "bank"
         JMP _LOOP
 
 _L03    CMP #$5E
@@ -9778,7 +9792,7 @@ _L04    CMP #$20
         BCC _LOOP                       ; Yes, loop when it is < than $41
         SBC #$41
         CLC
-        ADC aA4C8
+        ADC MUSIC_DEBUG_BANK_OFFSET     ;Adjust bank offset if needed
         DEC $D020                       ;Border Color
 
         JSR MUSIC_FN
@@ -9786,7 +9800,8 @@ _L04    CMP #$20
         INC $D020                       ;Border Color
         JMP _LOOP
 
-aA4C8   .BYTE $00
+MUSIC_DEBUG_BANK_OFFSET
+        .BYTE $00
         .BYTE $00
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
@@ -9803,15 +9818,18 @@ _L00    STA $0400,X
         BNE _L00
         RTS
 
-sA4DE   JSR sA4E1
-sA4E1   JSR sA4E4
-sA4E4   JSR sA4E7
-sA4E7   JSR sA4EA
-sA4EA   JSR sA4ED
-sA4ED   JSR sA4F0
-sA4F0   JSR sA4F3
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+; WTF?
+sA4DE
+        JSR _L00
+_L00    JSR _L01
+_L01    JSR _L02
+_L02    JSR _L03
+_L03    JSR _L04
+_L04    JSR _L05
+_L05    JSR _L06
 
-sA4F3   LDA #$00
+_L06    LDA #$00
         JMP MUSIC_FN
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
@@ -9886,7 +9904,7 @@ sA548   LDA #$05                        ;Color Green
         STA $0415
         LDA a85EC
         STA $0416
-        LDA aA4C8
+        LDA MUSIC_DEBUG_BANK_OFFSET
         STA $0425
         LDA a845B
         STA $0426
@@ -9955,7 +9973,9 @@ bA60B
         BPL bA604
         RTS
 
-        ; FIXME: Is this garbage?
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+; First part looks like garbage (the parttern $00,$FF).
+; As in the rest of the music code, it requires a fully-analyzed music code
         .BYTE $C5,$CE,$C4,$00,$FF,$00,$FF,$00
         .BYTE $FF,$00,$FF,$F7,$00,$FF,$00,$FF
         .BYTE $00,$FF,$00,$00,$FF,$00,$FF,$00
@@ -10101,18 +10121,20 @@ bA60B
         .BYTE $0C,$17,$D4,$0D,$07,$5F,$02,$D4
         .BYTE $06,$5A,$D4,$07,$00,$BF,$4A,$DC
         .BYTE $61,$A7,$5F,$04,$C8,$81,$A8,$5F
-        .BYTE $04,$45,$01,$46,$01,$45,$0C,$D2
-        .BYTE $C9,$AA,$5F,$04,$D2,$E8,$AA,$BF
-        .BYTE $00,$DC,$70,$A7,$BF,$00,$CE,$0D
-        .BYTE $00,$CE,$11,$00,$BF,$A0,$D8,$04
-        .BYTE $D2,$F9,$AA,$D8,$04,$1A,$01,$DA
-        .BYTE $DA
+        .BYTE $04,$45,$01,$46,$01,$45,$0C
+        #MUSIC_NOTE $D2,aAAC9,$5F,$04
+        #MUSIC_NOTE $D2,aAAE8,$BF,$00
+        .BYTE $DC,$70,$A7,$BF,$00
+        .BYTE $CE,$0D,$00,$CE,$11
+        .BYTE $00,$BF,$A0,$D8,$04
+        #MUSIC_NOTE $D2,aAAF9,$D8,$04
+        .BYTE $1A,$01,$DA,$DA
 
-TITO
-        ; FIXME: Is this garbage?
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+aAAA6
         DEC a27
         TAX
-        LDX #$AC
+aAAC9   LDX #$AC
         LDY #$39
         STX a8232
         STY a8233
@@ -10126,21 +10148,21 @@ TITO
         STY a821C
         RTS
 
-        LDA #$64     ;#%01100100
+aAAE8   LDA #$64
         STA a8231
-        LDA #$DB     ;#%11011011
-        STA $D406    ;Voice 1: Sustain / Release Cycle Control
-        LDX #$2C     ;#%00101100
-        LDY #$33     ;#%00110011
+        LDA #$DB                        ;#%11011011
+        STA $D406                       ;Voice 1: Sustain / Release Cycle Control
+        LDX #$2C
+        LDY #$33
         JMP j8116
 
-        LDA a814F
+aAAF9   LDA a814F
         CLC
-        ADC #$20     ;#%00100000
+        ADC #$20
         STA a814F
         RTS
 
-        ; FIXME: Is this garbage?
+        ; Ditto above.
         .BYTE $BF,$0C,$C8,$CD,$A7,$5F,$0F,$C8
         .BYTE $CD,$A7,$5F,$0D,$CC,$CD,$A7,$18
         .BYTE $5F,$0E,$DC,$66,$A7,$CE,$18,$21
@@ -10285,6 +10307,8 @@ TITO
         .BYTE $1B,$CA,$00,$7A,$6C,$15,$03,$17
         .BYTE $03,$18,$02,$1A,$02,$1C,$02,$1E
         .BYTE $02,$C6,$DE,$AE,$C5,$CE,$C4,$00
+
+        ; Probably garbage
         .BYTE $FF,$00,$FF,$00,$FF,$FF,$00,$FF
         .BYTE $00,$FF,$00,$FF,$00,$00,$FF,$00
         .BYTE $FF,$00,$FF,$00,$FF,$FF,$00,$FF
@@ -10302,10 +10326,11 @@ TITO
         .BYTE $FF,$00,$FF,$00,$FF,$FF,$00,$FF
         .BYTE $00,$FF,$00,$FF,$00
 
-        ; Hi-Score table. Each score contains 3 bytes
-        ; They are in MSB order. E.g:
-        ;   .BYTE $08,$00,$00 -> 80000
-        ; The table is 240 bytes long: 80 * 3 = 240
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+; Hi-Score table. Each score contains 3 bytes
+; They are in MSB order. E.g:
+;   .BYTE $08,$00,$00 -> 80000
+; The table is 240 bytes long: 80 * 3 = 240
 HISCORE_TBL
         .BYTE $08,$00,$00,$07,$90,$00,$07,$80
         .BYTE $00,$07,$70,$00,$07,$60,$00,$07

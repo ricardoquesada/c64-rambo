@@ -20,6 +20,10 @@ rambo-lia.prg: src/rambo-0334-feff.asm
 	64tass -Wall -Werror --cbm-prg -D USE_RAMBO_LIA:=1 -o bin/rambo-lia.prg -L bin/list.txt -l bin/labels.txt --vice-labels src/rambo-0334-feff.asm
 	exomizer sfx sys -x1 -Di_line_number=2022 bin/rambo-lia.prg -o bin/rambo.exo.prg
 
+music-lia.prg: src/rambo-0334-feff.asm
+	64tass -Wall -Werror --cbm-prg -D USE_RAMBO_LIA:=1 -D USE_CALL_DEBUG_MUSIC_CODE:=1 -o bin/music-lia.prg -L bin/list.txt -l bin/labels.txt --vice-labels src/rambo-0334-feff.asm
+	exomizer sfx sys -x1 -Di_line_number=2022 bin/music-lia.prg -o bin/music.exo.prg
+
 d64: rambo.prg
 	split -b48334 bin/rambo.prg
 	mv xaa bin/ram2.prg
@@ -41,6 +45,9 @@ run: d64
 
 run-lia: d64-lia
 	$(X64) -verbose -moncommands bin/labels.txt $(D64_IMAGE_LIA)
+
+run-music: music-lia.prg
+	$(X64) -verbose -moncommands bin/labels.txt bin/music.exo.prg
 
 clean:
 	-rm $(D64_IMAGE) $(D64_IMAGE_LIA)
