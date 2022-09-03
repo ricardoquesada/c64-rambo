@@ -12,7 +12,7 @@ all: rambo.prg
 
 rambo.prg: src/rambo-0334-fff9.asm
 	64tass -Wall -Werror --cbm-prg -o bin/rambo.prg -L bin/list.txt -l bin/labels.txt --vice-labels src/rambo-0334-fff9.asm
-	md5sum bin/rambo.prg orig/rambo-0334-fff9.prg
+	md5sum bin/rambo.prg orig/rambo-0334-feff.prg
 
 d64: rambo.prg
 	split -b48334 bin/rambo.prg

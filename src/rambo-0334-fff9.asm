@@ -12792,36 +12792,5 @@ MAP_TILES_ORIG
 TILES_DEF
         .BINARY "rambo-ef00-ff00-tiles.bin"
 
-        ; Garbage
-        .BYTE $00,$00,$00,$00,$00,$00,$00,$00
-        .BYTE $00,$00,$00,$00,$00,$00,$00,$00
-        .BYTE $00,$00,$00,$00,$00,$00,$00,$00
-        .BYTE $00,$00,$00,$00,$00,$00,$00,$00
-        .BYTE $00,$00,$00,$00,$00,$00,$00,$00
-        .BYTE $00,$00,$00,$00,$00,$00,$00,$00
-        .BYTE $00,$00,$00,$00,$00,$00,$00,$00
-        .BYTE $00,$00,$00,$00,$00,$00,$00,$00
-        .BYTE $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
-        .BYTE $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
-        .BYTE $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
-        .BYTE $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
-        .BYTE $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
-        .BYTE $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
-        .BYTE $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
-        .BYTE $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$00,$00,$00,$00
-        .BYTE $00,$00,$00,$00,$00,$00,$00,$00
-        .BYTE $00,$00,$00,$00,$00,$00,$00,$00
-        .BYTE $00,$00,$00,$00,$00,$00,$00,$00
-        .BYTE $00,$00,$00,$00,$00,$00,$00,$00
-        .BYTE $00,$00,$00,$00,$00,$00,$00,$00
-        .BYTE $00,$00,$00,$00,$00,$00,$00,$00
-        .BYTE $00,$00,$00,$00,$00,$00,$00,$00
-        .BYTE $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
-        .BYTE $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
-        .BYTE $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
-        .BYTE $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
-        .BYTE $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
-        .BYTE $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
-        .BYTE $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
-        .BYTE $FF,$FF
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+; $FF00: Garbage
