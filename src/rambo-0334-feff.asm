@@ -6758,12 +6758,20 @@ CHARSET_DIGITS_0_9
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 ; $39d0: Garbage
+.IF USE_NO_GARBAGE==1
+.ELSE
         .BINARY "rambo-39d0-3fff-garbage.bin"
+.ENDIF
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 ; $4000. Screen RAM
+; Technically this is not garbage, but there is no need to include it in the
+; binary since it gets generated in runtime
         * = $4000
+.IF USE_NO_GARBAGE==1
+.ELSE
         .BINARY "rambo-4000-4fe7-screen-ram.bin"
+.ENDIF
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 ; Sprite frames
@@ -10316,9 +10324,15 @@ HISCORE_TBL_IDX
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 ; $B46A garbage: A bit of garbage, a bit of old music not
+.IF USE_NO_GARBAGE==1
+.ELSE
         .BINARY "rambo-b46a-bfff-garbage.bin"
+.ENDIF
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+; Need to fix address. Loader jumps here
+        * = $C000
+
 PRINT_EXT_STR_BIS                       ;$C000
         JMP PRINT_EXT_STR
 
@@ -12194,10 +12208,15 @@ aCFFF   .BYTE $00
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 ; $D800: Garbage
+.IF USE_NO_GARBAGE==1
+.ELSE
         .BINARY "rambo-d800-dfff-garbage.bin"
+.ENDIF
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 ; $E000
+; FIXME: Should be relocatable
+        * = $E000
 MAP_TILES
         .BINARY "rambo-e000-e76f-map.bin"
 
@@ -12219,5 +12238,4 @@ MAP_TILES_ORIG
 TILES_DEF
         .BINARY "rambo-ef00-feff-tiles.bin"
 
-;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
-; $FF00: Garbage
+; #$FF00
