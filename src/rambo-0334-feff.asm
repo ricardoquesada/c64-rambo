@@ -2368,13 +2368,15 @@ j1382   LSR A
         LSR aF2
         ASL aF0
         ROL aF1
-        LDA #$00
+
+        LDA #<MAP_TILES
         CLC
         ADC aF0
         STA aF4
-        LDA #$E0     ;#%11100000
+        LDA #>MAP_TILES
         ADC aF1
         STA aF5
+
         LDY aF2
 
         ; Destroy terrain: Replace object with "destroyed" object
@@ -2390,6 +2392,9 @@ b13D6   STA TMP_2493
         JMP j14E9
 
 b13E1   STA (pF4),Y                     ;Points to MAP_TILES
+
+        ; Get the tile definition
+        ; Character * 64
         LDX #$00
         STX aF4
         LSR A
@@ -2402,12 +2407,14 @@ b13E1   STA (pF4),Y                     ;Points to MAP_TILES
         ADC #$00
         STA aF4
         TXA
-        ADC #$EF     ;#%11101111
+        ADC #>TILES_DEF
         STA aF5
+
         LDA #>$4000
         STA SCREEN_RAM_PTR_MSB
         LDA #<$4000
         STA SCREEN_RAM_PTR_LSB
+
         LDA ZP_GAME_MAP_OFFSET_X
         AND #$07     ;#%00000111
         STA a14EA
@@ -5052,13 +5059,15 @@ j27A6   LDA aE0
         STA aF1
         ASL aF0
         ROL aF1
-        LDA #$00
+
+        LDA #<MAP_TILES
         CLC
         ADC aF0
         STA aF4
-        LDA #$E0
+        LDA #>MAP_TILES
         ADC aF1
         STA aF5
+
 j27C1   LDY aF2
         LDA #$00
         STA aF0
@@ -5183,15 +5192,15 @@ s287D   LDA ZP_GAME_MAP_OFFSET_X
         STA aF1
         ASL aF0
         ROL aF1
-        LDA #$00     ;#%00000000
+        LDA #<MAP_TILES
         CLC
         ADC aF0
         STA aF4
-        LDA #$E0     ;#%11100000
+        LDA #>MAP_TILES
         ADC aF1
         STA aF5
 j28A5   LDY aF2
-        LDX #$00     ;#%00000000
+        LDX #$00
         STX aF0
         LDA (pF4),Y                     ;Points to MAP_TILES
         LSR A
@@ -12215,7 +12224,7 @@ aCFFF   .BYTE $00
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 ; $E000
-; FIXME: Should be relocatable
+; Should not conflict with $D000/$DFFF address
         * = $E000
 MAP_TILES
         .BINARY "rambo-e000-e76f-map.bin"
@@ -12227,14 +12236,23 @@ MAP_TILES_ORIG
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 ; $EEE0: Unused, Garbage ?
+.IF USE_NO_GARBAGE==1
+.ELSE
         .BYTE $55,$40,$55,$40,$55,$40,$55,$40
         .BYTE $55,$40,$55,$40,$55,$40,$55,$40
         .BYTE $55,$40,$55,$40,$55,$40,$55,$40
         .BYTE $55,$40,$55,$40,$55,$40,$55,$40
+.ENDIF
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 ; $EF00
 ; Each tile consists of 8x8 chars = 64 chars per tile
+; FIXME: Should be relocatable, but must be aligned to 256
+.IF USE_NO_GARBAGE==1
+        .ALIGN 256
+.ELSE
+        * = $EF00
+.ENDIF
 TILES_DEF
         .BINARY "rambo-ef00-feff-tiles.bin"
 
