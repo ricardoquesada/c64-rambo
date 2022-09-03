@@ -116,8 +116,8 @@ p30 = $30                               ;Points to Screen RAM
 p32 = $32
 p60 = $60
 pC4 = $C4
-pF0 = $F0
-pF4 = $F4
+pF0 = $F0                               ;Points to TILES_DEF
+pF4 = $F4                               ;Use to index the Map and the Tiles
 pFA = $FA
 pFB = $FB
 pFC = $FC
@@ -2358,7 +2358,9 @@ j1382   LSR A
         ADC aF1
         STA aF5
         LDY aF2
-        LDA (pF4),Y
+
+        ; Destroy terrain: Replace object with "destroyed" object
+        LDA (pF4),Y                     ;Points to MAP_TILES
         TAX
         LDA f1267,X
         CPX #48                         ;Something special about object 48
@@ -2369,7 +2371,7 @@ b13D6   STA TMP_2493
         BNE b13E1
         JMP j14E9
 
-b13E1   STA (pF4),Y
+b13E1   STA (pF4),Y                     ;Points to MAP_TILES
         LDX #$00
         STX aF4
         LSR A
@@ -2465,7 +2467,7 @@ j1490   LDA a14ED
         LDX a14EE
         LDA a14EF
         STA aF3
-b14AB   LDA (pF4),Y
+b14AB   LDA (pF4),Y                     ;Points to TILES_DEF
 SCREEN_RAM_PTR_LSB   = *+$01
 SCREEN_RAM_PTR_MSB   = *+$02
         STA $4000,X
@@ -5050,10 +5052,10 @@ j27C1   LDY aF2
         TAY
         LDA aF0
         CLC
-        ADC #$00     ;#%00000000
+        ADC #<TILES_DEF
         STA aF0
         TYA
-        ADC #$EF     ;#%11101111
+        ADC #>TILES_DEF
         STA aF1
 j27DC   LDA aF3
         ASL A
@@ -5062,9 +5064,9 @@ j27DC   LDA aF3
         CLC
         ADC aF7
         TAY
-        LDA (pF0),Y
-        CMP #$FD
-        BNE b27EE
+        LDA (pF0),Y                     ;Points to TILES_DEF
+        CMP #253                        ; Is it char 253?
+        BNE b27EE                       ; No, jump
         JSR s0EDC
 
 a27EF   =*+$01
@@ -5173,7 +5175,7 @@ s287D   LDA ZP_GAME_MAP_OFFSET_X
 j28A5   LDY aF2
         LDX #$00     ;#%00000000
         STX aF0
-        LDA (pF4),Y
+        LDA (pF4),Y                     ;Points to MAP_TILES
         LSR A
         ROR aF0
         ROR A
@@ -5181,10 +5183,10 @@ j28A5   LDY aF2
         TAX
         LDA aF0
         CLC
-        ADC #$00     ;#%00000000
+        ADC #<TILES_DEF
         STA aF0
         TXA
-        ADC #$EF     ;#%11101111
+        ADC #>TILES_DEF
         STA aF1
         LDX aF3
         LDA ZP_MAP_OFFSET_Y_LSB
@@ -5200,12 +5202,13 @@ j28A5   LDY aF2
         CLC
         ADC #$08
         STA a28EB
-b28D5   LDA (pF0),Y
-        CMP #$FD
-        BNE b28E1
+b28D5   LDA (pF0),Y                     ;Points to TILES_DEF
+        CMP #253                        ; Is it char 253?
+        BNE b28E1                       ; No, jump
+
         STX a2747
         JSR s0F18
-b28E1   CPX #$28
+b28E1   CPX #40
         BCS b28FB
 a28E6   =*+$01
 a28E7   =*+$02
@@ -13041,7 +13044,7 @@ MAP_TILES_ORIG
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 ; $EF00
 ; Each tile consists of 8x8 chars = 64 chars per tile
-TILE_DEF
+TILES_DEF
         .BINARY "rambo-ef00-ff00-tiles.bin"
 
         ; Garbage
