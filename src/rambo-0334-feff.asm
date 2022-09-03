@@ -19,7 +19,7 @@ USE_RAMBO_LIA :?= 0
 USE_NO_GARBAGE          :?= 0           ;Don't include garbage data
 USE_SINGLE_FILE         :?= 0           ;Single file instead of multi-file
 USE_CORRECT_SPELLING    :?= 0           ;Homel -> Homeland
-USE_CALL_DEBUG_MUSIC_CODE :?= 0         ;Call music debug code
+USE_CALL_DEBUG_MUSIC_CODE :?= 0         ;Call music debug code, and NOT the game
 
 ;
 ; Notes:
