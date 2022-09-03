@@ -3038,7 +3038,7 @@ b189C   LDA f1955,X
         BPL b18DA
         DEC f1955,X
         BPL b18D2
-j18A6   AND #$7F     ;#%01111111
+j18A6   AND #$7F
         TAY
 
         ; Check whether bullet is within the screen range
@@ -6818,7 +6818,10 @@ CHARSET_GAME
         .BINARY "rambo-7800-charset-game.bin"
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
-; Unused?
+; $8000
+; In theory this is a 128-bytes long table
+; but it seems that only 88-bytes are used (?)
+; FIXME
 f8000   .BYTE $00,$00,$00,$01,$01,$02,$03,$04
         .BYTE $05,$07,$08,$0A,$0C,$0D,$0F,$11
         .BYTE $13,$15,$18,$1A,$1C,$1F,$21,$24
@@ -6835,6 +6838,9 @@ f8000   .BYTE $00,$00,$00,$01,$01,$02,$03,$04
         .BYTE $FF,$FF,$10,$00,$FF,$FF,$10,$00
         .BYTE $FF,$FF,$10,$00,$FF,$FF,$10,$00
         .BYTE $FF,$FF,$10,$00,$FF,$FF,$10,$00
+
+.IF USE_NO_GARBAGE==1
+.ELSE
         .BYTE $FF,$FF,$48,$00,$FF,$FF,$00,$00
         .BYTE $FF,$FF,$00,$00,$FF,$FF,$00,$00
         .BYTE $FF,$FF,$00,$00,$FF,$FF,$00,$00
@@ -6851,6 +6857,7 @@ f8000   .BYTE $00,$00,$00,$01,$01,$02,$03,$04
         .BYTE $FF,$FF,$00,$00,$FF,$FF,$00,$00
         .BYTE $2E,$00,$BE,$00,$FF,$FF,$00,$00
         .BYTE $FF,$FF,$00,$00,$FF,$FF,$00,$00
+.ENDIF
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 ;
