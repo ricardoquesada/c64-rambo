@@ -8,11 +8,14 @@ X64SC = x64sc
 C1541 = c1541
 PRINTF = /usr/bin/printf
 
-all: rambo.prg
+all: rambo.prg rambo-clean.prg
 
-rambo.prg: src/rambo-0334-fff9.asm
-	64tass -Wall -Werror --cbm-prg -o bin/rambo.prg -L bin/list.txt -l bin/labels.txt --vice-labels src/rambo-0334-fff9.asm
+rambo.prg: src/rambo-0334-feff.asm
+	64tass -Wall -Werror --cbm-prg -o bin/rambo.prg -L bin/list.txt -l bin/labels.txt --vice-labels src/rambo-0334-feff.asm
 	md5sum bin/rambo.prg orig/rambo-0334-feff.prg
+
+rambo-clean.prg: src/rambo-0334-feff.asm
+	64tass -Wall -Werror --cbm-prg -D USE_RAMBO_LIA:=1 -o bin/rambo.prg -L bin/list.txt -l bin/labels.txt --vice-labels src/rambo-0334-feff.asm
 
 d64: rambo.prg
 	split -b48334 bin/rambo.prg

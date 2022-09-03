@@ -1,4 +1,20 @@
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+; Rambo: First Blood, Part II (NTSC) for Commodore 64                          ;
+; Disassembled + commented                                                     ;
+; Added some improvements. See compile-time variables below                    ;
+;                                                                              ;
+; by riq / L.I.A                                                               ;
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+
+; Compile-time variables
+; To compile the unmodified original game, all values must be 0
+USE_RAMBO_LIA :?= 0
+.IF USE_RAMBO_LIA==1
+        USE_NO_GARBAGE := 1
+.ENDIF
+
+USE_NO_GARBAGE           :?= 0           ;Don't include garbage data
+
 ;
 ; Notes:
 ; Supports up to 14 sprites:
@@ -13,7 +29,7 @@
 ;
 ; Map:
 ;  Each Tile is composed by 8x8 chars
-;  Maps is 14 * 136 Tiles (?)
+;  Map is 14 * 136 Tiles (1904)
 
 ;
 ; **** ZP FIELDS ****
