@@ -2,10 +2,14 @@
 ;
 ; Notes:
 ; Supports up to 14 sprites:
-;  0-3: Enemy soldier (4)
-;  4-8: Enemy bullets (5)
-;  9-11: Hero bullets (3)
-;  12-13: Hero + Hero overlay (2)
+;       0-3: Enemy soldier (4)
+;       4-8: Enemy bullets (5)
+;       9-11: Hero bullets (3)
+;       12-13: Hero + Hero overlay (2)
+;
+; During copter phase:
+;       5-8: Enemy Copter
+;       10: Hero missile
 ;
 
 ;
@@ -199,7 +203,8 @@ GAME_PLAY_MUSIC_BIS
 GAME_UPDATE_SPRITE_SCORE_BIS
         JMP GAME_UPDATE_SPRITE_SCORE
 
-s0352   JMP GAME_UPDATE_SCORE_FROM_POINTS
+GAME_UPDATE_SCORE_FROM_POINTS_BIS
+        JMP GAME_UPDATE_SCORE_FROM_POINTS
 
         JMP j123A
 
@@ -3954,7 +3959,7 @@ GAME_SMOOTH_SCROLL_Y_INC_BY_1
 
 s1F9B   LDA $D011                       ;VIC Control Register 1
         AND #$70                        ;Mask y-smooth scrolling
-        ORA ZP_GAME_SMOOTH_Y               ;Y-smooth scrolling
+        ORA ZP_GAME_SMOOTH_Y            ;Y-smooth scrolling
         STA $D011                       ;VIC Control Register 1
         RTS
 
@@ -4434,7 +4439,7 @@ _L00    LDA #225                        ;Same Y for all weapons
         JSR s15F1
         JMP _L02
 
-_L01    JSR s3006
+_L01    JSR GAME_COPTER_ANIM_COPTER_HERO_BIS
 
 _L02    LDA #$0D                        ;Color Light Green
         STA $D027                       ;Sprite 0 Color
@@ -5486,27 +5491,28 @@ ENEMY_COPTER_ANIM_BIS
 
 s3003   JMP j37B7
 
-s3006   JMP j36C6
+GAME_COPTER_ANIM_COPTER_HERO_BIS
+        JMP GAME_COPTER_ANIM_COPTER_HERO
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
-; Helicopter anim
+; Helicopter main loop
 GAME_COPTER_MAIN_LOOP
         JSR GAME_SPRITE_SYNC_PROPERTEIS_AFTER_RASTER_BIS
         JSR GAME_MAP_PAINT_BIS
         JSR GAME_DO_HARD_SCROLL_BIS
         JSR GAME_PLAY_MUSIC_BIS
-        JSR s3764
+        JSR GAME_COPTER_READ_JOYSTICK
         JSR GAME_COPTER_CHECK_ARRIVE_AT_HELIPAD
         JSR s3066
         JSR s3210
-        JSR s3140
+        JSR GAME_COPTER_FIRE_PRESSED
         JSR s3272
         JSR GAME_MAYBE_SELECT_NEXT_WEAPON_BIS
         JSR s319D
         JSR GAME_UPDATE_ENERGY_AND_CHECK_GAME_OVER
-        JSR s304E
+        JSR GAME_COPTER_DECREASE_ENERGY
         JSR GAME_UPDATE_SPRITE_SCORE_BIS
-        JSR s0352
+        JSR GAME_UPDATE_SCORE_FROM_POINTS_BIS
         JSR GAME_SPRITE_SORT_BIS
 
         JMP GAME_COPTER_MAIN_LOOP
@@ -5525,27 +5531,29 @@ _L00    PLA
         JMP GAME_PRINT_GAME_OVER_BIS
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
-s304E   LDA a3063
-        BEQ b3057
-        DEC a3063
+GAME_COPTER_DECREASE_ENERGY
+        LDA _DELAY
+        BEQ _L00
+        DEC _DELAY
         RTS
 
-b3057   LDX a3825
-        LDA f3064,X
-        STA a3063
+_L00    LDX a3825
+        LDA _DELAY_TBL,X
+        STA _DELAY
         INC ZP_GAME_ENERGY_TO_DECREASE
         RTS
 
-a3063   .BYTE $00
-f3064   .BYTE $12,$C8
+_DELAY          .BYTE $00
+_DELAY_TBL      .BYTE $12,$C8
 
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 s3066   LDA a30C3
         BEQ b306E
         JMP j307D
 
 b306E   JSR s3484
         JSR s3373
-        JSR s32D9
+        JSR GAME_COPTER_ANIM_COPTER_ENEMY
         JSR s3316
         JMP j30C4
 
@@ -5575,21 +5583,22 @@ b309C   STA a3567
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 ENEMY_COPTER_ANIM_NEXT
-        LDA ENEMY_COPTER_ANIM_IDX
+        LDA COPTER_ANIM_IDX_TBL+1
         CMP #$0B                        ;Last frame to animate?
         BEQ _L00                        ; Yes, jump
-        INC ENEMY_COPTER_ANIM_IDX
+        INC COPTER_ANIM_IDX_TBL+1
         RTS
 
 _L00    LDA #$00                        ;Reset animation idx
-        STA ENEMY_COPTER_ANIM_IDX
+        STA COPTER_ANIM_IDX_TBL+1
         RTS
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 
 a30C3   .BYTE $00
 
-j30C4   LDA a32D7
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+j30C4   LDA COPTER_MISSILE_ALREADY_FIRED
         CMP #$01
         BEQ _L00
         RTS
@@ -5614,7 +5623,7 @@ _L01    LDA ZP_GAME_SPRITE_Y_COPY_TBL+10
         LDA #$00
         ROL A
         STA a38DD
-        LDX ENEMY_COPTER_ANIM_IDX
+        LDX COPTER_ANIM_IDX_TBL+1
         LDA f3128,X
         STA a38E1
         LDA f3134,X
@@ -5646,29 +5655,31 @@ f3134   .BYTE $0A,$0A,$0A,$22,$22,$22,$0A,$0A
         .BYTE $0A,$22,$22,$22
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
-s3140   LDA ZP_SELECTED_WEAPON
+GAME_COPTER_FIRE_PRESSED
+        LDA ZP_SELECTED_WEAPON
         CMP #$05                        ;Missile
         BEQ _L00
         RTS
 
-_L00    LDA a3770
-        AND #$10
-        BNE _L01
+_L00    LDA COPTER_JOY_STATE
+        AND #$10                        ;Fire?
+        BNE _L01                        ; yes, jump
         RTS
 
-_L01    LDA a32D7
+_L01    LDA COPTER_MISSILE_ALREADY_FIRED
         BEQ _L02
         RTS
 
-_L02    INC a32D7
+_L02    INC COPTER_MISSILE_ALREADY_FIRED
+        ; Setup missile sprite position
         LDA ZP_GAME_SPRITE_X_COPY_TBL+12
         LSR A
         STA ZP_GAME_SPRITE_X_COPY_TBL+10
         LDA ZP_GAME_SPRITE_Y_COPY_TBL+12
         STA ZP_GAME_SPRITE_Y_COPY_TBL+10
         INC ZP_GAME_SPRITE_STATE_TBL+10
-        LDA HERO_COPTER_ANIM_IDX
-        STA a324D
+        LDA COPTER_ANIM_IDX_TBL
+        STA a324C+1
         RTS
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
@@ -5777,9 +5788,9 @@ _L02    LDA a362F
         CMP #$14     ;#%00010100
         BCC b324B
         INC f32D6
-        LDX ENEMY_COPTER_ANIM_IDX
+        LDX COPTER_ANIM_IDX_TBL+1
         STX a324C
-        LDA #$0E     ;#%00001110
+        LDA #$0E                        ;Color Light Blue
         STA ZP_GAME_SPRITE_COLOR_TBL+9
         LDA a362E
         STA ZP_GAME_SPRITE_X_COPY_TBL+9
@@ -5788,8 +5799,7 @@ _L02    LDA a362F
         INC ZP_GAME_SPRITE_STATE_TBL+9
 b324B   RTS
 
-a324C   .BYTE $00
-a324D   .BYTE $00
+a324C   .BYTE $00,$00
 f324E   .BYTE $FA,$FA,$FA,$00,$00,$00,$06,$06
         .BYTE $06,$00,$00,$00
 f325A   .BYTE $00,$00,$00,$FD,$FD,$FD,$00,$00
@@ -5852,12 +5862,14 @@ j32C8   LDA #$00     ;#%00000000
 a32D4   .BYTE $00
 a32D5   .BYTE $00
 f32D6   .BYTE $00
-a32D7   .BYTE $00
+COPTER_MISSILE_ALREADY_FIRED
+        .BYTE $00
 a32D8   .BYTE $00
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
-s32D9   LDY #$01
-        JMP j36CE
+GAME_COPTER_ANIM_COPTER_ENEMY
+        LDY #$01
+        JMP GAME_COPTER_ANIM_COPTER
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 s32DE   LDX #$03
@@ -5986,9 +5998,9 @@ s3391   LDA ZP_MAP_OFFSET_Y_LSB
         LDA a3480
         CMP a356B
         BNE b33D3
-        LDA a3772
-        AND #$0C     ;#%00001100
-        STA a3772
+        LDA COPTER_DIRECTION_TBL+1
+        AND #$0C     ;#%00001100        ;Left & Right mask
+        STA COPTER_DIRECTION_TBL+1
         INC a32D8
 b33D3   LDA a347F
         SEC
@@ -6030,10 +6042,10 @@ j340F   LDA a3483
         LDA #$02     ;#%00000010
         STA a340E
         INC a3481
-b3428   LDA a3772
-        AND #$0C     ;#%00001100
-        ORA #$01     ;#%00000001
-        STA a3772
+b3428   LDA COPTER_DIRECTION_TBL+1
+        AND #$0C     ;#%00001100        ;Left & Right mask
+        ORA #$01     ;#%00000001        ;Go up
+        STA COPTER_DIRECTION_TBL+1
         RTS
 
 b3433   LDA a3481
@@ -6055,10 +6067,10 @@ j3444   LDA a3483
         LDA #$02     ;#%00000010
         STA a340E
         INC a3481
-b345D   LDA a3772
-        AND #$0C     ;#%00001100
-        ORA #$02     ;#%00000010
-        STA a3772
+b345D   LDA COPTER_DIRECTION_TBL+1
+        AND #$0C     ;#%00001100        ;Left & Right mask
+        ORA #$02     ;#%00000010        ;Go down
+        STA COPTER_DIRECTION_TBL+1
         RTS
 
 b3468   LDA a3481
@@ -6115,9 +6127,9 @@ s34A2   LDA ZP_GAME_MAP_OFFSET_X
         PHP
         BNE b34D5
         INC a32D8
-        LDA a3772
-        AND #$03     ;#%00000011
-        STA a3772
+        LDA COPTER_DIRECTION_TBL+1
+        AND #$03     ;#%00000011        ;Up & Down mask
+        STA COPTER_DIRECTION_TBL+1
 b34D5   PLP
         BCS b34DB
         JMP j3503
@@ -6150,10 +6162,10 @@ j3503   LDA a3561
         CMP #$1F     ;#%00011111
         BEQ b3512
         INC a355F
-b3512   LDA a3772
-        AND #$03     ;#%00000011
-        ORA #$08     ;#%00001000
-        STA a3772
+b3512   LDA COPTER_DIRECTION_TBL+1
+        AND #$03     ;#%00000011        ;Up & Down mask
+        ORA #$08     ;#%00001000        ;Go Right
+        STA COPTER_DIRECTION_TBL+1
         RTS
 
 b351D   LDA a355F
@@ -6171,10 +6183,10 @@ j352E   LDA a3561
         CMP #$1F     ;#%00011111
         BEQ b3547
         INC a355F
-        LDA a3772
-        AND #$03     ;#%00000011
-        ORA #$04     ;#%00000100
-        STA a3772
+        LDA COPTER_DIRECTION_TBL+1
+        AND #$03     ;#%00000011        ;Up & Down mask
+        ORA #$04     ;#%00000100        ;Go Left
+        STA COPTER_DIRECTION_TBL+1
 b3547   RTS
 
 b3548   LDA a355F
@@ -6240,7 +6252,7 @@ _L00    LDX #$0C
         LDA #$01                        ;100.000 Points
         LDX #$00
         JSR SET_LOCAL_POINTS_BIS
-        JSR s0352
+        JSR GAME_UPDATE_SCORE_FROM_POINTS_BIS
         SEI
         PLA
         PLA
@@ -6263,7 +6275,7 @@ _EXIT   RTS
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 ENEMY_COPTER_ANIM
-        LDX ENEMY_COPTER_ANIM_IDX
+        LDX COPTER_ANIM_IDX_TBL+1
 
         LDA a362E
         CLC
@@ -6384,21 +6396,28 @@ f36C4   .BYTE $02
 a36C5   .BYTE $00
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
-j36C6   LDY #$00
-        JSR j36CE
+GAME_COPTER_ANIM_COPTER_HERO
+        LDY #$00
+        JSR GAME_COPTER_ANIM_COPTER
         JMP j373F
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
-; Args: Y
-j36CE   LDA f3771,Y
+; Args: Y, Copter to test:
+;       y=0: Hero copter
+;       y=1: Enemy copter
+GAME_COPTER_ANIM_COPTER
+        LDA COPTER_DIRECTION_TBL,Y
         CMP f375C,Y
         BEQ _L02
+
         STA f375C,Y
         CMP #$00
         BEQ _L02
+
         LDX f375A,Y
         AND f3748,X
         BEQ _L00
+
         STA f375A,Y
         JMP _L02
 
@@ -6423,7 +6442,7 @@ _L02    LDA f375A,Y
         LDX f375A,Y
         LDA f3751,X
         STA f375E,Y
-        LDA f3771,Y
+        LDA COPTER_DIRECTION_TBL,Y
         AND #$0C     ;#%00001100
         LSR A
         LSR A
@@ -6432,13 +6451,14 @@ _L02    LDA f375A,Y
 _L03    LDX f375A,Y
         LDA f3751,X
         STA f375E,Y
-        LDA f3771,Y
+        LDA COPTER_DIRECTION_TBL,Y
         AND #$03     ;#%00000011
 _L04    CLC
         ADC f375E,Y
-        STA HERO_COPTER_ANIM_IDX,Y
+        STA COPTER_ANIM_IDX_TBL,Y
         RTS
 
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 j373F   JSR s369C
         JSR s3827
         JMP HERO_COPTER_ANIM
@@ -6452,21 +6472,23 @@ f375C   .BYTE $00,$00
 f375E   .BYTE $00,$00,$CE,$73,$37,$60
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
-s3764   JSR GAME_READ_JOYSTICK_BIS
-        STA a3770
-        AND #$0F
-        STA f3771
+; Not sure why there is another function to read the joystick
+GAME_COPTER_READ_JOYSTICK
+        JSR GAME_READ_JOYSTICK_BIS
+        STA COPTER_JOY_STATE
+        AND #$0F                        ;Only directional moves
+        STA COPTER_DIRECTION_TBL
         RTS
 
-a3770                   .BYTE $00
-f3771                   .BYTE $00
-a3772                   .BYTE $00
-HERO_COPTER_ANIM_IDX    .BYTE $00
-ENEMY_COPTER_ANIM_IDX   .BYTE $00
+COPTER_JOY_STATE        .BYTE $00
+COPTER_DIRECTION_TBL    .BYTE $00       ;Hero copter
+                        .BYTE $00       ;Enemy copter
+COPTER_ANIM_IDX_TBL      .BYTE $00       ;Hero copter
+                        .BYTE $00       ;Enemy copter
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 HERO_COPTER_ANIM
-        LDX HERO_COPTER_ANIM_IDX
+        LDX COPTER_ANIM_IDX_TBL
         LDA ZP_GAME_SPRITE_X_COPY_TBL+12
         CLC
         ADC f3793,X
@@ -6495,8 +6517,8 @@ j37B7   STA a3825
         JSR GAME_SPRITE_SYNC_PROPERTEIS_AFTER_RASTER_BIS
         SEI
         LDA #$00
-        STA HERO_COPTER_ANIM_IDX
-        STA f3771
+        STA COPTER_ANIM_IDX_TBL
+        STA COPTER_DIRECTION_TBL
         STA f375C
         LDA #$08
         STA f375A
