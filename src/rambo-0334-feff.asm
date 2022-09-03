@@ -906,8 +906,8 @@ _L03    LDA a0966
         INC a0967
         LDA #$28
         STA a0966
-        LDA #$33
-        STA f1267+50
+        LDA #$33                        ;POW tent opened
+        STA DESTROYED_TILE_TBL+$32
         LDA ZP_GAME_SPRITE_Y_COPY_TBL+13
         STA a1931
         LDA ZP_GAME_SPRITE_X_COPY_TBL+13
@@ -917,7 +917,7 @@ _L03    LDA a0966
         LDA #$00
         STA a1933
 
-        JSR s1366
+        JSR PAINT_DESTROYED_TILES
 
         LDA a2747
         ASL A
@@ -1150,13 +1150,14 @@ _L00    LDA #$00
         STA f1961,X
         STA f1963,X
         STA GAME_CURRENT_ENEMY_STATE_TBL,X
-        STA a101E
+        STA TOWER_DESTROYED
         STA a101D
         STA ZP_GAME_SPRITE_Y_COPY_TBL,X
         STA ZP_GAME_SPRITE_Y_COPY_TBL+5,X
         STA ZP_GAME_SPRITE_Y_COPY_TBL+7,X          ;Overwrites previous value
         DEX
         BPL _L00
+
         RTS
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
@@ -1416,7 +1417,7 @@ _L00    LDA $4000+64*33,X               ;Original energy: left
         BPL _L00
 
         LDA #48                         ;48 = width of 2 sprites (24*2)
-        STA PLYR_ENERGY
+        STA HERO_ENERGY
         RTS
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
@@ -1427,14 +1428,14 @@ GAME_UPDATE_SPRITE_ENERGY
         ; Rumble code should go here
 
         DEC ZP_GAME_ENERGY_TO_DECREASE
-        DEC PLYR_ENERGY
+        DEC HERO_ENERGY
         BPL _L00
 
         LDA #$01
         STA ZP_IS_GAME_OVER
         RTS
 
-_L00    LDA PLYR_ENERGY
+_L00    LDA HERO_ENERGY
         PHA
         LSR A
         LSR A
@@ -1462,7 +1463,7 @@ _L02    LDA $4000+64*16,X               ;Spr frame #16: Energy
         BPL _L02                        ; No, jump
 _EXIT   RTS
 
-PLYR_ENERGY             .BYTE $00
+HERO_ENERGY             .BYTE $00
 ENERGY_BAR_INVERT_MASK  .BYTE $80,$40,$20,$10,$08,$04,$02,$01
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
@@ -1878,14 +1879,15 @@ _L02    JMP GAME_SET_ENEMY_OUT_OF_BOUNDS
 _L03    CMP #$02
         BNE _L05
 
-        LDA a101E
+        LDA TOWER_DESTROYED
         BEQ _L04
-        DEC a101E
+
+        DEC TOWER_DESTROYED
         LDA #$28
         STA a101D
         INC a120F
         JSR GAME_UPDATE_ENEMY_POS_IF_NEEDED
-        LDA #125                        ;Frame: Enemy flipped vertically
+        LDA #125                        ;Frame: Enemy flipped vertically, falling from tower
         STA ZP_GAME_SPRITE_FRAME_TBL+4
         RTS
 
@@ -1924,7 +1926,8 @@ _L07    JMP GAME_UPDATE_ENEMY_POS_IF_NEEDED
 f1012   .BYTE $01,$FD,$03,$03,$03,$02,$02,$02
         .BYTE $01,$01,$01
 a101D   .BYTE $00
-a101E   .BYTE $00
+TOWER_DESTROYED
+        .BYTE $00
 
 b101F   JSR s1032
         JSR GAME_UPDATE_ENEMY_POS_IF_NEEDED
@@ -2231,35 +2234,46 @@ _L01    DEX
 _EXIT   RTS
 
 a1266   .BYTE $00
-        ; FIXME: Complete list of objects
-        ; Objects are 8 by 8 (?)
-        ; Destructible objects (64 items)
-        ; $00 = One Palm Tree
-        ; $01 = Rock and grass
-        ; $02 = Nothing
-        ; $03 = Statue
-        ; $04 = Two Palm Trees
-        ; $05 = Three Palm Trees
-        ; $06 = Bunker
-        ; $07 = Building, rock and grass
-        ; $08 = Bunker 2
-        ; $09 = One Palm Tree Destroyed
-        ; $0a = Grass
-        ; $0b = Two Palm Trees Semi Destroyed
-        ; $0c = Two Palm Trees Totally Destroyed
-        ; $0d = Three Palm Trees Semi Destroyed
-        ; $0e = Three Palm Trees Semi Destroyed
-        ; $0f = Bunker Semi Destroyed
-        ; $10 = Bunker Totally Destroyed
-        ; $11 =
-f1267   .BYTE $09,$01,$02,$03,$0B,$0D,$0F,$11
-        .BYTE $13,$0A,$0A,$0C,$0C,$0E,$0E,$10
-        .BYTE $10,$12,$12,$14,$14,$16,$17,$17
-        .BYTE $18,$19,$3D,$1B,$1C,$1D,$1E,$1F
-        .BYTE $20,$21,$22,$23,$24,$25,$26,$28
-        .BYTE $28,$2A,$2A,$2C,$3C,$2E,$2F,$2F
-        .BYTE $31,$31,$32,$33,$34,$35,$36,$37
-        .BYTE $38,$39,$3A,$3B,$3C,$3D,$3E,$3F
+
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+; This table contains which tile should replace the destroyed one.
+; For example, when object $30 (index $30) in the list gets destroyed, it
+; gets replaced with object $31
+;
+; Tiles are 8 by 8 characters
+;
+; Tiles by ID: (64 items)
+; $00 = One Palm Tree
+; $01 = Rock and grass
+; $02 = Nothing
+; $03 = Statue
+; $04 = Two Palm Trees
+; $05 = Three Palm Trees
+; $06 = Bunker
+; $07 = Building, rock and grass
+; $08 = Bunker 2
+; $09 = One Palm Tree Destroyed
+; $0a = Grass
+; $0b = Two Palm Trees Semi Destroyed
+; $0c = Two Palm Trees Totally Destroyed
+; $0d = Three Palm Trees Semi Destroyed
+; $0e = Three Palm Trees Semi Destroyed
+; $0f = Bunker Semi Destroyed
+; $10 = Bunker Totally Destroyed
+; $11 =
+; $30 = Tower
+; $31 = Tower Destroyed
+; $32 = POW Tent closed
+; $33 = POW Tent open
+DESTROYED_TILE_TBL
+        .BYTE $09,$01,$02,$03,$0B,$0D,$0F,$11   ;$00-$07
+        .BYTE $13,$0A,$0A,$0C,$0C,$0E,$0E,$10   ;$08-$0F
+        .BYTE $10,$12,$12,$14,$14,$16,$17,$17   ;$10-$17
+        .BYTE $18,$19,$3D,$1B,$1C,$1D,$1E,$1F   ;$18-$1F
+        .BYTE $20,$21,$22,$23,$24,$25,$26,$28   ;$20-$27
+        .BYTE $28,$2A,$2A,$2C,$3C,$2E,$2F,$2F   ;$28-$2F
+        .BYTE $31,$31,$32,$33,$34,$35,$36,$37   ;$30-$37
+        .BYTE $38,$39,$3A,$3B,$3C,$3D,$3E,$3F   ;$38-$3F
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 s12A7   LDA GAME_JOY_STATE
@@ -2352,40 +2366,44 @@ b135B   LDA GAME_JOY_STATE_COPY2
         JMP j1328
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
-s1366   LDA ZP_GAME_SMOOTH_X
+PAINT_DESTROYED_TILES
+        LDA ZP_GAME_SMOOTH_X
         CLC
         ADC #22
-        AND #$FE     ;#%11111110
+        AND #$FE
         STA TMP_2493
 
         LDA a1932
         SEC
         SBC TMP_2493
         PHA
-        BCS b137F
-        LDA #$00     ;#%00000000
-        JMP j1382
+        BCS _L00
+        LDA #$00
+        JMP _L01
 
-b137F   LDA a1933
-j1382   LSR A
+_L00    LDA a1933
+_L01    LSR A
         PLA
         ROR A
         LSR A
         LSR A
         STA a1A50
+
         LDA a1931
         SEC
-        SBC #$2D     ;#%00101101
+        SBC #45
         SBC ZP_GAME_SMOOTH_Y
         LSR A
         LSR A
         LSR A
         STA a1A46
+
         LDA ZP_MAP_OFFSET_Y_LSB
         SEC
         SBC a1A46
-        AND #$F8     ;#%11111000
+        AND #$F8
         STA aF0
+
         LDA ZP_MAP_OFFSET_Y_MSB
         SBC #$00
         STA aF1
@@ -2412,16 +2430,18 @@ j1382   LSR A
         ; Destroy terrain: Replace object with "destroyed" object
         LDA (pF4),Y                     ;Points to MAP_TILES
         TAX
-        LDA f1267,X
-        CPX #48                         ;Something special about object 48
-        BNE b13D6                       ; XXX: but what is is?
-        INC a101E
-b13D6   STA TMP_2493
-        CPX TMP_2493
-        BNE b13E1
-        JMP j14E9
+        LDA DESTROYED_TILE_TBL,X
+        CPX #$30                        ;Is it a tower?
+        BNE _L02                        ; No, jump
 
-b13E1   STA (pF4),Y                     ;Points to MAP_TILES
+        INC TOWER_DESTROYED             ;This is to trigger the falling-enemy-from-tower
+
+_L02    STA TMP_2493                    ;Compare Tile ID with the new Tile ID
+        CPX TMP_2493                    ; If they are the same, no need to paint them.
+        BNE _L03                        ;Different? Yes, jump and paint it
+        JMP _EXIT                       ; The same, then exit
+
+_L03    STA (pF4),Y                     ;Points to MAP_TILES
 
         ; Get the tile definition
         ; Character * 64
@@ -2441,26 +2461,26 @@ b13E1   STA (pF4),Y                     ;Points to MAP_TILES
         STA aF5
 
         LDA #>$4000
-        STA SCREEN_RAM_PTR_MSB
+        STA _SCREEN_RAM_PTR_MSB
         LDA #<$4000
-        STA SCREEN_RAM_PTR_LSB
+        STA _SCREEN_RAM_PTR_LSB
 
         LDA ZP_GAME_MAP_OFFSET_X
-        AND #$07     ;#%00000111
+        AND #$07
         STA a14EA
-        EOR #$07     ;#%00000111
+        EOR #$07
         STA aF0
         LDA ZP_MAP_OFFSET_Y_LSB
-        AND #$07     ;#%00000111
+        AND #$07
         STA TMP_2493
         STA a14ED
-        EOR #$07     ;#%00000111
+        EOR #$07
         STA a14EB
-        LDX #$00     ;#%00000000
+        LDX #$00
         STX a2747
         LDA TMP_2493
         CMP a1A46
-        BCS b1463
+        BCS _L04
         LDA #$00
         STA a31
         LDA #$07
@@ -2482,34 +2502,35 @@ b13E1   STA (pF4),Y                     ;Points to MAP_TILES
         ROL a31
         CLC
         ADC a30
-        STA SCREEN_RAM_PTR_LSB
+        STA _SCREEN_RAM_PTR_LSB
         LDA a31
         ADC #$40                        ;$4000
-        STA SCREEN_RAM_PTR_MSB
+        STA _SCREEN_RAM_PTR_MSB
         CMP #$44                        ;$4400 (out of range) ?
-        BCC b1463                       ; No, Continue
-        JMP j14E9                       ; Yes, Exit
+        BCC _L04                        ; No, Continue
+        JMP _EXIT                       ; Yes, Exit
 
-b1463   LDA aF0
+_L04    LDA aF0
         CMP a1A50
-        BCS b1488
+        BCS _L05
         LDA a1A50
         CLC
         ADC a14EA
-        AND #$F8     ;#%11111000
+        AND #$F8
         SEC
         SBC a14EA
         STA a14EF
-        LDA #$00     ;#%00000000
+        LDA #$00
         STA a14EA
         LDA a14EF
         STA a14EE
-        JMP j1490
+        JMP _L06
 
-b1488   LDA #$00     ;#%00000000
+_L05    LDA #$00
         STA a14EF
         STA a14EE
-j1490   LDA a14ED
+
+_L06    LDA a14ED
         ASL A
         ASL A
         ASL A
@@ -2517,45 +2538,47 @@ j1490   LDA a14ED
         ADC a14EA
         TAY
         LDA a14EA
-        EOR #$07     ;#%00000111
+        EOR #$07
         STA a14EC
         LDX a14EE
         LDA a14EF
         STA aF3
-b14AB   LDA (pF4),Y                     ;Points to TILES_DEF
-SCREEN_RAM_PTR_LSB   = *+$01
-SCREEN_RAM_PTR_MSB   = *+$02
+
+_L07    LDA (pF4),Y                     ;Points to TILES_DEF
+_SCREEN_RAM_PTR_LSB   = *+$01
+_SCREEN_RAM_PTR_MSB   = *+$02
         STA $4000,X
         INY
         INX
         DEC a14EC
-        BMI b14C7
+        BMI _L08
         INC aF3
         LDA aF3
         CMP #40
-        BCC b14AB
+        BCC _L07
+
         LDA a1A50
         LDA a14EE
         STA aF3
 
-b14C7   LDA SCREEN_RAM_PTR_LSB          ;Next row (LSB)
+_L08    LDA _SCREEN_RAM_PTR_LSB         ;Next row (LSB)
         CLC
         ADC #40
-        STA SCREEN_RAM_PTR_LSB
+        STA _SCREEN_RAM_PTR_LSB
 
-        BCC b14D5
-        INC SCREEN_RAM_PTR_MSB          ;Next row (MSB)
+        BCC _L09
+        INC _SCREEN_RAM_PTR_MSB         ;Next row (MSB)
 
-b14D5   DEC a14ED
-        BMI j14E9
+_L09    DEC a14ED
+        BMI _EXIT
         INC a2747
         LDA a2747
-        CMP #$19     ;#%00011001
-        BCC b14E6
-        BCS j14E9
-b14E6   JMP j1490
+        CMP #25
+        BCC _L10
+        BCS _EXIT
+_L10    JMP _L06
 
-j14E9   RTS
+_EXIT   RTS
 
 a14EA   .BYTE $00
 a14EB   .BYTE $00
@@ -2860,7 +2883,7 @@ _L01    LDA ITEMS_READY_TO_PICK_UP_ORIG_TBL,X
         STA $D021                       ;Background Color 0
         STA GAME_RASTER_TICK_DB
         STA ZP_IS_GAME_OVER
-        STA a101E
+        STA TOWER_DESTROYED
         STA aE6
         STA ZP_GAME_ENERGY_TO_DECREASE
         LDA #$07                        ;Knife,Explosive Arrow,Arrow
@@ -2872,8 +2895,8 @@ _L01    LDA ITEMS_READY_TO_PICK_UP_ORIG_TBL,X
         LDA #$0F                        ;#%00001111
         STA $D018                       ; Charset: $7800-$7FFF
                                         ; Video: $4000
-        LDA #$32
-        STA f1267+50
+        LDA #$32                        ;POW Tent closed
+        STA DESTROYED_TILE_TBL+$32
         JSR s0983
         LDA #$00
         STA GAME_JOY_STATE
@@ -3124,7 +3147,7 @@ _COLLISION_WITH_CHAR
         LDA #$00
         ROL A
         STA a1933
-        JSR s1366
+        JSR PAINT_DESTROYED_TILES
         PLA
         TAX
         RTS
@@ -3238,10 +3261,10 @@ _L00    LDA GAME_DASHBOARD_COLOR_REF_TBL,X
 s19D1   LDX ZP_SELECTED_WEAPON
         LDY a1B70
         LDA f1B71,Y
-        LDY PLYR_ENERGY
+        LDY HERO_ENERGY
         CPY #10                         ;Enegy < 10
         BCC _L00                        ; Yes, jump
-        LDY #$07                        ;Not clear why it compares PLYR_ENERGY
+        LDY #$07                        ;Not clear why it compares HERO_ENERGY
         STY a2425
         JMP _L01
 

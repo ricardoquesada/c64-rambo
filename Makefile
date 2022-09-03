@@ -8,10 +8,12 @@ DEBUGGER = c64debugger
 C1541 = c1541
 PRINTF = /usr/bin/printf
 
-all: rambo.prg rambo-lia.prg
+all: md5 rambo-lia.prg
 
 rambo.prg: src/rambo-0334-feff.asm
 	64tass -Wall -Werror --cbm-prg -o bin/rambo.prg -L bin/list.txt -l bin/labels.txt --vice-labels src/rambo-0334-feff.asm
+
+md5: rambo.prg
 	md5sum bin/rambo.prg orig/rambo-0334-feff.prg
 
 rambo-lia.prg: src/rambo-0334-feff.asm
