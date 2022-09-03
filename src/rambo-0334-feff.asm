@@ -6862,8 +6862,7 @@ CHARSET_DIGITS_0_9
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 ; $39d0: Garbage
-.IF USE_NO_GARBAGE==1
-.ELSE
+.IF USE_NO_GARBAGE==0
         .BINARY "rambo-39d0-3fff-garbage.bin"
 .ENDIF
 
@@ -6872,8 +6871,7 @@ CHARSET_DIGITS_0_9
 ; Technically this is not garbage, but there is no need to include it in the
 ; binary since it gets generated in runtime
         * = $4000
-.IF USE_NO_GARBAGE==1
-.ELSE
+.IF USE_NO_GARBAGE==0
         .BINARY "rambo-4000-4fe7-screen-ram.bin"
 .ENDIF
 
@@ -6917,8 +6915,7 @@ f8000   .BYTE $00,$00,$00,$01,$01,$02,$03,$04
         .BYTE $FF,$FF,$10,$00,$FF,$FF,$10,$00
         .BYTE $FF,$FF,$10,$00,$FF,$FF,$10,$00
 
-.IF USE_NO_GARBAGE==1
-.ELSE
+.IF USE_NO_GARBAGE==0
         .BYTE $FF,$FF,$48,$00,$FF,$FF,$00,$00
         .BYTE $FF,$FF,$00,$00,$FF,$FF,$00,$00
         .BYTE $FF,$FF,$00,$00,$FF,$FF,$00,$00
@@ -10467,13 +10464,15 @@ HISCORE_TBL_IDX
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 ; $B46A garbage: A bit of garbage, a bit of deprecated/old music code/data
-.IF USE_NO_GARBAGE==1
-.ELSE
+.IF USE_NO_GARBAGE==0
         .BINARY "rambo-b46a-bfff-garbage.bin"
 .ENDIF
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 ; Need to fix address. Loader jumps here
+; But should not be needed in USE_SINGLE_FILE version
+; FIXME: Crashes when removed in USE_SINGLE_FILE
+
         * = $C000
 
 PRINT_EXT_STR_BIS                       ;$C000
@@ -12317,8 +12316,7 @@ _L01    LDA fCF13,X
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 ; Garbage: ???
-.IF USE_NO_GARBAGE==1
-.ELSE
+.IF USE_NO_GARBAGE==0
         .BYTE $DF,$60,$DF,$20,$DF,$20,$DF,$20
         .BYTE $DF,$00,$DF,$20,$DF,$20,$DF,$20
         .BYTE $DF,$20,$DF,$20,$DF,$20,$DF,$20
@@ -12354,8 +12352,7 @@ aCFFF   .BYTE $00
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 ; $D800: Garbage
-.IF USE_NO_GARBAGE==1
-.ELSE
+.IF USE_NO_GARBAGE==0
         .BINARY "rambo-d800-dfff-garbage.bin"
 .ENDIF
 
@@ -12373,8 +12370,7 @@ MAP_TILES_ORIG
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 ; $EEE0: Unused, Garbage ?
-.IF USE_NO_GARBAGE==1
-.ELSE
+.IF USE_NO_GARBAGE==0
         .BYTE $55,$40,$55,$40,$55,$40,$55,$40
         .BYTE $55,$40,$55,$40,$55,$40,$55,$40
         .BYTE $55,$40,$55,$40,$55,$40,$55,$40
