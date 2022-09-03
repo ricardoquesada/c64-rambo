@@ -9,7 +9,7 @@
 ;
 ; During copter phase:
 ;       5-8: Enemy Copter
-;       10: Hero missile
+;       10: Hero Rocket
 ;
 
 ;
@@ -48,7 +48,7 @@ ZP_GAME_HARD_SCROLL_DIR = $0A
 ZP_GAME_ENERGY_TO_DECREASE = $0B        ;Ammount of energy to decrease to the player
 ZP_DELTA_X = $0C
 ZP_DELTA_Y = $0D
-ZP_SELECTED_WEAPON = $0E                ;0=Knife, 1=Bazooka, 2=Arrow, 3=Grenade, 4=Gatling gun, 5=Missile
+ZP_SELECTED_WEAPON = $0E                ;0=Knife, 1=Bazooka, 2=Arrow, 3=Grenade, 4=Gatling gun, 5=Rocket
 ZP_IS_GAME_OVER = $0F
 a20 = $20
 a21 = $21
@@ -293,7 +293,7 @@ _L00    JSR GAME_MAYBE_PLAY_BASE_DISCOVERED_SFX
         JSR s0D99
         JSR GAME_MAYBE_SELECT_NEXT_WEAPON
         JSR GAME_UPDATE_SPRITE_ENERGY
-        JSR s0900
+        JSR GAME_CHECK_POW_TENT_OPENED
         JSR GAME_MAYBE_PRINT_GAME_OVER
 
 _L01    JSR GAME_SPRITE_SORT
@@ -837,7 +837,8 @@ _L00    STX GAME_JOY_STATE
         JMP j07FB
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
-s0900   LDA ZP_SELECTED_WEAPON          ;Weapon used
+GAME_CHECK_POW_TENT_OPENED
+        LDA ZP_SELECTED_WEAPON          ;Weapon used
         BNE _EXIT0                      ; Knife? No
 
         LDA a161E
@@ -859,6 +860,7 @@ _L02    LDA a0B2A
 _L03    LDA a0966
         BNE _EXIT1
 
+_TEST
         INC a0912
         INC a0967
         LDA #$28
@@ -1034,8 +1036,8 @@ IS_GAME_PAUSED          .BYTE $00
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 s0A41   LDA ZP_GAME_SPRITE_Y_COPY_TBL+12
-        CMP #$0A
-        BNE _L00
+        CMP #10                         ;Is it 10
+        BNE _L00                        ; No, jump
         RTS
 
 _L00    STA a25C4
@@ -1266,6 +1268,7 @@ f0BE5   .BYTE $51,$9A,$CA
 a0BE8   .BYTE $40
 f0BE9   .BYTE $00,$00,$00
 a0BEC   .BYTE $01
+        ; Grenade, Gatling Gun, Prisoner, Helicopter (???)
 f0BED   .BYTE $10,$08,$FF,$20
 f0BF1   .BYTE $10,$08,$FF,$20
 f0BF5   .BYTE $23,$24,$D7,$B9
@@ -2481,7 +2484,7 @@ _L00    LDX a152D
         LDA SPRITE_BULLET_ID_TBL,X
         CMP #$05                        ;Bazooka?
         BEQ _L01                        ; Yes, jump
-        CMP #$08                        ;Missile
+        CMP #$08                        ;Rocket?
         BEQ _L01                        ; Yes, jump
         JMP _L02
 
@@ -3127,8 +3130,8 @@ _DASHBOARD_SPR_FRAME_TBL
         .BYTE 22                        ;Gatling gun right
         .BYTE 23                        ;Missle left
         .BYTE 24                        ;Missle right
-        .BYTE 25                        ;Gatling & Missile left
-        .BYTE 26                        ;Gatling & Missile right
+        .BYTE 25                        ;Gatling & Rocket left
+        .BYTE 26                        ;Gatling & Rocket right
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 GAME_RESTORE_DASHBOARD_COLORS
@@ -3279,7 +3282,7 @@ _L04    LDA _WEAPON_ID_TBL,Y
         LDA #57                         ;Knife sprite frame
         JMP _SETUP_SPRITE_BULLET
 
-_L05    CMP #$03                        ;Weapon is Grenade, Gatling Gun or Missile?
+_L05    CMP #$03                        ;Weapon is Grenade, Gatling Gun or Rocket?
         BCS _L06                        ; Yes, jump
 
         LDA _SPRITE_FRAME_BAZOOKA_TBL,Y ;Weapon is Bazooka or Arrow
@@ -3288,7 +3291,7 @@ _L05    CMP #$03                        ;Weapon is Grenade, Gatling Gun or Missi
 _L06    CMP #$05                        ;Weapon is Missle?
         BNE _L07                        ; No, jump
 
-        LDA _SPRITE_FRAME_MISSILE_TBL,Y ;Weapon is missile
+        LDA _SPRITE_FRAME_ROCKET_TBL,Y ;Weapon is rocket
         JMP _SETUP_SPRITE_BULLET
 
 _L07    CMP #$03                        ;Weapon is Grenade?
@@ -3340,7 +3343,7 @@ _SPRITE_FRAME_BAZOOKA_TBL               ;Shared with Arrow
         .BYTE $26,$26,$27,$00
         .BYTE $29,$2C,$2D,$00
         .BYTE $28,$2A,$2B
-_SPRITE_FRAME_MISSILE_TBL
+_SPRITE_FRAME_ROCKET_TBL
         .BYTE $2E,$2E,$2F,$00
         .BYTE $30,$34,$35,$00
         .BYTE $31,$32,$33
@@ -4479,7 +4482,7 @@ _L05    INC GAME_RASTER_TICK_DB
 
 _L06    LDA COPTER_MODE_ENABLED
         BEQ _L07
-        JSR ENEMY_COPTER_ANIM_BIS
+        JSR ENEMY_COPTER_UPDATE_SPRITE_BIS
         JMP _L08
 
 _L07    JSR s1BD4
@@ -4498,8 +4501,8 @@ GAME_DASHBOARD_SPR_X_TBL
 GAME_DASHBOARD_SPR_FRAME_TBL
         .BYTE 20,27,28                  ;Sprite frames: Knife, Main Weapon Left, Main Weapon right
         .BYTE 19                        ;Grenade
-        .BYTE 25                        ;Gatling Gun/Missile left
-        .BYTE 26                        ;Gatling Gun/Missile right
+        .BYTE 25                        ;Gatling Gun/Rocket left
+        .BYTE 26                        ;Gatling Gun/Rocket right
 
 a2425   .BYTE $00
 
@@ -5486,8 +5489,8 @@ f29A8   .BYTE $01,$04,$05,$06,$02,$02,$03,$01
         .BYTE $00,$00,$FF,$FF,$00,$00,$FF,$FF
 
         ; $3000
-ENEMY_COPTER_ANIM_BIS
-        JMP ENEMY_COPTER_ANIM
+ENEMY_COPTER_UPDATE_SPRITE_BIS
+        JMP ENEMY_COPTER_UPDATE_SPRITE
 
 s3003   JMP j37B7
 
@@ -5560,7 +5563,7 @@ b306E   JSR s3484
 j307D   JSR s34F1
         JSR s34F1
         JSR s34F1
-        JSR ENEMY_COPTER_ANIM_NEXT
+        JSR ENEMY_COPTER_UPDATE_SPRITE_NEXT
         JSR s3316
         LDA a3315
         BEQ b3092
@@ -5582,7 +5585,7 @@ b309C   STA a3567
         RTS
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
-ENEMY_COPTER_ANIM_NEXT
+ENEMY_COPTER_UPDATE_SPRITE_NEXT
         LDA COPTER_ANIM_IDX_TBL+1
         CMP #$0B                        ;Last frame to animate?
         BEQ _L00                        ; Yes, jump
@@ -5598,7 +5601,7 @@ _L00    LDA #$00                        ;Reset animation idx
 a30C3   .BYTE $00
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
-j30C4   LDA COPTER_MISSILE_ALREADY_FIRED
+j30C4   LDA COPTER_ROCKET_ALREADY_FIRED
         CMP #$01
         BEQ _L00
         RTS
@@ -5657,7 +5660,7 @@ f3134   .BYTE $0A,$0A,$0A,$22,$22,$22,$0A,$0A
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 GAME_COPTER_FIRE_PRESSED
         LDA ZP_SELECTED_WEAPON
-        CMP #$05                        ;Missile
+        CMP #$05                        ;Rocket
         BEQ _L00
         RTS
 
@@ -5666,11 +5669,11 @@ _L00    LDA COPTER_JOY_STATE
         BNE _L01                        ; yes, jump
         RTS
 
-_L01    LDA COPTER_MISSILE_ALREADY_FIRED
+_L01    LDA COPTER_ROCKET_ALREADY_FIRED
         BEQ _L02
         RTS
 
-_L02    INC COPTER_MISSILE_ALREADY_FIRED
+_L02    INC COPTER_ROCKET_ALREADY_FIRED
         ; Setup missile sprite position
         LDA ZP_GAME_SPRITE_X_COPY_TBL+12
         LSR A
@@ -5862,7 +5865,7 @@ j32C8   LDA #$00     ;#%00000000
 a32D4   .BYTE $00
 a32D5   .BYTE $00
 f32D6   .BYTE $00
-COPTER_MISSILE_ALREADY_FIRED
+COPTER_ROCKET_ALREADY_FIRED
         .BYTE $00
 a32D8   .BYTE $00
 
@@ -6274,7 +6277,7 @@ _L01    INC aE6
 _EXIT   RTS
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
-ENEMY_COPTER_ANIM
+ENEMY_COPTER_UPDATE_SPRITE
         LDX COPTER_ANIM_IDX_TBL+1
 
         LDA a362E
