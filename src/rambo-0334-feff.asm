@@ -9679,42 +9679,44 @@ _L00    CMP $D012                       ;Wait for raster at position $64
         CMP #$0D
         BNE _L01
 
-        JSR sA5FC                       ;Key is $0D
+        JSR sA5FC                       ;Key is $0D (RETURN)
         JMP _LOOP
 
 _L01    CMP #$32
         BNE _L02
 
-        LDA #$1A                        ;Key is $32
+        LDA #$1A                        ;Key is $32 (2)
         STA aA4C8
         JMP _LOOP
 
 _L02    CMP #$31
         BNE _L03
 
-        LDA #$00                        ;Key is $31
+        LDA #$00                        ;Key is $31 (1)
         STA aA4C8
         JMP _LOOP
 
 _L03    CMP #$5E
         BNE _L04
 
-        JSR sA4DE                       ;Key is $5e
+        JSR sA4DE                       ;Key is $5e (UP ARROW)
         JMP _LOOP
 
 _L04    CMP #$20
-        BEQ MUSIC_DEBUG_INIT            ;Key is $20
+        BEQ MUSIC_DEBUG_INIT            ;Key is $20 (SPACE)
 
-        CMP #$5B
+        CMP #$5B                        ;'['
         BCS _LOOP
 
-        CMP #$41                        ;Is it < $41
+        CMP #$41                        ;Is it < $41 (A)
         BCC _LOOP                       ; Yes, loop when it is < than $41
         SBC #$41
         CLC
         ADC aA4C8
         DEC $D020                       ;Border Color
+
         JSR MUSIC_FN
+
         INC $D020                       ;Border Color
         JMP _LOOP
 
