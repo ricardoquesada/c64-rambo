@@ -2217,6 +2217,7 @@ _L01    DEX
 _EXIT   RTS
 
 a1266   .BYTE $00
+        ; FIXME: Complete list of objects
         ; Objects are 8 by 8 (?)
         ; Destructible objects (64 items)
         ; $00 = One Palm Tree
@@ -10347,7 +10348,7 @@ HISCORE_TBL_IDX
         .BYTE $48,$49,$4A,$4B,$4C,$4D,$4E,$4F
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
-; $B46A garbage: A bit of garbage, a bit of old music not
+; $B46A garbage: A bit of garbage, a bit of deprecated/old music code/data
 .IF USE_NO_GARBAGE==1
 .ELSE
         .BINARY "rambo-b46a-bfff-garbage.bin"
@@ -12198,6 +12199,8 @@ _L01    LDA fCF13,X
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 ; Garbage: ???
+.IF USE_NO_GARBAGE==1
+.ELSE
         .BYTE $DF,$60,$DF,$20,$DF,$20,$DF,$20
         .BYTE $DF,$00,$DF,$20,$DF,$20,$DF,$20
         .BYTE $DF,$20,$DF,$20,$DF,$20,$DF,$20
@@ -12223,6 +12226,7 @@ _L01    LDA fCF13,X
         .BYTE $00,$DF,$00,$DF,$00,$FF,$00,$FF
         .BYTE $00,$DF,$00,$FF,$00,$FF,$00,$DF
         .BYTE $20
+.ENDIF
 aCFFF   .BYTE $00
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
