@@ -48,7 +48,7 @@ ZP_GAME_HARD_SCROLL_DIR = $0A
 ZP_GAME_ENERGY_TO_DECREASE = $0B        ;Ammount of energy to decrease to the player
 ZP_DELTA_X = $0C
 ZP_DELTA_Y = $0D
-ZP_SELECTED_WEAPON = $0E                ;0=Knife, 1=Bazooka, 2=Arrow, 3=Grenade, 4=Gatling gun, 5=Rocket
+ZP_SELECTED_WEAPON = $0E                ;0=Knife, 1=Explosive Arrow, 2=Arrow, 3=Grenade, 4=machine gun, 5=Rocket
 ZP_IS_GAME_OVER = $0F
 a20 = $20
 a21 = $21
@@ -985,7 +985,7 @@ _L02    JSR VIC_SCREEN_DISABLE
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 ; Copy $E770-$EEE0 to $E000
 ; Copies the original copy of the map to $E000 since the map can be modified
-; in runtime: trees, buildings, etc can get destroyed with the bazooka
+; in runtime: trees, buildings, etc can get destroyed with the Explosive Arrow
 GAME_COPY_ORIG_MAP
         LDA #>MAP_TILES
         STA _MAP_MSB_DST
@@ -1268,7 +1268,7 @@ f0BE5   .BYTE $51,$9A,$CA
 a0BE8   .BYTE $40
 f0BE9   .BYTE $00,$00,$00
 a0BEC   .BYTE $01
-        ; Grenade, Gatling Gun, Prisoner, Helicopter (???)
+        ; Grenade, machine Gun, Prisoner, Rocket
 f0BED   .BYTE $10,$08,$FF,$20
 f0BF1   .BYTE $10,$08,$FF,$20
 f0BF5   .BYTE $23,$24,$D7,$B9
@@ -2482,7 +2482,7 @@ GAME_CHECK_DESTROY_TERRAIN
 
 _L00    LDX a152D
         LDA SPRITE_BULLET_ID_TBL,X
-        CMP #$05                        ;Bazooka?
+        CMP #$05                        ;Explosive Arrow?
         BEQ _L01                        ; Yes, jump
         CMP #$08                        ;Rocket?
         BEQ _L01                        ; Yes, jump
@@ -2771,7 +2771,7 @@ _L01    LDA f0BF1,X
         STA a101E
         STA aE6
         STA ZP_GAME_ENERGY_TO_DECREASE
-        LDA #$07                        ;Knife,Bazooka,Arrow
+        LDA #$07                        ;Knife,Explosive Arrow,Arrow
         STA WEAPONS_PICKED_UP
 
         LDA #$96                        ;#%10010110
@@ -3126,12 +3126,12 @@ _L01    LDA WEAPONS_PICKED_UP
 
 _DASHBOARD_SPR_FRAME_TBL
         .BYTE 34,34                     ;Empty frame
-        .BYTE 21                        ;Gatling gun left
-        .BYTE 22                        ;Gatling gun right
+        .BYTE 21                        ;machine gun left
+        .BYTE 22                        ;machine gun right
         .BYTE 23                        ;Missle left
         .BYTE 24                        ;Missle right
-        .BYTE 25                        ;Gatling & Rocket left
-        .BYTE 26                        ;Gatling & Rocket right
+        .BYTE 25                        ;machine & Rocket left
+        .BYTE 26                        ;machine & Rocket right
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 GAME_RESTORE_DASHBOARD_COLORS
@@ -3242,10 +3242,10 @@ _L02    LDA SPRITE_BULLET_ID_TBL,X                     ;Find the one that is emp
         RTS
 
 _L03    LDY ZP_SELECTED_WEAPON
-        CPY #$04                        ;Gatling gun?
+        CPY #$04                        ;machine gun?
         BNE _L04                        ; No, jump
 
-        LDA a11C1                       ;Weapon is Gatling gun
+        LDA a11C1                       ;Weapon is machine gun
         CLC
         ADC #$05
         STA a11C1
@@ -3282,11 +3282,11 @@ _L04    LDA _WEAPON_ID_TBL,Y
         LDA #57                         ;Knife sprite frame
         JMP _SETUP_SPRITE_BULLET
 
-_L05    CMP #$03                        ;Weapon is Grenade, Gatling Gun or Rocket?
+_L05    CMP #$03                        ;Weapon is Grenade, machine Gun or Rocket?
         BCS _L06                        ; Yes, jump
 
-        LDA _SPRITE_FRAME_BAZOOKA_TBL,Y ;Weapon is Bazooka or Arrow
-        JMP _SETUP_SPRITE_BULLET                        ; They share the same sprite frames
+        LDA _SPRITE_FRAME_EXPLOSIVE_ARROW_TBL,Y ;Weapon is Explosive Arrow or Arrow
+        JMP _SETUP_SPRITE_BULLET        ; They share the same sprite frames
 
 _L06    CMP #$05                        ;Weapon is Missle?
         BNE _L07                        ; No, jump
@@ -3306,7 +3306,7 @@ _L07    CMP #$03                        ;Weapon is Grenade?
         LDA #54                         ;Grenade sprite frame
         JMP _SETUP_SPRITE_BULLET
 
-_L08    LDA _SPRITE_FRAME_GATLING_GUN_TBL,Y      ;Weapon is Gatling Gun
+_L08    LDA _SPRITE_FRAME_MACHINE_GUN_TBL,Y      ;Weapon is machine Gun
 
         ; Y = Joystick direction
         ; X = index of the "bullet" to use
@@ -3333,13 +3333,13 @@ _WEAPON_ID_TBL
         .BYTE $04,$05,$06,$09,$03,$08
 _WEAPON_COLOR_TBL
         .BYTE $0B,$04,$03,$05,$00,$0E
-_SPRITE_FRAME_GATLING_GUN_TBL
+_SPRITE_FRAME_MACHINE_GUN_TBL
         .BYTE $1D,$1D,$1D,$00,$1E,$1F,$20,$00
         .BYTE $1E,$20,$1F
         ; 0, Up, Down, N/A
         ; Left, Up+Left, Down+Left,N/A
         ; Right, Up+Right, Up+Left
-_SPRITE_FRAME_BAZOOKA_TBL               ;Shared with Arrow
+_SPRITE_FRAME_EXPLOSIVE_ARROW_TBL       ;Shared with Arrow
         .BYTE $26,$26,$27,$00
         .BYTE $29,$2C,$2D,$00
         .BYTE $28,$2A,$2B
@@ -4501,8 +4501,8 @@ GAME_DASHBOARD_SPR_X_TBL
 GAME_DASHBOARD_SPR_FRAME_TBL
         .BYTE 20,27,28                  ;Sprite frames: Knife, Main Weapon Left, Main Weapon right
         .BYTE 19                        ;Grenade
-        .BYTE 25                        ;Gatling Gun/Rocket left
-        .BYTE 26                        ;Gatling Gun/Rocket right
+        .BYTE 25                        ;machine Gun/Rocket left
+        .BYTE 26                        ;machine Gun/Rocket right
 
 a2425   .BYTE $00
 
@@ -5855,7 +5855,7 @@ s3288   LDY a324C,X
         BCS j32C8
         RTS
 
-j32C8   LDA #$00     ;#%00000000
+j32C8   LDA #$00
         STA f32D6,X
         DEC ZP_GAME_SPRITE_STATE_TBL+9,X
         LDA #$0A     ;#%00001010
