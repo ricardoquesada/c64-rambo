@@ -111,7 +111,7 @@ aF4 = $F4
 aF5 = $F5
 aF6 = $F6
 aF7 = $F7
-ZP_GAME_MAP_OFFSET_X = $F8              ;Player goes from $00 to $5a (90)
+ZP_GAME_MAP_OFFSET_X = $F8              ;Hero goes from $00 to $5a (90)
 aFA = $FA
 ZP_NEXT_RASTER_IRQ_POS = $FB            ;In game, it is used as next raster position
 aFB = $FB                               ; but in Title, it is used as a pointer
@@ -120,8 +120,8 @@ ZP_GAME_SPRITE_IDX_TO_PROCESS = $FC     ;In game, saves the next sprite index to
 aFC = $FC                               ; but in Title is used as a pointer
                                         ; so keeping both references
 aFD = $FD
-ZP_MAP_OFFSET_Y_LSB = $FE               ;Game: Map offset Y LSB (Player goes $0018 to $03b8)
-ZP_MAP_OFFSET_Y_MSB = $FF               ;Game: Map offset Y MSB (                 24 to 952)
+ZP_MAP_OFFSET_Y_LSB = $FE               ;Game: Map offset Y LSB (Hero goes $0018 to $03b8)
+ZP_MAP_OFFSET_Y_MSB = $FF               ;Game: Map offset Y MSB (             24 to 952)
 aFE = $FE                               ;Menu: Something else
 aFF = $FF
 
@@ -137,7 +137,7 @@ p32 = $32
 p60 = $60
 pC4 = $C4
 pF0 = $F0                               ;Points to TILES_DEF
-pF4 = $F4                               ;Use to index the Map and the Tiles
+pF4 = $F4                               ;Points to TILES_DEF and MAP_TILES
 pFA = $FA
 pFB = $FB
 pFC = $FC
@@ -147,11 +147,6 @@ pFE = $FE
 ; **** FIELDS ****
 ;
 f00E0 = $00E0
-;
-; **** ABSOLUTE ADRESSES ****
-;
-a028A = $028A
-a7ED8 = $7ED8                           ;Updating charset?
 
 ;
 ; **** POINTERS ****
@@ -1712,22 +1707,28 @@ _L03    LDA ZP_GAME_SMOOTH_X
 
 a0EB3   .BYTE $00
 
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+; Char 219 is an "almost all grey" char
+; Is this the animation for the river?
+; If so, why does it use the Weapons mask?
 s0EB4   LDX a0EDB
         LDY a0EDA
-        LDA #$00     ;#%00000000
-        STA a7ED8,X
+        LDA #$00
+        STA CHARSET_GAME+8*219,X
         INX
         INY
         INY
         TXA
-        AND #$07     ;#%00000111
+        AND #$07
         TAX
         TYA
-        AND #$07     ;#%00000111
+        AND #$07
         TAY
-        LDA a7ED8,X
+
+        LDA CHARSET_GAME+8*219,X
         ORA WEAPONS_PICKED_UP_MASK_TBL+1,Y
-        STA a7ED8,X
+        STA CHARSET_GAME+8*219,X
+
         STX a0EDB
         STY a0EDA
         RTS
@@ -6812,8 +6813,8 @@ GAME_SPR_FRAME_TBL      .BYTE 71                ;Sprite Frame Rambo MC
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 ; $7800: Charset
-
         * = $7800
+CHARSET_GAME
         .BINARY "rambo-7800-charset-game.bin"
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
@@ -9765,7 +9766,7 @@ _L02    LDA #$0C                        ;Color Grey 2
         BPL _L02
 
         LDA #$FF
-        STA a028A
+        STA $028A                       ;Repeat Flag
 
         RTS
 
@@ -9866,6 +9867,7 @@ bA60B
         BPL bA604
         RTS
 
+        ; FIXME: Is this garbage?
         .BYTE $C5,$CE,$C4,$00,$FF,$00,$FF,$00
         .BYTE $FF,$00,$FF,$F7,$00,$FF,$00,$FF
         .BYTE $00,$FF,$00,$00,$FF,$00,$FF,$00
@@ -10018,6 +10020,7 @@ bA60B
         .BYTE $D2,$F9,$AA,$D8,$04,$1A,$01,$DA
         .BYTE $DA
 
+        ; FIXME: Is this garbage?
         DEC a27
         TAX
         LDX #$AC
@@ -10048,6 +10051,7 @@ bA60B
         STA a814F
         RTS
 
+        ; FIXME: Is this garbage?
         .BYTE $BF,$0C,$C8,$CD,$A7,$5F,$0F,$C8
         .BYTE $CD,$A7,$5F,$0D,$CC,$CD,$A7,$18
         .BYTE $5F,$0E,$DC,$66,$A7,$CE,$18,$21
@@ -10522,7 +10526,7 @@ _L03    ASL A                           ;Multiply by 4
         ASL A                           ; Since each letter has 4 chars
         CLC
         ADC #60                         ;And add 60, since letter A starts there.
-        STA TMP_C19C                       ; Technically it starts at 64, but char 0 is A
+        STA TMP_C19C                    ; Technically it starts at 64, but char 0 is A
                                         ; instead of char 1, so offset is 60 and not 64.
 
         LDX #$03                        ;Chars to print: 4
@@ -10673,7 +10677,7 @@ GET_CHAR
         LDY #$00                        ;Get char
         LDA (pFA),Y
         PHA
-        JSR POINT_TO_NEXT_CHAR                       ;Update pointer to next char
+        JSR POINT_TO_NEXT_CHAR          ;Update pointer to next char
         PLA
         RTS
 
@@ -11208,7 +11212,7 @@ TROOPER_PROCESS_SPECIAL_CHAR
         CPX #$1B                        ;Is it "RUB"? (backspace)
         BNE _L01                        ; No
 
-        LDY TROOPER_NAME_CHAR_POS                       ; Yes, it is backspace
+        LDY TROOPER_NAME_CHAR_POS       ; Yes, it is backspace
         BEQ _L00
         DEC TROOPER_NAME_CHAR_POS
         DEY
@@ -12080,7 +12084,7 @@ TITLE_IRQ_HANDLER
         NOP
 _ADDR_LO = *+$01
 _ADDR_HI = *+$02
-        JSR TITLE_RASTER_81                       ;Gets patched in runtime
+        JSR TITLE_RASTER_81             ;Gets patched in runtime
         INC a02
         LDA a02
         CMP #$04
@@ -12165,7 +12169,7 @@ TITLE_TOGGLE_SMOOTH_Y
                                         ; 'BIT abs'  (this is kind of a NOP)
         CMP #$02                        ;Ready for hard scrolling?
         BNE _L00                        ; No
-        INC TITLE_SCROLL_Y_READY_FOR_NEW_LINE                       ; Yes, trigger it
+        INC TITLE_SCROLL_Y_READY_FOR_NEW_LINE   ; Yes, trigger it
 _L00    RTS
 
 TITLE_RASTER_TICK                       .BYTE $00
