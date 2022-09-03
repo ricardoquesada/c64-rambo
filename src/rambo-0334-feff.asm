@@ -11,9 +11,11 @@
 USE_RAMBO_LIA :?= 0
 .IF USE_RAMBO_LIA==1
         USE_NO_GARBAGE := 1
+        USE_SINGLE_FILE := 1
 .ENDIF
 
-USE_NO_GARBAGE           :?= 0           ;Don't include garbage data
+USE_NO_GARBAGE          :?= 0           ;Don't include garbage data
+USE_SINGLE_FILE         :?= 0           ;Single file instead of multi-file
 
 ;
 ; Notes:
@@ -193,7 +195,14 @@ MUSIC_PATCH             .MACRO x, note_list_addr
 
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
-        * = $0334
+.IF USE_SINGLE_FILE==1
+        * = $0801                       ;
+        .WORD (+), 2022                 ;pointer, line number
+        .NULL $9E, FORMAT("%4d", MAIN)  ;will be "sys ${START}"
++       .WORD 0                         ;basic line end
+.ELSE
+        * = $0334                       ;Start for original game
+.ENDIF
 
         JMP GAME_SPRITE_SYNC_PROPERTIES
 

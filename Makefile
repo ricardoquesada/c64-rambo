@@ -16,6 +16,7 @@ rambo.prg: src/rambo-0334-feff.asm
 
 rambo-lia.prg: src/rambo-0334-feff.asm
 	64tass -Wall -Werror --cbm-prg -D USE_RAMBO_LIA:=1 -o bin/rambo-lia.prg -L bin/list.txt -l bin/labels.txt --vice-labels src/rambo-0334-feff.asm
+	exomizer sfx sys -x1 -Di_line_number=2022 bin/rambo-lia.prg -o bin/rambo.exo.prg
 
 d64: rambo.prg
 	split -b48334 bin/rambo.prg
@@ -29,14 +30,8 @@ d64: rambo.prg
 	$(C1541) $(D64_IMAGE) -list
 
 d64-lia: rambo-lia.prg
-	split -b48334 bin/rambo-lia.prg
-	mv xaa bin/ram2.prg
-	$(PRINTF) "\x00\x40" | cat - xab > bin/ram1.prg
-	rm xab
 	$(C1541) -format "rambo,rq" d64 $(D64_IMAGE_LIA)
-	$(C1541) $(D64_IMAGE_LIA) -write orig/sys16384.prg "sys16384"
-	$(C1541) $(D64_IMAGE_LIA) -write bin/ram1.prg "ram1"
-	$(C1541) $(D64_IMAGE_LIA) -write bin/ram2.prg "ram2"
+	$(C1541) $(D64_IMAGE_LIA) -write bin/rambo.exo.prg "rambo"
 	$(C1541) $(D64_IMAGE_LIA) -list
 
 run: d64
