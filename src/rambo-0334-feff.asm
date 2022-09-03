@@ -321,10 +321,10 @@ _L00    JSR GAME_MAYBE_PLAY_BASE_DISCOVERED_SFX
         JSR GAME_UPDATE_SCORE_FROM_POINTS
         JSR GAME_CHECK_HERO_FIRE_BULLET
         JSR j123A
-        JSR s1819
+        JSR GAME_ANIM_HERO_BULLETS
         JSR s25C8
         JSR s0E5B
-        JSR s152E
+        JSR GAME_CHECK_HERO_BULLETS_KILLED_ENEMIES
         JSR s0BF9
         JSR s0C49
         JSR s0A41
@@ -917,7 +917,7 @@ _L03    LDA a0966
         LDA #$00
         STA a1933
 
-        JSR PAINT_DESTROYED_TILES
+        JSR GAME_PAINT_DESTROYED_TILES
 
         LDA a2747
         ASL A
@@ -2366,7 +2366,7 @@ b135B   LDA GAME_JOY_STATE_COPY2
         JMP j1328
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
-PAINT_DESTROYED_TILES
+GAME_PAINT_DESTROYED_TILES
         LDA ZP_GAME_SMOOTH_X
         CLC
         ADC #22
@@ -2476,6 +2476,7 @@ _L03    STA (pF4),Y                     ;Points to MAP_TILES
         STA a14ED
         EOR #$07
         STA a14EB
+
         LDX #$00
         STX a2747
         LDA TMP_2493
@@ -2488,7 +2489,7 @@ _L03    STA (pF4),Y                     ;Points to MAP_TILES
         LDA a1A46
         CLC
         ADC a14EB
-        AND #$F8     ;#%11111000
+        AND #$F8
         SEC
         SBC a14EB
         STA a2747
@@ -2571,10 +2572,11 @@ _L08    LDA _SCREEN_RAM_PTR_LSB         ;Next row (LSB)
 
 _L09    DEC a14ED
         BMI _EXIT
+
         INC a2747
         LDA a2747
-        CMP #25
-        BCC _L10
+        CMP #25                         ;Done 25 rows?
+        BCC _L10                        ; No, continue
         BCS _EXIT
 _L10    JMP _L06
 
@@ -2630,19 +2632,23 @@ _L03    STX a152D
 a152D   .BYTE $00
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
-s152E   LDX a154E
+GAME_CHECK_HERO_BULLETS_KILLED_ENEMIES
+        LDX a154E
         LDA SPRITE_BULLET_ID_TBL,X      ;Type of bullet
-        BEQ _L00                        ; None, jump
+        BEQ _L00                        ; None, jump to next
         CMP #$09                        ;Is it grenade?
-        BEQ _L00                        ; yes, jump
+        BEQ _L00                        ; yes, jump to next
+                                        ; grenades only kill when they are explosions
+                                        ; meaning that they are no longer in the air
 
-        JSR s155F
+        JSR GAME_CHECK_HERO_BULLET_KILLED_ENEMIES
+
         DEC a154E
         BMI _L01
         RTS
 
 _L00    DEC a154E
-        BPL s152E
+        BPL GAME_CHECK_HERO_BULLETS_KILLED_ENEMIES
 _L01    LDA #$02
         STA a154E
         RTS
@@ -2651,22 +2657,29 @@ a154E   .BYTE $00
 f154F   .BYTE $0D,$0C,$0C,$0C,$00,$0C,$00,$18
 f1557   .BYTE $0D,$0B,$0B,$0B,$00,$0B,$00,$15
 
-s155F   STA a2745
-        LDY #$03     ;#%00000011
-j1564   STY TMP_2493
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+; Args: A=Bullet ID
+GAME_CHECK_HERO_BULLET_KILLED_ENEMIES
+        STA a2745                       ;Save Bullet ID for later
+        LDY #$03
+
+CHECK_ENEMY_COLLISION_LOOP
+        STY TMP_2493                    ;Current enemy idx cache
         LDA a2745
         SEC
-        SBC #$03     ;#%00000011
+        SBC #$03
         TAY
         LDA f154F,Y
         STA a25C6
         LDA f1557,Y
         STA a25C7
+
         LDY TMP_2493
-        LDA GAME_CURRENT_ENEMY_STATE_TBL,Y
-        BEQ b15EA
-        CMP #$04
-        BEQ b15EA
+        LDA GAME_CURRENT_ENEMY_STATE_TBL,Y      ;Compare with eneymy state
+        BEQ CHECK_NEXT_ENEMY                    ; Not active, skip
+        CMP #$04                                ; Already killed?
+        BEQ CHECK_NEXT_ENEMY                    ; yes, skip
+
         LDA ZP_GAME_SPRITE_Y_COPY_TBL+9,X
         STA a25C4
         LDA ZP_GAME_SPRITE_Y_COPY_TBL,Y
@@ -2682,18 +2695,23 @@ j1564   STY TMP_2493
         LDA ZP_GAME_SPRITE_X_MSB_COPY_TBL,Y
         STA a25C3
         JSR s257D
-        BCC b15EA
+        BCC CHECK_NEXT_ENEMY
+
         LDA a2745
-        CMP #$08
-        BEQ b15C3
-        CMP #$05
-        BEQ b15C3
-        CMP #$0A
+        CMP #$08                        ;Rocket launcher?
+        BEQ _DO_EXPLOSION
+        CMP #$05                        ;Explosive arrow?
+        BEQ _DO_EXPLOSION
+        CMP #$0A                        ;Already an explosion?
         BEQ ONE_ENEMY_KILLED
-        JSR s1837
+
+        JSR GAME_RECYCLE_HERO_BULLET
         JMP ONE_ENEMY_KILLED
 
-b15C3   JSR s1934
+_DO_EXPLOSION
+        JSR GAME_CONVERT_BULLET_INTO_EXPLOSION
+
+        ; Fallthrough
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 ; Args: Y (enemy that was killed)
@@ -2708,16 +2726,16 @@ ONE_ENEMY_KILLED
         STA GAME_CURRENT_ENEMY_STATE_TBL,Y
         STA GAME_SPRITE_ENEMY_FRAME_DELAY_TBL,Y
         LDA #$01
-        STA ZP_GAME_SPRITE_COLOR_TBL,Y     ;Color White
+        STA ZP_GAME_SPRITE_COLOR_TBL,Y  ;Color White
         STA LOCAL_POINTS+3              ;Set 100 points
         LDA #$12
         JMP GAME_MAYBE_PLAY_SFX
 
-b15EA   DEY
-        BPL b15EE
+CHECK_NEXT_ENEMY
+        DEY
+        BPL _L00
         RTS
-
-b15EE   JMP j1564
+_L00    JMP CHECK_ENEMY_COLLISION_LOOP
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 s15F1   LDX #$0D
@@ -2995,47 +3013,63 @@ VIC_SCREEN_ENABLE
         RTS
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
-s1819
+GAME_ANIM_HERO_BULLETS
         LDX #$02
 _L00    LDA SPRITE_BULLET_ID_TBL,X
         BEQ _L01
-        JSR s1827
+        JSR GAME_ANIM_HERO_BULLET
 _L01    DEX
         BPL _L00
         RTS
 
-s1827   CMP #$09
-        BNE _L00
-        JMP j1885
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+; Args: A = Bullet idx
+GAME_ANIM_HERO_BULLET
+        CMP #$09                        ;Grenade ?
+        BNE _L00                        ; No
+        JMP CHECK_COLLISION_WITH_GRENADE; Yes, special case for it
 
-_L00    STA TMP_2493
+_L00    STA TMP_2493                    ;Save bullet ID for later
+
+        ; Bullet out-of-bounds Y ?
         LDA ZP_GAME_SPRITE_Y_COPY_TBL+9,X
-        CMP #$0A
+        CMP #10
         BCS b1843
-s1837   LDA #$00
+
+        ; Kill bullet: Called from other places as well.
+        ; X=Bullet to recycle
+GAME_RECYCLE_HERO_BULLET
+        LDA #$00
         STA SPRITE_BULLET_ID_TBL,X
         LDA #$00
         STA ZP_GAME_SPRITE_Y_COPY_TBL+9,X
         DEC ZP_GAME_SPRITE_STATE_TBL+9,X
         RTS
 
-b1843   CMP #$C4
+        ; Y lower range
+b1843   CMP #196
         BCC b184A
-        JMP s1837
+        JMP GAME_RECYCLE_HERO_BULLET
 
+        ; Bullet out-of-bounds X ?
 b184A   LDA ZP_GAME_SPRITE_X_COPY_TBL+9,X
         CMP #$04
         BCS b1853
-        JMP s1837
+        JMP GAME_RECYCLE_HERO_BULLET
 
-b1853   CMP #$AC
-        BCS s1837
+        ; X right border
+b1853   CMP #172
+        BCS GAME_RECYCLE_HERO_BULLET
+
+        ;
+        ; At this point we assume that bullet is not out-of-bounds
+        ;
         LDA TMP_2493
-        CMP #$0A     ;#%00001010
-        BNE b1861
-        JMP j1968
+        CMP #$0a                        ;Is it an explosion? (already collided)
+        BNE _L00                        ; No, jump
+        JMP GAME_BULLET_ID_ANIM_EXPLOSION_NEXT  ; Yes, do the explosion animation
 
-b1861   LDA ZP_GAME_SPRITE_Y_COPY_TBL+9,X
+_L00    LDA ZP_GAME_SPRITE_Y_COPY_TBL+9,X
         CLC
         ADC SPRITE_BULLET_SPEED_Y_TBL,X
         STA ZP_GAME_SPRITE_Y_COPY_TBL+9,X
@@ -3046,19 +3080,20 @@ b1861   LDA ZP_GAME_SPRITE_Y_COPY_TBL+9,X
         STA ZP_GAME_SPRITE_X_COPY_TBL+9,X
 
         LDA TMP_2493
-        CMP #$04     ;#%00000100
-        BEQ b1879
+        CMP #$04                        ;Knife?
+        BEQ _L01                        ; Yes
         RTS
 
-b1879   LDA ZP_GAME_SPRITE_FRAME_TBL+9,X
+_L01    LDA ZP_GAME_SPRITE_FRAME_TBL+9,X
         CMP #64                         ;Frame: Knife anim (last frame) (??)
-        BEQ b1882
+        BEQ _L02
         INC ZP_GAME_SPRITE_FRAME_TBL+9,X
         RTS
 
-b1882   JMP j195C
+_L02    JMP GAME_BULLET_ID_ANIM_KNIFE_RESET
 
-j1885   LDA f1955,X
+CHECK_COLLISION_WITH_GRENADE
+        LDA f1955,X
         AND #$7F     ;#%01111111
         LSR A
         LSR A
@@ -3114,7 +3149,7 @@ b18DA   INC f1955,X
 s18E4   LDY SPRITE_BULLET_ID_TBL,X
         LDA f1927,Y
         JSR GAME_MAYBE_PLAY_SFX
-        JSR s1934
+        JSR GAME_CONVERT_BULLET_INTO_EXPLOSION
         TXA
         PHA
         CLC
@@ -3147,7 +3182,7 @@ _COLLISION_WITH_CHAR
         LDA #$00
         ROL A
         STA a1933
-        JSR PAINT_DESTROYED_TILES
+        JSR GAME_PAINT_DESTROYED_TILES
         PLA
         TAX
         RTS
@@ -3159,9 +3194,12 @@ a1931   .BYTE $00
 a1932   .BYTE $00
 a1933   .BYTE $00
 
-s1934   LDA #65                         ;Frame: Explosion #00
+
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+GAME_CONVERT_BULLET_INTO_EXPLOSION
+        LDA #65                         ;Frame: Explosion #00
         STA ZP_GAME_SPRITE_FRAME_TBL+9,X
-        LDA #$0A
+        LDA #$0A                        ;Bullet id gets converted to explosion
         STA SPRITE_BULLET_ID_TBL,X
         LDA a11C1
         ADC #$05
@@ -3181,7 +3219,8 @@ f1958   .BYTE $00,$00,$00
 a195B   .BYTE $00
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
-j195C   LDA #57                         ;Frame: Knife #00
+GAME_BULLET_ID_ANIM_KNIFE_RESET
+        LDA #57                         ;Frame: Knife #00
         STA ZP_GAME_SPRITE_FRAME_TBL+9,X
         RTS
 
@@ -3191,12 +3230,13 @@ SPRITE_BULLET_ID_TBL
         .BYTE $00,$00,$00
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
-j1968   LDA f197F,X
-        BEQ b1971
+GAME_BULLET_ID_ANIM_EXPLOSION_NEXT
+        LDA f197F,X
+        BEQ _L00
         DEC f197F,X
         RTS
 
-b1971   LDA #$02
+_L00    LDA #$02
         STA f197F,X
         LDA ZP_GAME_SPRITE_FRAME_TBL+9,X
         CMP #69                         ;Frame: Explosion #04 (last frame)
@@ -3205,7 +3245,8 @@ b1971   LDA #$02
         RTS
 
 f197F   .BYTE $00,$00,$00
-b1982   JMP s1837
+
+b1982   JMP GAME_RECYCLE_HERO_BULLET
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 s1985   LDA #20                         ;Frame: Knife Dashboard
@@ -3350,7 +3391,7 @@ _L00    LDA #$00
 _L01    STA HERO_FIRE_ALREADY_PRESSED
 
         LDX #$02                        ;Max number of bullets: 3
-_L02    LDA SPRITE_BULLET_ID_TBL,X                     ;Find the one that is empty
+_L02    LDA SPRITE_BULLET_ID_TBL,X      ;Find the one that is empty
         BEQ _L03
         DEX
         BPL _L02
@@ -3445,6 +3486,8 @@ _SETUP_SPRITE_BULLET
 _WEAPON_SFX_TBL
         .BYTE $00,$11,$11,$13,$17,$10
 _WEAPON_ID_TBL
+        ; Knife, Explosive Arrow, Arrow, Grenade, Machine Gun, Rocket Launcher
+        ; ID = $0A means explosion
         .BYTE $04,$05,$06,$09,$03,$08
 _WEAPON_COLOR_TBL
         .BYTE $0B,$04,$03,$05,$00,$0E
@@ -5976,7 +6019,7 @@ s3288   LDY a324C,X
 j32C8   LDA #$00
         STA f32D6,X
         DEC ZP_GAME_SPRITE_STATE_TBL+9,X
-        LDA #$0A     ;#%00001010
+        LDA #$0A
         STA ZP_GAME_SPRITE_Y_COPY_TBL+9,X
         RTS
 
@@ -10065,6 +10108,7 @@ bA60B
         .BYTE $D2,$F9,$AA,$D8,$04,$1A,$01,$DA
         .BYTE $DA
 
+TITO
         ; FIXME: Is this garbage?
         DEC a27
         TAX
