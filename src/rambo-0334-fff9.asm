@@ -227,7 +227,7 @@ GAME_INIT_BIS
 
 s036A   JMP j1659
 
-        JMP j0B2B
+        JMP GAME_CHECK_ITEM_PICK_UP
 
         JMP GAME_DISABLE_JOYSTICK       ;Unused
 
@@ -261,7 +261,7 @@ _GAME_MAIN_LOOP
         JSR GAME_SPRITE_SYNC_PROPERTIES_AFTER_RASTER
         JSR GAME_MAP_PAINT
         JSR GAME_DO_HARD_SCROLL
-        JSR j0B2B
+        JSR GAME_CHECK_ITEM_PICK_UP
         JSR s0F6C
 
         INC a0559                       ;Not clear why this check is
@@ -1060,8 +1060,8 @@ _L00    STA a25C4
         RTS
 
 _L01    LDX a0BE0
-        LDA f0BED,X
-        BMI _L02
+        LDA ITEMS_READY_TO_PICK_UP_TBL,X
+        BMI _PRISONER
 
         ; Weapon picked up
         ORA WEAPONS_PICKED_UP
@@ -1075,18 +1075,19 @@ _L01    LDX a0BE0
         BEQ b0ADC
 
         LDA #$00
-        STA f0BED,X
+        STA ITEMS_READY_TO_PICK_UP_TBL,X
         LDA #$03                        ;Set 3000 points
         STA LOCAL_POINTS+2
         LDA #$1E
         JSR GAME_MAYBE_PLAY_SFX
         JMP j0BC9
 
-_L02    LDA ZP_SELECTED_WEAPON          ;Weapon used
+_PRISONER
+        LDA ZP_SELECTED_WEAPON          ;Weapon used
         BNE _EXIT                       ; Knife? No
 
-        ; First prisoner rescued
-        STA f0BED,X
+        ; Prisoner Banks rescued
+        STA ITEMS_READY_TO_PICK_UP_TBL,X
         INC a0B29
         LDA #$05                        ;Set 5000 points
         STA LOCAL_POINTS+2
@@ -1137,13 +1138,13 @@ b0ADC
         STA ZP_GAME_ENERGY_TO_DECREASE
         STA a0967
         INC ZP_GAME_SPRITE_STATE_TBL+13
-        LDA #$B2
-        STA a0BE8
+        LDA #178
+        STA ITEMS_POS_Y_LSB_TBL+3           ;Update Y copter position
         LDA #$00
-        STA a0BEC
+        STA ITEMS_POS_Y_MSB_TBL+3
         STA ZP_GAME_SPRITE_X_MSB_COPY_TBL+13
-        LDA #$4F
-        STA a0BE4
+        LDA #79                         ;Update X copter position
+        STA ITEMS_POS_X_TBL+3
         STX ZP_GAME_SPRITE_X_COPY_TBL+13
         STY ZP_GAME_SPRITE_Y_COPY_TBL+13
         JSR s1F9B
@@ -1155,30 +1156,34 @@ a0B29   .BYTE $00
 a0B2A   .BYTE $00
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
-j0B2B   LDX #$03
-j0B2D   LDA f0BED,X
+GAME_CHECK_ITEM_PICK_UP
+        LDX #$03                        ;Test all four possible items
+j0B2D   LDA ITEMS_READY_TO_PICK_UP_TBL,X
         BNE _L01
 _L00    JMP _L04
 
-_L01    LDA f0BE1,X
+_L01    LDA ITEMS_POS_X_TBL,X
         SEC
         SBC ZP_GAME_MAP_OFFSET_X
         BCC _L00
-        CMP #$2D     ;#%00101101
+        CMP #45
         BCS _L00
+
         TAY
         LDA ZP_MAP_OFFSET_Y_MSB
-        CMP f0BE9,X
+        CMP ITEMS_POS_Y_MSB_TBL,X
         BCC _L00
         LDA ZP_MAP_OFFSET_Y_LSB
-        CMP f0BE5,X
+        CMP ITEMS_POS_Y_LSB_TBL,X
         BCC _L00
+
         LDA ZP_MAP_OFFSET_Y_LSB
         SEC
-        SBC f0BE5,X
+        SBC ITEMS_POS_Y_LSB_TBL,X
         STA a2745
         LDA ZP_MAP_OFFSET_Y_MSB
-        SBC f0BE9,X
+
+        SBC ITEMS_POS_Y_MSB_TBL,X
         STA a2746
         LDA a2746
         BNE _L00
@@ -1262,15 +1267,18 @@ _EXIT   RTS
 b0BDD   JMP j0B2D
 
 a0BE0   .BYTE $00
-f0BE1   .BYTE $60,$37,$25
-a0BE4   .BYTE $32
-f0BE5   .BYTE $51,$9A,$CA
-a0BE8   .BYTE $40
-f0BE9   .BYTE $00,$00,$00
-a0BEC   .BYTE $01
         ; Grenade, machine Gun, Prisoner, Rocket
-f0BED   .BYTE $10,$08,$FF,$20
-f0BF1   .BYTE $10,$08,$FF,$20
+        ; Items = Weapons or Prisoner Banks
+ITEMS_POS_X_TBL
+        .BYTE $60,$37,$25,$32
+ITEMS_POS_Y_LSB_TBL
+        .BYTE $51,$9A,$CA,$40
+ITEMS_POS_Y_MSB_TBL
+        .BYTE $00,$00,$00,$01
+ITEMS_READY_TO_PICK_UP_TBL
+        .BYTE $10,$08,$FF,$20
+ITEMS_READY_TO_PICK_UP_ORIG_TBL
+        .BYTE $10,$08,$FF,$20
 f0BF5   .BYTE $23,$24,$D7,$B9
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
@@ -2739,15 +2747,16 @@ _L00    STA f02,X
         JSR s096A
 
         LDA #$32
-        STA a0BE4
+        STA ITEMS_POS_X_TBL+3           ;Update X copter position
         LDA #$40
-        STA a0BE8
+        STA ITEMS_POS_Y_LSB_TBL+3       ; ditto for Y
         LDA #$01
-        STA a0BEC
+        STA ITEMS_POS_Y_MSB_TBL+3
 
+        ; Copy the original table of items to pick up
         LDX #$02
-_L01    LDA f0BF1,X
-        STA f0BED,X
+_L01    LDA ITEMS_READY_TO_PICK_UP_ORIG_TBL,X
+        STA ITEMS_READY_TO_PICK_UP_TBL,X
         DEX
         BPL _L01
 
