@@ -13,11 +13,13 @@ USE_RAMBO_LIA :?= 0
         USE_NO_GARBAGE := 1
         USE_SINGLE_FILE := 1
         USE_CORRECT_SPELLING := 1
+        USE_CALL_DEBUG_MUSIC_CODE :=0
 .ENDIF
 
 USE_NO_GARBAGE          :?= 0           ;Don't include garbage data
 USE_SINGLE_FILE         :?= 0           ;Single file instead of multi-file
 USE_CORRECT_SPELLING    :?= 0           ;Homel -> Homeland
+USE_CALL_DEBUG_MUSIC_CODE :?= 0         ;Call music debug code
 
 ;
 ; Notes:
@@ -195,10 +197,21 @@ MUSIC_PATCH             .MACRO x, note_list_addr
 .IF USE_SINGLE_FILE==1
         * = $0801                       ;
         .WORD (+), 2022                 ;pointer, line number
-        .NULL $9E, FORMAT("%4d", MAIN)  ;will be "sys ${START}"
+.IF USE_CALL_DEBUG_MUSIC_CODE==1
+        .NULL $9E, FORMAT("%4d", MUSIC_DEBUG_PRE_INIT)
+.ELSE
+        .NULL $9E, FORMAT("%4d", MAIN)  ;will be "sys ${MAIN}"
+.ENDIF
 +       .WORD 0                         ;basic line end
 .ELSE
         * = $0334                       ;Start for original game
+.ENDIF
+
+.IF USE_CALL_DEBUG_MUSIC_CODE==1
+MUSIC_DEBUG_PRE_INIT
+        LDA #$36
+        STA a01
+        JMP MUSIC_DEBUG_INIT
 .ENDIF
 
         JMP GAME_SPRITE_SYNC_PROPERTIES
@@ -9637,8 +9650,8 @@ aA432   .BYTE $00,$00,$00
         .BYTE $03,$07,$DA,$61
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
-        ; Main for debug code for music ???
-bA451
+; Main for debug code for music ???
+MUSIC_DEBUG_INIT
         JSR sA4F8
 
         LDA #$01
@@ -9690,7 +9703,7 @@ _L03    CMP #$5E
         JMP _LOOP
 
 _L04    CMP #$20
-        BEQ bA451                       ;Key is $20
+        BEQ MUSIC_DEBUG_INIT            ;Key is $20
 
         CMP #$5B
         BCS _LOOP
