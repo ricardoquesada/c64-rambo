@@ -12092,8 +12092,8 @@ _L01    LDA $4000+40 * 11 + 0,Y
         LDA $D800+40 * 18 + 0,Y
         STA $D800+40 * 17 + 0,Y
 
-        LDA $4000+40 * 19 + 0,Y         ;Color updated in next loop
-        STA $4000+40 * 18 + 0,Y         ; Bug? Why was the loop split in two?
+        LDA $4000+40 * 19 + 0,Y
+        STA $4000+40 * 18 + 0,Y
         INY
         CPY #40
         BNE _L01

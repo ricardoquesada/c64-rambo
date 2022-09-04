@@ -49,6 +49,12 @@ run-lia: d64-lia
 run-music: music-lia.prg
 	$(X64) -verbose -moncommands bin/labels.txt bin/music.exo.prg
 
+intro.prg: intro/intro.s
+	64tass -Wall -Werror --cbm-prg -o bin/intro.prg -L bin/list.txt -l bin/labels.txt --vice-labels intro/intro.s
+
+run-intro: intro.prg
+	$(X64) -verbose -moncommands bin/labels.txt bin/intro.prg
+
 clean:
 	-rm $(D64_IMAGE) $(D64_IMAGE_LIA)
 	-rm bin/*.prg bin/*.txt bin/*.d64 bin/*.bin bin/*.crt
