@@ -8,23 +8,28 @@ DEBUGGER = c64debugger
 C1541 = c1541
 PRINTF = /usr/bin/printf
 
-all: md5 rambo-lia.prg
+all: md5 rambo-lia
 
-rambo.prg: src/rambo-0334-feff.asm
-	64tass -Wall -Werror --cbm-prg -o bin/rambo.prg -L bin/list.txt -l bin/labels.txt --vice-labels src/rambo-0334-feff.asm
+rambo: src/rambo-0334-feff.asm
+	64tass -Wall -Werror --cbm-prg -o bin/$@.prg -L bin/list.txt -l bin/labels.txt --vice-labels src/rambo-0334-feff.asm
 
-md5: rambo.prg
+md5: rambo
 	md5sum bin/rambo.prg orig/rambo-0334-feff.prg
 
-rambo-lia.prg: src/rambo-0334-feff.asm
-	64tass -Wall -Werror --cbm-prg -D USE_RAMBO_LIA:=1 -o bin/rambo-lia.prg -L bin/list.txt -l bin/labels.txt --vice-labels src/rambo-0334-feff.asm
-	exomizer sfx sys -x1 -Di_line_number=2022 bin/rambo-lia.prg -o bin/rambo.exo.prg
+rambo-lia: src/rambo-0334-feff.asm
+	64tass -Wall -Werror --cbm-prg -D USE_RAMBO_LIA:=1 -o bin/$@.prg -L bin/list.txt -l bin/labels.txt --vice-labels src/rambo-0334-feff.asm
 
-music-lia.prg: src/rambo-0334-feff.asm
-	64tass -Wall -Werror --cbm-prg -D USE_RAMBO_LIA:=1 -D USE_CALL_DEBUG_MUSIC_CODE:=1 -o bin/music-lia.prg -L bin/list.txt -l bin/labels.txt --vice-labels src/rambo-0334-feff.asm
-	exomizer sfx sys -x1 -Di_line_number=2022 bin/music-lia.prg -o bin/music.exo.prg
+rambo-lia-exo: rambo-lia
+	exomizer sfx sys -x1 -Di_line_number=2022 bin/rambo-lia.prg -o bin/$@.prg
 
-d64: rambo.prg
+rambo-lia-non-sfx-exo: rambo-lia
+	exomizer mem bin/rambo-lia.prg -o bin/$@.prg
+
+music-lia: src/rambo-0334-feff.asm
+	64tass -Wall -Werror --cbm-prg -D USE_RAMBO_LIA:=1 -D USE_CALL_DEBUG_MUSIC_CODE:=1 -o bin/$@.prg -L bin/list.txt -l bin/labels.txt --vice-labels src/rambo-0334-feff.asm
+	exomizer sfx sys -x1 -Di_line_number=2022 bin/$@.prg -o bin/$@.exo.prg
+
+d64: rambo
 	split -b48334 bin/rambo.prg
 	mv xaa bin/ram2.prg
 	$(PRINTF) "\x00\x40" | cat - xab > bin/ram1.prg
@@ -35,9 +40,9 @@ d64: rambo.prg
 	$(C1541) $(D64_IMAGE) -write bin/ram2.prg "ram2"
 	$(C1541) $(D64_IMAGE) -list
 
-d64-lia: rambo-lia.prg
+d64-lia: rambo-lia-exo
 	$(C1541) -format "rambo,rq" d64 $(D64_IMAGE_LIA)
-	$(C1541) $(D64_IMAGE_LIA) -write bin/rambo.exo.prg "rambo"
+	$(C1541) $(D64_IMAGE_LIA) -write bin/rambo-lia-exo.prg "rambo"
 	$(C1541) $(D64_IMAGE_LIA) -list
 
 run: d64
@@ -46,14 +51,17 @@ run: d64
 run-lia: d64-lia
 	$(X64) -verbose -moncommands bin/labels.txt $(D64_IMAGE_LIA)
 
-run-music: music-lia.prg
-	$(X64) -verbose -moncommands bin/labels.txt bin/music.exo.prg
+run-music: music-lia
+	$(X64) -verbose -moncommands bin/labels.txt bin/music-lia-exo.prg
 
-intro.prg: intro/intro.s
-	64tass -Wall -Werror --cbm-prg -o bin/intro.prg -L bin/list.txt -l bin/labels.txt --vice-labels intro/intro.s
+intro: rambo-lia-non-sfx-exo intro/intro.s
+	64tass -Wall -Werror --cbm-prg -o bin/$@.prg -L bin/list.txt -l bin/labels.txt --vice-labels intro/intro.s
 
-run-intro: intro.prg
-	$(X64) -verbose -moncommands bin/labels.txt bin/intro.prg
+intro-exo: intro
+	exomizer sfx sys -x1 -Di_line_number=2022 bin/intro.prg -o bin/$@.prg
+
+run-intro: intro-exo
+	$(X64) -verbose -moncommands bin/labels.txt bin/intro-exo.prg
 
 clean:
 	-rm $(D64_IMAGE) $(D64_IMAGE_LIA)

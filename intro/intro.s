@@ -115,3 +115,5 @@ image_screen
 * = $4000
         .binary "rambo-bitmap.bin"
 
+exo_game
+        .binary "../bin/rambo-lia-non-sfx-exo.prg"
