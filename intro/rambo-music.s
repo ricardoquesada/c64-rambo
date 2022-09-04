@@ -1,3 +1,13 @@
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+
+INCLUDE_GARBAGE :?= 0
+
+; Addresses:
+;       $2ce3   -> $316f
+;       $2ceb   -> $2e2b
+;       $2cf2   -> $2e31
+;       $2dc8   -> $2e27
+
 ;
 ; **** ZP FIELDS ****
 ;
@@ -47,7 +57,7 @@ aFFFF = $FFFF
 ;
 p0016 = $0016
 
-        * = $2000
+;        * = $2000
 
 a2001   =*+$01
 a2002   =*+$02
@@ -290,6 +300,7 @@ j21ED   STX a10
         PHA
         LDA #$AA     ;#%10101010
         PHA
+TITO
         JMP (p0016)
 
         LDA #$03     ;#%00000011
@@ -1400,9 +1411,15 @@ f2B26   .BYTE $24,$88,$24,$A4,$24,$98,$24,$9E
         .BYTE $2E,$29,$D8,$49,$2C,$00,$10,$5F
         .BYTE $10,$D8,$6B,$2C,$CE,$52,$2E,$29
         .BYTE $D8,$53,$2C,$CC,$00,$28,$10,$5F
-        .BYTE $10,$C0,$BF,$32,$D4,$6F,$31,$DA
-        .BYTE $03,$BF,$00,$DC,$D4,$2B,$2E,$BF
-        .BYTE $00,$BF,$00,$D4,$31,$2E,$BF,$00
+        .BYTE $10,$C0,$BF,$32,$D4
+        .ADDR a316F
+        .BYTE $DA
+        .BYTE $03,$BF,$00,$DC,$D4
+        .ADDR a2E2B
+        .BYTE $BF
+        .BYTE $00,$BF,$00,$D4
+        .ADDR a2E31
+        .BYTE $BF,$00
         .BYTE $97,$A8,$D0,$19,$38,$D6,$1D,$B1
         .BYTE $D6,$1E,$19,$D6,$0C,$0A,$D6,$0D
         .BYTE $07,$5F,$02,$35,$04,$C6,$10,$2C
@@ -1429,7 +1446,9 @@ f2B26   .BYTE $24,$88,$24,$A4,$24,$98,$24,$9E
         .BYTE $C6,$D8,$2B,$43,$08,$D0,$0D,$00
         .BYTE $BF,$00,$BF,$00,$C2,$8C,$2B,$D0
         .BYTE $11,$00,$D0,$17,$08,$CC,$18,$DA
-        .BYTE $40,$D4,$27,$2E,$00,$02,$DC,$C2
+        .BYTE $40,$D4
+        .ADDR a2E27
+        .BYTE $00,$02,$DC,$C2
         .BYTE $87,$2B,$CA,$A8,$2C,$CE,$B1,$2C
         .BYTE $36,$CA,$A8,$2C,$CE,$9D,$2C,$37
         .BYTE $CE,$B4,$2C,$36,$D0,$18,$41,$C6
@@ -1441,15 +1460,16 @@ f2B26   .BYTE $24,$88,$24,$A4,$24,$98,$24,$9E
         .BYTE $BF,$00,$CC,$00,$BF,$00,$92,$7D
         .BYTE $D6,$1D,$B3,$D6,$1E,$08,$BF,$C8
         .BYTE $D6,$1C
-        .BYTE $FF,$BF,$C8
-        DEC f1C,X
+        .BYTE $FF,$BF,$C8,$D6,$1C
         .BYTE $64,$C0
+a2E27
         INC a291D
         RTS
-
+a2E2B
         LDX #$38     ;#%00111000
         LDY #$1B     ;#%00011011
         BNE b2E35
+a2E31
         LDX #$B1     ;#%10110001
         LDY #$19     ;#%00011001
 b2E35   STX $D400    ;Voice 1: Frequency Control - Low-Byte
@@ -1541,6 +1561,7 @@ b2E35   STX $D400    ;Voice 1: Frequency Control - Low-Byte
         .BYTE $1D,$CE,$1B,$30,$20,$CE,$1B,$30
         .BYTE $22,$C2,$74,$2B,$62,$00,$D6,$1C
         .BYTE $FF,$BF,$FE,$D6,$1C,$FF,$C0
+
 j30E3   LDA #$00     ;#%00000000
         STA a29CE
         STA a29F5
@@ -1605,6 +1626,7 @@ b3164   LDA #$02     ;#%00000010
         LDY #$20     ;#%00100000
 b316A   STA a2918
         BNE b3195
+a316F
         LDA #$A0     ;#%10100000
         STA $D406    ;Voice 1: Sustain / Release Cycle Control
         LDX #$4B     ;#%01001011
@@ -1640,456 +1662,6 @@ f319E   .BYTE $84,$92,$98,$98,$84,$82,$A4,$9C
         .BYTE $00,$FF,$00,$FF,$00,$FE,$00,$FF
         .BYTE $00,$7E,$FE,$00,$FF,$00,$FF,$00
 
-.IF INCLUDE_GARBAGE==1
-        .BYTE $FF,$00,$FF,$00,$FF,$00,$FF,$00
-        .BYTE $FF,$00,$FF,$00,$FF,$00,$FF,$00
-        .BYTE $FF,$00,$FF,$00,$FF,$00,$FF,$00
-        .BYTE $FF,$00,$FF,$00,$FF,$00,$FF,$00
-        .BYTE $FF,$00,$FF,$00,$FF,$00,$FF,$00
-        .BYTE $FF,$00,$FF,$00,$FF,$00,$FF,$00
-        .BYTE $FF,$00,$FF,$00,$FF,$00,$FF,$00
-        .BYTE $FF,$00,$FF,$00,$FF,$00,$FF,$00
-        .BYTE $FF,$00,$FF,$00,$FF,$00,$FF,$00
-        .BYTE $FF,$00,$FF,$00,$FF,$00,$FF,$00
-        .BYTE $FF,$00,$FF,$00,$FF,$00,$FF,$00
-        .BYTE $FF,$00,$FF,$00,$FF,$00,$FF,$00
-        .BYTE $FF,$00,$FF,$00,$FF,$00,$FF,$00
-        .BYTE $FF,$00,$FF,$00,$FF,$00,$FF,$00
-        .BYTE $FF,$00,$FF,$00,$FF,$00,$FF,$00
-        .BYTE $FF,$00,$FE,$00,$FF,$00,$FF,$00
-        .BYTE $FF,$00,$FF,$00,$FF,$00,$FF,$00
-        .BYTE $FF,$00,$FF,$00,$FF,$00,$FF,$00
-        .BYTE $FF,$00,$FF,$00,$FF,$00,$FF,$00
-        .BYTE $FF,$00,$FF,$00,$FF,$00,$FF,$00
-        .BYTE $FF,$00,$FF,$00,$FF,$00,$FF,$00
-        .BYTE $FF,$00,$FF,$00,$FF,$00,$FF,$00
-        .BYTE $FF,$00,$FF,$00,$FF,$00,$FF,$00
-        .BYTE $FF,$00,$FF,$00,$FF,$00,$FF,$00
-        .BYTE $FF,$00,$FF,$00,$FF,$00,$FF,$00
-        .BYTE $FF,$00,$FF,$00,$FF,$00,$FF,$00
-        .BYTE $FF,$00,$FF,$00,$FF,$00,$FF,$00
-        .BYTE $FF,$00,$FF,$00,$FF,$00,$FF,$00
-        .BYTE $FF,$00,$FF,$00,$FF,$00,$FF,$00
-        .BYTE $FF,$00,$FF,$00,$FF,$00,$FF,$00
-        .BYTE $FF,$00,$FF,$00,$FF,$00,$FF,$00
-        .BYTE $FF,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$20,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $01,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $01,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$01,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00,$00,$00,$FF,$FF,$FF,$FF
-        .BYTE $00,$00
-.ENDIF
 
 MUSIC_MAIN
         SEI
@@ -2102,7 +1674,8 @@ MUSIC_MAIN
         LDA #$07     ;#%00000111
         STA a4131
         LDA #$00     ;#%00000000
-        STA $D021    ;Background Color 0
+;        STA $D021    ;Background Color 0
+        STA $D020    ;Background Color 0
         STA $DC0D    ;CIA1: CIA Interrupt Control Register
         STA $DC0E    ;CIA1: CIA Control Register A
         STA $D01A    ;VIC Interrupt Mask Register (IMR)
@@ -2114,7 +1687,9 @@ MUSIC_MAIN
         STA a4130
         STA a4135
         STA a413A
-        LDA #$05     ;#%00000101
+
+;        LDA #$05     ;#%00000101
+        LDA #$35     ;#%00000101
         STA a01
         LDA #<p409F  ;#%10011111
         STA aFFFE    ;IRQ
@@ -2126,8 +1701,8 @@ MUSIC_MAIN
         STA $DD07    ;CIA2: Timer B: High-Byte
         LDA #$96     ;#%10010110
         STA $D012    ;Raster Position
-        LDA #$1B     ;#%00011011
-        STA $D011    ;VIC Control Register 1
+;        LDA #$1B     ;#%00011011
+;        STA $D011    ;VIC Control Register 1
         LDA #$10     ;#%00010000
         STA $DD0F    ;CIA2: CIA Control Register B
         LDA #$90     ;#%10010000
@@ -2137,17 +1712,17 @@ MUSIC_MAIN
         LDA $DD0D    ;CIA2: CIA Interrupt Control Register
         LDA $DD0E    ;CIA2: CIA Control Register A
 
-        LDA #$60     ;#%01100000
-        STA aFA
-        LDY #$00     ;#%00000000
-        TYA
-b4077   STA (pF9),Y
-        INY
-        BNE b4077
-        INC aFA
-        LDX aFA
-        CPX #$80     ;#%10000000
-        BNE b4077
+;        LDA #$60     ;#%01100000
+;        STA aFA
+;        LDY #$00     ;#%00000000
+;        TYA
+;b4077   STA (pF9),Y
+;        INY
+;        BNE b4077
+;        INC aFA
+;        LDX aFA
+;        CPX #$80     ;#%10000000
+;        BNE b4077
 
         LDA #$04     ;#%00000100
         STA a4206
@@ -2162,6 +1737,7 @@ b408D   DEX
         LDA a4206
         BNE b4089
         CLI
+
         JMP j413E
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
@@ -2255,44 +1831,48 @@ j413E   LDA a4132
         AND #$02     ;#%00000010
         BNE b414D
         INC $D020    ;Border Color
-b414D   LDA $D019    ;VIC Interrupt Request Register (IRR)
+b414D
+        LDA $D019    ;VIC Interrupt Request Register (IRR)
         AND #$01     ;#%00000001
         BEQ j413E
         STA $D019    ;VIC Interrupt Request Register (IRR)
         LDA a4133
         AND #$02     ;#%00000010
         BNE b4166
-        LDA #$0B     ;#%00001011
-        STA $D011    ;VIC Control Register 1
+;        LDA #$0B     ;#%00001011
+;        STA $D011    ;VIC Control Register 1
         JMP j4170
 
-b4166   LDA $D011    ;VIC Control Register 1
-        ORA #$10     ;#%00010000
-        AND #$7F     ;#%01111111
-        STA $D011    ;VIC Control Register 1
+b4166
+;        LDA $D011    ;VIC Control Register 1
+;        ORA #$10     ;#%00010000
+;        AND #$7F     ;#%01111111
+;        STA $D011    ;VIC Control Register 1
 j4170   LDA a4133
         AND #$04     ;#%00000100
         BNE b4182
-        LDA $D011    ;VIC Control Register 1
-        AND #$5F     ;#%01011111
-        STA $D011    ;VIC Control Register 1
+;        LDA $D011    ;VIC Control Register 1
+;        AND #$5F     ;#%01011111
+;        STA $D011    ;VIC Control Register 1
         JMP j41A8
 
-b4182   LDA $D011    ;VIC Control Register 1
-        ORA #$20     ;#%00100000
-        AND #$7F     ;#%01111111
-        STA $D011    ;VIC Control Register 1
+b4182
+;        LDA $D011    ;VIC Control Register 1
+;        ORA #$20     ;#%00100000
+;        AND #$7F     ;#%01111111
+;        STA $D011    ;VIC Control Register 1
         LDA #$92     ;#%10010010
         STA $DD00    ;CIA2: Data Port Register A
-        LDA #$78     ;#%01111000
-        STA $D018    ;VIC Memory Control Register
-        LDA $D016    ;VIC Control Register 2
-        ORA #$10     ;#%00010000
-        STA $D016    ;VIC Control Register 2
+;        LDA #$78     ;#%01111000
+;        STA $D018    ;VIC Memory Control Register
+;        LDA $D016    ;VIC Control Register 2
+;        ORA #$10     ;#%00010000
+;        STA $D016    ;VIC Control Register 2
         LDA #$07     ;#%00000111
         STA $D021    ;Background Color 0
         LDA #$00     ;#%00000000
         STA $D020    ;Border Color
+
 j41A8   LDA a4135
         BNE b41C7
         LDA a4133
@@ -2326,8 +1906,8 @@ j41DF   SEI
         STA $DC0E    ;CIA1: CIA Control Register A
         LDA #$10     ;#%00010000
         STA $DC0D    ;CIA1: CIA Interrupt Control Register
-        LDA #$1B     ;#%00011011
-        STA $D011    ;VIC Control Register 1
+;        LDA #$1B     ;#%00011011
+;        STA $D011    ;VIC Control Register 1
         LDX #$FA     ;#%11111010
         LDA #$F5     ;#%11110101
         .BYTE $9B,$00,$01

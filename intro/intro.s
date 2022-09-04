@@ -5,8 +5,8 @@
 ; by riq / L.I.A                                                               ;
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 
-BITMAP_ADDR = $6000
-SCREEN_ADDR = $4000
+BITMAP_ADDR = $4000
+SCREEN_ADDR = $6000
 
         * = $0801                       ;
         .WORD (+), 2022                 ;pointer, line number
@@ -15,8 +15,6 @@ SCREEN_ADDR = $4000
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 start:
-        jmp $4000
-
         sei
 
         lda #$35                        ;RAM/IO/RAM
@@ -39,11 +37,6 @@ start:
         lda #%00011000
         sta $d016                       ;turn on multicolor
 
-        ldx #<irq_handler               ;raster irq vector
-        ldy #>irq_handler
-        stx $fffe
-        sty $ffff
-
         lda #$60
         sta $d012
 
@@ -53,7 +46,7 @@ start:
         ; Select Bank $4000-$7fff for VIC
         lda $dd00                       ;CIA 2
         and #%11111100                  ;Mask the first 2 bits
-        ora #3                          ;3 for Bank 0
+        ora #2                          ;3 for Bank 0
                                         ;2 for Bank 1
                                         ;1 for Bank 2
         sta $dd00                       ;0 for Bank 3
@@ -73,31 +66,20 @@ _lp:
         lda image_color + step,x
         sta $d800 + step,x
         lda image_screen + step,x
-        sta $0400 + step,x
+        sta SCREEN_ADDR + step,x
         .endfor
         inx
         bne _lp
 
-        lda #%00011000                  ;Video at $0400
-        sta $d018                       ; Bitmap at $2000
+        lda #%10000000                  ;Video at BANK + $2000 ($6000)
+        sta $d018                       ; Bitmap at BANK + $0000 ($4000)
 
         lda #%00111011                  ;Turn on VIC again by disabling extended color.
         sta $d011                       ; Also enable bitmap mode
         lda #%00011000                  ;Make sure MC is enabled
         sta $d016
 
-
-        ldx #<irq_handler
-        ldy #>irq_handler
-        stx $fffe
-        sty $ffff
-
-        jsr $2003
-
-        cli
-
-_l00:
-        jmp _l00
+        jmp MUSIC_MAIN
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 irq_handler
@@ -127,8 +109,9 @@ image_color
 image_screen
         .binary "rambo-screen.bin"
 
-;* = $2000
-;image_bitmap
-;        .binary "rambo-bitmap.bin"
-
+* = $2000
         .include "rambo-music.s"
+
+* = $4000
+        .binary "rambo-bitmap.bin"
+
