@@ -318,11 +318,24 @@ SCROLL_TEXT
         .enc "screen"
         .text "L.I.A PRESENTS 'RAMBO: FIRST BLOOD PART II' (NTSC & PAL)"
         .text "    "
-        .text "WITH SUPPORT FOR:      GAMEPAD RUMBLE      "
+        .text "WITH SUPPORT FOR:    "
+        .byte $40,$41,$42
+        .text "  RUMBLE  "
+        .byte $40,$41,$42
+        .text "  "
         .byte $fe                       ;Pause
         .text "                  "
-        .text "GREETINGS TO RETROCOMPUTACION.COM, PUNGAS DE VILLA MARTELLI, "
-        .text " AND THE LATIN AMERICAN VINTAGE COMPUTER SCENE               "
+        .text "TEST IT WITH A MODERN GAMEPAD LIKE SONY DUALSENSE, "
+        .text "DUALSHOCK 4, SWITCH PRO CONTROLLER, ETC. THE GAMEPAD WILL "
+        .text "VIBRATE (RUMBLE) WHEN RAMBO GETS HIT... "
+        .text "REQUIRES A UNIJOYSTICLE FLASHPARTY EDITION DEVICE..."
+        .text "    "
+        .byte $53                       ;Heart
+        .text " TO RETROCOMPUTACION.COM, PUNGAS DE VILLA MARTELLI, "
+        .text "AND THE LATIN AMERICAN VINTAGE COMPUTER SCENE."
+        .text "              "
+        .text "GAME CRACKED AND IMPROVED BY RIQ / L.I.A."
+        .text "              "
         .byte $ff                       ;End of scroll
 
 image_color
