@@ -29,8 +29,6 @@ a1C = $1C
 a1D = $1D
 a1E = $1E
 a1F = $1F
-aFA = $FA
-aFE = $FE
 ;
 ; **** ZP POINTERS ****
 ;
@@ -38,8 +36,6 @@ p10 = $10
 p12 = $12
 p14 = $14
 p16 = $16
-pF9 = $F9
-pFD = $FD
 ;
 ; **** ABSOLUTE ADRESSES ****
 ;
