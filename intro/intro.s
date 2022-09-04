@@ -341,6 +341,8 @@ SCROLL_TEXT
 image_color
         .binary "rambo-color.bin"
 
+        .include "exodecrunch.s"
+
 * = $1800
 CHARSET_ADDR
         .binary "intro-charset.bin"
