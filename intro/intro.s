@@ -43,6 +43,11 @@ start:
         lda #$01                        ;Enable raster irq
         sta $d01a
 
+        ldx #<irq_handler
+        ldy #>irq_handler
+        stx $fffe
+        sty $ffff
+
         ; Select Bank $4000-$7fff for VIC
         lda $dd00                       ;CIA 2
         and #%11111100                  ;Mask the first 2 bits
@@ -79,26 +84,31 @@ _lp:
         lda #%00011000                  ;Make sure MC is enabled
         sta $d016
 
-        jmp MUSIC_MAIN
+        jsr MUSIC_INIT
+
+        cli
+
+_l00
+        jmp _l00
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 irq_handler
-        pha                             ;saves A, X, Y
-        txa
         pha
         tya
         pha
+        txa
+        pha
 
-        asl $d019                       ;clears raster interrupt
+        asl $d019                       ;ACK interrupt
 
-        jsr $2000
+        jsr MUSIC_PLAY
 
-        pla                             ;restores A, X, Y
-        tay
         pla
         tax
         pla
-        rti                             ;restores previous PC, status
+        tay
+        pla
+        rti
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 ; Data

@@ -29,9 +29,7 @@ a1C = $1C
 a1D = $1D
 a1E = $1E
 a1F = $1F
-aF9 = $F9
 aFA = $FA
-aFD = $FD
 aFE = $FE
 ;
 ; **** ZP POINTERS ****
@@ -1662,164 +1660,35 @@ f319E   .BYTE $84,$92,$98,$98,$84,$82,$A4,$9C
         .BYTE $00,$7E,$FE,$00,$FF,$00,$FF,$00
 
 
-MUSIC_MAIN
-        SEI
-        LDA #$06     ;#%00000110
-        STA $D020    ;Border Color
-        LDA #$0F     ;#%00001111
-        STA $D418    ;Select Filter Mode and Volume
-        LDA #$27     ;#%00100111
-        STA a00
-        LDA #$07     ;#%00000111
-        STA a4131
-        LDA #$00     ;#%00000000
-        STA $D020    ;Background Color 0
-        STA $DC0D    ;CIA1: CIA Interrupt Control Register
-        STA $DC0E    ;CIA1: CIA Control Register A
-        STA $D01A    ;VIC Interrupt Mask Register (IMR)
-        STA $D019    ;VIC Interrupt Request Register (IRR)
-        STA SHOULD_EXIT
-        STA a412F
-        STA aFD
-        STA aF9
-        STA a4130
-        STA a4135
-        STA a413A
-
-        LDA #$35     ;#%00000101
-        STA a01
-        LDA #<p409F  ;#%10011111
-        STA aFFFE    ;IRQ
-        LDA #>p409F  ;#%01000000
-        STA aFFFF    ;IRQ
-        LDA #$E0     ;#%11100000
-        STA $DD06    ;CIA2: Timer B: Low-Byte
-        LDA #$03     ;#%00000011
-        STA $DD07    ;CIA2: Timer B: High-Byte
-        LDA #$96     ;#%10010110
-        STA $D012    ;Raster Position
-        LDA #$10     ;#%00010000
-        STA $DD0F    ;CIA2: CIA Control Register B
-        LDA #$90     ;#%10010000
-        STA $DC0D    ;CIA1: CIA Interrupt Control Register
-        LDA $DC0D    ;CIA1: CIA Interrupt Control Register
-        LDA $DC0E    ;CIA1: CIA Control Register A
-        LDA $DD0D    ;CIA2: CIA Interrupt Control Register
-        LDA $DD0E    ;CIA2: CIA Control Register A
-
-        JMP MAIN_LOOP
-
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
-; IRQ handler
-p409F   PHA
-        TXA
-        PHA
-        TYA
-        PHA
-        LDA $DD07                       ;CIA2: Timer B: High-Byte
-        LDY #$11                        ;#%00010001
-        STY $DD0F                       ;CIA2: CIA Control Register B
-        EOR #$02                        ;#%00000010
-        LSR A
-        LSR A
-        ROR a412F
-a40B3   NOP
-a40B4   NOP
-        LDA a40B3
-        CMP #$EA     ;#%11101010
-        BNE b40F8
-        DEC a4131
-        BPL b4103
-        LDX #$07     ;#%00000111
-        STX a4131
-        LDX a4130
-        BNE b410C
-        LDA a4134
-        BNE b40DE
-        LDA a412F
-        STA DEBUG_FLAG
-        LDA #$01
-        STA a4134
-        JMP b4103
+MUSIC_INIT
+        LDA #$0F                        ;#%00001111
+        STA $D418                       ;Select Filter Mode and Volume
 
-b40DE   LDX #$01     ;#%00000001
-        STX a4130
-        LDA a412F
-        BNE b40F1
-        SEI
-        LDA #$01     ;#%00000001
-        STA SHOULD_EXIT
-        JMP b4103
-
-b40F1   STA aFE
         LDA #$00
-        STA a4134
-b40F8   LDA #$EA     ;#%11101010
-        STA a40B3
-        STA a40B4
-        JMP b4103
+        STA a4135
 
-b4103   LDA $DC0D    ;CIA1: CIA Interrupt Control Register
-        PLA
-        TAY
-        PLA
-        TAX
-        PLA
-        RTI
+        RTS
 
-b410C   LDA DEBUG_FLAG
-        LSR A
-        BCS b4116
-        LDA #$00     ;#%00000000
-        STA a01
-b4116   LDY #$00     ;#%00000000
-        LDA a412F
-        STA (pFD),Y
-        LDA #$05     ;#%00000101
-        STA a01
-        STY a412F
-        INC aFD
-        BNE b4103
-        STY a4130
-        JMP b4103
-
-        .BYTE $00
-a412F   .BYTE $80
-a4130   .BYTE $01
-a4131   .BYTE $04
-SHOULD_EXIT     .BYTE $00
-DEBUG_FLAG      .BYTE %00001110
-a4134   .BYTE $00
-a4135   .BYTE $01,$00,$00,$00,$00
-a413A   .BYTE $00
-
-DO_EXIT JMP DO_EXIT
-
-;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
-MAIN_LOOP
-        LDA SHOULD_EXIT
-        BNE DO_EXIT
-
-        ; Raster interrupt?
-        LDA $D019    ;VIC Interrupt Request Register (IRR)
-        AND #$01     ;#%00000001
-        BEQ MAIN_LOOP
-        STA $D019    ;VIC Interrupt Request Register (IRR)
-
+MUSIC_PLAY
         LDA a4135
         BNE _L02
 
         LDA #$01
         STA a4135
-        JSR s2003
-        JMP MAIN_LOOP
+        JMP s2003
 
 _L02    JSR s2006
         BEQ _L03
-        JSR s2000
-        JMP MAIN_LOOP
+        JMP s2000
 
-_L03    JSR s2003
+_L03
         LDA #$00
         STA a4135
-        JMP MAIN_LOOP
+        JMP s2003
+
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+
+
+a4135           .BYTE $01
+
