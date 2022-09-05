@@ -255,7 +255,24 @@ animate_scroll
         beq _do
 
         dec ZP_DELAY
-        rts
+        beq _restore
+        jmp animate_rumble
+
+_restore
+        ; Once the delay finished, restore sprite positions
+        ldx #6
+        ldy #12
+
+-       lda sprite_x_pos,x
+        sta $d000,y
+        lda #252                        ; same Y for all sprites
+        sta $d001,y
+        dey
+        dey
+        dex
+        bpl -
+
+        ; fallthrough
 _do
         ; use fa-ff as variables
         lda #0
@@ -340,6 +357,64 @@ _next_char
 _l1     stx ZP_BIT_INDEX
 
         rts
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+animate_rumble
+        ldx _anim_idx
+        cpx #ANIM_SIZE
+        bne _next
+
+        lda #$00
+        sta _anim_idx
+        rts
+
+_next   inc _anim_idx
+        clc
+
+        ; Left gamepad
+        lda $d000 + 2 * 1
+        clc
+        adc _gamepad_left_x,x
+        sta $d000 + 2 * 1
+
+        lda $d001 + 2 * 1
+        clc
+        adc _gamepad_left_y,x
+        sta $d001 + 2 * 1
+
+        ; Right gamepad
+        lda $d000 + 2 * 5
+        clc
+        adc _gamepad_right_x,x
+        sta $d000 + 2 * 5
+
+        lda $d000 + 2 * 6
+        clc
+        adc _gamepad_right_x,x
+        sta $d000 + 2 * 6
+
+        lda $d001 + 2 * 5
+        clc
+        adc _gamepad_right_y,x
+        sta $d001 + 2 * 5
+
+        lda $d001 + 2 * 6
+        clc
+        adc _gamepad_right_y,x
+        sta $d001 + 2 * 6
+
+        rts
+
+_anim_idx       .byte $00
+_gamepad_left_x
+        .byte $02,$fe,$02,$fe,$02,$fe,$02,$fe
+        ANIM_SIZE = * - _gamepad_left_x
+_gamepad_left_y
+        .byte $01,$ff,$00,$01,$00,$ff,$00,$00
+_gamepad_right_x
+        .byte $fe,$02,$fe,$02,$fe,$02,$fe,$02
+_gamepad_right_y
+        .byte $ff,$00,$01,$00,$ff,$01,$00,$00
+
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 ; Decruncher routine
@@ -453,28 +528,30 @@ _l3     lda decruncher,x                ;copy decruncher to $400
 
 SCROLL_TEXT
         .enc "screen"
-        .text "L.I.A PRESENTS 'RAMBO: FIRST BLOOD PART II' (NTSC & PAL)"
-        .text "    "
-        .text "THIS VERSION INCLUDES SUPPORT FOR:    "
+        .text '    L.I.A PRESENTS "RAMBO: FIRST BLOOD PART II" (NTSC & PAL)'
+        .text "       "
+        .text "THIS VERSION INCLUDES SUPPORT FOR   "
         .byte $40,$41,$42
         .text "  RUMBLE  "
         .byte $40,$41,$42
         .text "  "
         .byte $fe                       ;Pause
         .text "                  "
-        .text "TEST IT WITH A MODERN GAMEPAD LIKE SONY DUALSENSE, "
-        .text "DUALSHOCK 4, SWITCH PRO CONTROLLER, ETC. THE GAMEPAD WILL "
+        .text "TEST IT WITH A MODERN ",$40,$41,$42," "
+        .text "LIKE SONY DUALSENSE, "
+        .text "DUALSHOCK 4, SWITCH PRO CONTROLLER, ETC...  "
+        .text "THE ",$40,$41,$42," WILL "
         .text "VIBRATE (RUMBLE) WHEN RAMBO GETS HIT...  "
         .text "REQUIRES A UNIJOYSTICLE FLASHPARTY EDITION DEVICE..."
-        .text "    "
-        .byte $53                       ;Heart
+        .text "  "
+        .text " ",$53, " ",$53, " ",$53                       ;Heart
         .text " TO RETROCOMPUTACION.COM, PUNGAS DE VILLA MARTELLI, "
         .text "AND THE LATIN AMERICAN VINTAGE COMPUTER SCENE."
         .text "              "
-        .text "PRESS SPACE TO START GAME, PRESS 'M' TO START GALWAY'S "
+        .text "PRESS SPACE TO START THE GAME, PRESS 'M' TO START GALWAY'S "
         .text "MUSIC DEBUG PROGRAM.     "
         .text "GAME CRACKED AND IMPROVED BY RIQ/L.I.A."
-        .text "              "
+        .text "                "
         .byte $ff                       ;End of scroll
 
 image_color
