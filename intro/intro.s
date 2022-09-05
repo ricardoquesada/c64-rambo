@@ -104,16 +104,15 @@ _lp:
 
         ; Reverse Input / Output so that we don't have to write to $dc00
         ; to read the keyboard
-        ldx #$ff                        ;Set as Ouput
-        stx $dc03                       ;CIA1: Data Direction Register
+        ldx #$ff
+        stx $dc03                       ;DDR B: Output
+        ldx #%11000000
+        stx $dc02                       ;DDR A: Input, except Rumble which is Output
+
+        lda #$00
+        sta $dc00                       ;Disable rumble
 
 _l00
-        ldx #$ff
-        stx $dc02                       ;Temporary set it as Output
-        lda #%00111110                  ;Disable rumble
-        sta $dc00
-        inx
-        stx $dc02                       ;Back to Input mode
 
 _wait_raster
         lda ZP_RASTER_TICK
@@ -122,28 +121,19 @@ _wait_raster
         lda #$00
         sta ZP_RASTER_TICK              ;Raster to 0 again
 
-_test_space
-        lda #%11101111                  ;space ?
-        sta $dc01                       ;row 7
+_test_p
+        lda #%11111101                  ;Col 1
+        sta $dc01
         lda $dc00
-        and #%10000000                  ;col 4
-        bne _test_q
-
-        lda #$00                        ;Indicates jump to game
-        beq _exit
-
-_test_q
-        lda #%10111111                  ;q?
-        sta $dc01                       ;row 6
-        lda $dc00
-        and #%10000000                  ;col 7
-        bne _test_fire_joy2
+        and #%00100000                  ;Row 5
+        bne _test_fire_joy
 
         lda #$83                        ;Indicates jumps to music
         bne _exit
 
-_test_fire_joy2
+_test_fire_joy
         lda $dc00
+        and $dc01
         and #%00010000                  ;fire
         bne _l00
 
@@ -589,7 +579,7 @@ SCROLL_TEXT
         .text "AND THE LATIN AMERICAN VINTAGE COMPUTER SCENE."
         .text "              "
         .text "PRESS SPACE TO START THE GAME, "
-        .text 'PRESS "Q" TO START '
+        .text 'PRESS "P" TO START '
         .text "MARTIN GALWAY'S MUSIC DEBUG PROGRAM.     "
         .text "GAME CRACKED AND IMPROVED BY RIQ/L.I.A"
         .text "                "
