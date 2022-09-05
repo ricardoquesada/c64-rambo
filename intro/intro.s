@@ -19,6 +19,11 @@ ZP_DELAY                = $62           ;byte  points to the bit displayed
 start:
         sei
 
+        ldx #<nmi_handler               ; restore key disabled
+        ldy #>nmi_handler
+        stx $fffa
+        sty $fffb
+
         lda #$35                        ;RAM/IO/RAM
         sta $01
 
@@ -92,6 +97,10 @@ _lp:
 
 _l00
         jmp _l00
+
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+nmi_handler
+        rti
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 irq_handler_f9
@@ -312,6 +321,94 @@ _l1     stx ZP_BIT_INDEX
         rts
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+; Decruncher routine
+decruncher
+.logical $0400
+
+        .include "exodecrunch.s"
+exod_get_crunched_byte
+        inc $d020
+        lda _crunched_byte_lo
+        bne _byte_skip_hi
+        dec _crunched_byte_hi
+_byte_skip_hi:
+        dec _crunched_byte_lo
+_crunched_byte_lo = * + 1
+_crunched_byte_hi = * + 2
+        lda exo_game_tail               ; self-modyfing. needs to be set correctly before
+        rts                             ; decrunch_file is called.
+.endlogical
+
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+end_intro
+        sei
+        lda $dd00                       ; Vic bank 0: $0000-$3FFF
+        and #%11111100
+        ora #3
+        sta $dd00
+
+        lda #%00001000                  ; no scroll, multi-color off, 40-cols
+        sta $d016
+
+        lda #%00010100                  ; screen addr 0x0400, charset at $1000
+        sta $d018
+
+        lda #%00011011                  ; bitmap mode disabled
+        sta $d011
+
+        asl $d019                       ; ack raster irq
+        lda #0
+        sta $d01a                       ; disable irq
+
+        ldx #0
+        lda #$20
+_l0:    sta $0400,x                     ; clears the screen memory
+        sta $0500,x
+        sta $0600,x
+        sta $06e8,x
+        inx                             ; 1000 bytes = 40*25
+        bne _l0
+
+        lda #0                          ; ram color. white. for PVM logo
+_l1:
+        sta $d800,x
+        sta $d900,x
+        sta $da00,x
+        sta $dae8,x
+        inx
+        bne _l1
+
+        lda #12                         ; L
+        sta $7e4
+        lda #9                          ; I
+        sta $7e5
+        lda #1                          ; A
+        sta $7e6
+
+        lda #15                         ; gray
+        sta $dbe4
+        sta $dbe5
+        sta $dbe6
+        sta $dbe7
+
+        ldx #0                          ; decrunch table. clean it
+_l2:    sta $0200,x
+        inx
+        bne _l2
+
+        ldx #0
+_l3:    lda decruncher,x                ; copy decruncher to $400
+        sta $0400,x
+        lda decruncher + $0100,x
+        sta $0500,x
+        inx
+        bne _l3
+
+        jmp $0400                       ; jmp to decruncher
+
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 ; Data
 
 SCROLL_TEXT
@@ -341,8 +438,6 @@ SCROLL_TEXT
 image_color
         .binary "rambo-color.bin"
 
-        .include "exodecrunch.s"
-
 * = $1800
 CHARSET_ADDR
         .binary "intro-charset.bin"
@@ -366,3 +461,4 @@ SPRITE_ADDR
 * = $6600
 exo_game
         .binary "../bin/rambo-lia-non-sfx-exo.prg"
+exo_game_tail
