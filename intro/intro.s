@@ -572,7 +572,8 @@ SCROLL_TEXT
         .text "DUALSHOCK 4, SWITCH PRO CONTROLLER, ETC...  "
         .text "THE ",$40,$41,$42," WILL "
         .text "VIBRATE (RUMBLE) WHEN RAMBO GETS HIT...  "
-        .text "REQUIRES A UNIJOYSTICLE FLASHPARTY EDITION DEVICE..."
+        .text "REQUIRES A UNIJOYSTICLE FLASHPARTY EDITION DEVICE...  "
+        .text "PUT THE DEVICE IN ENHANCED MODE TO BE ABLE TO SWITCH WEAPONS WITH FIRE#1...  "
         .text "  "
         .text " ",$53, " ",$53, " ",$53                       ;Heart
         .text "  TO REBELION.DIGITAL, RETROCOMPUTACION.COM, PUNGAS DE VILLA MARTELLI, "
