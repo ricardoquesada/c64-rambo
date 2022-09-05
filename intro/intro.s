@@ -12,8 +12,9 @@ SPRITE_PTR0 = <((SPRITE_ADDR % $4000) / 64)
         .NULL $9E, FORMAT("%4d", start) ;will be "sys ${start}"
 +       .WORD 0                         ;basic line end
 
-ZP_BIT_INDEX            = $61           ;byte  points to the bit displayed
-ZP_DELAY                = $62           ;byte  points to the bit displayed
+ZP_BIT_INDEX            = $02           ;byte  points to the bit displayed
+ZP_DELAY                = $03           ;Delay for the scroller
+ZP_JUMP_TO_GAME         = $fc           ;Jump to Music or to Game. Used in Game code
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 start:
@@ -90,8 +91,11 @@ _lp:
         sta $d016
 
         jsr MUSIC_INIT
-
         jsr init_sprites
+
+        lda #$00
+        sta ZP_DELAY
+        sta ZP_BIT_INDEX
 
         cli
 
@@ -103,9 +107,8 @@ _test_space
         and #%00010000                  ;col 4
         bne _test_m
 
-        lda #$00
-        sta $0334                       ;Indicates jump to game
-        jmp end_intro
+        lda #$00                        ;Indicates jump to game
+        beq _exit
 
 _test_m
         lda #%11101111                  ;m?
@@ -114,8 +117,9 @@ _test_m
         and #%00010000                  ;col 4
         bne _l00
 
-        lda #$fe
-        sta $0334                       ;Indicates jumps to music
+        lda #$fe                        ;Indicates jumps to music
+_exit
+        sta ZP_JUMP_TO_GAME
         jmp end_intro
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
@@ -177,12 +181,12 @@ irq_handler_60
         stx $fffe
         sty $ffff
 
-        inc $d020
+;        inc $d020
         jsr MUSIC_PLAY
-        inc $d020
+;        inc $d020
         jsr animate_scroll
-        dec $d020
-        dec $d020
+;        dec $d020
+;        dec $d020
 
         pla
         tax
@@ -229,9 +233,6 @@ _l2     sta SPRITE_ADDR,x               ;8 sprites = 512 bytes = 64 * 8
         sta SPRITE_ADDR+$100,x
         dex
         bne _l2
-
-        lda #$00
-        sta ZP_DELAY
 
         rts
 
@@ -442,11 +443,6 @@ _l3     lda decruncher,x                ;copy decruncher to $400
         sta $0400 + $0200,x
         inx
         bne _l3
-
-        ldx #<$ff48                     ;Prevents a sound glitch
-        ldy #>$ff48
-        stx $fffe
-        sty $ffff
 
         jmp $0400
 

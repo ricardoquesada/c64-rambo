@@ -200,12 +200,13 @@ MUSIC_PATCH             .MACRO x, note_list_addr
 +       .WORD 0                         ;basic line end
 
 START
-        LDA $0334                       ;00: Game, $FF: Music
-        CMP #$FE
+        LDA $FC                         ;00: Game, $FE: Music
+        CMP #$FE                        ; Defined in intro code
         BEQ _MUSIC
-        JMP MAIN
+        JMP MAIN                        ;Just jump to the game
+
 _MUSIC
-        LDA #$36
+        LDA #$36                        ;RAM / IO / KERNAL
         STA a01
 
         ; Restores original colors, modified by intro/cruncher
@@ -221,7 +222,28 @@ _L1     STA $D800,X
         INX
         BNE _L1
 
+        ; Restores IRQ, and other jumps that were destroyed by intro
+        LDX #<$FF48
+        LDY #>$FF48
+        STX $FFFE
+        STY $FFFF
+
+        LDX #<$FF43
+        LDY #>$FF43
+        STX $FFFA
+        STY $FFFB
+
+        LDX #<$EB48
+        LDY #>$EB48
+        STX $028F
+        STY $0290
+
+        CLI
+
         JMP MUSIC_DEBUG_INIT
+
+_nmi_handler
+        rti
 .ELSE
         * = $0334                       ;Start for original game
 .ENDIF
