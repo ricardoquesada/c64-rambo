@@ -19,7 +19,6 @@ USE_RAMBO_LIA :?= 0
 USE_NO_GARBAGE          :?= 0           ;Don't include garbage data
 USE_SINGLE_FILE         :?= 0           ;Single file instead of multi-file
 USE_CORRECT_SPELLING    :?= 0           ;Homel -> Homeland
-USE_CALL_DEBUG_MUSIC_CODE :?= 0         ;Call music debug code, and NOT the game
 USE_RUMBLE              :?= 0           ;Rumble gamepad when Hero gets hit
 
 ;
@@ -202,10 +201,9 @@ MUSIC_PATCH             .MACRO x, note_list_addr
 +       .WORD 0                         ;basic line end
 
 START
-.if USE_RUMBLE == 1
-        LDA #%00111110                  ;Disable rumble in both joysticks
+        LDA #%00111111                  ;Disable rumble both joysticks
         STA $DC00
-.endif
+
         LDA $FC                         ;00: Game, $FE: Music
         CMP #$83                        ; Defined in intro code
         BEQ _MUSIC
@@ -1094,6 +1092,11 @@ _L01    LDA MAP_TILES_ORIG + $0700,Y
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 GAME_MAYBE_TOGGLE_PAUSE
+.IF USE_RUMBLE == 1
+        ; Perhaps a different key can be used, but "STOP" conflicts
+        ; with Rumble
+        RTS
+.ELSE
         LDA #%00111111                  ;Stop key: Row=7, Col=7
         JSR IS_KEY_PRESSED
         BCC _L00                        ;Not pressed
@@ -1111,6 +1114,7 @@ _EXIT   RTS
 _L00    LDA #$00
         STA _ALREADY_PRESSED
         RTS
+.ENDIF
 
 _ALREADY_PRESSED        .BYTE $00
 IS_GAME_PAUSED          .BYTE $00
@@ -1466,14 +1470,24 @@ GAME_UPDATE_SPRITE_ENERGY
 
         ; Rumble code should go here
 .if USE_RUMBLE == 1
-        BNE +
+        BNE _ENABLE_RUMBLE
 
-        LDA #%00111110                  ;Disable rumble both joysticks
+        LDA _RUMBLE_DUR
+        BNE _WAIT
+
+        LDA #%00111111                  ;Disable rumble both joysticks
         STA $DC00
         RTS
+_WAIT
+        DEC _RUMBLE_DUR
+        RTS
+_RUMBLE_DUR .BYTE $00                   ;How many frames it should say on
 
-+       LDA #%10111110                  ;Enable rumble in Joy#2
+_ENABLE_RUMBLE
+        LDA #%10111111                  ;Enable rumble in Joy#2
         STA $DC00
+        LDA #$04
+        STA _RUMBLE_DUR
 .else
         ; To keep code %100 unmodified when not using
         ; LIA modifications
@@ -1486,6 +1500,10 @@ GAME_UPDATE_SPRITE_ENERGY
 
         LDA #$01
         STA ZP_IS_GAME_OVER
+.IF USE_RUMBLE == 1
+        LDA #%00111111                  ;Disable rumble both joysticks
+        STA $DC00                       ; In game over
+.ENDIF
         RTS
 
 _L00    LDA HERO_ENERGY
@@ -1521,6 +1539,12 @@ ENERGY_BAR_INVERT_MASK  .BYTE $80,$40,$20,$10,$08,$04,$02,$01
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 GAME_MAYBE_TOGGLE_MUSIC
+.IF USE_RUMBLE == 1
+        ; Temporaly disable.
+        ; "S" doesn't not conflict with rumble.
+        ; Can be enabled later
+        RTS
+.ELSE
         LDA #%00001101                  ;'S' row=1,col=5
         JSR IS_KEY_PRESSED
         BCC _L00                        ;Not pressed
@@ -1544,6 +1568,7 @@ _EXIT   RTS
 _L00    LDA #$00
         STA _ALREADY_PRESSED
         RTS
+.ENDIF
 
 _ALREADY_PRESSED   .BYTE $00
 a0D23   .BYTE $00
@@ -3381,6 +3406,9 @@ _L03    STA GAME_DASHBOARD_SPR_COLOR_TBL+6      ;Helicoper gun
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 ; If space is pressed, select the next weapon
 GAME_MAYBE_SELECT_NEXT_WEAPON
+.IF USE_RUMBLE==0
+        ; Disable it when rumble, since selecting
+        ; a new weapon can be done while moving
         LDA #$00
         STA $DC00                       ; CIA1: Data Port Register A
 
@@ -3388,15 +3416,31 @@ GAME_MAYBE_SELECT_NEXT_WEAPON
         EOR #$FF                        ; Flip bits since they are active low
         BNE _L00                        ;Any activity?
                                         ; Yes, jump
-
-        LDA #$FF                        ;Enable keyboard scanning
+        LDA #%11111111                  ;Enable keyboard scanning
         STA $DC00                       ; CIA1: Data Port Register A
         RTS
+.ENDIF
 
-_L00    LDA #%00111100                  ;Space: row=7, col=4
+_L00
+.IF USE_RUMBLE==1
+        ; In Rumble, use Joy#1 button as space.
+        ; Switching weapons should be easy while holding
+        ; a gamepad.
+        LDA $DC01                       ;Read Joy #1
+        EOR #$FF
+        AND #%00010000                  ;And filter fire button
+        BNE _PRESSED
+
+        LDA #$00
+        BEQ _L04
+.ELSE
+        LDA #%00111100                  ;Space: row=7, col=4
         JSR IS_KEY_PRESSED
+.ENDIF
         LDA #$00
         BCC _L04                        ; Not pressed
+
+_PRESSED
         LDA a1A45
         BEQ _L01
         DEC a1A45
@@ -3852,8 +3896,16 @@ GAME_READ_JOYSTICK_L0
         BEQ _L01
         JMP j08D4
 
-_L01    LDA $DC01                       ;Read Joy port #2
-        AND $DC00                       ;And it wih Read Joy port #1
+_L01
+.IF USE_RUMBLE == 1
+        ; When rumble is active, disable joy #1
+        ; Since it might be used for something else.
+        LDA $DC00                       ;Read Joy port #2
+.ELSE
+        LDA $DC01                       ;Combine Joy# 1 and Joy #2
+        AND $DC00
+.ENDIF
+
         EOR #$FF                        ; Flip bits since it is active low
         AND #$1F                        ; Mask direction+fire
         STA GAME_JOY_STATE              ; Save the state
@@ -5114,18 +5166,18 @@ IS_KEY_PRESSED
         LSR A
         LSR A
         TAY
-        LDA _KEYBOARD_ROW_MASK,Y        ;Filter keyboard row
+        LDA _KEYBOARD_ROW_MASK,Y        ;Set row to read from
         STA $DC00                       ; CIA1: Data Port Register A
         PLA
         AND #$07
         TAY
-        LDA $DC01                       ;Ready keyboard column
+        LDA $DC01                       ;Read column
         AND _KEYBOARD_COL_MASK,Y
         BNE _L00
 
-        LDA #$FF                        ;Disable keyboard scanning
+        LDA #$FF                        ;Disable all rows (?)
         STA $DC00                       ; All rows desactivated
-        LDA $DC01                       ;Read Joy port #2
+        LDA $DC01                       ;Read Colum
         AND _KEYBOARD_COL_MASK,Y
         BEQ _L00
         SEC                             ;Tag it as pressed
@@ -11472,8 +11524,12 @@ _L00    STA JOYSTICK_VALUE_RIGHT,X
         DEX
         BPL _L00
 
-        LDA $DC00                       ;Read Joy port #1
-        AND $DC01                       ;Read Joy port #2
+        LDA $DC00                       ;Read Joy port #2
+.IF USE_RUMBLE == 0
+        ; Disable Joy #1 when rumble is active
+        ; It conflicts with DualStick
+        AND $DC01                       ;Read Joy port #1
+.ENDIF
         EOR #$FF                        ; Flip bits since they are active low
         AND #$1F                        ; Mask direction and button
         STA JOYSTICK_VALUE_ALL
