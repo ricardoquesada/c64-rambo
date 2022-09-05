@@ -545,11 +545,12 @@ SCROLL_TEXT
         .text "REQUIRES A UNIJOYSTICLE FLASHPARTY EDITION DEVICE..."
         .text "  "
         .text " ",$53, " ",$53, " ",$53                       ;Heart
-        .text " TO RETROCOMPUTACION.COM, PUNGAS DE VILLA MARTELLI, "
+        .text "  TO RETROCOMPUTACION.COM, PUNGAS DE VILLA MARTELLI, "
         .text "AND THE LATIN AMERICAN VINTAGE COMPUTER SCENE."
         .text "              "
-        .text "PRESS SPACE TO START THE GAME, PRESS 'M' TO START GALWAY'S "
-        .text "MUSIC DEBUG PROGRAM.     "
+        .text "PRESS SPACE TO START THE GAME, "
+        .text 'PRESS "M" TO START '
+        .text "MARTIN GALWAY'S MUSIC DEBUG PROGRAM.     "
         .text "GAME CRACKED AND IMPROVED BY RIQ/L.I.A."
         .text "                "
         .byte $ff                       ;End of scroll
