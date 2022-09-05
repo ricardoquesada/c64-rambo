@@ -13,12 +13,14 @@ USE_RAMBO_LIA :?= 0
         USE_NO_GARBAGE := 1
         USE_SINGLE_FILE := 1
         USE_CORRECT_SPELLING := 1
+        USE_RUMBLE := 1
 .ENDIF
 
 USE_NO_GARBAGE          :?= 0           ;Don't include garbage data
 USE_SINGLE_FILE         :?= 0           ;Single file instead of multi-file
 USE_CORRECT_SPELLING    :?= 0           ;Homel -> Homeland
 USE_CALL_DEBUG_MUSIC_CODE :?= 0         ;Call music debug code, and NOT the game
+USE_RUMBLE              :?= 0           ;Rumble gamepad when Hero gets hit
 
 ;
 ; Notes:
@@ -200,8 +202,12 @@ MUSIC_PATCH             .MACRO x, note_list_addr
 +       .WORD 0                         ;basic line end
 
 START
+.if USE_RUMBLE == 1
+        LDA #%00111110                  ;Disable rumble in both joysticks
+        STA $DC00
+.endif
         LDA $FC                         ;00: Game, $FE: Music
-        CMP #$FE                        ; Defined in intro code
+        CMP #$83                        ; Defined in intro code
         BEQ _MUSIC
         JMP MAIN                        ;Just jump to the game
 
@@ -1457,9 +1463,22 @@ _L00    LDA $4000+64*33,X               ;Original energy: left
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 GAME_UPDATE_SPRITE_ENERGY
         LDA ZP_GAME_ENERGY_TO_DECREASE
-        BEQ _EXIT
 
         ; Rumble code should go here
+.if USE_RUMBLE == 1
+        BNE +
+
+        LDA #%00111110                  ;Disable rumble both joysticks
+        STA $DC00
+        RTS
+
++       LDA #%10111110                  ;Enable rumble in Joy#2
+        STA $DC00
+.else
+        ; To keep code %100 unmodified when not using
+        ; LIA modifications
+        BEQ _EXIT
+.endif
 
         DEC ZP_GAME_ENERGY_TO_DECREASE
         DEC HERO_ENERGY

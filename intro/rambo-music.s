@@ -293,7 +293,6 @@ j21ED   STX a10
         PHA
         LDA #$AA     ;#%10101010
         PHA
-TITO
         JMP (p0016)
 
         LDA #$03     ;#%00000011

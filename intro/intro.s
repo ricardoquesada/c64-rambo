@@ -14,6 +14,7 @@ SPRITE_PTR0 = <((SPRITE_ADDR % $4000) / 64)
 
 ZP_BIT_INDEX            = $02           ;byte  points to the bit displayed
 ZP_DELAY                = $03           ;Delay for the scroller
+ZP_RASTER_TICK          = $04
 ZP_JUMP_TO_GAME         = $fc           ;Jump to Music or to Game. Used in Game code
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
@@ -96,28 +97,59 @@ _lp:
         lda #$00
         sta ZP_DELAY
         sta ZP_BIT_INDEX
+        sta ZP_RASTER_TICK
+
 
         cli
 
+        ; Reverse Input / Output so that we don't have to write to $dc00
+        ; to read the keyboard
+        ldx #$ff                        ;Set as Ouput
+        stx $dc03                       ;CIA1: Data Direction Register
+
 _l00
+        ldx #$ff
+        stx $dc02                       ;Temporary set it as Output
+        lda #%00111110                  ;Disable rumble
+        sta $dc00
+        inx
+        stx $dc02                       ;Back to Input mode
+
+_wait_raster
+        lda ZP_RASTER_TICK
+        beq _wait_raster
+
+        lda #$00
+        sta ZP_RASTER_TICK              ;Raster to 0 again
+
 _test_space
-        lda #%01111111                  ;space ?
-        sta $dc00                       ;row 7
-        lda $dc01
-        and #%00010000                  ;col 4
-        bne _test_m
+        lda #%11101111                  ;space ?
+        sta $dc01                       ;row 7
+        lda $dc00
+        and #%10000000                  ;col 4
+        bne _test_q
 
         lda #$00                        ;Indicates jump to game
         beq _exit
 
-_test_m
-        lda #%11101111                  ;m?
-        sta $dc00                       ;row 4
-        lda $dc01
-        and #%00010000                  ;col 4
+_test_q
+        lda #%10111111                  ;q?
+        sta $dc01                       ;row 6
+        lda $dc00
+        and #%10000000                  ;col 7
+        bne _test_fire_joy2
+
+        lda #$83                        ;Indicates jumps to music
+        bne _exit
+
+_test_fire_joy2
+        lda $dc00
+        and #%00010000                  ;fire
         bne _l00
 
-        lda #$fe                        ;Indicates jumps to music
+        lda #$00
+        ; Fallthrough
+
 _exit
         sta ZP_JUMP_TO_GAME
         jmp end_intro
@@ -187,6 +219,8 @@ irq_handler_60
         jsr animate_scroll
 ;        dec $d020
 ;        dec $d020
+
+        inc ZP_RASTER_TICK
 
         pla
         tax
@@ -519,6 +553,12 @@ _l3     lda decruncher,x                ;copy decruncher to $400
         inx
         bne _l3
 
+        ; Restore values
+        ldx #$00                        ;Set as Input
+        stx $dc03
+        dex                             ;Set as Output
+        stx $dc02
+
         jmp $0400
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
@@ -530,7 +570,7 @@ SCROLL_TEXT
         .enc "screen"
         .text '    L.I.A PRESENTS "RAMBO: FIRST BLOOD PART II" (NTSC & PAL)'
         .text "       "
-        .text "THIS VERSION INCLUDES SUPPORT FOR   "
+        .text "THIS VERSION SUPPORTS  "
         .byte $40,$41,$42
         .text "  RUMBLE  "
         .byte $40,$41,$42
@@ -545,13 +585,13 @@ SCROLL_TEXT
         .text "REQUIRES A UNIJOYSTICLE FLASHPARTY EDITION DEVICE..."
         .text "  "
         .text " ",$53, " ",$53, " ",$53                       ;Heart
-        .text "  TO RETROCOMPUTACION.COM, PUNGAS DE VILLA MARTELLI, "
+        .text "  TO REBELION.DIGITAL, RETROCOMPUTACION.COM, PUNGAS DE VILLA MARTELLI, "
         .text "AND THE LATIN AMERICAN VINTAGE COMPUTER SCENE."
         .text "              "
         .text "PRESS SPACE TO START THE GAME, "
-        .text 'PRESS "M" TO START '
+        .text 'PRESS "Q" TO START '
         .text "MARTIN GALWAY'S MUSIC DEBUG PROGRAM.     "
-        .text "GAME CRACKED AND IMPROVED BY RIQ/L.I.A."
+        .text "GAME CRACKED AND IMPROVED BY RIQ/L.I.A"
         .text "                "
         .byte $ff                       ;End of scroll
 
