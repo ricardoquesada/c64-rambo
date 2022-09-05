@@ -196,21 +196,19 @@ MUSIC_PATCH             .MACRO x, note_list_addr
 .IF USE_SINGLE_FILE==1
         * = $0801                       ;
         .WORD (+), 2022                 ;pointer, line number
-.IF USE_CALL_DEBUG_MUSIC_CODE==1
-        .NULL $9E, FORMAT("%4d", MUSIC_DEBUG_PRE_INIT)
-.ELSE
-        .NULL $9E, FORMAT("%4d", MAIN)  ;will be "sys ${MAIN}"
-.ENDIF
+        .NULL $9E, FORMAT("%4d", START) ;will be "sys ${START}"
 +       .WORD 0                         ;basic line end
-.ELSE
-        * = $0334                       ;Start for original game
-.ENDIF
 
-.IF USE_CALL_DEBUG_MUSIC_CODE==1
-MUSIC_DEBUG_PRE_INIT
+START
+        LDA $0334                       ;00: Game, $FF: Music
+        BNE _MUSIC
+        JMP MAIN
+_MUSIC
         LDA #$36
         STA a01
         JMP MUSIC_DEBUG_INIT
+.ELSE
+        * = $0334                       ;Start for original game
 .ENDIF
 
         JMP GAME_SPRITE_SYNC_PROPERTIES

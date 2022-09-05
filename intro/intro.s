@@ -96,7 +96,27 @@ _lp:
         cli
 
 _l00
-        jmp _l00
+_test_space
+        lda #%01111111                  ;space ?
+        sta $dc00                       ;row 7
+        lda $dc01
+        and #%00010000                  ;col 4
+        bne _test_m
+
+        lda #$00
+        sta $0334                       ;Indicates jump to game
+        jmp end_intro
+
+_test_m
+        lda #%11101111                  ;m?
+        sta $dc00                       ;row 4
+        lda $dc01
+        and #%00010000                  ;col 4
+        bne _l00
+
+        lda #$ff
+        sta $0334                       ;Indicates jumps to music
+        jmp end_intro
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 nmi_handler
@@ -325,86 +345,101 @@ _l1     stx ZP_BIT_INDEX
 decruncher
 .logical $0400
 
-        .include "exodecrunch.s"
+        dec $01                         ;All RAM
+        jsr exod_decrunch               ;jmp to decruncher
+        inc $01                         ;RAM/IO/RAM
+
+        cli
+        jmp $080D                       ;Jump to main game
+
 exod_get_crunched_byte
-        inc $d020
-        lda _crunched_byte_lo
-        bne _byte_skip_hi
-        dec _crunched_byte_hi
-_byte_skip_hi:
-        dec _crunched_byte_lo
+        ; In forward mode, "LDA" should happen before altering the pointer
 _crunched_byte_lo = * + 1
 _crunched_byte_hi = * + 2
-        lda exo_game_tail               ; self-modyfing. needs to be set correctly before
-        rts                             ; decrunch_file is called.
+        lda exo_game_head               ;self-modyfing. needs to be set correctly before
+        inc _crunched_byte_lo
+        bne _byte_skip_hi
+        inc _crunched_byte_hi
+_byte_skip_hi:
+        inc $07e7
+        dec $07e7
+        rts                             ;decrunch_file is called.
+
+        .include "exodecrunch.s"
+
 .endlogical
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 end_intro
         sei
-        lda $dd00                       ; Vic bank 0: $0000-$3FFF
+
+        lda $dd00                       ;Vic bank 0: $0000-$3FFF
         and #%11111100
         ora #3
         sta $dd00
 
-        lda #%00001000                  ; no scroll, multi-color off, 40-cols
+        lda #%00001000                  ;no scroll, multi-color off, 40-cols
         sta $d016
 
-        lda #%00010100                  ; screen addr 0x0400, charset at $1000
+        lda #%00010100                  ;screen addr 0x0400, charset at $1000
         sta $d018
 
-        lda #%00011011                  ; bitmap mode disabled
+        lda #%00011011                  ;bitmap mode disabled
         sta $d011
 
-        asl $d019                       ; ack raster irq
+        asl $d019                       ;ack raster irq
         lda #0
-        sta $d01a                       ; disable irq
+        sta $d01a                       ;disable irq
 
         ldx #0
         lda #$20
-_l0:    sta $0400,x                     ; clears the screen memory
+_l0     sta $0400,x                     ;clears the screen memory
         sta $0500,x
         sta $0600,x
         sta $06e8,x
-        inx                             ; 1000 bytes = 40*25
+        inx                             ;1000 bytes = 40*25
         bne _l0
 
-        lda #0                          ; ram color. white. for PVM logo
-_l1:
-        sta $d800,x
+        lda #0                          ;ram color black
+_l1     sta $d800,x
         sta $d900,x
         sta $da00,x
         sta $dae8,x
         inx
         bne _l1
 
-        lda #12                         ; L
-        sta $7e4
-        lda #9                          ; I
-        sta $7e5
-        lda #1                          ; A
-        sta $7e6
+        stx $d021                       ;background black
+        stx $d418                       ;no volume
 
-        lda #15                         ; gray
+        lda #12                         ;L
+        sta $07e4
+        lda #9                          ;I
+        sta $07e5
+        lda #1                          ;A
+        sta $07e6
+
+        lda #15                         ;gray
         sta $dbe4
         sta $dbe5
         sta $dbe6
         sta $dbe7
 
-        ldx #0                          ; decrunch table. clean it
-_l2:    sta $0200,x
+        ldx #0                          ;decrunch table. clean it
+_l2     sta $0200,x
         inx
         bne _l2
 
         ldx #0
-_l3:    lda decruncher,x                ; copy decruncher to $400
+_l3     lda decruncher,x                ;copy decruncher to $400
         sta $0400,x
         lda decruncher + $0100,x
-        sta $0500,x
+        sta $0400 + $0100,x
+        lda decruncher + $0200,x
+        sta $0400 + $0200,x
         inx
         bne _l3
 
-        jmp $0400                       ; jmp to decruncher
+        jmp $0400
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 
@@ -415,7 +450,7 @@ SCROLL_TEXT
         .enc "screen"
         .text "L.I.A PRESENTS 'RAMBO: FIRST BLOOD PART II' (NTSC & PAL)"
         .text "    "
-        .text "WITH SUPPORT FOR:    "
+        .text "THIS VERSION INCLUDES SUPPORT FOR:    "
         .byte $40,$41,$42
         .text "  RUMBLE  "
         .byte $40,$41,$42
@@ -424,14 +459,16 @@ SCROLL_TEXT
         .text "                  "
         .text "TEST IT WITH A MODERN GAMEPAD LIKE SONY DUALSENSE, "
         .text "DUALSHOCK 4, SWITCH PRO CONTROLLER, ETC. THE GAMEPAD WILL "
-        .text "VIBRATE (RUMBLE) WHEN RAMBO GETS HIT... "
+        .text "VIBRATE (RUMBLE) WHEN RAMBO GETS HIT...  "
         .text "REQUIRES A UNIJOYSTICLE FLASHPARTY EDITION DEVICE..."
         .text "    "
         .byte $53                       ;Heart
         .text " TO RETROCOMPUTACION.COM, PUNGAS DE VILLA MARTELLI, "
         .text "AND THE LATIN AMERICAN VINTAGE COMPUTER SCENE."
         .text "              "
-        .text "GAME CRACKED AND IMPROVED BY RIQ / L.I.A."
+        .text "PRESS SPACE TO START GAME, PRESS 'M' TO START GALWAY'S "
+        .text "MUSIC DEBUG PROGRAM.     "
+        .text "GAME CRACKED AND IMPROVED BY RIQ/L.I.A."
         .text "              "
         .byte $ff                       ;End of scroll
 
@@ -458,7 +495,13 @@ SPRITE_ADDR
 
 ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
 ; Fix offset so that $7fff matches with value $ff (garbage byte for open borders)
-* = $6600
-exo_game
+* = $7fff
+        .byte $ff
+
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+; Uses forward crunch, the closer to the $ffff the better since it decompresses
+; up to $ff00
+* = $9200
+exo_game_head
         .binary "../bin/rambo-lia-non-sfx-exo.prg"
 exo_game_tail

@@ -23,7 +23,7 @@ rambo-lia-exo: rambo-lia
 	exomizer sfx sys -x1 -Di_line_number=2022 bin/rambo-lia.prg -o bin/$@.prg
 
 rambo-lia-non-sfx-exo: rambo-lia
-	exomizer mem bin/rambo-lia.prg -o bin/$@.prg
+	exomizer mem -l none -f bin/rambo-lia.prg -o bin/$@.prg
 
 music-lia: src/rambo-0334-feff.asm
 	64tass -Wall -Werror --cbm-prg -D USE_RAMBO_LIA:=1 -D USE_CALL_DEBUG_MUSIC_CODE:=1 -o bin/$@.prg -L bin/list.txt -l bin/labels.txt --vice-labels src/rambo-0334-feff.asm

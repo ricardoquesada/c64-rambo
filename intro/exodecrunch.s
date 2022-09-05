@@ -31,40 +31,40 @@
 ;  A simple way to work around this is to not decrunch to address $ffff.
 ; -------------------------------------------------------------------
 ; Controls if the shared get_bits routines should be inlined or not.
-;INLINE_GET_BITS=1
+;INLINE_GET_BITS := 1
 INLINE_GET_BITS :?= 0
 ; -------------------------------------------------------------------
 ; if literal sequences is not used (the data was crunched with the -c
 ; flag) then the following line can be uncommented for shorter and.
 ; slightly faster code.
-;LITERAL_SEQUENCES_NOT_USED = 1
+;LITERAL_SEQUENCES_NOT_USED := 1
 LITERAL_SEQUENCES_NOT_USED :?= 0
 ; -------------------------------------------------------------------
 ; if the sequence length is limited to 256 (the data was crunched with
 ; the -M256 flag) then the following line can be uncommented for
 ; shorter and slightly faster code.
-;MAX_SEQUENCE_LENGTH_256 = 1
+;MAX_SEQUENCE_LENGTH_256 := 1
 MAX_SEQUENCE_LENGTH_256 :?= 0
 ; -------------------------------------------------------------------
 ; if the sequence length 3 has its own offset table (the data was
 ; crunched with the -P+16 flag) then the following
 ; line must be uncommented.
-;EXTRA_TABLE_ENTRY_FOR_LENGTH_THREE = 1
+;EXTRA_TABLE_ENTRY_FOR_LENGTH_THREE := 1
 EXTRA_TABLE_ENTRY_FOR_LENGTH_THREE :?= 0
 ; -------------------------------------------------------------------
 ; if sequence offsets are not reused (the data was crunched with the
 ; -P-32 flag) then the following line must be uncommented. Uncommenting the
 ; line will also result in shorter and slightly faster code.
-;DONT_REUSE_OFFSET = 1
+;DONT_REUSE_OFFSET := 1
 DONT_REUSE_OFFSET :?= 0
 ; -------------------------------------------------------------------
 ; if decrunching forwards then the following line must be uncommented.
-;DECRUNCH_FORWARDS = 1
+DECRUNCH_FORWARDS := 1
 DECRUNCH_FORWARDS :?= 0
 ; -------------------------------------------------------------------
 ; if split encoding is used (the data is crunched with the -E flag)
 ; then the following line must be uncommented.
-;ENABLE_SPLIT_ENCODING = 1
+;ENABLE_SPLIT_ENCODING := 1
 ENABLE_SPLIT_ENCODING :?= 0
 
 ; -------------------------------------------------------------------
@@ -194,7 +194,7 @@ _gb_get_hi
 ; call the decruncher
 ; no constraints on register content, however the
 ; decimal flag has to be cleared (it almost always is, otherwise do a cld)
-decrunch:
+exod_decrunch:
 .IF ENABLE_SPLIT_ENCODING != 0
         ldx #3
         jsr internal_gentable
