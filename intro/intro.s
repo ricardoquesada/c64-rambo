@@ -114,7 +114,7 @@ _test_m
         and #%00010000                  ;col 4
         bne _l00
 
-        lda #$ff
+        lda #$fe
         sta $0334                       ;Indicates jumps to music
         jmp end_intro
 
@@ -391,6 +391,10 @@ end_intro
         lda #0
         sta $d01a                       ;disable irq
 
+        lda #$00                        ;Restore sprite expand 2x X/Y
+        sta $d017                       ; Since game does not properly initialize them
+        sta $d01d
+
         ldx #0
         lda #$20
 _l0     sta $0400,x                     ;clears the screen memory
@@ -438,6 +442,11 @@ _l3     lda decruncher,x                ;copy decruncher to $400
         sta $0400 + $0200,x
         inx
         bne _l3
+
+        ldx #<$ff48                     ;Prevents a sound glitch
+        ldy #>$ff48
+        stx $fffe
+        sty $ffff
 
         jmp $0400
 

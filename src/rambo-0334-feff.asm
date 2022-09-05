@@ -201,11 +201,26 @@ MUSIC_PATCH             .MACRO x, note_list_addr
 
 START
         LDA $0334                       ;00: Game, $FF: Music
-        BNE _MUSIC
+        CMP #$FE
+        BEQ _MUSIC
         JMP MAIN
 _MUSIC
         LDA #$36
         STA a01
+
+        ; Restores original colors, modified by intro/cruncher
+        LDA #$06                        ;COLOR BLUE
+        STA $D021
+        LDA #$0E                        ;COLOR LIGHT BLUE
+        STA $D020
+
+_L1     STA $D800,X
+        STA $D900,X
+        STA $DA00,X
+        STA $DAE8,X
+        INX
+        BNE _L1
+
         JMP MUSIC_DEBUG_INIT
 .ELSE
         * = $0334                       ;Start for original game
