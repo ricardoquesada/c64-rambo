@@ -10,14 +10,14 @@ PRINTF = /usr/bin/printf
 
 all: md5 rambo-lia
 
-rambo: src/rambo-0334-feff.asm
-	64tass -Wall -Werror --cbm-prg -o bin/$@.prg -L bin/list.txt -l bin/labels.txt --vice-labels src/rambo-0334-feff.asm
+rambo: src/rambo-0334-feff.s
+	64tass -Wall -Werror --cbm-prg -o bin/$@.prg -L bin/list.txt -l bin/labels.txt --vice-labels src/rambo-0334-feff.s
 
 md5: rambo
 	md5sum bin/rambo.prg orig/rambo-0334-feff.prg
 
-rambo-lia: src/rambo-0334-feff.asm
-	64tass -Wall -Werror --cbm-prg -D USE_RAMBO_LIA:=1 -o bin/$@.prg -L bin/list.txt -l bin/labels.txt --vice-labels src/rambo-0334-feff.asm
+rambo-lia: src/rambo-0334-feff.s
+	64tass -Wall -Werror --cbm-prg -D USE_RAMBO_LIA:=1 -o bin/$@.prg -L bin/list.txt -l bin/labels.txt --vice-labels src/rambo-0334-feff.s
 
 rambo-lia-exo: rambo-lia
 	exomizer sfx sys -x1 -Di_line_number=2022 bin/rambo-lia.prg -o bin/$@.prg
@@ -25,8 +25,8 @@ rambo-lia-exo: rambo-lia
 rambo-lia-non-sfx-exo: rambo-lia
 	exomizer mem -l none -f bin/rambo-lia.prg -o bin/$@.prg
 
-music-lia: src/rambo-0334-feff.asm
-	64tass -Wall -Werror --cbm-prg -D USE_RAMBO_LIA:=1 -D USE_CALL_DEBUG_MUSIC_CODE:=1 -o bin/$@.prg -L bin/list.txt -l bin/labels.txt --vice-labels src/rambo-0334-feff.asm
+music-lia: src/rambo-0334-feff.s
+	64tass -Wall -Werror --cbm-prg -D USE_RAMBO_LIA:=1 -D USE_CALL_DEBUG_MUSIC_CODE:=1 -o bin/$@.prg -L bin/list.txt -l bin/labels.txt --vice-labels src/rambo-0334-feff.s
 	exomizer sfx sys -x1 -Di_line_number=2022 bin/$@.prg -o bin/$@.exo.prg
 
 d64: rambo
