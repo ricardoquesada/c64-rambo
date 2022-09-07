@@ -15,7 +15,7 @@ rambo-orig: src/rambo-0334-feff.s
 	$(AS) -Wall -Werror --cbm-prg -o bin/$@.prg -L bin/list.txt -l bin/labels.txt --vice-labels src/rambo-0334-feff.s
 
 md5: rambo-orig
-	md5sum bin/rambo.prg orig/rambo-0334-feff.prg
+	md5sum bin/rambo-orig.prg orig/rambo-0334-feff.prg
 
 rambo-lia: src/rambo-0334-feff.s
 	$(AS) -Wall -Werror --cbm-prg -D USE_RAMBO_LIA:=1 -o bin/$@.prg -L bin/list.txt -l bin/labels.txt --vice-labels src/rambo-0334-feff.s
