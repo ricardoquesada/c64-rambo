@@ -207,6 +207,9 @@ START
         LDA $FC                         ;00: Game, $FE: Music
         CMP #$83                        ; Defined in intro code
         BEQ _MUSIC
+
+        LDA #$01                        ;Init music to prevent glitch
+        JSR MUSIC_FN
         JMP MAIN                        ;Just jump to the game
 
 _MUSIC
@@ -7416,18 +7419,22 @@ MUSIC_FN_02
         ORA a827F
         RTS
 
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;
+; Init music
 MUSIC_FN_01
-        LDA #$38     ;#%00111000
+        LDA #$38
         STA a29
-        LDA #$00     ;#%00000000
+        LDA #$00
         STA a820D
         STA a8231
         STA a8258
         STA a827F
-        LDX #$14     ;#%00010100
-b8488   STA $D400,X  ;Voice 1: Frequency Control - Low-Byte
+
+        LDX #$14
+_L00    STA $D400,X
         DEX
-        BPL b8488
+        BPL _L00
+
         STX a85EB
         STA a859F
         STA a845B
