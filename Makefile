@@ -51,10 +51,10 @@ d64-lia: intro-exo
 run-orig: d64-orig
 	$(X64) -verbose -moncommands bin/labels.txt $(D64_IMAGE)
 
-run-lia: d64-lia
+run: d64-lia
 	$(X64) -verbose -moncommands bin/labels.txt $(D64_IMAGE_LIA)
 
-run-intro: intro-exo
+run-prg: intro-exo
 	$(X64) -verbose -moncommands bin/labels.txt bin/intro-exo.prg
 
 clean:
