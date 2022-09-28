@@ -2,11 +2,11 @@
 
 ![screenshot_intro]
 ![screenshot_game1]
-![screenshot_game2]
+![screenshot_music]
 
 [screenshot_intro]: images/screenshot_intro.png
 [screenshot_game1]: images/screenshot_game1.png
-[screenshot_game2]: images/screenshot_game2.png
+[screenshot_music]: images/screenshot_music_debug.png
 
 
 Rambo for the C64.
@@ -24,6 +24,7 @@ Includes optional patches like:
 - Removed copy protection
 - Convert it to single load
 - Includes image and sound from .tap version
+- Includes a way to jump to the Galway's Music Debug program (Press 'P' in the intro)
 
 ## Rumble support
 
