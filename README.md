@@ -24,7 +24,7 @@ Includes optional patches like:
 - Removed copy protection
 - Convert it to single load
 - Includes image and sound from .tap version
-- Includes a way to jump to the Galway's Music Debug program (Press 'P' in the intro)
+- Option to jump to Galway's Music Debug program (Press 'P' in the intro)
 
 ## Rumble support
 
