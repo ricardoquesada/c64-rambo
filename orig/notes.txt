@@ -1,5 +1,5 @@
-OBSOLETE / DEPRECATED
-=====================
+Notes about removing copy protection
+====================================
 
 Initial jump: $c006, enencrypt, $0100
 
