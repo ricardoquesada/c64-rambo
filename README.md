@@ -44,6 +44,10 @@ Requirements:
 
 [64tass]: http://tass64.sourceforge.net/
 
+## See it in action
+
+[![video](https://img.youtube.com/vi/vCj45OX43JE/0.jpg)](https://www.youtube.com/watch?v=vCj45OX43JE)
+
 ## Authors
 
 Crack & Dissasembly & patches: [riq][retro_moe] / [L.I.A][lia]
