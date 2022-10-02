@@ -26,6 +26,13 @@ Includes optional patches like:
 - Includes image and sound from .tap version
 - Option to jump to Galway's Music Debug program (Press 'P' in the intro)
 
+## Download
+
+- Latest binary: [rambo-lia.d64]
+- CSDB entry: https://csdb.dk/release/index.php?id=224025
+
+[rambo-lia.d64]: bin/rambo-lia.d64
+
 ## Rumble support
 
 To play it with rumble, use a [Unijoysticle Flashparty Edition][uni2_flashparty]
